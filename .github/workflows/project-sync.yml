@@ -4,25 +4,26 @@ on:
   pull_request:
     types: [opened, reopened]
 
-permissions:
-  contents: read
-  issues: write
-  repository-projects: write
-
 jobs:
   set-in-review:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BOT_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+          owner: mirrorstack-ai
+
       - name: Get linked issues
         id: issues
         uses: actions/github-script@v7
         with:
           script: |
-            // Find issues linked via "Closes #N" or branch develop link
             const pr = context.payload.pull_request;
             const body = pr.body || "";
 
-            // Match "Closes #N", "Fixes #N", "Resolves #N"
             const regex = /(?:closes|fixes|resolves)\s+#(\d+)/gi;
             const issues = [];
             let match;
@@ -30,21 +31,6 @@ jobs:
               issues.push(parseInt(match[1]));
             }
 
-            // Also check for linked issues via the API (from gh issue develop)
-            try {
-              const timeline = await github.rest.issues.listEventsForTimeline({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-              });
-              for (const event of timeline.data) {
-                if (event.event === "cross-referenced" && event.source?.issue) {
-                  issues.push(event.source.issue.number);
-                }
-              }
-            } catch {}
-
-            // Deduplicate
             const unique = [...new Set(issues)];
             core.setOutput("numbers", JSON.stringify(unique));
             console.log(`Linked issues: ${unique.join(", ") || "none"}`);
@@ -52,15 +38,14 @@ jobs:
       - name: Set issues to In Review
         if: steps.issues.outputs.numbers != '[]'
         uses: actions/github-script@v7
-        env:
-          PROJECT_NUMBER: "2"
-          ORG: "mirrorstack-ai"
         with:
+          github-token: ${{ steps.bot-token.outputs.token }}
           script: |
             const issues = JSON.parse('${{ steps.issues.outputs.numbers }}');
+            const ORG = "mirrorstack-ai";
+            const PROJECT_NUMBER = 2;
 
             for (const issueNumber of issues) {
-              // Find the project item for this issue
               const query = `
                 query($owner: String!, $repo: String!, $number: Int!) {
                   repository(owner: $owner, name: $repo) {
@@ -83,14 +68,13 @@ jobs:
               });
 
               const items = result.repository.issue.projectItems.nodes;
-              const projectItem = items.find(i => i.project.number === parseInt(process.env.PROJECT_NUMBER));
+              const projectItem = items.find(i => i.project.number === PROJECT_NUMBER);
 
               if (!projectItem) {
-                console.log(`Issue #${issueNumber} not in project ${process.env.PROJECT_NUMBER}`);
+                console.log(`Issue #${issueNumber} not in project ${PROJECT_NUMBER}`);
                 continue;
               }
 
-              // Get the Status field ID and "In Review" option ID
               const fieldQuery = `
                 query($org: String!, $projectNumber: Int!) {
                   organization(login: $org) {
@@ -108,8 +92,8 @@ jobs:
               `;
 
               const fieldResult = await github.graphql(fieldQuery, {
-                org: process.env.ORG,
-                projectNumber: parseInt(process.env.PROJECT_NUMBER),
+                org: ORG,
+                projectNumber: PROJECT_NUMBER,
               });
 
               const field = fieldResult.organization.projectV2.field;
@@ -120,7 +104,6 @@ jobs:
                 continue;
               }
 
-              // Update the item status
               const mutation = `
                 mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
                   updateProjectV2ItemFieldValue(input: {
