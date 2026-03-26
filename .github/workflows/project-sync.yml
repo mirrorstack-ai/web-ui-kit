@@ -2,10 +2,11 @@ name: Sync Project Status
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, closed]
 
 jobs:
   set-in-review:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
       - name: Generate bot token
@@ -125,4 +126,96 @@ jobs:
               });
 
               console.log(`Issue #${issueNumber} → In Review`);
+            }
+
+  set-target-date:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.BOT_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+          owner: mirrorstack-ai
+
+      - name: Get linked issues
+        id: issues
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+            const regex = /(?:closes|fixes|resolves)\s+#(\d+)/gi;
+            const issues = [];
+            let match;
+            while ((match = regex.exec(body)) !== null) {
+              issues.push(parseInt(match[1]));
+            }
+            const unique = [...new Set(issues)];
+            core.setOutput("numbers", JSON.stringify(unique));
+            console.log(`Linked issues: ${unique.join(", ") || "none"}`);
+
+      - name: Set Target Date on linked issues
+        if: steps.issues.outputs.numbers != '[]'
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ steps.bot-token.outputs.token }}
+          script: |
+            const issues = JSON.parse('${{ steps.issues.outputs.numbers }}');
+            const ORG = "mirrorstack-ai";
+            const PROJECT_NUMBER = 2;
+            const today = new Date().toISOString().split("T")[0];
+
+            for (const issueNumber of issues) {
+              const result = await github.graphql(`
+                query($owner: String!, $repo: String!, $number: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    issue(number: $number) {
+                      projectItems(first: 10) {
+                        nodes { id project { number } }
+                      }
+                    }
+                  }
+                }
+              `, { owner: context.repo.owner, repo: context.repo.repo, number: issueNumber });
+
+              const items = result.repository.issue.projectItems.nodes;
+              const projectItem = items.find(i => i.project.number === PROJECT_NUMBER);
+              if (!projectItem) continue;
+
+              const fieldResult = await github.graphql(`
+                query($org: String!, $projectNumber: Int!) {
+                  organization(login: $org) {
+                    projectV2(number: $projectNumber) {
+                      id
+                      field(name: "Target Date") {
+                        ... on ProjectV2Field { id }
+                      }
+                    }
+                  }
+                }
+              `, { org: ORG, projectNumber: PROJECT_NUMBER });
+
+              const project = fieldResult.organization.projectV2;
+
+              await github.graphql(`
+                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $date: Date!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: { date: $date }
+                  }) {
+                    projectV2Item { id }
+                  }
+                }
+              `, {
+                projectId: project.id,
+                itemId: projectItem.id,
+                fieldId: project.field.id,
+                date: today,
+              });
+
+              console.log(`Issue #${issueNumber} Target Date → ${today}`);
             }

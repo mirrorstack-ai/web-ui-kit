@@ -63,8 +63,9 @@ function main() {
     }
   }
 
-  // Set project status to "In Progress"
+  // Set project status to "In Progress" and Start Date to today
   setProjectStatus(issueNumber, "In Progress");
+  setProjectDate(issueNumber, "Start Date");
 }
 
 function setProjectStatus(issueNumber: string, statusName: string) {
@@ -138,6 +139,61 @@ function setProjectStatus(issueNumber: string, statusName: string) {
     console.log(`Project status → ${statusName}`);
   } catch (e: any) {
     console.log(`Warning: could not update project status — ${e.message}`);
+  }
+}
+
+function setProjectDate(issueNumber: string, fieldName: string) {
+  const today = new Date().toISOString().split("T")[0];
+  try {
+    const itemQuery = run(`gh api graphql -f query='
+      query {
+        repository(owner: "${ORG}", name: "${REPO.split("/")[1]}") {
+          issue(number: ${issueNumber}) {
+            projectItems(first: 10) {
+              nodes { id project { number } }
+            }
+          }
+        }
+      }
+    '`);
+
+    const items = JSON.parse(itemQuery).data.repository.issue.projectItems.nodes;
+    const projectItem = items.find((i: any) => i.project.number === PROJECT_NUMBER);
+    if (!projectItem) return;
+
+    const fieldQuery = run(`gh api graphql -f query='
+      query {
+        organization(login: "${ORG}") {
+          projectV2(number: ${PROJECT_NUMBER}) {
+            id
+            field(name: "${fieldName}") {
+              ... on ProjectV2Field { id }
+            }
+          }
+        }
+      }
+    '`);
+
+    const fieldData = JSON.parse(fieldQuery);
+    const project = fieldData.data.organization.projectV2;
+    const field = project.field;
+
+    run(`gh api graphql -f query='
+      mutation {
+        updateProjectV2ItemFieldValue(input: {
+          projectId: "${project.id}"
+          itemId: "${projectItem.id}"
+          fieldId: "${field.id}"
+          value: { date: "${today}" }
+        }) {
+          projectV2Item { id }
+        }
+      }
+    '`);
+
+    console.log(`${fieldName} → ${today}`);
+  } catch (e: any) {
+    console.log(`Warning: could not set ${fieldName} — ${e.message}`);
   }
 }
 
