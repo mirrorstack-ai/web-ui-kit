@@ -40,20 +40,31 @@ jobs:
 
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./storybook-static
-          keep_files: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages:gh-pages || git checkout --orphan gh-pages
+          git checkout gh-pages
+          # Keep PR preview folders, replace root content
+          find . -maxdepth 1 ! -name '.' ! -name '.git' ! -name 'pr' -exec rm -rf {} +
+          cp -r ${{ github.workspace }}/storybook-static/* .
+          git add -A
+          git diff --cached --quiet || git commit -m "deploy: update Storybook from ${{ github.sha }}"
+          git push origin gh-pages
 
       - name: Deploy PR preview
         if: github.event_name == 'pull_request'
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./storybook-static
-          destination_dir: pr/${{ github.event.pull_request.number }}
-          keep_files: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages:gh-pages
+          git checkout gh-pages
+          rm -rf pr/${{ github.event.pull_request.number }}
+          mkdir -p pr/${{ github.event.pull_request.number }}
+          cp -r ${{ github.workspace }}/storybook-static/* pr/${{ github.event.pull_request.number }}/
+          git add -A
+          git diff --cached --quiet || git commit -m "deploy: PR #${{ github.event.pull_request.number }} preview"
+          git push origin gh-pages
 
       - name: Comment PR link
         if: github.event_name == 'pull_request'
