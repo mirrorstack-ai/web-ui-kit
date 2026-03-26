@@ -801,10 +801,7 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
             </div>
             <pre><code>Component: src/components/ui/feedback/progress/Progress.tsx::Progress</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>/**
- * Accessible label for screen readers. Defaults to &quot;Loading&quot; (indeterminate) or &quot;X% complete&quot; (determinate).
- */
-aria-label?: string
+            <pre><code>aria-label?: string
 
 children?: ReactNode
 
@@ -818,12 +815,12 @@ color?: &quot;primary&quot; | &quot;secondary&quot; | &quot;tertiary&quot; | &qu
 intermediate?: boolean
 
 /**
- * Stroke / line thickness (SVG units for wave &amp; circular, px for normal linear). Defaults by size.
+ * Stroke / line thickness. Defaults by size.
  */
 lineWidth?: number
 
 /**
- * Show active loading animation. Without value → indeterminate. With value → animated determinate at value%.
+ * Animated determinate: shows wave/bar animation clipped to value%.
  */
 progressive?: boolean
 
