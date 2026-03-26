@@ -47,7 +47,12 @@ function App() {
 
 ## UI Components & Layouts
 
-UI components and layouts are being ported from the `reference/v2-restored` branch. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full list and how to add them.
+| Category | Components |
+|----------|-----------|
+| Actions | Button |
+| Feedback | Progress (linear, circular, wave) |
+
+More components are being ported from the `reference/v2-restored` branch. Run `pnpm components list` for the latest, or see [CONTRIBUTING.md](CONTRIBUTING.md) for how to add them.
 
 ## Dark mode
 
