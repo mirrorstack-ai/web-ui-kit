@@ -1,5 +1,11 @@
 import { type ButtonHTMLAttributes } from "react";
 import { cn } from "@/utils/cn";
+import type { ComponentMeta } from "@/types/component-meta";
+
+export const meta: ComponentMeta = {
+  name: "Button",
+  description: "Multi-variant button with icons and loading state",
+};
 
 type ButtonVariant = "filled" | "tonal" | "outline" | "text";
 type ButtonColor = "primary" | "secondary" | "tertiary" | "error" | "warning";

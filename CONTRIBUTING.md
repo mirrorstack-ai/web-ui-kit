@@ -52,8 +52,16 @@ Categories: `actions`, `inputs`, `feedback`, `navigation`, `surfaces`, `media`, 
 
 ### 2. Write the component
 
+Every component must export a `meta` object with `name` and `description`. This is validated in CI.
+
 ```tsx
 import { cn } from "@/utils/cn";
+import type { ComponentMeta } from "@/types/component-meta";
+
+export const meta: ComponentMeta = {
+  name: "Button",
+  description: "Multi-variant button with icons and loading state",
+};
 
 export interface ButtonProps {
   // ...
@@ -67,6 +75,7 @@ export function Button({ className, ...props }: ButtonProps) {
 ```
 
 Rules:
+- **Export `meta`** — required, validated by `pnpm components validate`
 - **No `"use client"`** — the consuming app decides the boundary
 - **Use `@/` path alias** for imports (e.g. `@/utils/cn`)
 - **Use `cn()`** for class merging (clsx + tailwind-merge)
@@ -186,6 +195,23 @@ Consuming apps should add this in `<head>` before React hydrates:
 
 This keeps theme synced across multiple apps sharing the same API.
 
+## Component CLI
+
+```bash
+pnpm components list              # List all components with descriptions
+pnpm components get <path|name>   # Show component props, story, and usage
+pnpm components validate          # Check all components have valid metadata
+```
+
+Examples:
+
+```bash
+pnpm components get ui/actions/button
+pnpm components get Button
+```
+
+`validate` runs in CI — PRs with missing or empty `meta` exports will fail.
+
 ## Porting components from reference
 
 The `reference/v2-restored` branch contains all 55 components from the previous codebase. To port a component:
@@ -193,6 +219,8 @@ The `reference/v2-restored` branch contains all 55 components from the previous 
 1. Check the reference: `git diff main..reference/v2-restored -- src/components/ComponentName.tsx`
 2. Create the folder in the new structure
 3. Copy and adapt — fix imports to use `@/` alias
-4. Add a story and test
-5. Export from `index.ts`
+4. Add `meta` export with name and description
+5. Add a story and test
+6. Export from `index.ts`
+7. Run `pnpm components validate` to verify
 

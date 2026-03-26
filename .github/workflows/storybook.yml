@@ -32,6 +32,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm components validate
+
       - run: pnpm build-storybook
 
       - name: Deploy to GitHub Pages
