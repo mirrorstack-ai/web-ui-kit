@@ -125,7 +125,7 @@ export function Button({
     >
       {loading && (
         <span className="absolute inset-0 flex items-center justify-center">
-          <Progress type="circular" variant="wave" size={size} color="current" />
+          <Progress type="circular" variant="wave" size="sm" color="current" />
         </span>
       )}
       <span
