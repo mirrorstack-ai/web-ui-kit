@@ -66,9 +66,10 @@ function scanComponentPaths(baseDir: string, prefix: string) {
       const componentPath = join(categoryPath, component.name);
 
       const files = readdirSync(componentPath);
-      const mainFile = files.find(
-        (f) => f.endsWith(".tsx") && !f.includes(".stories.") && !f.includes(".test.")
-      );
+      // Main file matches folder name (PascalCase) or is the only non-story/test tsx
+      const folderName = component.name.replace(/(^|-)(\w)/g, (_: string, __: string, c: string) => c.toUpperCase());
+      const mainFile = files.find((f) => f === `${folderName}.tsx`)
+        || files.find((f) => f.endsWith(".tsx") && !f.includes(".stories.") && !f.includes(".test.") && files.filter((g) => g.endsWith(".tsx") && !g.includes(".stories.") && !g.includes(".test.")).length === 1);
       if (!mainFile) continue;
 
       results.push({
