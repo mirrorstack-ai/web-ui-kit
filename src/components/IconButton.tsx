@@ -1,7 +1,7 @@
 import { type ButtonHTMLAttributes } from "react";
 import { cn } from "../utils/cn";
 
-type IconButtonVariant = "filled" | "tonal" | "outline" | "ghost";
+type IconButtonVariant = "filled" | "tonal" | "outline" | "ghost" | "text";
 type IconButtonColor = "primary" | "secondary" | "tertiary" | "error" | "warning";
 type IconButtonSize = "sm" | "md" | "lg";
 
@@ -70,6 +70,7 @@ const variantMap: Record<
   tonal: tonalStyles,
   outline: outlineStyles,
   ghost: ghostStyles,
+  text: ghostStyles,
 };
 
 const sizeStyles: Record<IconButtonSize, string> = {
