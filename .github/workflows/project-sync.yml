@@ -1,0 +1,145 @@
+name: Sync Project Status
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+  issues: write
+  repository-projects: write
+
+jobs:
+  set-in-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get linked issues
+        id: issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Find issues linked via "Closes #N" or branch develop link
+            const pr = context.payload.pull_request;
+            const body = pr.body || "";
+
+            // Match "Closes #N", "Fixes #N", "Resolves #N"
+            const regex = /(?:closes|fixes|resolves)\s+#(\d+)/gi;
+            const issues = [];
+            let match;
+            while ((match = regex.exec(body)) !== null) {
+              issues.push(parseInt(match[1]));
+            }
+
+            // Also check for linked issues via the API (from gh issue develop)
+            try {
+              const timeline = await github.rest.issues.listEventsForTimeline({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+              });
+              for (const event of timeline.data) {
+                if (event.event === "cross-referenced" && event.source?.issue) {
+                  issues.push(event.source.issue.number);
+                }
+              }
+            } catch {}
+
+            // Deduplicate
+            const unique = [...new Set(issues)];
+            core.setOutput("numbers", JSON.stringify(unique));
+            console.log(`Linked issues: ${unique.join(", ") || "none"}`);
+
+      - name: Set issues to In Review
+        if: steps.issues.outputs.numbers != '[]'
+        uses: actions/github-script@v7
+        env:
+          PROJECT_NUMBER: "2"
+          ORG: "mirrorstack-ai"
+        with:
+          script: |
+            const issues = JSON.parse('${{ steps.issues.outputs.numbers }}');
+
+            for (const issueNumber of issues) {
+              // Find the project item for this issue
+              const query = `
+                query($owner: String!, $repo: String!, $number: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    issue(number: $number) {
+                      projectItems(first: 10) {
+                        nodes {
+                          id
+                          project { number }
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+
+              const result = await github.graphql(query, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                number: issueNumber,
+              });
+
+              const items = result.repository.issue.projectItems.nodes;
+              const projectItem = items.find(i => i.project.number === parseInt(process.env.PROJECT_NUMBER));
+
+              if (!projectItem) {
+                console.log(`Issue #${issueNumber} not in project ${process.env.PROJECT_NUMBER}`);
+                continue;
+              }
+
+              // Get the Status field ID and "In Review" option ID
+              const fieldQuery = `
+                query($org: String!, $projectNumber: Int!) {
+                  organization(login: $org) {
+                    projectV2(number: $projectNumber) {
+                      id
+                      field(name: "Status") {
+                        ... on ProjectV2SingleSelectField {
+                          id
+                          options { id name }
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+
+              const fieldResult = await github.graphql(fieldQuery, {
+                org: process.env.ORG,
+                projectNumber: parseInt(process.env.PROJECT_NUMBER),
+              });
+
+              const field = fieldResult.organization.projectV2.field;
+              const inReviewOption = field.options.find(o => o.name === "In Review");
+
+              if (!inReviewOption) {
+                console.log("'In Review' status option not found");
+                continue;
+              }
+
+              // Update the item status
+              const mutation = `
+                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: { singleSelectOptionId: $optionId }
+                  }) {
+                    projectV2Item { id }
+                  }
+                }
+              `;
+
+              await github.graphql(mutation, {
+                projectId: fieldResult.organization.projectV2.id,
+                itemId: projectItem.id,
+                fieldId: field.id,
+                optionId: inReviewOption.id,
+              });
+
+              console.log(`Issue #${issueNumber} → In Review`);
+            }
