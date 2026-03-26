@@ -12,6 +12,7 @@ pnpm typecheck                    # Type check
 pnpm components list              # List all components with descriptions
 pnpm components get <path|name>   # Show component props, story, and usage
 pnpm components validate          # Validate all components have metadata
+pnpm start-issue <number>         # Create branch from issue and checkout
 ```
 
 ## Before using a component

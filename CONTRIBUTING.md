@@ -31,7 +31,11 @@ Examples: `feat/WUK-1_avatar-component`, `refactor/WUK-15_consolidate-inputs`, `
 
 ## PR workflow
 
-1. Create a branch from `main`
+1. Start work from an issue:
+   ```bash
+   pnpm start-issue <number>
+   ```
+   This auto-creates and checks out a branch with the correct naming convention (e.g. `feat/WUK-1_progress-indicator`), linked to the issue.
 2. Make changes, ensure Storybook renders correctly
 3. Push and open a PR — a Storybook preview link is auto-posted
 4. PR requires maintainer review before merge
