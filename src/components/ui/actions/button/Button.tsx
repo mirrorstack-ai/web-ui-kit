@@ -84,6 +84,12 @@ const iconStyleMap: Record<ButtonSize, React.CSSProperties> = {
   lg: { fontSize: 24 },
 };
 
+const spinnerStyles: Record<ButtonSize, string> = {
+  sm: "!h-4 !w-4",
+  md: "!h-5 !w-5",
+  lg: "!h-6 !w-6",
+};
+
 const gapStyles: Record<ButtonSize, string> = {
   sm: "gap-1",
   md: "gap-2",
@@ -125,7 +131,7 @@ export function Button({
     >
       {loading && (
         <span className="absolute inset-0 flex items-center justify-center">
-          <Progress type="circular" variant="wave" size="sm" color="current" />
+          <Progress type="circular" variant="wave" size="sm" color="current" className={spinnerStyles[size]} />
         </span>
       )}
       <span
