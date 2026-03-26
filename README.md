@@ -1,7 +1,130 @@
-# @mirrorstack/web-ui-kit
+# @mirrorstack-ai/web-ui-kit
 
-MirrorStack Design System — shared React UI components.
+Shared React UI component library for [MirrorStack](https://mirrorstack.com).
 
-## Reference
+Built with React 19, TypeScript, Tailwind CSS v4, and Material Design 3.
 
-The `reference/v2-restored` branch contains the current working V2 components restored from V1 source + Next.js cache recovery.
+## Getting started
+
+### Install
+
+```bash
+pnpm add @mirrorstack-ai/web-ui-kit
+```
+
+### Setup theme
+
+Import the theme tokens in your app's `globals.css`:
+
+```css
+@import "tailwindcss";
+@source "@mirrorstack-ai/web-ui-kit/src/components";
+@import "@mirrorstack-ai/web-ui-kit/src/theme.css";
+```
+
+Add the Material Symbols font in your HTML `<head>`:
+
+```html
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+/>
+```
+
+### Usage
+
+```tsx
+import { Button } from "@mirrorstack-ai/web-ui-kit";
+
+function App() {
+  return (
+    <Button variant="filled" color="primary" leftIcon="add">
+      Create
+    </Button>
+  );
+}
+```
+
+## UI Components & Layouts
+
+UI components and layouts are being ported from the `reference/v2-restored` branch. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full list and how to add them.
+
+## Dark mode
+
+Wrap your app with `ThemeProvider` to enable light, dark, and auto (system) themes:
+
+```tsx
+import { ThemeProvider } from "@mirrorstack-ai/web-ui-kit";
+
+export default function App({ children }) {
+  return <ThemeProvider>{children}</ThemeProvider>;
+}
+```
+
+`ThemeProvider` manages the `.dark` class on `<html>`, persists the user's choice, and syncs across apps via the API.
+
+To prevent a flash of light theme before hydration, add this blocking script to your `<head>`:
+
+```html
+<script>
+  (function () {
+    try {
+      var theme = localStorage.getItem("theme") || "auto";
+      var isDark =
+        theme === "auto"
+          ? window.matchMedia("(prefers-color-scheme: dark)").matches
+          : theme === "dark";
+      if (isDark) document.documentElement.classList.add("dark");
+    } catch (e) {}
+  })();
+</script>
+```
+
+## Storybook
+
+Run the component explorer locally:
+
+```bash
+pnpm storybook
+```
+
+Opens at [http://localhost:6006](http://localhost:6006). Use the toolbar to toggle between light and dark mode.
+
+## Project structure
+
+```
+src/
+  components/
+    ui/                        Standalone, reusable components
+      <category>/<component>/
+        Component.tsx
+        Component.stories.tsx
+        Component.test.tsx
+
+    layout/                    Page-level compositions
+      <category>/<layout>/
+        Layout.tsx
+        Layout.stories.tsx
+
+  context/       Providers
+    <context>/
+      Context.tsx
+      Context.test.tsx
+  hooks/         Reusable hooks
+  utils/         Helpers (cn, formatBytes, formatDate)
+  assets/        SVGs and icons
+  theme.css      MD3 design tokens (light + dark)
+```
+
+## Tech stack
+
+- **React 19** with TypeScript
+- **Tailwind CSS v4** with `@tailwindcss/vite`
+- **Material Design 3** color system and design tokens
+- **Material Symbols Rounded** for icons
+- **Storybook 8** for component development
+- **Vitest** for testing
+
+## License
+
+MIT
