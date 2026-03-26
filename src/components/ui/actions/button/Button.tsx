@@ -86,8 +86,8 @@ const iconStyleMap: Record<ButtonSize, React.CSSProperties> = {
 
 const spinnerStyles: Record<ButtonSize, string> = {
   sm: "!h-4 !w-4",
-  md: "!h-5 !w-5",
-  lg: "!h-6 !w-6",
+  md: "!h-6 !w-6",
+  lg: "!h-8 !w-8",
 };
 
 const gapStyles: Record<ButtonSize, string> = {
