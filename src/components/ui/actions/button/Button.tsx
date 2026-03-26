@@ -1,4 +1,4 @@
-import { type ButtonHTMLAttributes } from "react";
+import { type ButtonHTMLAttributes, type CSSProperties } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Progress } from "@/components/ui/feedback/progress/Progress";
@@ -78,16 +78,16 @@ const sizeStyles: Record<ButtonSize, string> = {
   lg: "px-6 py-4 text-lg",
 };
 
-const iconStyleMap: Record<ButtonSize, React.CSSProperties> = {
+const iconStyleMap: Record<ButtonSize, CSSProperties> = {
   sm: { fontSize: 16 },
   md: { fontSize: 20 },
   lg: { fontSize: 24 },
 };
 
-const spinnerStyles: Record<ButtonSize, string> = {
-  sm: "!h-4 !w-4",
-  md: "!h-6 !w-6",
-  lg: "!h-8 !w-8",
+const spinnerSizes: Record<ButtonSize, CSSProperties> = {
+  sm: { width: 16, height: 16 },
+  md: { width: 24, height: 24 },
+  lg: { width: 32, height: 32 },
 };
 
 const gapStyles: Record<ButtonSize, string> = {
@@ -131,7 +131,7 @@ export function Button({
     >
       {loading && (
         <span className="absolute inset-0 flex items-center justify-center">
-          <Progress type="circular" variant="wave" size="sm" color="current" className={spinnerStyles[size]} />
+          <Progress type="circular" variant="wave" size="sm" color="current" style={spinnerSizes[size]} />
         </span>
       )}
       <span

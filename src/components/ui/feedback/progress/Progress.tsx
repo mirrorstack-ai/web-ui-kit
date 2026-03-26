@@ -28,6 +28,7 @@ export interface ProgressProps {
   /** Accessible label for screen readers. Defaults to "Loading" (indeterminate) or "X% complete" (determinate). */
   "aria-label"?: string;
   className?: string;
+  style?: CSSProperties;
   children?: ReactNode;
 }
 
@@ -409,6 +410,7 @@ function CircularProgress({
   intermediate,
   "aria-label": ariaLabel,
   className,
+  style,
   children,
 }: ProgressProps) {
   const sw = lineWidth ?? defaultSvgStroke[size];
@@ -427,6 +429,7 @@ function CircularProgress({
         aria-label={label}
         aria-valuemin={0}
         aria-valuemax={100}
+        style={style}
         className={cn("relative inline-flex items-center justify-center", circularSizes[size], colorClass, className)}
       >
         <svg
@@ -484,6 +487,7 @@ function CircularProgress({
         aria-valuenow={pct}
         aria-valuemin={0}
         aria-valuemax={100}
+        style={style}
         className={cn("relative inline-flex items-center justify-center", circularSizes[size], fc && "animate-progress-four-color", className)}
       >
         <svg viewBox={`0 0 ${SVG_VIEWBOX} ${SVG_VIEWBOX}`} className={svgClass}>
@@ -523,7 +527,8 @@ function CircularProgress({
       aria-valuenow={pct}
       aria-valuemin={0}
       aria-valuemax={100}
-      className={cn("relative inline-flex items-center justify-center", circularSizes[size], fc && "animate-progress-four-color", className)}
+      style={style}
+        className={cn("relative inline-flex items-center justify-center", circularSizes[size], fc && "animate-progress-four-color", className)}
     >
       <svg viewBox={`0 0 ${SVG_VIEWBOX} ${SVG_VIEWBOX}`} className={svgClass}>
         <circle
