@@ -35,7 +35,7 @@ function main() {
   }
 
   // Parse type prefix from title (feat:, fix:, refactor:, chore:)
-  const prefixMatch = title.match(/^(feat|fix|refactor|chore|docs):\s*/i);
+  const prefixMatch = title.match(/^(feat|fix|refactor|chore|docs|test):\s*/i);
   const type = prefixMatch ? prefixMatch[1].toLowerCase() : "feat";
   const cleanTitle = prefixMatch ? title.slice(prefixMatch[0].length) : title;
 
