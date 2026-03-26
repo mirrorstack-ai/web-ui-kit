@@ -123,6 +123,63 @@ export function useSnackbar() {
   };
 }
 
+export interface UseUnsavedSnackbarOptions {
+  snapshot: string;
+  message?: string;
+  onSave: () => void;
+  onReset: () => void;
+}
+
+export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
+  const { showSnackbar, dismissSnackbar } = useSnackbar();
+  const savedRef = useRef(options.snapshot);
+  const isDirty = options.snapshot !== savedRef.current;
+  const prevDirty = useRef(false);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      savedRef.current = options.snapshot;
+      isFirstRender.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isDirty && !prevDirty.current) {
+      showSnackbar({
+        message: options.message ?? "Unsaved changes",
+        variant: "unsave",
+        duration: 0,
+        action: {
+          label: "Save",
+          onClick: () => {
+            savedRef.current = options.snapshot;
+            prevDirty.current = false;
+            options.onSave();
+            dismissSnackbar();
+            setTimeout(() => {
+              showSnackbar({ message: "Saved", variant: "success" });
+            }, 50);
+          },
+        },
+        secondaryAction: {
+          label: "Reset",
+          onClick: () => {
+            prevDirty.current = false;
+            options.onReset();
+            dismissSnackbar();
+          },
+        },
+      });
+    } else if (!isDirty && prevDirty.current) {
+      dismissSnackbar();
+    }
+    prevDirty.current = isDirty;
+  }, [isDirty, options.snapshot]);
+
+  return { isDirty, savedRef };
+}
+
 /**
  * Place inside a content area to center the snackbar over that area.
  * Pass a className to offset for sidebars (e.g. "lg:left-72").

@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "../utils/cn";
 
 export type BadgeVariant =

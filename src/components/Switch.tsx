@@ -2,7 +2,7 @@
 
 import { cn } from "../utils/cn";
 
-export type SwitchColor = "primary" | "error";
+export type SwitchColor = "primary" | "error" | "warning";
 
 export interface SwitchProps {
   checked: boolean;
@@ -17,11 +17,13 @@ export interface SwitchProps {
 const trackColors: Record<SwitchColor, string> = {
   primary: "bg-primary",
   error: "bg-error",
+  warning: "bg-warning",
 };
 
 const thumbColors: Record<SwitchColor, string> = {
   primary: "bg-on-primary",
   error: "bg-on-error",
+  warning: "bg-on-warning",
 };
 
 export function Switch({

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import { cn } from "../utils/cn";
 import { NavDrawer, type NavDrawerItem, type NavDrawerSection } from "./NavDrawer";

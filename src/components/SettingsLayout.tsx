@@ -20,7 +20,7 @@ export interface SettingsNavSection {
 export interface SettingsLayoutProps {
   children: ReactNode;
   /** Navigation sections for the sidebar */
-  navSections: SettingsNavSection[];
+  navSections?: SettingsNavSection[];
   /** Currently active nav item id */
   activeItemId?: string;
   /** Called when a nav item is clicked */
@@ -49,7 +49,7 @@ const navItemIconVariantStyles: Record<"default" | "danger", string> = {
 
 export function SettingsLayout({
   children,
-  navSections,
+  navSections = [],
   activeItemId,
   onNavItemClick,
   header,

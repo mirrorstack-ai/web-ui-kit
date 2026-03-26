@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "../utils/cn";
 import { IconButton } from "./IconButton";

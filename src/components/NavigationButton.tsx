@@ -1,3 +1,5 @@
+"use client";
+
 import { type ButtonHTMLAttributes, type ReactNode, useState, useEffect } from "react";
 import { cn } from "../utils/cn";
 

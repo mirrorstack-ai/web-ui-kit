@@ -1,7 +1,7 @@
 import { type ButtonHTMLAttributes } from "react";
 import { cn } from "../utils/cn";
 
-type IconButtonVariant = "filled" | "tonal" | "outline" | "ghost" | "text";
+type IconButtonVariant = "filled" | "tonal" | "outline" | "text";
 type IconButtonColor = "primary" | "secondary" | "tertiary" | "error" | "warning";
 type IconButtonSize = "sm" | "md" | "lg";
 
@@ -54,7 +54,7 @@ const outlineStyles: Record<IconButtonColor, string> = {
   warning: "border border-warning/50 text-warning hover:bg-warning/8",
 };
 
-const ghostStyles: Record<IconButtonColor, string> = {
+const textStyles: Record<IconButtonColor, string> = {
   primary: "text-primary hover:bg-primary/8",
   secondary: "text-secondary hover:bg-secondary/8",
   tertiary: "text-tertiary hover:bg-tertiary/8",
@@ -69,8 +69,7 @@ const variantMap: Record<
   filled: filledStyles,
   tonal: tonalStyles,
   outline: outlineStyles,
-  ghost: ghostStyles,
-  text: ghostStyles,
+  text: textStyles,
 };
 
 const sizeStyles: Record<IconButtonSize, string> = {
@@ -87,7 +86,7 @@ const iconSizes: Record<IconButtonSize, number> = {
 
 export function IconButton({
   icon,
-  variant = "ghost",
+  variant = "text",
   color = "primary",
   size = "md",
   loading = false,

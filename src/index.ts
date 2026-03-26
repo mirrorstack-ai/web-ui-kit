@@ -9,8 +9,10 @@ export { SidebarProvider, useSidebarWidth } from "./context/SidebarContext";
 export {
   SnackbarProvider,
   useSnackbar,
+  useUnsavedSnackbar,
   SnackbarOutlet,
   type SnackbarOptions,
+  type UseUnsavedSnackbarOptions,
 } from "./context/SnackbarContext";
 
 // Components — Layout
@@ -115,6 +117,7 @@ export {
 export {
   ModuleSettingsLayout,
   type ModuleSettingsLayoutProps,
+  type SettingsTab,
 } from "./components/ModuleSettingsLayout";
 
 // Components — Misc
