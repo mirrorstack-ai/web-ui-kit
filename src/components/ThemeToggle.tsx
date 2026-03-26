@@ -1,6 +1,6 @@
 "use client";
 
-import { IconButton, type IconButtonProps } from "./icon-button";
+import { IconButton, type IconButtonProps } from "./IconButton";
 import type { Theme } from "../context/ThemeContext";
 
 const ICON: Record<Theme, string> = {
