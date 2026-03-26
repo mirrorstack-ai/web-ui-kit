@@ -1,0 +1,264 @@
+/* MirrorStack — Material Design 3 Theme + Base Styles */
+/* Import this AFTER @import "tailwindcss" in your app's globals.css */
+
+@theme {
+  /* Material Design 3 - Light Mode (Default) */
+  --color-primary: #006973;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #28bdce;
+  --color-on-primary-container: #00262b;
+  --color-primary-fixed: #c7e7ff;
+  --color-on-primary-fixed: #001e2e;
+
+  --color-secondary: #39656b;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #beecf3;
+  --color-on-secondary-container: #224f55;
+  --color-secondary-fixed-dim: #b4dfe6;
+
+  --color-tertiary: #7a4a97;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #cb97eb;
+  --color-on-tertiary-container: #360254;
+  --color-tertiary-fixed: #e9ddff;
+  --color-tertiary-container-dim: #b57dd4;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #410002;
+
+  --color-success: #1b6d2f;
+  --color-on-success: #ffffff;
+  --color-success-container: #a4f5a8;
+  --color-on-success-container: #002108;
+
+  --color-warning: #7c5800;
+  --color-on-warning: #ffffff;
+  --color-warning-container: #ffdea6;
+  --color-on-warning-container: #271900;
+
+  --color-info: #0061a4;
+  --color-on-info: #ffffff;
+  --color-info-container: #d1e4ff;
+  --color-on-info-container: #001d36;
+
+  --color-background: #e6f5f6;
+  --color-on-background: #171d1e;
+
+  --color-surface: #f5fafb;
+  --color-on-surface: #171d1e;
+  --color-surface-variant: #d7e5e7;
+  --color-on-surface-variant: #3c494b;
+
+  --color-outline: #6c797b;
+  --color-outline-variant: #bbc9cb;
+
+  --color-surface-dim: #d5dbdc;
+  --color-surface-bright: #f5fafb;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff5f5;
+  --color-surface-container: #e9eff0;
+  --color-surface-container-high: #e3e9ea;
+  --color-surface-container-highest: #dee3e4;
+
+  --color-inverse-primary: #50d8e8;
+  --color-inverse-surface: #2b3132;
+  --color-inverse-on-surface: #ecf2f3;
+  --color-surface-tint: #006973;
+
+  --color-shadow: #000000;
+  --color-scrim: #000000;
+
+  /* Font */
+  --font-sans: "Shantell Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Progress animations */
+  --animate-progress-bar-1: progress-bar-1 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  --animate-progress-bar-2: progress-bar-2 2s cubic-bezier(0.65, 0, 0.35, 1) 0.8s infinite;
+  --animate-progress-wave-flow: progress-wave-flow 2s linear infinite;
+  --animate-progress-rotate: progress-rotate 2s linear infinite;
+  --animate-progress-dash: progress-dash 1.5s ease-in-out infinite;
+  --animate-progress-wave-dash: progress-dash 1.5s ease-in-out infinite;
+  --animate-progress-four-color: progress-four-color 3s linear infinite;
+  --animate-wave-bar: wave-bar 1s ease-in-out infinite;
+}
+
+/* Dark mode */
+.dark {
+  --color-primary: #93cdf6;
+  --color-on-primary: #00344c;
+  --color-primary-container: #004c6d;
+  --color-on-primary-container: #c7e7ff;
+  --color-primary-fixed: #c7e7ff;
+  --color-on-primary-fixed: #001e2e;
+
+  --color-secondary: #b6c9d8;
+  --color-on-secondary: #21323e;
+  --color-secondary-container: #384956;
+  --color-on-secondary-container: #d2e5f5;
+  --color-secondary-fixed-dim: #154a51;
+
+  --color-tertiary: #cdc0e9;
+  --color-on-tertiary: #342b4b;
+  --color-tertiary-container: #4b4263;
+  --color-on-tertiary-container: #e9ddff;
+  --color-tertiary-fixed: #e9ddff;
+
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+
+  --color-success: #89d98d;
+  --color-on-success: #003913;
+  --color-success-container: #005320;
+  --color-on-success-container: #a4f5a8;
+
+  --color-warning: #f5bf48;
+  --color-on-warning: #412d00;
+  --color-warning-container: #5e4200;
+  --color-on-warning-container: #ffdea6;
+
+  --color-info: #9ecaff;
+  --color-on-info: #003258;
+  --color-info-container: #00497d;
+  --color-on-info-container: #d1e4ff;
+
+  --color-background: #101417;
+  --color-on-background: #dfe3e7;
+
+  --color-surface: #101417;
+  --color-on-surface: #dfe3e7;
+  --color-surface-variant: #3c494b;
+  --color-on-surface-variant: #bbc9cb;
+
+  --color-outline: #869395;
+  --color-outline-variant: #3c494b;
+
+  --color-surface-dim: #101417;
+  --color-surface-bright: #343a3b;
+  --color-surface-container-lowest: #090f10;
+  --color-surface-container-low: #171d1e;
+  --color-surface-container: #1b2122;
+  --color-surface-container-high: #252b2c;
+  --color-surface-container-highest: #303637;
+
+  --color-inverse-primary: #006973;
+  --color-inverse-surface: #dee3e4;
+  --color-inverse-on-surface: #101417;
+  --color-surface-tint: #93cdf6;
+}
+
+/* Base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-on-background);
+  font-variation-settings: "BNCE" 0, "INFM" 0, "SPAC" 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Progress indicator animations */
+@keyframes progress-bar-1 {
+  0% {
+    left: -100%;
+    right: 100%;
+  }
+  50% {
+    left: 25%;
+    right: -10%;
+  }
+  100% {
+    left: 100%;
+    right: -35%;
+  }
+}
+
+@keyframes progress-bar-2 {
+  0% {
+    left: -100%;
+    right: 100%;
+  }
+  65% {
+    left: 50%;
+    right: -20%;
+  }
+  100% {
+    left: 100%;
+    right: -10%;
+  }
+}
+
+@keyframes progress-wave-flow {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--wave-shift, -5%));
+  }
+}
+
+@keyframes progress-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes progress-dash {
+  0%,
+  100% {
+    stroke-dashoffset: 80;
+  }
+  50% {
+    stroke-dashoffset: 20;
+  }
+}
+
+@keyframes progress-four-color {
+  0%,
+  100% {
+    color: var(--color-primary);
+  }
+  25% {
+    color: var(--color-secondary);
+  }
+  50% {
+    color: var(--color-tertiary);
+  }
+  75% {
+    color: var(--color-error);
+  }
+}
+
+@keyframes wave-bar {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
+}
+
+/* Material Symbols Rounded */
+.material-symbols-rounded {
+  font-family: "Material Symbols Rounded";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
