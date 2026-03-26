@@ -26,7 +26,8 @@ LINES=$(wc -l < "$FILE_PATH" | tr -d ' ')
 
 if [ "$LINES" -gt "$MAX_LINES" ]; then
   echo "BLOCKED: $FILE_PATH has $LINES lines (max $MAX_LINES)."
-  echo "Split the file into smaller modules, or add '// @generated' to the first 5 lines to skip this check."
+  echo "Run /simplify to break it into smaller modules."
+  echo "Or add '// @generated' in the first 5 lines to skip this check."
   exit 1
 fi
 
