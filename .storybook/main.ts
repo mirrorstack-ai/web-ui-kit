@@ -1,10 +1,11 @@
-import path from "node:path";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { StorybookConfig } from "@storybook/react-vite";
 import tailwindcss from "@tailwindcss/vite";
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(ts|tsx)"],
-  addons: ["@storybook/addon-essentials"],
+  addons: [],
   framework: {
     name: "@storybook/react-vite",
     options: {},
@@ -15,7 +16,7 @@ const config: StorybookConfig = {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@": path.resolve(__dirname, "../src"),
+      "@": resolve(dirname(fileURLToPath(import.meta.url)), "../src"),
     };
     return config;
   },
