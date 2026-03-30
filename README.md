@@ -1,5 +1,10 @@
 # @mirrorstack-ai/web-ui-kit
 
+[![CI](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/ci.yml)
+[![Storybook](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/storybook.yml/badge.svg)](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/storybook.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Good First Issues](https://img.shields.io/github/issues/mirrorstack-ai/web-ui-kit/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/mirrorstack-ai/web-ui-kit/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
+
 Shared React UI component library for [MirrorStack](https://mirrorstack.com).
 
 Built with React 19, TypeScript, Tailwind CSS v4, and Material Design 3.
