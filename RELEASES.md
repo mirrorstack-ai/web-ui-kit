@@ -50,21 +50,23 @@ alpha → beta → rc → stable
 Releases are **label-triggered**. Add the `release` label to a PR before merging.
 
 On merge, CI will automatically:
-1. Bump the version in `package.json`
-2. Create a git tag (e.g. `v0.1.0-alpha.2`)
-3. Create a GitHub Release with auto-generated changelog
+1. Create a git tag (e.g. `v0.1.0-alpha.2`)
+2. Create a GitHub Release with auto-generated changelog
+3. Alpha/beta/rc versions are marked as prerelease
 
-PRs without the `release` label do not trigger a version bump.
+PRs without the `release` label do not trigger a release.
 
-### Stage transitions (manual)
+The PR author should bump `version` in `package.json` before adding the `release` label.
 
-To move between stages (e.g. alpha → beta), a maintainer manually sets the version in `package.json` and creates the tag:
+### npm publishing
+
+Not published to npm during pre-release stages (alpha/beta/rc). Apps install directly from git:
 
 ```bash
-# in package.json: "version": "0.1.0-beta.1"
-git tag v0.1.0-beta.1
-git push origin v0.1.0-beta.1
+pnpm add github:mirrorstack-ai/web-ui-kit
 ```
+
+npm publishing will be enabled at stable `1.0.0`.
 
 ## Milestones
 
