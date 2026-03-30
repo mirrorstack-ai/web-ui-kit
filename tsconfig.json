@@ -15,5 +15,5 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*", "__tests__/**/*"]
+  "include": ["src/**/*", "__tests__/**/*", "vitest.setup.ts"]
 }
