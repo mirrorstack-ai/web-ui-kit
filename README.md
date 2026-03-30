@@ -4,6 +4,8 @@ Shared React UI component library for [MirrorStack](https://mirrorstack.com).
 
 Built with React 19, TypeScript, Tailwind CSS v4, and Material Design 3.
 
+**[Storybook Demo](https://mirrorstack-ai.github.io/web-ui-kit/)** | **[Contributing](CONTRIBUTING.md)** | **[Good First Issues](https://github.com/mirrorstack-ai/web-ui-kit/issues?q=is%3Aopen+label%3A%22good+first+issue%22)**
+
 ## Getting started
 
 ### Install
@@ -129,6 +131,12 @@ src/
 - **Material Symbols Rounded** for icons
 - **Storybook 8** for component development
 - **Vitest** for testing
+
+## Contributing
+
+We welcome contributions! Check out our [Contributing Guide](CONTRIBUTING.md) to get started.
+
+Look for issues labeled [`good first issue`](https://github.com/mirrorstack-ai/web-ui-kit/issues?q=is%3Aopen+label%3A%22good+first+issue%22) for beginner-friendly tasks.
 
 ## License
 

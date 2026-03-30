@@ -29,6 +29,18 @@ fix/WUK-{number}_{slug}/agent
 
 Examples: `feat/WUK-1_avatar-component`, `refactor/WUK-15_consolidate-inputs`, `fix/WUK-18_badge-dark-mode/agent`
 
+## Labels
+
+| Category | Labels |
+|----------|--------|
+| Work | `feature` `bug` `test` `docs` `refactor` `chore` |
+| Priority | `p0:critical` `p1:high` `p2:medium` `p3:low` |
+| Size | `size:xs` `size:s` `size:m` `size:l` |
+| Status | `blocked` `needs triage` |
+| Contributor | `good first issue` `help wanted` |
+
+Look for issues labeled [`good first issue`](https://github.com/mirrorstack-ai/web-ui-kit/issues?q=is%3Aopen+label%3A%22good+first+issue%22) to get started.
+
 ## PR workflow
 
 1. Start work from an issue:

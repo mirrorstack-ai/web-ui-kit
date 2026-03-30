@@ -1,0 +1,49 @@
+name: Component Port
+description: Port a component from reference/v2-restored
+title: "[Port] "
+labels: ["feature"]
+body:
+  - type: input
+    id: component-name
+    attributes:
+      label: Component name
+      placeholder: "e.g. Avatar"
+    validations:
+      required: true
+
+  - type: input
+    id: reference-path
+    attributes:
+      label: Reference branch path
+      placeholder: "e.g. src/components/Avatar.tsx"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - actions
+        - inputs
+        - feedback
+        - navigation
+        - surfaces
+        - media
+        - data
+        - files
+        - state
+    validations:
+      required: true
+
+  - type: textarea
+    id: props
+    attributes:
+      label: Props to keep / remove / change
+      description: Any changes from the reference version?
+      placeholder: |
+        Keep: variant, size, color
+        Remove: legacy onClick handler
+        Add: loading state
+    validations:
+      required: false
