@@ -2,6 +2,9 @@ import { type ButtonHTMLAttributes, type CSSProperties } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Progress } from "@/components/ui/feedback/progress/Progress";
+import { ENV } from "@/utils/env";
+
+const isDev = process.env.NODE_ENV === ENV.DEV;
 
 export const meta: ComponentMeta = {
   name: "Button",
@@ -117,6 +120,15 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
+  if (isDev) {
+    if (loading && !props["aria-label"] && !children) {
+      console.warn("[Button] loading button should have accessible label");
+    }
+    if ((leftIcon || rightIcon) && !children) {
+      console.warn("[Button] icon-only button should use IconButton instead");
+    }
+  }
+
   return (
     <button
       className={cn(
