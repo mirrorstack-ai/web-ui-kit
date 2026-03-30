@@ -254,3 +254,7 @@ The `reference/v2-restored` branch contains all 55 components from the previous 
 6. Export from `index.ts`
 7. Run `pnpm components validate` to verify
 
+## Releases
+
+See [RELEASES.md](RELEASES.md) for the versioning strategy. We follow semver with pre-release stages: `alpha → beta → rc → stable`.
+
