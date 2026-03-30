@@ -53,6 +53,8 @@ Look for issues labeled [`good first issue`](https://github.com/mirrorstack-ai/w
 4. PR requires maintainer review before merge
 5. Squash merge to `main`
 
+See [PR #2](https://github.com/mirrorstack-ai/web-ui-kit/pull/2) for an example of a good component PR.
+
 ## Adding a UI component
 
 ### 1. Create the folder
