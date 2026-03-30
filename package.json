@@ -1,10 +1,12 @@
 {
   "name": "@mirrorstack-ai/web-ui-kit",
   "packageManager": "pnpm@10.29.3",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.1.0-alpha.1",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "components": "tsx scripts/components.ts",
     "start-issue": "tsx scripts/start-issue.ts",
