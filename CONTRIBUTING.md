@@ -99,6 +99,18 @@ Rules:
 - **Use `cn()`** for class merging (clsx + tailwind-merge)
 - **Use Material Symbols Rounded** for icons (`<span className="material-symbols-rounded">icon_name</span>`)
 - **Export the props interface** alongside the component
+- **Use `ENV` for environment checks** — never use raw `"production"` / `"development"` strings:
+  ```tsx
+  import { ENV } from "@/utils/env";
+
+  // dev-only warnings
+  if (process.env.NODE_ENV === ENV.DEV) {
+    console.warn("[ComponentName] helpful warning message");
+  }
+
+  // production guard
+  if (process.env.NODE_ENV === ENV.PROD) return null;
+  ```
 
 ### 3. Write the story
 
