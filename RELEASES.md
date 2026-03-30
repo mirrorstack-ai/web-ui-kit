@@ -12,10 +12,10 @@ MAJOR.MINOR.PATCH-{stage}.{number}
 
 | Stage | Format | Meaning |
 |-------|--------|---------|
-| Alpha | `0.x.0-alpha.N` | Active development. Breaking changes expected. |
-| Beta | `0.x.0-beta.N` | Feature complete. Bug fixes and polish only. |
-| RC | `0.x.0-rc.N` | Release candidate. Production ready, final testing. |
-| Stable | `0.x.0` | Stable release. Safe for production use. |
+| Alpha | `0.x.y-alpha.N` | Active development. Breaking changes expected. |
+| Beta | `0.x.y-beta.N` | Feature complete. Bug fixes and polish only. |
+| RC | `0.x.y-rc.N` | Release candidate. Production ready, final testing. |
+| Stable | `0.x.y` | Stable release. Safe for production use. |
 
 ## Current version
 
@@ -31,20 +31,40 @@ alpha → beta → rc → stable
   └──────────────── New features, breaking changes OK
 ```
 
-## When to bump
+## Version bumps
 
-- **alpha.N → alpha.N+1** — new component added, breaking API change
-- **alpha → beta** — all planned components for the milestone are ported
-- **beta.N → beta.N+1** — bug fix during beta
-- **beta → rc** — all known bugs fixed, ready for production testing
-- **rc → stable** — no issues found during rc period
+| Change | Version example |
+|--------|-----------------|
+| New component added | `0.1.0-alpha.1` → `0.1.0-alpha.2` |
+| Bug fix during alpha | `0.1.0-alpha.2` → `0.1.0-alpha.3` |
+| All core components done | `0.1.0-alpha.N` → `0.1.0-beta.1` |
+| Bug fix during beta | `0.1.0-beta.1` → `0.1.0-beta.2` |
+| Ready for production testing | `0.1.0-beta.N` → `0.1.0-rc.1` |
+| First stable release | `0.1.0-rc.N` → `0.1.0` |
+| Bug fix after stable | `0.1.0` → `0.1.1` |
+| New component batch | `0.1.1` → `0.2.0` |
+| Public API stable | `0.x.y` → `1.0.0` |
 
 ## How to release
 
-1. Update `version` in `package.json`
-2. Create a git tag: `git tag v0.1.0-alpha.1`
-3. Push the tag: `git push origin v0.1.0-alpha.1`
-4. Create a GitHub Release from the tag with changelog
+Releases are **label-triggered**. Add the `release` label to a PR before merging.
+
+On merge, CI will automatically:
+1. Bump the version in `package.json`
+2. Create a git tag (e.g. `v0.1.0-alpha.2`)
+3. Create a GitHub Release with auto-generated changelog
+
+PRs without the `release` label do not trigger a version bump.
+
+### Stage transitions (manual)
+
+To move between stages (e.g. alpha → beta), a maintainer manually sets the version in `package.json` and creates the tag:
+
+```bash
+# in package.json: "version": "0.1.0-beta.1"
+git tag v0.1.0-beta.1
+git push origin v0.1.0-beta.1
+```
 
 ## Milestones
 
