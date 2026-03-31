@@ -85,19 +85,19 @@ describe("Progress", () => {
     it("renders progressive circular with rotation animation", () => {
       const { container } = render(<Progress type="circular" value={50} progressive />);
       const svg = container.querySelector("svg");
-      expect(svg?.className.baseVal).toContain("animate-progress-rotate");
+      expect(svg?.getAttribute("class")).toContain("animate-progress-rotate");
     });
   });
 
   describe("colors", () => {
     it("applies four-color animation class", () => {
       const { container } = render(<Progress type="circular" value={50} color="four-color" />);
-      expect(getProgressbar(container)?.className).toContain("animate-progress-four-color");
+      expect(getProgressbar(container)?.getAttribute("class")).toContain("animate-progress-four-color");
     });
 
     it("applies current color for indeterminate", () => {
       const { container } = render(<Progress type="circular" color="current" />);
-      expect(getProgressbar(container)?.className).toContain("text-current");
+      expect(getProgressbar(container)?.getAttribute("class")).toContain("text-current");
     });
   });
 
@@ -109,7 +109,7 @@ describe("Progress", () => {
 
     it("applies custom className", () => {
       const { container } = render(<Progress type="linear" className="my-class" />);
-      expect(getProgressbar(container)?.className).toContain("my-class");
+      expect(getProgressbar(container)?.getAttribute("class")).toContain("my-class");
     });
 
     it("applies style to circular", () => {
@@ -124,7 +124,7 @@ describe("Progress", () => {
     it("defaults to linear type", () => {
       const { container } = render(<Progress />);
       expect(getProgressbar(container)).toBeInTheDocument();
-      expect(getProgressbar(container)?.className).not.toContain("inline-flex");
+      expect(getProgressbar(container)?.getAttribute("class")).not.toContain("inline-flex");
     });
 
     it("defaults to wave variant", () => {
