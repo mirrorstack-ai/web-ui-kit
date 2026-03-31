@@ -101,17 +101,26 @@ Rules:
 - **Use `cn()`** for class merging (clsx + tailwind-merge)
 - **Use Material Symbols Rounded** for icons (`<span className="material-symbols-rounded">icon_name</span>`)
 - **Export the props interface** alongside the component
-- **Use `ENV` for environment checks** — never use raw `"production"` / `"development"` strings:
+- **Use `isDev` / `isProd`** from `@/utils/env` for environment checks — never use raw strings:
   ```tsx
-  import { ENV } from "@/utils/env";
-
-  // dev-only warnings
-  if (process.env.NODE_ENV === ENV.DEV) {
-    console.warn("[ComponentName] helpful warning message");
+  import { isDev, isProd } from "@/utils/env";
+  ```
+- **Add dev-only warnings** for common mistakes. Use `isDev` guard and prefix with `[ComponentName]`:
+  ```tsx
+  if (isDev) {
+    console.warn("[Button] loading button should have aria-label");
   }
+  ```
 
-  // production guard
-  if (process.env.NODE_ENV === ENV.PROD) return null;
+### Dev warnings
+
+Components should include dev-only warnings for:
+- **Accessibility** — missing `aria-label`, `role`, or accessible text
+- **Invalid props** — value out of range, conflicting props
+- **Wrong component usage** — e.g. icon-only `Button` should use `IconButton` instead
+- **Production guard** — components that should not render in production (e.g. DevToolbar):
+  ```tsx
+  if (isProd) return null;
   ```
 
 ### 3. Write the story

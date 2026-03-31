@@ -35,5 +35,6 @@ src/utils/                                   Helpers
 - Every component must export `meta: ComponentMeta` with `name` and `description`
 - No `"use client"` in component files
 - Use `cn()` from `@/utils/cn` for class merging
-- Use `ENV.PROD` / `ENV.DEV` from `@/utils/env` for environment checks — never use raw strings
+- Use `isDev` / `isProd` from `@/utils/env` for environment checks — never use raw strings
+- Add dev-only warnings: `if (isDev) { console.warn("[ComponentName] message"); }` for accessibility, invalid props, wrong usage
 - See CONTRIBUTING.md for full details
