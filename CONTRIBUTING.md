@@ -105,12 +105,23 @@ Rules:
   ```tsx
   import { ENV } from "@/utils/env";
 
-  // dev-only warnings
-  if (process.env.NODE_ENV === ENV.DEV) {
-    console.warn("[ComponentName] helpful warning message");
+  const isDev = process.env.NODE_ENV === ENV.DEV;
+  ```
+- **Add dev-only warnings** for common mistakes. Use `isDev` guard and prefix with `[ComponentName]`:
+  ```tsx
+  if (isDev) {
+    console.warn("[Button] loading button should have aria-label");
   }
+  ```
 
-  // production guard
+### Dev warnings
+
+Components should include dev-only warnings for:
+- **Accessibility** — missing `aria-label`, `role`, or accessible text
+- **Invalid props** — value out of range, conflicting props
+- **Wrong component usage** — e.g. icon-only `Button` should use `IconButton` instead
+- **Production guard** — components that should not render in production (e.g. DevToolbar):
+  ```tsx
   if (process.env.NODE_ENV === ENV.PROD) return null;
   ```
 
