@@ -1,5 +1,5 @@
 export { cn } from "./utils/cn";
-export { isDev, isProd } from "./utils/env";
+export { isDev, isProd, isStorybook } from "./utils/env";
 export { Button, type ButtonProps } from "./components/ui/actions/button/Button";
 export {
   Progress,
