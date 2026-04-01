@@ -1,6 +1,6 @@
 name: Feature Request
 description: Suggest a new component or feature
-title: "[Feature] "
+title: "feat: "
 labels: ["feature"]
 body:
   - type: textarea
