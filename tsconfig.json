@@ -13,7 +13,8 @@
     },
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "types": ["vite/client"]
   },
   "include": ["src/**/*", "__tests__/**/*", "vitest.setup.ts"]
 }
