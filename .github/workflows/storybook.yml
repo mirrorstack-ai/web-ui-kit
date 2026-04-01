@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
@@ -36,7 +36,14 @@ jobs:
 
       - run: pnpm build-storybook
 
-      - name: Deploy to GitHub Pages
+      - name: Upload Storybook build
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-${{ github.event.pull_request.number || 'main' }}
+          path: storybook-static/
+          retention-days: 7
+
+      - name: Deploy to GitHub Pages (main)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           cp -r storybook-static /tmp/storybook-static
@@ -50,23 +57,36 @@ jobs:
           git diff --cached --quiet || git commit -m "deploy: update Storybook from ${{ github.sha }}"
           git push origin gh-pages
 
+  deploy-pr-preview:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+
+      - name: Download Storybook build
+        uses: actions/download-artifact@v4
+        with:
+          name: storybook-${{ github.event.pull_request.number }}
+          path: /tmp/storybook-static
+
       - name: Deploy PR preview
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
-          cp -r storybook-static /tmp/storybook-static
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin gh-pages:gh-pages
-          git checkout gh-pages
           rm -rf pr/${{ github.event.pull_request.number }}
           mkdir -p pr/${{ github.event.pull_request.number }}
           cp -r /tmp/storybook-static/* pr/${{ github.event.pull_request.number }}/
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           git diff --cached --quiet || git commit -m "deploy: PR #${{ github.event.pull_request.number }} preview"
           git push origin gh-pages
 
       - name: Comment PR link
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@v8
         with:
           script: |
