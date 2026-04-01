@@ -51,7 +51,7 @@ jobs:
           git push origin gh-pages
 
       - name: Deploy PR preview
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
           cp -r storybook-static /tmp/storybook-static
           git config user.name "github-actions[bot]"
@@ -66,7 +66,7 @@ jobs:
           git push origin gh-pages
 
       - name: Comment PR link
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@v8
         with:
           script: |
