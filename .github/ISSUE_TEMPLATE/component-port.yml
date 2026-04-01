@@ -1,6 +1,6 @@
 name: Component Port
 description: Port a component from reference/v2-restored
-title: "[Port] "
+title: "feat: port "
 labels: ["feature"]
 body:
   - type: input
