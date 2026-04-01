@@ -1,0 +1,125 @@
+name: Storybook Deploy
+
+on:
+  workflow_run:
+    workflows: [Storybook]
+    types: [completed]
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  deploy-main:
+    if: >
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+
+      - name: Download Storybook build
+        uses: actions/download-artifact@v4
+        with:
+          name: storybook-build
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: /tmp/storybook-static
+
+      - name: Deploy to GitHub Pages
+        run: |
+          find . -maxdepth 1 ! -name '.' ! -name '.git' ! -name 'pr' -exec rm -rf {} +
+          cp -r /tmp/storybook-static/* .
+          rm -f PR_NUMBER
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "deploy: update Storybook from ${{ github.event.workflow_run.head_sha }}"
+          git push origin gh-pages
+
+  deploy-pr-preview:
+    if: >
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+
+      - name: Download Storybook build
+        uses: actions/download-artifact@v4
+        with:
+          name: storybook-build
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: /tmp/storybook-static
+
+      - name: Get PR number
+        id: pr
+        run: echo "number=$(cat /tmp/storybook-static/PR_NUMBER)" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy PR preview
+        run: |
+          rm -rf pr/${{ steps.pr.outputs.number }}
+          mkdir -p pr/${{ steps.pr.outputs.number }}
+          cp -r /tmp/storybook-static/* pr/${{ steps.pr.outputs.number }}/
+          rm -f pr/${{ steps.pr.outputs.number }}/PR_NUMBER
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "deploy: PR #${{ steps.pr.outputs.number }} preview"
+          git push origin gh-pages
+
+      - name: Comment PR link
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = parseInt('${{ steps.pr.outputs.number }}');
+            const url = `https://mirrorstack-ai.github.io/web-ui-kit/pr/${prNumber}/`;
+            const body = `**Storybook Preview:** ${url}`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.find(c => c.body.includes('Storybook Preview:'));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
+
+  cleanup-pr:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+
+      - name: Remove PR preview
+        run: |
+          rm -rf pr/${{ github.event.pull_request.number }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "chore: clean up PR #${{ github.event.pull_request.number }} preview"
+          git push
