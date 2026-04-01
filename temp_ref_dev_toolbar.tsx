@@ -1,20 +1,13 @@
 "use client";
 
-import { type ReactElement } from "react";
-import { isDev, isProd } from "@/utils/env";
-import { cn } from "@/utils/cn";
+import { cn } from "../utils/cn";
 
-export const meta = {
-  name: "DevToolbar",
-  description: "Fixed floating toolbar for switching between dev states/views",
-};
-
-export interface DevToolbarItem {
+interface DevToolbarItem {
   label: string;
   value: string;
 }
 
-export interface DevToolbarProps {
+interface DevToolbarProps {
   items: DevToolbarItem[];
   value: string;
   onChange: (value: string) => void;
@@ -22,15 +15,8 @@ export interface DevToolbarProps {
   onToggleError?: () => void;
 }
 
-export function DevToolbar({
-  items,
-  value,
-  onChange,
-  showError,
-  onToggleError,
-}: DevToolbarProps): ReactElement | null {
-  if (isProd) return null;
-  if (isDev) console.warn("[DevToolbar] rendered");
+export function DevToolbar({ items, value, onChange, showError, onToggleError }: DevToolbarProps) {
+  if (process.env.NODE_ENV === "production") return null;
 
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex bg-surface-container border border-outline-variant rounded-2xl px-4 py-2 shadow-xl">
@@ -56,7 +42,7 @@ export function DevToolbar({
             <button
               onClick={onToggleError}
               className={cn(
-                "px-3 h-8 whitespace-nowrap text-xs rounded shrink-0 transition-colors",
+                "px-2 py-1 text-xs rounded shrink-0",
                 showError
                   ? "bg-error text-on-error"
                   : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"

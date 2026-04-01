@@ -4,6 +4,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { DevToolbar } from "./DevToolbar";
 import { ENV } from "@/utils/env";
 
+vi.mock("@/utils/env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/env")>();
+  return {
+    ...actual,
+    get isProd() { return process.env.NODE_ENV === "production"; },
+    get isDev() { return process.env.NODE_ENV === "development"; },
+  };
+});
+
 describe("DevToolbar", () => {
   const defaultProps = {
     items: [
@@ -49,7 +58,7 @@ describe("DevToolbar", () => {
     const onToggleError = vi.fn();
     render(<DevToolbar {...defaultProps} onToggleError={onToggleError} />);
     
-    const errorButton = screen.getAllByRole("button", { name: "Show Error" })[0];
+    const errorButton = screen.getAllByRole("button", { name: "Error OFF" })[0];
     fireEvent.click(errorButton);
     
     expect(onToggleError).toHaveBeenCalled();
