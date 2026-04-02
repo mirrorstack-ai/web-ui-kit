@@ -59,7 +59,7 @@ export function DevToolbar({
             <button
               onClick={onToggleError}
               className={cn(
-                "px-2 py-1 text-xs rounded shrink-0 transition-colors cursor-pointer",
+                "min-w-[5rem] px-2 py-1 text-xs rounded shrink-0 transition-colors cursor-pointer",
                 showError
                   ? "bg-error text-on-error"
                   : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container",
