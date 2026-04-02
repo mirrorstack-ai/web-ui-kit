@@ -2,9 +2,7 @@ import { type ButtonHTMLAttributes, type CSSProperties } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Progress } from "@/components/ui/feedback/progress/Progress";
-import { ENV } from "@/utils/env";
-
-const isDev = process.env.NODE_ENV === ENV.DEV;
+import { isDev } from "@/utils/env";
 
 export const meta: ComponentMeta = {
   name: "Button",
