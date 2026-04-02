@@ -34,7 +34,7 @@ jobs:
         run: echo "${{ github.event.pull_request.number }}" > storybook-static/PR_NUMBER
 
       - name: Upload Storybook build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: storybook-build
           path: storybook-static/
