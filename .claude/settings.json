@@ -3,7 +3,9 @@
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
-        "hook": "scripts/hooks/check-file-length.sh"
+        "hooks": [
+          { "type": "command", "command": "node scripts/hooks/check-file-length.js" }
+        ]
       }
     ]
   }
