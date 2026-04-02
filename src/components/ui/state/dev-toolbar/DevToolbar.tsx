@@ -1,7 +1,5 @@
-"use client";
-
 import { type ReactElement } from "react";
-import { isDev, isProd } from "@/utils/env";
+import { isProd, isStorybook } from "@/utils/env";
 import { cn } from "@/utils/cn";
 
 export const meta = {
@@ -29,8 +27,7 @@ export function DevToolbar({
   showError,
   onToggleError,
 }: DevToolbarProps): ReactElement | null {
-  if (isProd) return null;
-  if (isDev) console.warn("[DevToolbar] rendered");
+  if (isProd && !isStorybook) return null;
 
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex bg-surface-container border border-outline-variant rounded-2xl px-4 py-2 shadow-xl">
@@ -56,7 +53,7 @@ export function DevToolbar({
             <button
               onClick={onToggleError}
               className={cn(
-                "px-3 h-8 whitespace-nowrap text-xs rounded shrink-0 transition-colors",
+                "px-2 py-1 whitespace-nowrap text-xs rounded shrink-0 transition-colors",
                 showError
                   ? "bg-error text-on-error"
                   : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"
