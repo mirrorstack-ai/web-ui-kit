@@ -2,14 +2,9 @@ import type { ComponentMeta } from "@/types/component-meta";
 import type { ProgressProps } from "./types";
 import { LinearProgress } from "./LinearProgress";
 import { CircularProgress } from "./CircularProgress";
-import { ENV } from "@/utils/env";
-declare const process: any;
+import { isDev } from "@/utils/env";
 
 export type { ProgressProps, ProgressType, ProgressColor, ProgressVariant, ProgressSize } from "./types";
-
-const isDev =
-  typeof process !== "undefined" &&
-  process?.env?.NODE_ENV === ENV.DEV;
 
 export const meta: ComponentMeta = {
   name: "Progress",
@@ -32,8 +27,6 @@ export function Progress(props: ProgressProps) {
     if (!isValidType || !isValidVariant) {
       console.warn("[Progress] invalid type/variant combination");
     }
-
-    console.log("[Progress props]", { value, type, variant });
   }
 
   return type === "circular" ? (
