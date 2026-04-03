@@ -15,6 +15,10 @@ export {
   type SegmentedButtonOption,
 } from "./components/ui/inputs/segmented-button/SegmentedButton";
 export {
+  ReadOnlyField,
+  type ReadOnlyFieldProps,
+} from "./components/ui/data/read-only-field/ReadOnlyField";
+export {
   DevToolbar,
   type DevToolbarProps,
   type DevToolbarItem,
