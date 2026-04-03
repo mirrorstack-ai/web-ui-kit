@@ -15,6 +15,11 @@ export {
   type SegmentedButtonOption,
 } from "./components/ui/inputs/segmented-button/SegmentedButton";
 export {
+  Alert,
+  type AlertProps,
+  type AlertVariant,
+} from "./components/ui/feedback/alert/Alert";
+export {
   DevToolbar,
   type DevToolbarProps,
   type DevToolbarItem,
