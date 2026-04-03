@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">4 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">4/4 infos</a><span class="filter-pill ok" aria-disabled="true">20 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">5 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">5/5 infos</a><span class="filter-pill ok" aria-disabled="true">25 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -1119,14 +1119,175 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="SegmentedButton">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> SegmentedButton</h2>
+      <div class="badges">
+        <label for="c-3-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-3-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-3-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">5 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/inputs/segmented-button/SegmentedButton.stories.tsx">ui-inputs-segmentedbutton · ./src/components/ui/inputs/segmented-button/SegmentedButton.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-3-ui-inputs-segmentedbutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-3-ui-inputs-segmentedbutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-3-ui-inputs-segmentedbutton-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">6 prop types</span>
+            </div>
+            <pre><code>Component: src/components/ui/inputs/segmented-button/SegmentedButton.tsx::SegmentedButton</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>aria-label?: string
+
+className?: string
+
+disabled?: boolean = false
+
+onChange: (value: T) =&gt; void
+
+options: unknown
+
+value: T</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { SegmentedButton } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Interactive playground — all controls work here</div>
+              <pre><code>const Playground = () =&gt; &lt;SegmentedButton
+    options={sizeOptions}
+    value=&quot;md&quot;
+    aria-label=&quot;Select size&quot;
+    disabled={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Controlled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Controlled example with live state</div>
+              <pre><code>const Controlled = () =&gt; {
+    const [selected, setSelected] = useState(args.value ?? &quot;md&quot;);
+
+    return (
+        &lt;div className=&quot;flex flex-col gap-3&quot;&gt;
+            &lt;SegmentedButton
+                options={sizeOptions}
+                aria-label=&quot;Select size&quot;
+                disabled={false}
+                value={selected}
+                onChange={setSelected} /&gt;
+            &lt;p className=&quot;text-sm text-on-surface-variant&quot;&gt;Selected: &lt;strong&gt;{selected}&lt;/strong&gt;
+            &lt;/p&gt;
+        &lt;/div&gt;
+    );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Two Options</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Two options</div>
+              <pre><code>const TwoOptions = () =&gt; &lt;SegmentedButton
+    options={[
+      { value: &quot;list&quot;, label: &quot;List&quot; },
+      { value: &quot;grid&quot;, label: &quot;Grid&quot; },
+    ]}
+    value=&quot;list&quot;
+    aria-label=&quot;Select view&quot;
+    disabled={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Many Options</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Many options</div>
+              <pre><code>const ManyOptions = () =&gt; &lt;SegmentedButton
+    options={[
+      { value: &quot;day&quot;, label: &quot;Day&quot; },
+      { value: &quot;week&quot;, label: &quot;Week&quot; },
+      { value: &quot;month&quot;, label: &quot;Month&quot; },
+      { value: &quot;quarter&quot;, label: &quot;Quarter&quot; },
+      { value: &quot;year&quot;, label: &quot;Year&quot; },
+    ]}
+    value=&quot;month&quot;
+    aria-label=&quot;Select time range&quot;
+    disabled={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Disabled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Disabled state</div>
+              <pre><code>const Disabled = () =&gt; &lt;SegmentedButton options={sizeOptions} value=&quot;md&quot; aria-label=&quot;Select size&quot; disabled /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="Surface">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Surface</h2>
       <div class="badges">
-        <label for="c-3-ui-surfaces-surface-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-3-ui-surfaces-surface-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-ui-surfaces-surface-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-4-ui-surfaces-surface-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-4-ui-surfaces-surface-info" class="badge info as-toggle">1 info</label>
+        <label for="c-4-ui-surfaces-surface-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -1138,10 +1299,10 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-3-ui-surfaces-surface-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-3-ui-surfaces-surface-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-4-ui-surfaces-surface-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-4-ui-surfaces-surface-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-3-ui-surfaces-surface-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-4-ui-surfaces-surface-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
