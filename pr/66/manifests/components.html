@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">2 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">2/2 infos</a><span class="filter-pill ok" aria-disabled="true">14 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">3 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">3/3 infos</a><span class="filter-pill ok" aria-disabled="true">15 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -758,14 +758,131 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="DevToolbar">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> DevToolbar</h2>
+      <div class="badges">
+        <label for="c-1-ui-state-devtoolbar-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-1-ui-state-devtoolbar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-1-ui-state-devtoolbar-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/state/dev-toolbar/DevToolbar.stories.tsx">ui-state-devtoolbar · ./src/components/ui/state/dev-toolbar/DevToolbar.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-1-ui-state-devtoolbar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-1-ui-state-devtoolbar-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-1-ui-state-devtoolbar-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">5 prop types</span>
+            </div>
+            <pre><code>Component: src/components/ui/state/dev-toolbar/DevToolbar.tsx::DevToolbar</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>items: DevToolbarItem[]
+
+onChange: (value: string) =&gt; void
+
+onToggleError?: () =&gt; void
+
+showError?: boolean
+
+value: string</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { DevToolbar } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = () =&gt; {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [value, setValue] = useState(&quot;a&quot;);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [showError, setShowError] = useState(false);
+
+  return (
+    &lt;div className=&quot;h-screen w-full bg-surface-container-lowest flex items-center justify-center font-sans text-on-surface&quot;&gt;
+      &lt;DevToolbar
+        items={[
+          { label: &quot;State A&quot;, value: &quot;a&quot; },
+          { label: &quot;State B&quot;, value: &quot;b&quot; },
+          { label: &quot;State C&quot;, value: &quot;c&quot; },
+        ]}
+        value={value}
+        onChange={setValue}
+        showError={showError}
+        onToggleError={() =&gt; setShowError((prev) =&gt; !prev)}
+      /&gt;
+      &lt;div className=&quot;flex flex-col items-center gap-2 p-6 rounded-2xl bg-surface-container border border-outline-variant&quot;&gt;
+        &lt;h2 className=&quot;text-xl font-medium tracking-tight&quot;&gt;Main Content Area&lt;/h2&gt;
+        &lt;p className=&quot;text-on-surface-variant&quot;&gt;
+          Current selected state value: &lt;strong className=&quot;text-primary&quot;&gt;{value}&lt;/strong&gt;
+        &lt;/p&gt;
+        &lt;p className=&quot;text-on-surface-variant&quot;&gt;
+          Error mode: &lt;strong className={showError ? &quot;text-error font-medium&quot; : &quot;&quot;}&gt;{showError ? &quot;Active&quot; : &quot;Inactive&quot;}&lt;/strong&gt;
+        &lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="Progress">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Progress</h2>
       <div class="badges">
-        <label for="c-1-ui-feedback-progress-props" class="badge ok as-toggle">12 prop types</label>
-        <label for="c-1-ui-feedback-progress-info" class="badge info as-toggle">1 info</label>
-        <label for="c-1-ui-feedback-progress-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-2-ui-feedback-progress-props" class="badge ok as-toggle">12 prop types</label>
+        <label for="c-2-ui-feedback-progress-info" class="badge info as-toggle">1 info</label>
+        <label for="c-2-ui-feedback-progress-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -777,10 +894,10 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-1-ui-feedback-progress-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-1-ui-feedback-progress-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-2-ui-feedback-progress-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-2-ui-feedback-progress-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-1-ui-feedback-progress-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-2-ui-feedback-progress-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
