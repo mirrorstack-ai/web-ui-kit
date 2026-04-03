@@ -10,7 +10,7 @@ vi.mock("@/utils/env", async (importOriginal) => {
     ...actual,
     get isProd() { return process.env.NODE_ENV === "production"; },
     get isDev() { return process.env.NODE_ENV === "development"; },
-    get isStorybook() { return process.env.STORYBOOK === "true" || process.env.NODE_ENV === "test"; },
+    get isStorybook() { return Boolean(import.meta.env?.STORYBOOK); },
   };
 });
 
@@ -28,6 +28,7 @@ describe("DevToolbar", () => {
 
   afterEach(() => {
     process.env.NODE_ENV = originalEnv;
+    delete import.meta.env.STORYBOOK;
     vi.clearAllMocks();
   });
 
@@ -40,14 +41,14 @@ describe("DevToolbar", () => {
 
   it("returns null in production", () => {
     process.env.NODE_ENV = ENV.PROD;
-    process.env.STORYBOOK = "false";
+    delete import.meta.env.STORYBOOK;
     const { container } = render(<DevToolbar {...defaultProps} />);
     expect(container.firstChild).toBeNull();
   });
 
   it("renders when isProd = true but isStorybook = true", () => {
     process.env.NODE_ENV = ENV.PROD;
-    process.env.STORYBOOK = "true";
+    import.meta.env.STORYBOOK = "true";
     render(<DevToolbar {...defaultProps} />);
     expect(screen.getAllByRole("button", { name: "State A" })[0]).toBeInTheDocument();
   });
