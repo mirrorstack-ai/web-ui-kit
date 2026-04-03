@@ -15,6 +15,11 @@ export {
   type SegmentedButtonOption,
 } from "./components/ui/inputs/segmented-button/SegmentedButton";
 export {
+  ReauthDialog,
+  type ReauthDialogProps,
+  type ReauthMethod,
+} from "./components/ui/surfaces/reauth-dialog/ReauthDialog";
+export {
   DevToolbar,
   type DevToolbarProps,
   type DevToolbarItem,
