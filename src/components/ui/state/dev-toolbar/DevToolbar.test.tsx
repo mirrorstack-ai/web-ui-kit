@@ -28,7 +28,7 @@ describe("DevToolbar", () => {
 
   afterEach(() => {
     process.env.NODE_ENV = originalEnv;
-    delete import.meta.env.STORYBOOK;
+    vi.unstubAllEnvs();
     vi.clearAllMocks();
   });
 
@@ -41,14 +41,14 @@ describe("DevToolbar", () => {
 
   it("returns null in production", () => {
     process.env.NODE_ENV = ENV.PROD;
-    delete import.meta.env.STORYBOOK;
+    vi.stubEnv("STORYBOOK", "");
     const { container } = render(<DevToolbar {...defaultProps} />);
     expect(container.firstChild).toBeNull();
   });
 
   it("renders when isProd = true but isStorybook = true", () => {
     process.env.NODE_ENV = ENV.PROD;
-    import.meta.env.STORYBOOK = "true";
+    vi.stubEnv("STORYBOOK", "true");
     render(<DevToolbar {...defaultProps} />);
     expect(screen.getAllByRole("button", { name: "State A" })[0]).toBeInTheDocument();
   });
