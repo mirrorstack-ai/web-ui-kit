@@ -10,6 +10,11 @@ export {
   type ProgressSize,
 } from "./components/ui/feedback/progress/Progress";
 export {
+  SegmentedButton,
+  type SegmentedButtonProps,
+  type SegmentedButtonOption,
+} from "./components/ui/inputs/segmented-button/SegmentedButton";
+export {
   DevToolbar,
   type DevToolbarProps,
   type DevToolbarItem,
