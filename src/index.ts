@@ -2,6 +2,13 @@ export { cn } from "./utils/cn";
 export { isDev, isProd, isStorybook } from "./utils/env";
 export { Button, type ButtonProps } from "./components/ui/actions/button/Button";
 export {
+  SocialButton,
+  type SocialButtonProps,
+  type SocialProvider,
+  SocialIcon,
+  type SocialIconProps,
+} from "./components/ui/actions/social-button/SocialButton";
+export {
   Progress,
   type ProgressProps,
   type ProgressType,
