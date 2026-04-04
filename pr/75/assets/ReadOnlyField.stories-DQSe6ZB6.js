@@ -1,0 +1,26 @@
+import{r as x,j as e}from"./iframe-DOar9_25.js";import{c as b}from"./cn-IyxL_b2c.js";import"./preload-helper-PPVm8Dsz.js";function s({label:a,value:t,mono:c=!1,copyable:i=!1,onCopy:d,suffix:m,className:p}){const[u,r]=x.useState(!1),f=()=>{navigator.clipboard.writeText(t).then(()=>{r(!0),d?.(),setTimeout(()=>r(!1),2e3)}).catch(()=>{})};return e.jsxs("div",{className:p,children:[e.jsx("label",{className:"mb-1 block text-sm font-medium text-on-surface",children:a}),e.jsxs("div",{className:"flex min-h-8 items-center gap-2",children:[e.jsx("span",{className:b("truncate text-sm",c?"font-mono text-on-surface-variant":"text-on-surface"),children:t}),i&&e.jsx("button",{type:"button",onClick:f,className:"shrink-0 cursor-pointer p-1 text-on-surface-variant transition-colors hover:text-primary","aria-label":`Copy ${a}`,children:e.jsx("span",{className:"material-symbols-rounded","aria-hidden":"true",style:{fontSize:16},children:u?"check":"content_copy"})}),m]})]})}s.__docgenInfo={description:"",methods:[],displayName:"ReadOnlyField",props:{label:{required:!0,tsType:{name:"string"},description:""},value:{required:!0,tsType:{name:"string"},description:""},mono:{required:!1,tsType:{name:"boolean"},description:"",defaultValue:{value:"false",computed:!1}},copyable:{required:!1,tsType:{name:"boolean"},description:"",defaultValue:{value:"false",computed:!1}},onCopy:{required:!1,tsType:{name:"signature",type:"function",raw:"() => void",signature:{arguments:[],return:{name:"void"}}},description:""},suffix:{required:!1,tsType:{name:"ReactNode"},description:""},className:{required:!1,tsType:{name:"string"},description:""}}};const h={title:"UI/Data/ReadOnlyField",component:s,args:{label:"API Key",value:"sk-proj-abc123def456ghi789",mono:!0,copyable:!0},argTypes:{mono:{control:"boolean"},copyable:{control:"boolean"},label:{control:"text"},value:{control:"text"}}},o={},l={render:a=>e.jsxs("div",{className:"max-w-md rounded-xl bg-surface-container p-5",children:[e.jsx("p",{className:"mb-4 text-sm font-semibold text-on-surface",children:"Account Details"}),e.jsxs("div",{className:"flex flex-col gap-4",children:[e.jsx(s,{...a,label:"Name",value:"Jane Doe",mono:!1,copyable:!1}),e.jsx(s,{...a,label:"Email",value:"jane@example.com",mono:!1,copyable:!0}),e.jsx(s,{...a,label:"User ID",value:"usr_2f8a9c1b3d4e5f6a",mono:!0,copyable:!0}),e.jsx(s,{...a,label:"API Key",value:"sk-proj-abc123def456ghi789jkl012mno345",mono:!0,copyable:!0}),e.jsx(s,{...a,label:"Status",value:"Active",mono:!1,copyable:!1,suffix:e.jsx("span",{className:"rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success",children:"Verified"})})]})]})},n={render:a=>e.jsxs("div",{className:"max-w-xs rounded-xl bg-surface-container p-5",children:[e.jsx("p",{className:"mb-4 text-sm font-semibold text-on-surface",children:"Webhook Config"}),e.jsxs("div",{className:"flex flex-col gap-4",children:[e.jsx(s,{...a,label:"Endpoint URL",value:"https://api.example.com/webhooks/v2/ingest/events/abc123def456",mono:!0,copyable:!0}),e.jsx(s,{...a,label:"Secret",value:"whsec_MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQ",mono:!0,copyable:!0})]})]})};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:"{}",...o.parameters?.docs?.source},description:{story:"Interactive playground — all controls work here",...o.parameters?.docs?.description}}};l.parameters={...l.parameters,docs:{...l.parameters?.docs,source:{originalSource:`{
+  render: args => <div className="max-w-md rounded-xl bg-surface-container p-5">
+      <p className="mb-4 text-sm font-semibold text-on-surface">
+        Account Details
+      </p>
+      <div className="flex flex-col gap-4">
+        <ReadOnlyField {...args} label="Name" value="Jane Doe" mono={false} copyable={false} />
+        <ReadOnlyField {...args} label="Email" value="jane@example.com" mono={false} copyable />
+        <ReadOnlyField {...args} label="User ID" value="usr_2f8a9c1b3d4e5f6a" mono copyable />
+        <ReadOnlyField {...args} label="API Key" value="sk-proj-abc123def456ghi789jkl012mno345" mono copyable />
+        <ReadOnlyField {...args} label="Status" value="Active" mono={false} copyable={false} suffix={<span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+              Verified
+            </span>} />
+      </div>
+    </div>
+}`,...l.parameters?.docs?.source},description:{story:"Account details card with multiple fields",...l.parameters?.docs?.description}}};n.parameters={...n.parameters,docs:{...n.parameters?.docs,source:{originalSource:`{
+  render: args => <div className="max-w-xs rounded-xl bg-surface-container p-5">
+      <p className="mb-4 text-sm font-semibold text-on-surface">
+        Webhook Config
+      </p>
+      <div className="flex flex-col gap-4">
+        <ReadOnlyField {...args} label="Endpoint URL" value="https://api.example.com/webhooks/v2/ingest/events/abc123def456" mono copyable />
+        <ReadOnlyField {...args} label="Secret" value="whsec_MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQ" mono copyable />
+      </div>
+    </div>
+}`,...n.parameters?.docs?.source},description:{story:"Long values truncated inside a narrow container",...n.parameters?.docs?.description}}};const j=["Playground","AccountDetails","Truncated"];export{l as AccountDetails,o as Playground,n as Truncated,j as __namedExportsOrder,h as default};

@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">5 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">5/5 infos</a><span class="filter-pill ok" aria-disabled="true">25 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">5 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">5/5 infos</a><span class="filter-pill ok" aria-disabled="true">23 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1126,7 +1126,7 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
       <div class="badges">
         <label for="c-3-ui-data-readonlyfield-props" class="badge ok as-toggle">7 prop types</label>
         <label for="c-3-ui-data-readonlyfield-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-ui-data-readonlyfield-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-3-ui-data-readonlyfield-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -1197,52 +1197,39 @@ value: string</code></pre>
               </div>
               
               <div class="hint">Interactive playground — all controls work here</div>
-              <pre><code>const Playground = () =&gt; &lt;ReadOnlyField
-    label=&quot;API Key&quot;
-    value=&quot;sk-proj-abc123def456ghi789&quot;
-    mono={false}
-    copyable={false} /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;ReadOnlyField label=&quot;API Key&quot; value=&quot;sk-proj-abc123def456ghi789&quot; mono copyable /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Mono Copyable</span>
+                <span class="ex-name">Account Details</span>
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Monospace value with copy button</div>
-              <pre><code>const MonoCopyable = () =&gt; &lt;ReadOnlyField
-    label=&quot;API Key&quot;
-    value=&quot;sk-proj-abc123def456ghi789jkl012mno345&quot;
-    mono
-    copyable /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Field Group</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              <div class="hint">Multiple fields stacked</div>
-              <pre><code>const FieldGroup = () =&gt; &lt;div className=&quot;flex flex-col gap-4 max-w-sm&quot;&gt;
-    &lt;ReadOnlyField mono={false} copyable={false} label=&quot;Name&quot; value=&quot;Jane Doe&quot; /&gt;
-    &lt;ReadOnlyField mono={false} label=&quot;Email&quot; value=&quot;jane@example.com&quot; copyable /&gt;
-    &lt;ReadOnlyField label=&quot;User ID&quot; value=&quot;usr_2f8a9c1b3d4e5f6a&quot; mono copyable /&gt;
+              <div class="hint">Account details card with multiple fields</div>
+              <pre><code>const AccountDetails = () =&gt; &lt;div className=&quot;max-w-md rounded-xl bg-surface-container p-5&quot;&gt;
+    &lt;p className=&quot;mb-4 text-sm font-semibold text-on-surface&quot;&gt;Account Details
+              &lt;/p&gt;
+    &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+        &lt;ReadOnlyField label=&quot;Name&quot; value=&quot;Jane Doe&quot; mono={false} copyable={false} /&gt;
+        &lt;ReadOnlyField label=&quot;Email&quot; value=&quot;jane@example.com&quot; mono={false} copyable /&gt;
+        &lt;ReadOnlyField label=&quot;User ID&quot; value=&quot;usr_2f8a9c1b3d4e5f6a&quot; mono copyable /&gt;
+        &lt;ReadOnlyField
+            label=&quot;API Key&quot;
+            value=&quot;sk-proj-abc123def456ghi789jkl012mno345&quot;
+            mono
+            copyable /&gt;
+        &lt;ReadOnlyField
+            label=&quot;Status&quot;
+            value=&quot;Active&quot;
+            mono={false}
+            copyable={false}
+            suffix={
+              &lt;span className=&quot;rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success&quot;&gt;
+                Verified
+              &lt;/span&gt;
+            } /&gt;
+    &lt;/div&gt;
 &lt;/div&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">With Suffix</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              <div class="hint">With suffix slot</div>
-              <pre><code>const WithSuffix = () =&gt; &lt;ReadOnlyField
-    label=&quot;Status&quot;
-    value=&quot;Active&quot;
-    mono={false}
-    copyable={false}
-    suffix={(&lt;span className=&quot;rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success&quot;&gt;Verified
-            &lt;/span&gt;)} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1250,13 +1237,22 @@ value: string</code></pre>
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Long value truncated</div>
-              <pre><code>const Truncated = () =&gt; &lt;div className=&quot;max-w-xs&quot;&gt;
-    &lt;ReadOnlyField
-        label=&quot;Webhook URL&quot;
-        value=&quot;https://api.example.com/webhooks/v2/ingest/events/abc123def456ghi789&quot;
-        mono
-        copyable /&gt;
+              <div class="hint">Long values truncated inside a narrow container</div>
+              <pre><code>const Truncated = () =&gt; &lt;div className=&quot;max-w-xs rounded-xl bg-surface-container p-5&quot;&gt;
+    &lt;p className=&quot;mb-4 text-sm font-semibold text-on-surface&quot;&gt;Webhook Config
+              &lt;/p&gt;
+    &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+        &lt;ReadOnlyField
+            label=&quot;Endpoint URL&quot;
+            value=&quot;https://api.example.com/webhooks/v2/ingest/events/abc123def456&quot;
+            mono
+            copyable /&gt;
+        &lt;ReadOnlyField
+            label=&quot;Secret&quot;
+            value=&quot;whsec_MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQ&quot;
+            mono
+            copyable /&gt;
+    &lt;/div&gt;
 &lt;/div&gt;;</code></pre>
             </div>
         </div>
