@@ -11,6 +11,16 @@ const meta: Meta<typeof SectionLabel> = {
   argTypes: {
     children: { control: "text" },
   },
+  decorators: [
+    (Story) => (
+      <div className="max-w-md rounded-xl bg-surface-container p-5">
+        <Story />
+        <p className="mt-2 text-sm text-on-surface">
+          Content below the section label goes here.
+        </p>
+      </div>
+    ),
+  ],
 };
 
 export default meta;
