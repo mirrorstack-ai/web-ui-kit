@@ -7,8 +7,8 @@ const meta: Meta<typeof ReadOnlyField> = {
   args: {
     label: "API Key",
     value: "sk-proj-abc123def456ghi789",
-    mono: false,
-    copyable: false,
+    mono: true,
+    copyable: true,
   },
   argTypes: {
     mono: { control: "boolean" },
@@ -24,66 +24,70 @@ type Story = StoryObj<typeof ReadOnlyField>;
 /** Interactive playground — all controls work here */
 export const Playground: Story = {};
 
-/** Monospace value with copy button */
-export const MonoCopyable: Story = {
-  args: {
-    label: "API Key",
-    value: "sk-proj-abc123def456ghi789jkl012mno345",
-    mono: true,
-    copyable: true,
-  },
-};
-
-/** Multiple fields stacked */
-export const FieldGroup: Story = {
+/** Account details card with multiple fields */
+export const AccountDetails: Story = {
   render: (args) => (
-    <div className="flex flex-col gap-4 max-w-sm">
-      <ReadOnlyField
-        {...args}
-        label="Name"
-        value="Jane Doe"
-      />
-      <ReadOnlyField
-        {...args}
-        label="Email"
-        value="jane@example.com"
-        copyable
-      />
-      <ReadOnlyField
-        {...args}
-        label="User ID"
-        value="usr_2f8a9c1b3d4e5f6a"
-        mono
-        copyable
-      />
+    <div className="max-w-md rounded-xl bg-surface-container p-5">
+      <p className="mb-4 text-sm font-semibold text-on-surface">
+        Account Details
+      </p>
+      <div className="flex flex-col gap-4">
+        <ReadOnlyField {...args} label="Name" value="Jane Doe" mono={false} copyable={false} />
+        <ReadOnlyField {...args} label="Email" value="jane@example.com" mono={false} copyable />
+        <ReadOnlyField
+          {...args}
+          label="User ID"
+          value="usr_2f8a9c1b3d4e5f6a"
+          mono
+          copyable
+        />
+        <ReadOnlyField
+          {...args}
+          label="API Key"
+          value="sk-proj-abc123def456ghi789jkl012mno345"
+          mono
+          copyable
+        />
+        <ReadOnlyField
+          {...args}
+          label="Status"
+          value="Active"
+          mono={false}
+          copyable={false}
+          suffix={
+            <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+              Verified
+            </span>
+          }
+        />
+      </div>
     </div>
   ),
 };
 
-/** With suffix slot */
-export const WithSuffix: Story = {
-  args: {
-    label: "Status",
-    value: "Active",
-    suffix: (
-      <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
-        Verified
-      </span>
-    ),
-  },
-};
-
-/** Long value truncated */
+/** Long values truncated inside a narrow container */
 export const Truncated: Story = {
   render: (args) => (
-    <div className="max-w-xs">
-      <ReadOnlyField
-        {...args}
-        label="Webhook URL"
-        value="https://api.example.com/webhooks/v2/ingest/events/abc123def456ghi789"
-        mono
-        copyable
-      />
+    <div className="max-w-xs rounded-xl bg-surface-container p-5">
+      <p className="mb-4 text-sm font-semibold text-on-surface">
+        Webhook Config
+      </p>
+      <div className="flex flex-col gap-4">
+        <ReadOnlyField
+          {...args}
+          label="Endpoint URL"
+          value="https://api.example.com/webhooks/v2/ingest/events/abc123def456"
+          mono
+          copyable
+        />
+        <ReadOnlyField
+          {...args}
+          label="Secret"
+          value="whsec_MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQ"
+          mono
+          copyable
+        />
+      </div>
     </div>
   ),
 };
