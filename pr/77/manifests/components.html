@@ -1174,7 +1174,7 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { SectionLabel } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { Button, SectionLabel } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -1189,26 +1189,66 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Section Headings</span>
+                <span class="ex-name">Settings Page</span>
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Multiple labels showing typical section headings</div>
-              <pre><code>const SectionHeadings = () =&gt; &lt;div className=&quot;flex flex-col gap-6&quot;&gt;
-    &lt;div&gt;
-        &lt;SectionLabel&gt;Account Details&lt;/SectionLabel&gt;
-        &lt;p className=&quot;mt-1 text-sm text-on-surface&quot;&gt;Manage your personal information and preferences.
-                    &lt;/p&gt;
+              <div class="hint">Settings page with labeled sections inside cards</div>
+              <pre><code>const SettingsPage = () =&gt; &lt;div className=&quot;flex flex-col gap-6 max-w-lg&quot;&gt;
+    {/* Profile section */}
+    &lt;div className=&quot;rounded-xl bg-surface-container p-5&quot;&gt;
+        &lt;SectionLabel&gt;Profile&lt;/SectionLabel&gt;
+        &lt;div className=&quot;mt-3 flex flex-col gap-3&quot;&gt;
+            &lt;div className=&quot;flex items-center justify-between&quot;&gt;
+                &lt;div&gt;
+                    &lt;p className=&quot;text-sm font-medium text-on-surface&quot;&gt;Display name&lt;/p&gt;
+                    &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;Jane Doe&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;Button variant=&quot;outline&quot; size=&quot;sm&quot;&gt;Edit
+                                &lt;/Button&gt;
+            &lt;/div&gt;
+            &lt;div className=&quot;flex items-center justify-between&quot;&gt;
+                &lt;div&gt;
+                    &lt;p className=&quot;text-sm font-medium text-on-surface&quot;&gt;Email&lt;/p&gt;
+                    &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;jane@example.com&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;Button variant=&quot;outline&quot; size=&quot;sm&quot;&gt;Edit
+                                &lt;/Button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
     &lt;/div&gt;
-    &lt;div&gt;
+    {/* Security section */}
+    &lt;div className=&quot;rounded-xl bg-surface-container p-5&quot;&gt;
         &lt;SectionLabel&gt;Security&lt;/SectionLabel&gt;
-        &lt;p className=&quot;mt-1 text-sm text-on-surface&quot;&gt;Password, two-factor authentication, and sessions.
-                    &lt;/p&gt;
+        &lt;div className=&quot;mt-3 flex flex-col gap-3&quot;&gt;
+            &lt;div className=&quot;flex items-center justify-between&quot;&gt;
+                &lt;div&gt;
+                    &lt;p className=&quot;text-sm font-medium text-on-surface&quot;&gt;Password&lt;/p&gt;
+                    &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;Last changed 30 days ago&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;Button variant=&quot;outline&quot; size=&quot;sm&quot;&gt;Change
+                                &lt;/Button&gt;
+            &lt;/div&gt;
+            &lt;div className=&quot;flex items-center justify-between&quot;&gt;
+                &lt;div&gt;
+                    &lt;p className=&quot;text-sm font-medium text-on-surface&quot;&gt;Two-factor auth&lt;/p&gt;
+                    &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;Enabled via authenticator app&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;Button variant=&quot;tonal&quot; size=&quot;sm&quot; color=&quot;primary&quot;&gt;Manage
+                                &lt;/Button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
     &lt;/div&gt;
-    &lt;div&gt;
-        &lt;SectionLabel&gt;Danger Zone&lt;/SectionLabel&gt;
-        &lt;p className=&quot;mt-1 text-sm text-on-surface&quot;&gt;Irreversible actions like account deletion.
+    {/* Danger zone */}
+    &lt;div className=&quot;rounded-xl border border-error/30 bg-error/5 p-5&quot;&gt;
+        &lt;SectionLabel className=&quot;text-error&quot;&gt;Danger Zone
+                    &lt;/SectionLabel&gt;
+        &lt;p className=&quot;mt-2 text-sm text-on-surface-variant&quot;&gt;Permanently delete your account and all associated data.
                     &lt;/p&gt;
+        &lt;div className=&quot;mt-3&quot;&gt;
+            &lt;Button variant=&quot;filled&quot; size=&quot;sm&quot; color=&quot;error&quot;&gt;Delete account
+                          &lt;/Button&gt;
+        &lt;/div&gt;
     &lt;/div&gt;
 &lt;/div&gt;;</code></pre>
             </div>
