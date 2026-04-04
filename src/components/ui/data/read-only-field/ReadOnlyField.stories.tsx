@@ -16,6 +16,13 @@ const meta: Meta<typeof ReadOnlyField> = {
     label: { control: "text" },
     value: { control: "text" },
   },
+};
+
+export default meta;
+type Story = StoryObj<typeof ReadOnlyField>;
+
+/** Interactive playground — all controls work here */
+export const Playground: Story = {
   decorators: [
     (Story) => (
       <div className="max-w-md rounded-xl bg-surface-container p-5">
@@ -24,12 +31,6 @@ const meta: Meta<typeof ReadOnlyField> = {
     ),
   ],
 };
-
-export default meta;
-type Story = StoryObj<typeof ReadOnlyField>;
-
-/** Interactive playground — all controls work here */
-export const Playground: Story = {};
 
 /** Account details card with multiple fields */
 export const AccountDetails: Story = {
