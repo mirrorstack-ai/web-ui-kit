@@ -24,7 +24,7 @@ export interface SidebarContextValue {
 
 export interface SidebarProviderProps {
   readonly children: ReactNode;
-  /** Default sidebar width when opened (defaults to 280) */
+  /** Default sidebar width when opened (defaults to 240) */
   readonly defaultWidth?: number;
   /** Initial width (0 = closed) */
   readonly initialWidth?: number;
@@ -32,7 +32,7 @@ export interface SidebarProviderProps {
 
 const SidebarContext = createContext<SidebarContextValue | null>(null);
 
-const DEFAULT_WIDTH = 280;
+const DEFAULT_WIDTH = 240;
 
 export function SidebarProvider({
   children,

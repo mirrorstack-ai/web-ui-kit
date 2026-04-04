@@ -58,7 +58,7 @@ describe("SidebarProvider", () => {
     );
 
     act(() => getByTestId("open").click());
-    expect(getByTestId("width").textContent).toBe("280");
+    expect(getByTestId("width").textContent).toBe("240");
     expect(getByTestId("is-open").textContent).toBe("true");
   });
 
@@ -86,7 +86,7 @@ describe("SidebarProvider", () => {
 
   test("close sets width to 0", () => {
     const { getByTestId } = render(
-      <SidebarProvider initialWidth={280}>
+      <SidebarProvider initialWidth={240}>
         <TestConsumer />
       </SidebarProvider>,
     );
@@ -104,13 +104,13 @@ describe("SidebarProvider", () => {
     );
 
     act(() => getByTestId("toggle").click());
-    expect(getByTestId("width").textContent).toBe("280");
+    expect(getByTestId("width").textContent).toBe("240");
     expect(getByTestId("is-open").textContent).toBe("true");
   });
 
   test("toggle closes when open", () => {
     const { getByTestId } = render(
-      <SidebarProvider initialWidth={280}>
+      <SidebarProvider initialWidth={240}>
         <TestConsumer />
       </SidebarProvider>,
     );
