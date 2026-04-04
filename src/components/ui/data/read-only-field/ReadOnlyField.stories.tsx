@@ -16,6 +16,13 @@ const meta: Meta<typeof ReadOnlyField> = {
     label: { control: "text" },
     value: { control: "text" },
   },
+  decorators: [
+    (Story) => (
+      <div className="max-w-md rounded-xl bg-surface-container p-5">
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export default meta;
