@@ -19,3 +19,16 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
+export {
+  ThemeProvider,
+  useTheme,
+  type ThemeProviderProps,
+  type ThemeContextValue,
+  type Theme,
+} from "./context/theme/ThemeProvider";
+export {
+  SidebarProvider,
+  useSidebar,
+  type SidebarProviderProps,
+  type SidebarContextValue,
+} from "./context/sidebar/SidebarProvider";
