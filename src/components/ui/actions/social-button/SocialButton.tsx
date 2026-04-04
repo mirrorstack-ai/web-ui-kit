@@ -90,15 +90,15 @@ function OpenIDIcon({ size = 20, className }: Omit<SocialIconProps, "provider">)
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="currentColor"
       className={className}
       aria-hidden="true"
     >
-      <path d="M13.544 3v13.837a8.636 8.636 0 0 1-4.357-1.26l-.762 1.376a10.028 10.028 0 0 0 5.119 1.5V3zm-4.632 9.49a4.79 4.79 0 0 1 .948-2.837L8.5 8.596a6.392 6.392 0 0 0 .007 7.792l1.357-1.055a4.79 4.79 0 0 1-.952-2.843z" />
-      <path
-        d="M17.4 7.2L13.544 9.6V3L17.4 5.4z"
-        fill="#F5821F"
-      />
+      {/* "O" ring */}
+      <circle cx="8.5" cy="13.5" r="5.5" fill="none" stroke="white" strokeWidth="2.8" />
+      {/* "i" vertical bar */}
+      <rect x="16" y="5" width="3" height="14" rx="1.5" fill="white" />
+      {/* "i" dot */}
+      <circle cx="17.5" cy="2.5" r="1.8" fill="white" />
     </svg>
   );
 }
