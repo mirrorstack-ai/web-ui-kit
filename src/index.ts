@@ -2,6 +2,11 @@ export { cn } from "./utils/cn";
 export { isDev, isProd, isStorybook } from "./utils/env";
 export { Button, type ButtonProps } from "./components/ui/actions/button/Button";
 export {
+  ThemeToggle,
+  type ThemeToggleProps,
+  type ThemeMode,
+} from "./components/ui/actions/theme-toggle/ThemeToggle";
+export {
   Progress,
   type ProgressProps,
   type ProgressType,
