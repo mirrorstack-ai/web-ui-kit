@@ -11,6 +11,13 @@ const meta: Meta<typeof SectionLabel> = {
   argTypes: {
     children: { control: "text" },
   },
+};
+
+export default meta;
+type Story = StoryObj<typeof SectionLabel>;
+
+/** Interactive playground — all controls work here */
+export const Playground: Story = {
   decorators: [
     (Story) => (
       <div className="max-w-md rounded-xl bg-surface-container p-5">
@@ -22,12 +29,6 @@ const meta: Meta<typeof SectionLabel> = {
     ),
   ],
 };
-
-export default meta;
-type Story = StoryObj<typeof SectionLabel>;
-
-/** Interactive playground — all controls work here */
-export const Playground: Story = {};
 
 /** Settings page with labeled sections inside cards */
 export const SettingsPage: Story = {
