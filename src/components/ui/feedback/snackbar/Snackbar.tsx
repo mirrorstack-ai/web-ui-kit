@@ -112,13 +112,13 @@ export function Snackbar({
     >
       <div
         className={cn(
-          "w-full max-w-2xl bg-surface-container-high border rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/40",
+          "w-fit min-w-[280px] max-w-2xl bg-surface-container-high border rounded-2xl shadow-md",
           variantBorder[variant],
         )}
       >
         <div
           className={cn(
-            "px-5 flex items-center justify-between gap-4 whitespace-nowrap min-h-12",
+            "px-5 flex items-center justify-between gap-4 min-h-12",
             hasActions ? "py-1.5" : "py-2.5",
           )}
         >
@@ -136,7 +136,7 @@ export function Snackbar({
                 {icon}
               </span>
             )}
-            <span className={cn("text-sm", variantTextColor[variant])}>
+            <span className={cn("text-sm whitespace-nowrap", variantTextColor[variant])}>
               {message}
             </span>
           </div>

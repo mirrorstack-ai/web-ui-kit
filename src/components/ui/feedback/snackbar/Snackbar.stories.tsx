@@ -25,7 +25,7 @@ const meta: Meta<typeof Snackbar> = {
   },
   decorators: [
     (Story) => (
-      <div className="relative min-h-[120px] flex items-end justify-center p-4">
+      <div className="relative min-h-[200px] flex items-end justify-center p-4">
         <Story />
       </div>
     ),
@@ -91,7 +91,7 @@ export const ToggleDemo: Story = {
   render: (args) => {
     const [open, setOpen] = useState(false);
     return (
-      <div className="relative min-h-[120px]">
+      <div className="relative min-h-[200px]">
         <Button onClick={() => setOpen(true)}>Show Snackbar</Button>
         <Snackbar
           {...args}
@@ -100,6 +100,7 @@ export const ToggleDemo: Story = {
           open={open}
           onDismiss={() => setOpen(false)}
           duration={3000}
+          inline
         />
       </div>
     );
