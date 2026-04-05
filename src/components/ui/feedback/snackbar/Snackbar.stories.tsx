@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { Snackbar } from "./Snackbar";
+import { Snackbar, type SnackbarVariant } from "./Snackbar";
 import { Button } from "@/components/ui/actions/button/Button";
 
 const meta: Meta<typeof Snackbar> = {
@@ -89,19 +89,63 @@ export const Loading: Story = {
 /** Toggle snackbar open/closed with a button */
 export const ToggleDemo: Story = {
   render: (args) => {
-    const [open, setOpen] = useState(false);
+    interface SnackbarItem {
+      id: number;
+      message: string;
+      variant: SnackbarVariant;
+      duration?: number;
+      hasActions?: boolean;
+    }
+
+    const [items, setItems] = useState<SnackbarItem[]>([]);
+
+    const addSnackbar = (variant: SnackbarVariant, message: string, duration?: number, hasActions?: boolean) => {
+      setItems((prev) => {
+        if (variant === "unsave" && prev.some((item) => item.variant === "unsave")) {
+          return prev;
+        }
+        return [{ id: Date.now(), message, variant, duration, hasActions }, ...prev];
+      });
+    };
+
+    const removeSnackbar = (id: number) => {
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    };
+
     return (
-      <div className="relative min-h-[200px]">
-        <Button onClick={() => setOpen(true)}>Show Snackbar</Button>
-        <Snackbar
-          {...args}
-          message="Action completed"
-          variant="success"
-          open={open}
-          onDismiss={() => setOpen(false)}
-          duration={3000}
-          inline
-        />
+      <div className="relative min-h-[400px]">
+        <div className="flex gap-3 flex-wrap">
+          <Button onClick={() => addSnackbar("success", "Action completed", 3000)}>
+            Show Success
+          </Button>
+          <Button variant="outline" color="error" onClick={() => addSnackbar("error", "Something went wrong", 3000)}>
+            Show Error
+          </Button>
+          <Button variant="outline" color="warning" onClick={() => addSnackbar("warning", "Connection unstable", 3000)}>
+            Show Warning
+          </Button>
+          <Button variant="outline" color="warning" onClick={() => addSnackbar("unsave", "You have unsaved changes", 0, true)}>
+            Show Unsaved Changes
+          </Button>
+        </div>
+        <div className="absolute bottom-4 inset-x-0 flex flex-col-reverse items-center gap-3 px-4">
+          {items.map((item) => (
+            <Snackbar
+              key={item.id}
+              {...args}
+              message={item.message}
+              variant={item.variant}
+              open
+              onDismiss={() => removeSnackbar(item.id)}
+              duration={item.duration}
+              {...(item.hasActions && {
+                action: { label: "Save", onClick: () => removeSnackbar(item.id) },
+                secondaryAction: { label: "Reset", onClick: () => removeSnackbar(item.id) },
+              })}
+              className="!relative !inset-auto !p-0 !w-full !max-w-lg"
+            />
+          ))}
+        </div>
       </div>
     );
   },

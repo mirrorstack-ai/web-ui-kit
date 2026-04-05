@@ -57,6 +57,8 @@ const variantTextColor: Record<SnackbarVariant, string> = {
   unsave: "text-on-surface",
 };
 
+const ACTION_BTN_CLS = "!h-8 !py-1 !text-xs";
+
 export function Snackbar({
   message,
   variant = "default",
@@ -114,17 +116,19 @@ export function Snackbar({
     >
       <div
         className={cn(
-          "w-fit min-w-[280px] max-w-2xl bg-surface-container-high border rounded-2xl shadow-md",
+          "w-full max-w-lg bg-surface-container-high border rounded-2xl shadow-md",
           variantBorder[variant],
         )}
       >
         <div
           className={cn(
-            "px-5 flex items-center justify-between gap-4 min-h-12",
-            hasActions ? "py-1.5" : "py-2.5",
+            "px-3 sm:px-4 flex min-h-12",
+            hasActions
+              ? "flex-col items-start gap-2 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-2"
+              : "items-center justify-between gap-3 py-2.5",
           )}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             {variant === "unsave" && (
               <div className="w-2 h-2 rounded-full bg-warning animate-pulse shrink-0" />
             )}
@@ -138,19 +142,19 @@ export function Snackbar({
                 {icon}
               </span>
             )}
-            <span className={cn("text-sm whitespace-nowrap", variantTextColor[variant])}>
+            <span className={cn("text-sm line-clamp-3 break-all", variantTextColor[variant])}>
               {message}
             </span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className={cn("flex items-center gap-2 shrink-0 self-center", hasActions && "self-end sm:self-center w-full sm:w-auto")}>
             {secondaryAction && (
               <Button
-                variant="text"
+                variant="outline"
                 size="sm"
                 onClick={secondaryAction.onClick}
                 disabled={loading}
-                className="!h-8 !py-1 !text-xs"
+                className={ACTION_BTN_CLS + " flex-1 sm:flex-none sm:border-0 sm:bg-transparent"}
               >
                 {secondaryAction.label}
               </Button>
@@ -160,7 +164,7 @@ export function Snackbar({
                 size="sm"
                 onClick={action.onClick}
                 loading={loading}
-                className="!h-8 !py-1 !text-xs"
+                className={ACTION_BTN_CLS + " flex-1 sm:flex-none"}
               >
                 {action.label}
               </Button>
