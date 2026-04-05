@@ -1676,21 +1676,66 @@ variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;
               </div>
               
               <div class="hint">Toggle snackbar open/closed with a button</div>
-              <pre><code>const ToggleDemo = () =&gt; {
-    const [open, setOpen] = useState(false);
+              <pre><code>const ToggleDemo = (args) =&gt; {
+  interface SnackbarItem {
+    id: number;
+    message: string;
+    variant: SnackbarVariant;
+    duration?: number;
+    hasActions?: boolean;
+  }
 
-    return (
-        &lt;div className=&quot;relative min-h-[200px]&quot;&gt;
-            &lt;Button onClick={() =&gt; setOpen(true)}&gt;Show Snackbar&lt;/Button&gt;
-            &lt;Snackbar
-                message=&quot;Action completed&quot;
-                variant=&quot;success&quot;
-                open={open}
-                onDismiss={() =&gt; setOpen(false)}
-                duration={3000}
-                inline /&gt;
-        &lt;/div&gt;
-    );
+  const [items, setItems] = useState&lt;SnackbarItem[]&gt;([]);
+
+  const addSnackbar = (variant: SnackbarVariant, message: string, duration?: number, hasActions?: boolean) =&gt; {
+    setItems((prev) =&gt; {
+      if (variant === &quot;unsave&quot; &amp;&amp; prev.some((item) =&gt; item.variant === &quot;unsave&quot;)) {
+        return prev;
+      }
+      return [{ id: Date.now(), message, variant, duration, hasActions }, ...prev];
+    });
+  };
+
+  const removeSnackbar = (id: number) =&gt; {
+    setItems((prev) =&gt; prev.filter((item) =&gt; item.id !== id));
+  };
+
+  return (
+    &lt;div className=&quot;relative min-h-[400px]&quot;&gt;
+      &lt;div className=&quot;flex gap-3 flex-wrap&quot;&gt;
+        &lt;Button onClick={() =&gt; addSnackbar(&quot;success&quot;, &quot;Action completed&quot;, 3000)}&gt;
+          Show Success
+        &lt;/Button&gt;
+        &lt;Button variant=&quot;outline&quot; color=&quot;error&quot; onClick={() =&gt; addSnackbar(&quot;error&quot;, &quot;Something went wrong&quot;, 3000)}&gt;
+          Show Error
+        &lt;/Button&gt;
+        &lt;Button variant=&quot;outline&quot; color=&quot;warning&quot; onClick={() =&gt; addSnackbar(&quot;warning&quot;, &quot;Connection unstable&quot;, 3000)}&gt;
+          Show Warning
+        &lt;/Button&gt;
+        &lt;Button variant=&quot;outline&quot; color=&quot;warning&quot; onClick={() =&gt; addSnackbar(&quot;unsave&quot;, &quot;You have unsaved changes&quot;, 0, true)}&gt;
+          Show Unsaved Changes
+        &lt;/Button&gt;
+      &lt;/div&gt;
+      &lt;div className=&quot;absolute bottom-4 inset-x-0 flex flex-col-reverse items-center gap-3 px-4&quot;&gt;
+        {items.map((item) =&gt; (
+          &lt;Snackbar
+            key={item.id}
+            {...args}
+            message={item.message}
+            variant={item.variant}
+            open
+            onDismiss={() =&gt; removeSnackbar(item.id)}
+            duration={item.duration}
+            {...(item.hasActions &amp;&amp; {
+              action: { label: &quot;Save&quot;, onClick: () =&gt; removeSnackbar(item.id) },
+              secondaryAction: { label: &quot;Reset&quot;, onClick: () =&gt; removeSnackbar(item.id) },
+            })}
+            className=&quot;!relative !inset-auto !p-0 !w-full !max-w-lg&quot;
+          /&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
 };</code></pre>
             </div>
         </div>
