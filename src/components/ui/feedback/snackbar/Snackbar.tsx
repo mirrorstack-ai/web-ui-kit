@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Button } from "@/components/ui/actions/button/Button";
@@ -70,6 +70,8 @@ export function Snackbar({
   className,
 }: SnackbarProps) {
   const [visible, setVisible] = useState(false);
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
 
   const effectiveDuration = duration ?? (variant === "unsave" ? 0 : 4000);
 
@@ -85,10 +87,10 @@ export function Snackbar({
 
   // Auto-dismiss
   useEffect(() => {
-    if (!open || effectiveDuration === 0 || !onDismiss) return;
-    const timer = setTimeout(onDismiss, effectiveDuration);
+    if (!open || effectiveDuration === 0 || !onDismissRef.current) return;
+    const timer = setTimeout(() => onDismissRef.current?.(), effectiveDuration);
     return () => clearTimeout(timer);
-  }, [open, effectiveDuration, onDismiss]);
+  }, [open, effectiveDuration]);
 
   if (!open && !visible) return null;
 
