@@ -1680,15 +1680,15 @@ variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;
     const [open, setOpen] = useState(false);
 
     return (
-        &lt;div className=&quot;relative min-h-[120px]&quot;&gt;
+        &lt;div className=&quot;relative min-h-[200px]&quot;&gt;
             &lt;Button onClick={() =&gt; setOpen(true)}&gt;Show Snackbar&lt;/Button&gt;
             &lt;Snackbar
-                inline
                 message=&quot;Action completed&quot;
                 variant=&quot;success&quot;
                 open={open}
                 onDismiss={() =&gt; setOpen(false)}
-                duration={3000} /&gt;
+                duration={3000}
+                inline /&gt;
         &lt;/div&gt;
     );
 };</code></pre>
