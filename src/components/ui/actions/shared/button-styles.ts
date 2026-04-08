@@ -53,7 +53,7 @@ export const variantMap: Record<ButtonVariant, Record<ButtonColor, string>> = {
 };
 
 export const iconSizes: Record<ButtonSize, number> = {
-  sm: 16,
-  md: 20,
-  lg: 24,
+  sm: 20,
+  md: 24,
+  lg: 28,
 };
