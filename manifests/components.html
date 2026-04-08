@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">7 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">7/7 infos</a><span class="filter-pill ok" aria-disabled="true">34 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">8 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">8/8 infos</a><span class="filter-pill ok" aria-disabled="true">38 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -1881,6 +1881,171 @@ variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;
     &lt;/div&gt;
   );
 };</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Switch">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Switch</h2>
+      <div class="badges">
+        <label for="c-7-ui-inputs-switch-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-7-ui-inputs-switch-info" class="badge info as-toggle">1 info</label>
+        <label for="c-7-ui-inputs-switch-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/inputs/switch/Switch.stories.tsx">ui-inputs-switch · ./src/components/ui/inputs/switch/Switch.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-7-ui-inputs-switch-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-7-ui-inputs-switch-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-7-ui-inputs-switch-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">7 prop types</span>
+            </div>
+            <pre><code>Component: src/components/ui/inputs/switch/Switch.tsx::Switch</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>aria-label?: string
+
+aria-labelledby?: string
+
+checked: boolean
+
+className?: string
+
+color?: &quot;primary&quot; | &quot;error&quot; | &quot;warning&quot; = &quot;primary&quot;
+
+disabled?: boolean = false
+
+onChange: (checked: boolean) =&gt; void</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Switch } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Interactive playground — all controls work here</div>
+              <pre><code>const Playground = () =&gt; &lt;Switch
+    checked={false}
+    disabled={false}
+    color=&quot;primary&quot;
+    aria-label=&quot;Toggle switch&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Controlled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Controlled example with live state</div>
+              <pre><code>const Controlled = () =&gt; {
+    const [checked, setChecked] = useState(args.checked ?? false);
+
+    return (
+        &lt;div className=&quot;flex items-center gap-3&quot;&gt;
+            &lt;Switch
+                disabled={false}
+                color=&quot;primary&quot;
+                aria-label=&quot;Toggle switch&quot;
+                checked={checked}
+                onChange={setChecked} /&gt;
+            &lt;span className=&quot;text-sm text-on-surface-variant&quot;&gt;
+                {checked ? &quot;ON&quot; : &quot;OFF&quot;}
+            &lt;/span&gt;
+        &lt;/div&gt;
+    );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Color Variants</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">All color variants side by side</div>
+              <pre><code>const ColorVariants = (args) =&gt; {
+  const [states, setStates] = useState({
+    primary: true,
+    error: true,
+    warning: true,
+  });
+
+  return (
+    &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+      {([&quot;primary&quot;, &quot;error&quot;, &quot;warning&quot;] as const).map((color) =&gt; (
+        &lt;div key={color} className=&quot;flex items-center gap-3&quot;&gt;
+          &lt;Switch
+            {...args}
+            color={color}
+            checked={states[color]}
+            onChange={(checked) =&gt;
+              setStates((prev) =&gt; ({ ...prev, [color]: checked }))
+            }
+            aria-label={`${color} switch`}
+          /&gt;
+          &lt;span className=&quot;text-sm text-on-surface-variant capitalize&quot;&gt;
+            {color}
+          &lt;/span&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Disabled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Disabled state</div>
+              <pre><code>const Disabled = () =&gt; &lt;Switch checked disabled color=&quot;primary&quot; aria-label=&quot;Toggle switch&quot; /&gt;;</code></pre>
             </div>
         </div>
     
