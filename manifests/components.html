@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">4 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">4/4 infos</a><span class="filter-pill ok" aria-disabled="true">20 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">5 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">5/5 infos</a><span class="filter-pill ok" aria-disabled="true">25 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -875,14 +875,238 @@ value: string</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="IconButton">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> IconButton</h2>
+      <div class="badges">
+        <label for="c-2-ui-actions-iconbutton-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-2-ui-actions-iconbutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-2-ui-actions-iconbutton-stories" class="badge ok as-toggle">5 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/actions/icon-button/IconButton.stories.tsx">ui-actions-iconbutton · ./src/components/ui/actions/icon-button/IconButton.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-2-ui-actions-iconbutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-2-ui-actions-iconbutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-2-ui-actions-iconbutton-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">7 prop types</span>
+            </div>
+            <pre><code>Component: src/components/ui/actions/icon-button/IconButton.tsx::IconButton</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>aria-label: string
+
+color?: &quot;primary&quot; | &quot;secondary&quot; | &quot;tertiary&quot; | &quot;error&quot; | &quot;warning&quot; = &quot;primary&quot;
+
+icon: string
+
+loading?: boolean = false
+
+size?: &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot; = &quot;md&quot;
+
+tooltip?: string
+
+variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;text&quot; = &quot;text&quot;</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { IconButton } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Interactive playground — all controls work here</div>
+              <pre><code>const Playground = () =&gt; &lt;IconButton
+    icon=&quot;settings&quot;
+    aria-label=&quot;Settings&quot;
+    variant=&quot;filled&quot;
+    color=&quot;primary&quot;
+    size=&quot;md&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Variants</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">All variants side by side</div>
+              <pre><code>const Variants = () =&gt; &lt;div className=&quot;flex gap-3 items-center&quot;&gt;
+    &lt;IconButton
+        color=&quot;primary&quot;
+        size=&quot;md&quot;
+        variant=&quot;filled&quot;
+        icon=&quot;favorite&quot;
+        aria-label=&quot;Favorite&quot; /&gt;
+    &lt;IconButton
+        color=&quot;primary&quot;
+        size=&quot;md&quot;
+        variant=&quot;tonal&quot;
+        icon=&quot;favorite&quot;
+        aria-label=&quot;Favorite&quot; /&gt;
+    &lt;IconButton
+        color=&quot;primary&quot;
+        size=&quot;md&quot;
+        variant=&quot;outline&quot;
+        icon=&quot;favorite&quot;
+        aria-label=&quot;Favorite&quot; /&gt;
+    &lt;IconButton
+        color=&quot;primary&quot;
+        size=&quot;md&quot;
+        variant=&quot;text&quot;
+        icon=&quot;favorite&quot;
+        aria-label=&quot;Favorite&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Colors</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">All colors side by side</div>
+              <pre><code>const Colors = () =&gt; &lt;div className=&quot;flex gap-3 items-center&quot;&gt;
+    &lt;IconButton
+        size=&quot;md&quot;
+        variant=&quot;filled&quot;
+        color=&quot;primary&quot;
+        icon=&quot;star&quot;
+        aria-label=&quot;Primary&quot; /&gt;
+    &lt;IconButton
+        size=&quot;md&quot;
+        variant=&quot;filled&quot;
+        color=&quot;secondary&quot;
+        icon=&quot;star&quot;
+        aria-label=&quot;Secondary&quot; /&gt;
+    &lt;IconButton
+        size=&quot;md&quot;
+        variant=&quot;filled&quot;
+        color=&quot;tertiary&quot;
+        icon=&quot;star&quot;
+        aria-label=&quot;Tertiary&quot; /&gt;
+    &lt;IconButton size=&quot;md&quot; variant=&quot;filled&quot; color=&quot;error&quot; icon=&quot;delete&quot; aria-label=&quot;Error&quot; /&gt;
+    &lt;IconButton
+        size=&quot;md&quot;
+        variant=&quot;filled&quot;
+        color=&quot;warning&quot;
+        icon=&quot;warning&quot;
+        aria-label=&quot;Warning&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Sizes</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">All sizes side by side</div>
+              <pre><code>const Sizes = () =&gt; &lt;div className=&quot;flex gap-3 items-center&quot;&gt;
+    &lt;IconButton
+        variant=&quot;filled&quot;
+        color=&quot;primary&quot;
+        size=&quot;sm&quot;
+        icon=&quot;close&quot;
+        aria-label=&quot;Small&quot; /&gt;
+    &lt;IconButton
+        variant=&quot;filled&quot;
+        color=&quot;primary&quot;
+        size=&quot;md&quot;
+        icon=&quot;close&quot;
+        aria-label=&quot;Medium&quot; /&gt;
+    &lt;IconButton
+        variant=&quot;filled&quot;
+        color=&quot;primary&quot;
+        size=&quot;lg&quot;
+        icon=&quot;close&quot;
+        aria-label=&quot;Large&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Loading</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Loading state replaces icon with spinner</div>
+              <pre><code>const Loading = () =&gt; &lt;div className=&quot;flex gap-3 items-center&quot;&gt;
+    &lt;IconButton
+        variant=&quot;filled&quot;
+        color=&quot;primary&quot;
+        size=&quot;sm&quot;
+        loading
+        icon=&quot;refresh&quot;
+        aria-label=&quot;Loading small&quot; /&gt;
+    &lt;IconButton
+        variant=&quot;filled&quot;
+        color=&quot;primary&quot;
+        size=&quot;md&quot;
+        loading
+        icon=&quot;refresh&quot;
+        aria-label=&quot;Loading medium&quot; /&gt;
+    &lt;IconButton
+        variant=&quot;filled&quot;
+        color=&quot;primary&quot;
+        size=&quot;lg&quot;
+        loading
+        icon=&quot;refresh&quot;
+        aria-label=&quot;Loading large&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="Progress">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Progress</h2>
       <div class="badges">
-        <label for="c-2-ui-feedback-progress-props" class="badge ok as-toggle">12 prop types</label>
-        <label for="c-2-ui-feedback-progress-info" class="badge info as-toggle">1 info</label>
-        <label for="c-2-ui-feedback-progress-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-3-ui-feedback-progress-props" class="badge ok as-toggle">12 prop types</label>
+        <label for="c-3-ui-feedback-progress-info" class="badge info as-toggle">1 info</label>
+        <label for="c-3-ui-feedback-progress-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -894,10 +1118,10 @@ value: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-2-ui-feedback-progress-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-2-ui-feedback-progress-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-3-ui-feedback-progress-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-3-ui-feedback-progress-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-2-ui-feedback-progress-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-3-ui-feedback-progress-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1124,9 +1348,9 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SegmentedButton</h2>
       <div class="badges">
-        <label for="c-3-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-3-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-4-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-4-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-4-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -1138,10 +1362,10 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-3-ui-inputs-segmentedbutton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-3-ui-inputs-segmentedbutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-4-ui-inputs-segmentedbutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-4-ui-inputs-segmentedbutton-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-3-ui-inputs-segmentedbutton-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-4-ui-inputs-segmentedbutton-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
