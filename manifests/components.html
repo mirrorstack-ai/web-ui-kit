@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">5 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">5/5 infos</a><span class="filter-pill ok" aria-disabled="true">25 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">6 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">6/6 infos</a><span class="filter-pill ok" aria-disabled="true">32 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1492,6 +1492,251 @@ value: T</code></pre>
               
               <div class="hint">Disabled state</div>
               <pre><code>const Disabled = () =&gt; &lt;SegmentedButton options={sizeOptions} value=&quot;md&quot; aria-label=&quot;Select size&quot; disabled /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Snackbar">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Snackbar</h2>
+      <div class="badges">
+        <label for="c-5-ui-feedback-snackbar-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-5-ui-feedback-snackbar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-5-ui-feedback-snackbar-stories" class="badge ok as-toggle">7 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/feedback/snackbar/Snackbar.stories.tsx">ui-feedback-snackbar · ./src/components/ui/feedback/snackbar/Snackbar.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-5-ui-feedback-snackbar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-5-ui-feedback-snackbar-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-5-ui-feedback-snackbar-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">10 prop types</span>
+            </div>
+            <pre><code>Component: src/components/ui/feedback/snackbar/Snackbar.tsx::Snackbar</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>action?: SnackbarAction
+
+className?: string
+
+/**
+ * Auto-dismiss after ms (default: 4000, 0 = no auto-dismiss). Unsave defaults to 0.
+ */
+duration?: number
+
+/**
+ * Use absolute positioning instead of fixed viewport
+ */
+inline?: boolean = false
+
+loading?: boolean = false
+
+message: string
+
+onDismiss?: () =&gt; void
+
+open?: boolean = true
+
+secondaryAction?: SnackbarAction
+
+variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;warning&quot; | &quot;unsave&quot; = &quot;default&quot;</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Button, Snackbar } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Interactive playground — all controls work here</div>
+              <pre><code>const Playground = () =&gt; &lt;Snackbar message=&quot;Changes saved successfully&quot; variant=&quot;default&quot; open inline /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Variants</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">All variants</div>
+              <pre><code>const Variants = () =&gt; &lt;div className=&quot;flex flex-col gap-16&quot;&gt;
+    &lt;Snackbar open inline variant=&quot;default&quot; message=&quot;Default notification&quot; /&gt;
+    &lt;Snackbar open inline variant=&quot;success&quot; message=&quot;Changes saved successfully&quot; /&gt;
+    &lt;Snackbar open inline variant=&quot;error&quot; message=&quot;Failed to save changes&quot; /&gt;
+    &lt;Snackbar open inline variant=&quot;warning&quot; message=&quot;Connection unstable&quot; /&gt;
+    &lt;Snackbar open inline variant=&quot;unsave&quot; message=&quot;You have unsaved changes&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Dismiss</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">With dismiss close button</div>
+              <pre><code>const WithDismiss = () =&gt; &lt;Snackbar
+    message=&quot;File uploaded&quot;
+    variant=&quot;success&quot;
+    open
+    inline
+    onDismiss={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Actions</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">With action buttons</div>
+              <pre><code>const WithActions = () =&gt; &lt;Snackbar
+    message=&quot;Item deleted&quot;
+    variant=&quot;default&quot;
+    open
+    inline
+    action={{ label: &quot;Undo&quot;, onClick: () =&gt; {} }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Both Actions</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">With primary and secondary actions</div>
+              <pre><code>const WithBothActions = () =&gt; &lt;Snackbar
+    message=&quot;Discard draft?&quot;
+    variant=&quot;default&quot;
+    open
+    inline
+    action={{ label: &quot;Discard&quot;, onClick: () =&gt; {} }}
+    secondaryAction={{ label: &quot;Keep editing&quot;, onClick: () =&gt; {} }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Loading</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Loading state on primary action</div>
+              <pre><code>const Loading = () =&gt; &lt;Snackbar
+    message=&quot;Restoring item...&quot;
+    variant=&quot;default&quot;
+    open
+    inline
+    loading
+    action={{ label: &quot;Undo&quot;, onClick: () =&gt; {} }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Toggle Demo</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Toggle snackbar open/closed with a button</div>
+              <pre><code>const ToggleDemo = (args) =&gt; {
+  interface SnackbarItem {
+    id: number;
+    message: string;
+    variant: SnackbarVariant;
+    duration?: number;
+    hasActions?: boolean;
+  }
+
+  const [items, setItems] = useState&lt;SnackbarItem[]&gt;([]);
+
+  const addSnackbar = (variant: SnackbarVariant, message: string, duration?: number, hasActions?: boolean) =&gt; {
+    setItems((prev) =&gt; {
+      if (variant === &quot;unsave&quot; &amp;&amp; prev.some((item) =&gt; item.variant === &quot;unsave&quot;)) {
+        return prev;
+      }
+      return [{ id: Date.now(), message, variant, duration, hasActions }, ...prev];
+    });
+  };
+
+  const removeSnackbar = (id: number) =&gt; {
+    setItems((prev) =&gt; prev.filter((item) =&gt; item.id !== id));
+  };
+
+  return (
+    &lt;div className=&quot;relative min-h-[400px]&quot;&gt;
+      &lt;div className=&quot;flex gap-3 flex-wrap&quot;&gt;
+        &lt;Button onClick={() =&gt; addSnackbar(&quot;success&quot;, &quot;Action completed&quot;, 3000)}&gt;
+          Show Success
+        &lt;/Button&gt;
+        &lt;Button variant=&quot;outline&quot; color=&quot;error&quot; onClick={() =&gt; addSnackbar(&quot;error&quot;, &quot;Something went wrong&quot;, 3000)}&gt;
+          Show Error
+        &lt;/Button&gt;
+        &lt;Button variant=&quot;outline&quot; color=&quot;warning&quot; onClick={() =&gt; addSnackbar(&quot;warning&quot;, &quot;Connection unstable&quot;, 3000)}&gt;
+          Show Warning
+        &lt;/Button&gt;
+        &lt;Button variant=&quot;outline&quot; color=&quot;warning&quot; onClick={() =&gt; addSnackbar(&quot;unsave&quot;, &quot;You have unsaved changes&quot;, 0, true)}&gt;
+          Show Unsaved Changes
+        &lt;/Button&gt;
+      &lt;/div&gt;
+      &lt;div className=&quot;absolute bottom-4 inset-x-0 flex flex-col-reverse items-center gap-3 px-4&quot;&gt;
+        {items.map((item) =&gt; (
+          &lt;Snackbar
+            key={item.id}
+            {...args}
+            message={item.message}
+            variant={item.variant}
+            open
+            onDismiss={() =&gt; removeSnackbar(item.id)}
+            duration={item.duration}
+            {...(item.hasActions &amp;&amp; {
+              action: { label: &quot;Save&quot;, onClick: () =&gt; removeSnackbar(item.id) },
+              secondaryAction: { label: &quot;Reset&quot;, onClick: () =&gt; removeSnackbar(item.id) },
+            })}
+            className=&quot;!relative !inset-auto !p-0 !w-full !max-w-lg&quot;
+          /&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
