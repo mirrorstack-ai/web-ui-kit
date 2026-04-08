@@ -26,6 +26,11 @@ export {
   type SegmentedButtonOption,
 } from "./components/ui/inputs/segmented-button/SegmentedButton";
 export {
+  Switch,
+  type SwitchProps,
+  type SwitchColor,
+} from "./components/ui/inputs/switch/Switch";
+export {
   SectionLabel,
   type SectionLabelProps,
 } from "./components/ui/data/section-label/SectionLabel";
