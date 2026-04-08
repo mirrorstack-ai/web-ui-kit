@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">6 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">6/6 infos</a><span class="filter-pill ok" aria-disabled="true">32 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">7 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">7/7 infos</a><span class="filter-pill ok" aria-disabled="true">34 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -1343,14 +1343,158 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="SectionLabel">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> SectionLabel</h2>
+      <div class="badges">
+        <label for="c-4-ui-data-sectionlabel-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-4-ui-data-sectionlabel-info" class="badge info as-toggle">1 info</label>
+        <label for="c-4-ui-data-sectionlabel-stories" class="badge ok as-toggle">2 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/data/section-label/SectionLabel.stories.tsx">ui-data-sectionlabel · ./src/components/ui/data/section-label/SectionLabel.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-4-ui-data-sectionlabel-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-4-ui-data-sectionlabel-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-4-ui-data-sectionlabel-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">1 prop type</span>
+            </div>
+            <pre><code>Component: src/components/ui/data/section-label/SectionLabel.tsx::SectionLabel</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>children: ReactNode</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Button, SectionLabel } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Interactive playground — all controls work here</div>
+              <pre><code>const Playground = () =&gt; &lt;SectionLabel&gt;Section Title&lt;/SectionLabel&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Settings Page</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Settings page with labeled sections inside cards</div>
+              <pre><code>const SettingsPage = () =&gt; &lt;div className=&quot;flex flex-col gap-6 max-w-lg&quot;&gt;
+    {/* Profile section */}
+    &lt;div className=&quot;rounded-xl bg-surface-container p-5&quot;&gt;
+        &lt;SectionLabel&gt;Profile&lt;/SectionLabel&gt;
+        &lt;div className=&quot;mt-3 flex flex-col gap-3&quot;&gt;
+            &lt;div className=&quot;flex items-center justify-between&quot;&gt;
+                &lt;div&gt;
+                    &lt;p className=&quot;text-sm font-medium text-on-surface&quot;&gt;Display name&lt;/p&gt;
+                    &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;Jane Doe&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;Button variant=&quot;outline&quot; size=&quot;sm&quot;&gt;Edit
+                                &lt;/Button&gt;
+            &lt;/div&gt;
+            &lt;div className=&quot;flex items-center justify-between&quot;&gt;
+                &lt;div&gt;
+                    &lt;p className=&quot;text-sm font-medium text-on-surface&quot;&gt;Email&lt;/p&gt;
+                    &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;jane@example.com&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;Button variant=&quot;outline&quot; size=&quot;sm&quot;&gt;Edit
+                                &lt;/Button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    {/* Security section */}
+    &lt;div className=&quot;rounded-xl bg-surface-container p-5&quot;&gt;
+        &lt;SectionLabel&gt;Security&lt;/SectionLabel&gt;
+        &lt;div className=&quot;mt-3 flex flex-col gap-3&quot;&gt;
+            &lt;div className=&quot;flex items-center justify-between&quot;&gt;
+                &lt;div&gt;
+                    &lt;p className=&quot;text-sm font-medium text-on-surface&quot;&gt;Password&lt;/p&gt;
+                    &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;Last changed 30 days ago&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;Button variant=&quot;outline&quot; size=&quot;sm&quot;&gt;Change
+                                &lt;/Button&gt;
+            &lt;/div&gt;
+            &lt;div className=&quot;flex items-center justify-between&quot;&gt;
+                &lt;div&gt;
+                    &lt;p className=&quot;text-sm font-medium text-on-surface&quot;&gt;Two-factor auth&lt;/p&gt;
+                    &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;Enabled via authenticator app&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;Button variant=&quot;tonal&quot; size=&quot;sm&quot; color=&quot;primary&quot;&gt;Manage
+                                &lt;/Button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    {/* Danger zone */}
+    &lt;div className=&quot;rounded-xl border border-error/30 bg-error/5 p-5&quot;&gt;
+        &lt;SectionLabel className=&quot;text-error&quot;&gt;Danger Zone
+                    &lt;/SectionLabel&gt;
+        &lt;p className=&quot;mt-2 text-sm text-on-surface-variant&quot;&gt;Permanently delete your account and all associated data.
+                    &lt;/p&gt;
+        &lt;div className=&quot;mt-3&quot;&gt;
+            &lt;Button variant=&quot;filled&quot; size=&quot;sm&quot; color=&quot;error&quot;&gt;Delete account
+                          &lt;/Button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="SegmentedButton">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SegmentedButton</h2>
       <div class="badges">
-        <label for="c-4-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-4-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-4-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-5-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-5-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-5-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -1362,10 +1506,10 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-4-ui-inputs-segmentedbutton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-4-ui-inputs-segmentedbutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-5-ui-inputs-segmentedbutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-5-ui-inputs-segmentedbutton-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-4-ui-inputs-segmentedbutton-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-5-ui-inputs-segmentedbutton-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1509,9 +1653,9 @@ value: T</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Snackbar</h2>
       <div class="badges">
-        <label for="c-5-ui-feedback-snackbar-props" class="badge ok as-toggle">10 prop types</label>
-        <label for="c-5-ui-feedback-snackbar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-5-ui-feedback-snackbar-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-6-ui-feedback-snackbar-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-6-ui-feedback-snackbar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-6-ui-feedback-snackbar-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -1523,10 +1667,10 @@ value: T</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-5-ui-feedback-snackbar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-5-ui-feedback-snackbar-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-6-ui-feedback-snackbar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-6-ui-feedback-snackbar-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-5-ui-feedback-snackbar-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-6-ui-feedback-snackbar-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
