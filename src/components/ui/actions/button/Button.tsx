@@ -8,8 +8,8 @@ import {
   type ButtonColor,
   type ButtonSize,
   variantMap,
-  iconSizes,
 } from "@/components/ui/actions/shared/button-styles";
+import { MaterialIcon } from "@/components/ui/actions/shared/MaterialIcon";
 
 export const meta: ComponentMeta = {
   name: "Button",
@@ -43,14 +43,6 @@ const gapStyles: Record<ButtonSize, string> = {
   md: "gap-2",
   lg: "gap-3",
 };
-
-function MaterialIcon({ name, size }: { name: string; size: ButtonSize }) {
-  return (
-    <span className="material-symbols-rounded" style={{ fontSize: iconSizes[size] }}>
-      {name}
-    </span>
-  );
-}
 
 export function Button({
   variant = "filled",

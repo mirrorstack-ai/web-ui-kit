@@ -10,6 +10,7 @@ import {
   variantMap,
   iconSizes,
 } from "@/components/ui/actions/shared/button-styles";
+import { MaterialIcon } from "@/components/ui/actions/shared/MaterialIcon";
 
 export const meta: ComponentMeta = {
   name: "IconButton",
@@ -71,12 +72,7 @@ export function IconButton({
           style={{ width: iconSizes[size], height: iconSizes[size] }}
         />
       ) : (
-        <span
-          className="material-symbols-rounded"
-          style={{ fontSize: iconSizes[size] }}
-        >
-          {icon}
-        </span>
+        <MaterialIcon name={icon} size={size} />
       )}
     </button>
   );

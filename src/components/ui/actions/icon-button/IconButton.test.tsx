@@ -77,7 +77,7 @@ describe("IconButton", () => {
         const { container } = render(
           <IconButton icon="star" aria-label="Star" variant="filled" color={color} />,
         );
-        expect(getButton(container).getAttribute("class")).toContain(color);
+        expect(getButton(container).getAttribute("class")).toContain(`bg-${color}`);
       });
     }
   });
