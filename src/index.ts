@@ -26,6 +26,10 @@ export {
   type SegmentedButtonOption,
 } from "./components/ui/inputs/segmented-button/SegmentedButton";
 export {
+  SectionLabel,
+  type SectionLabelProps,
+} from "./components/ui/data/section-label/SectionLabel";
+export {
   DevToolbar,
   type DevToolbarProps,
   type DevToolbarItem,
