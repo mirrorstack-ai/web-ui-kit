@@ -132,3 +132,8 @@ export {
   type NavDrawerItem,
   type NavDrawerSection,
 } from "./components/ui/navigation/nav-drawer/NavDrawer";
+export {
+  AppSwitcher,
+  type AppSwitcherProps,
+  type AppLink,
+} from "./components/ui/navigation/app-switcher/AppSwitcher";
