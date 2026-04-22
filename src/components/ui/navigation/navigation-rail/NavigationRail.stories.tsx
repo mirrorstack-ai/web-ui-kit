@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { NavigationRail } from "./NavigationRail";
 import { NavigationButton } from "@/components/ui/navigation/navigation-button/NavigationButton";
-import { Logo } from "@/components/ui/media/logo-mirrorstack/LogoMirrorStack";
 import { Avatar } from "@/components/ui/media/avatar/Avatar";
 
 const meta: Meta<typeof NavigationRail> = {
@@ -24,13 +23,9 @@ export const Playground: Story = {
   render: () => {
     const [selected, setSelected] = useState("apps");
     return (
+      <div className="flex flex-col items-center">
+      <Avatar size="lg" fallback="J" square className="ml-4 mb-2" />
       <NavigationRail
-        logo={
-          <div className="w-10 h-10">
-            <Logo />
-          </div>
-        }
-        header={<Avatar size="sm" fallback="J" />}
         footer={
           <NavigationButton
             icon="settings"
@@ -75,6 +70,7 @@ export const Playground: Story = {
           />
         </div>
       </NavigationRail>
+      </div>
     );
   },
 };
