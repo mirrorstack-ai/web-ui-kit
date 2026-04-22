@@ -108,7 +108,7 @@ export function AgentSidebarHeader({
       </div>
 
       {/* Tabs + add */}
-      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-x-clip overflow-y-visible pl-10 gap-1.5">
+      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 gap-1.5">
         <div role="tablist" aria-label="Chat sessions" className="flex h-full gap-1.5">
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
@@ -158,9 +158,9 @@ export function AgentSidebarHeader({
           })}
         </div>
 
-        {/* Overflow menu */}
+        {/* Overflow trigger */}
         {overflowTabs.length > 0 && (
-          <div ref={overflowRef} className="relative z-10 h-10 flex justify-center">
+          <div ref={overflowRef} className="z-10 h-10 flex justify-center">
             <IconButton
               icon="more_horiz"
               variant="text"
@@ -169,25 +169,6 @@ export function AgentSidebarHeader({
               onClick={() => setShowOverflow(!showOverflow)}
               aria-label={`${overflowTabs.length} more tabs`}
             />
-            {showOverflow && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-surface-container rounded-lg shadow-lg overflow-hidden z-20">
-                <div className="py-1 px-1">
-                  {overflowTabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      className={cn(
-                        "w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2",
-                        tab.id === activeTabId ? "bg-primary/10 text-primary" : "text-on-surface hover:bg-surface-container-high",
-                      )}
-                      onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
-                    >
-                      <Icon name="auto_awesome" size={14} />
-                      <span className="truncate">{tab.title}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -202,6 +183,26 @@ export function AgentSidebarHeader({
         <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
         <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
       </div>
+      {/* Overflow dropdown — rendered outside the clipped container */}
+      {showOverflow && overflowTabs.length > 0 && (
+        <div className="absolute top-full left-10 mt-1 w-48 bg-surface-container rounded-lg shadow-lg z-50">
+          <div className="py-1 px-1">
+            {overflowTabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={cn(
+                  "w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2",
+                  tab.id === activeTabId ? "bg-primary/10 text-primary" : "text-on-surface hover:bg-surface-container-high",
+                )}
+                onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
+              >
+                <Icon name="auto_awesome" size={14} />
+                <span className="truncate">{tab.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
