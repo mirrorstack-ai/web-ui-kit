@@ -1,4 +1,5 @@
 export { cn } from "./utils/cn";
+export { Icon, type IconProps } from "./components/ui/media/icon/Icon";
 export { isDev, isProd, isStorybook } from "./utils/env";
 export { Button, type ButtonProps } from "./components/ui/actions/button/Button";
 export {
