@@ -35,11 +35,11 @@ export const WithLabel: Story = {
   render: () => (
     <div className="flex flex-col gap-3 max-w-sm">
       <SocialButton provider="google">
-        <SocialIcon provider="google" className="mr-2" />
+        <SocialIcon provider="google" className="shrink-0" />
         Continue with Google
       </SocialButton>
       <SocialButton provider="discord">
-        <SocialIcon provider="discord" className="mr-2" />
+        <SocialIcon provider="discord" className="shrink-0" />
         Continue with Discord
       </SocialButton>
     </div>
