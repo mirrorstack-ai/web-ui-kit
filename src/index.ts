@@ -44,3 +44,7 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
+export {
+  Surface,
+  type SurfaceProps,
+} from "./components/ui/surfaces/surface/Surface";
