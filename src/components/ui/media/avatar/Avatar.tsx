@@ -47,7 +47,12 @@ export function Avatar({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const s = sizeMap[size];
   const initial = fallback.charAt(0).toUpperCase();
-  const radius = square ? "rounded-2xl rounded-br-3xl" : "rounded-full";
+  // Larger bottom-right radius only when editable+square (to accommodate the edit badge)
+  const radius = square
+    ? editable
+      ? "rounded-2xl rounded-br-3xl"
+      : "rounded-2xl"
+    : "rounded-full";
 
   const handleClick = () => {
     if (editable) fileInputRef.current?.click();
@@ -58,6 +63,8 @@ export function Avatar({
     if (file) onFileSelect?.(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  const showInitial = !overlay;
 
   const avatarContent = src ? (
     <img
@@ -73,7 +80,9 @@ export function Avatar({
         "bg-primary/20 flex items-center justify-center border-2 border-primary",
       )}
     >
-      <span className={cn("font-bold text-primary", s.text)}>{initial}</span>
+      {showInitial && (
+        <span className={cn("font-bold text-primary", s.text)}>{initial}</span>
+      )}
     </div>
   );
 
@@ -92,7 +101,7 @@ export function Avatar({
           {overlay ? (
             <div
               className={cn(
-                "absolute inset-1 bg-black/40 flex items-center justify-center",
+                "absolute inset-1 flex items-center justify-center",
                 radius,
               )}
             >

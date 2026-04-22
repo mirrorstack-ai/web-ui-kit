@@ -61,6 +61,6 @@ export const WithOverlay: Story = {
   args: {
     size: "xl",
     editable: true,
-    overlay: <Progress type="circular" variant="wave" size="sm" color="current" className="text-white" />,
+    overlay: <Progress type="circular" variant="wave" size="sm" color="primary" />,
   },
 };

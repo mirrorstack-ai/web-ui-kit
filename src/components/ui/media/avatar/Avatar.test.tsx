@@ -42,8 +42,16 @@ describe("Avatar", () => {
     expect(inner).toBeInTheDocument();
   });
 
-  it("renders overlay when provided", () => {
+  it("renders overlay and hides initials", () => {
     render(<Avatar editable overlay={<span data-testid="spinner" />} />);
     expect(screen.getByTestId("spinner")).toBeInTheDocument();
+    expect(screen.queryByText("U")).not.toBeInTheDocument();
+  });
+
+  it("uses uniform rounded-2xl for non-editable square", () => {
+    const { container } = render(<Avatar square fallback="S" />);
+    const inner = container.querySelector(".rounded-2xl");
+    expect(inner).toBeInTheDocument();
+    expect(container.querySelector(".rounded-br-3xl")).not.toBeInTheDocument();
   });
 });
