@@ -39,7 +39,7 @@ export function ActivityList({
   if (loading) {
     return (
       <div className={cn("py-8 text-center", className)}>
-        <Progress type="circular" size="sm" />
+        <Progress type="circular" size="md" />
       </div>
     );
   }
