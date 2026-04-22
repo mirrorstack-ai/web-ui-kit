@@ -44,3 +44,9 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
+export {
+  Badge,
+  type BadgeProps,
+  type BadgeVariant,
+  type BadgeSize,
+} from "./components/ui/feedback/badge/Badge";
