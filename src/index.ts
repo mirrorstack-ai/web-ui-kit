@@ -63,3 +63,4 @@ export {
   type AvatarProps,
   type AvatarSize,
 } from "./components/ui/media/avatar/Avatar";
+export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
