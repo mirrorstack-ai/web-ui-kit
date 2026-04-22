@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">16 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">16/16 infos</a><span class="filter-pill ok" aria-disabled="true">74 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">17 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">17/17 infos</a><span class="filter-pill ok" aria-disabled="true">76 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -3218,6 +3218,120 @@ onChange: (checked: boolean) =&gt; void</code></pre>
               
               <div class="hint">Disabled state</div>
               <pre><code>const Disabled = () =&gt; &lt;Switch checked disabled color=&quot;primary&quot; aria-label=&quot;Toggle switch&quot; /&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="ThemeToggle">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> ThemeToggle</h2>
+      <div class="badges">
+        <label for="c-16-ui-actions-themetoggle-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-16-ui-actions-themetoggle-info" class="badge info as-toggle">1 info</label>
+        <label for="c-16-ui-actions-themetoggle-stories" class="badge ok as-toggle">2 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/actions/theme-toggle/ThemeToggle.stories.tsx">ui-actions-themetoggle · ./src/components/ui/actions/theme-toggle/ThemeToggle.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-16-ui-actions-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-16-ui-actions-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-16-ui-actions-themetoggle-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">5 prop types</span>
+            </div>
+            <pre><code>Component: src/components/ui/actions/theme-toggle/ThemeToggle.tsx::ThemeToggle</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>color?: any = &quot;secondary&quot;
+
+onToggle: () =&gt; void
+
+size?: any = &quot;md&quot;
+
+theme: &quot;auto&quot; | &quot;light&quot; | &quot;dark&quot;
+
+variant?: any = &quot;tonal&quot;</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { ThemeToggle } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = () =&gt; &lt;ThemeToggle theme=&quot;auto&quot; onToggle={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Interactive</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Interactive = () =&gt; {
+  const [theme, setTheme] = useState&lt;Theme&gt;(&quot;auto&quot;);
+
+  useEffect(() =&gt; {
+    applyTheme(theme);
+  }, [theme]);
+
+  return (
+    &lt;div className=&quot;flex items-center gap-4&quot;&gt;
+      &lt;ThemeToggle
+        theme={theme}
+        onToggle={() =&gt; setTheme(ThemeToggle.next(theme))}
+      /&gt;
+      &lt;span className=&quot;text-sm text-on-surface-variant&quot;&gt;
+        Current: {theme}
+      &lt;/span&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
