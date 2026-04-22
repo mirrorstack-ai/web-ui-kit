@@ -36,15 +36,15 @@ export function AgentSidebarHeader({
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
     const container = tabsContainerRef.current.clientWidth;
-    const spaceForAll = tabs.length * TAB_WIDTH + (tabs.length - 1) * GAP + ADD_BTN;
+    const spaceForAll = tabs.length * TAB_WIDTH + (tabs.length - 1) * GAP;
 
     if (spaceForAll <= container) {
       setVisibleCount(tabs.length);
       return;
     }
 
-    // Need overflow button — subtract its width + add button
-    const available = container - ADD_BTN - ADD_BTN;
+    // Need overflow button — subtract its width
+    const available = container - ADD_BTN;
     const count = Math.floor((available + GAP) / (TAB_WIDTH + GAP));
     setVisibleCount(Math.max(1, count));
   }, [tabs.length]);
@@ -172,14 +172,11 @@ export function AgentSidebarHeader({
           </div>
         )}
 
-        {/* Add tab */}
-        <div className="z-10 h-10 flex justify-center">
-          <IconButton icon="add" variant="text" size="sm" className="m-auto text-on-surface" onClick={handleAddTab} aria-label="New chat" />
-        </div>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-0.5 pr-1 shrink-0">
+        <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label="New chat" />
         <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
         <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
       </div>
@@ -190,7 +187,7 @@ export function AgentSidebarHeader({
             <button
               key={tab.id}
               className={cn(
-                "w-full px-3 py-1.5 text-left text-xs rounded transition-colors flex items-center gap-2",
+                "w-full px-2.5 py-1 text-left text-xs rounded transition-colors flex items-center gap-1.5",
                 tab.id === activeTabId ? "bg-primary/10 text-primary" : "text-on-surface hover:bg-surface-container-high",
               )}
               onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
