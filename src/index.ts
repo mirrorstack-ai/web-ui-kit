@@ -113,3 +113,7 @@ export {
   type ActivityListProps,
   type ActivityItem,
 } from "./components/ui/data/activity-list/ActivityList";
+export {
+  ReauthDialog,
+  type ReauthDialogProps,
+} from "./components/ui/surfaces/reauth-dialog/ReauthDialog";
