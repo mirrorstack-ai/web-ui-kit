@@ -118,7 +118,7 @@ export function VerificationCodeInput({
           onPaste={handlePaste}
           onFocus={(e) => e.target.select()}
           className={cn(
-            "w-12 h-14 text-center text-xl font-semibold rounded-lg border bg-surface-container-low outline-none transition-colors",
+            "w-10 h-12 text-center text-lg font-semibold rounded-lg border bg-surface-container-low outline-none transition-colors",
             "focus:ring-2 focus:border-primary focus:ring-primary",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             error

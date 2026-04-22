@@ -199,8 +199,8 @@ export function ReauthDialog({
       )}
 
       {showingEmail && codeSent && (
-        <div className="flex flex-col items-center gap-4 py-2">
-          <p className="text-sm text-on-surface-variant text-center">
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-sm text-on-surface-variant text-center mb-1">
             Enter the 6-digit code sent to your email
           </p>
           <VerificationCodeInput
@@ -211,13 +211,13 @@ export function ReauthDialog({
             error={!!error}
           />
           {isVerifying && (
-            <p className="text-sm text-on-surface-variant">Verifying...</p>
+            <p className="text-xs text-on-surface-variant">Verifying...</p>
           )}
           <button
             type="button"
             onClick={handleSendCode}
             disabled={isSending || isVerifying}
-            className="text-sm text-primary hover:underline disabled:opacity-50"
+            className="text-xs text-primary hover:underline disabled:opacity-50"
           >
             {isSending ? "Sending..." : "Resend code"}
           </button>
