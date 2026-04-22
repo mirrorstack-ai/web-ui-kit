@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">23 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">23/23 infos</a><span class="filter-pill ok" aria-disabled="true">97 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">24 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">24/24 infos</a><span class="filter-pill ok" aria-disabled="true">101 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4183,6 +4183,153 @@ variant?: any = &quot;tonal&quot;</code></pre>
       &lt;/span&gt;
     &lt;/div&gt;
   );
+};</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="VerificationCodeInput">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> VerificationCodeInput</h2>
+      <div class="badges">
+        <label for="c-23-ui-inputs-verificationcodeinput-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-23-ui-inputs-verificationcodeinput-info" class="badge info as-toggle">1 info</label>
+        <label for="c-23-ui-inputs-verificationcodeinput-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/inputs/verification-code-input/VerificationCodeInput.stories.tsx">ui-inputs-verificationcodeinput · ./src/components/ui/inputs/verification-code-input/VerificationCodeInput.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-23-ui-inputs-verificationcodeinput-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-23-ui-inputs-verificationcodeinput-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-23-ui-inputs-verificationcodeinput-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">7 prop types</span>
+            </div>
+            <pre><code>Component: src/components/ui/inputs/verification-code-input/VerificationCodeInput.tsx::VerificationCodeInput</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>className?: string
+
+disabled?: boolean = false
+
+error?: boolean = false
+
+length?: number = 6
+
+onChange: (value: string) =&gt; void
+
+/**
+ * Called when all 6 digits are entered
+ */
+onComplete?: (code: string) =&gt; void
+
+value: string</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { VerificationCodeInput } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = () =&gt; {
+    const [value, setValue] = useState(&quot;&quot;);
+
+    return (
+        &lt;div className=&quot;flex flex-col items-center gap-4&quot;&gt;
+            &lt;VerificationCodeInput
+                value={value}
+                onChange={setValue}
+                onComplete={(code) =&gt; console.log(&quot;Complete:&quot;, code)} /&gt;
+            &lt;span className=&quot;text-sm text-on-surface-variant&quot;&gt;Value: {value || &quot;(empty)&quot;}
+            &lt;/span&gt;
+        &lt;/div&gt;
+    );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Error</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithError = () =&gt; {
+  const [value, setValue] = useState(&quot;12345&quot;);
+  return (
+    &lt;div className=&quot;flex flex-col items-center gap-2&quot;&gt;
+      &lt;VerificationCodeInput value={value} onChange={setValue} error /&gt;
+      &lt;span className=&quot;text-sm text-error&quot;&gt;Invalid code&lt;/span&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Disabled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Disabled = () =&gt; (
+  &lt;VerificationCodeInput value=&quot;123456&quot; onChange={() =&gt; {}} disabled /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Prefilled</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Prefilled = () =&gt; {
+  const [value, setValue] = useState(&quot;123456&quot;);
+  return &lt;VerificationCodeInput value={value} onChange={setValue} /&gt;;
 };</code></pre>
             </div>
         </div>
