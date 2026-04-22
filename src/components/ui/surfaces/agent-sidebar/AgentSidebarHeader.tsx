@@ -32,6 +32,7 @@ export function AgentSidebarHeader({
   const nextIdRef = useRef(2);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const overflowRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
@@ -75,7 +76,10 @@ export function AgentSidebarHeader({
     if (!showOverflow) return;
     const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowOverflow(false); };
     const handleClick = (e: MouseEvent) => {
-      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) setShowOverflow(false);
+      const target = e.target as Node;
+      if (overflowRef.current?.contains(target)) return;
+      if (dropdownRef.current?.contains(target)) return;
+      setShowOverflow(false);
     };
     document.addEventListener("keydown", handleKey);
     document.addEventListener("mousedown", handleClick);
@@ -172,13 +176,13 @@ export function AgentSidebarHeader({
       </div>
       {/* Overflow dropdown — rendered outside the clipped container */}
       {showOverflow && overflowTabs.length > 0 && (
-        <div className="absolute top-full right-12 mt-1 w-40 bg-surface-container rounded-lg shadow-lg z-50 py-1">
+        <div ref={dropdownRef} className="absolute top-full right-12 mt-1 w-40 bg-surface-container rounded-lg shadow-lg z-50 py-1 px-1">
           {overflowTabs.map((tab) => (
             <button
               key={tab.id}
               className={cn(
-                "w-full px-2.5 py-1 text-left text-xs rounded transition-colors flex items-center gap-1.5",
-                tab.id === activeTabId ? "bg-primary/10 text-primary" : "text-on-surface hover:bg-surface-container-high",
+                "w-full px-2.5 py-1 text-left text-xs rounded-md transition-colors flex items-center gap-1.5",
+                tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
               )}
               onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
             >
@@ -186,9 +190,9 @@ export function AgentSidebarHeader({
               <span className="truncate">{tab.title}</span>
             </button>
           ))}
-          <div className="h-px bg-outline-variant mx-2 my-1" />
+          <div className="h-px bg-outline-variant mx-1 my-1" />
           <button
-            className="w-full px-2.5 py-1 text-left text-xs rounded transition-colors flex items-center gap-1.5 text-primary hover:bg-surface-container-high"
+            className="w-full px-2.5 py-1 text-left text-xs rounded-md transition-colors flex items-center gap-1.5 text-primary hover:bg-on-surface/10"
             onClick={() => { handleAddTab(); setShowOverflow(false); }}
           >
             <Icon name="add" size={12} />
