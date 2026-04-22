@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { NavigationRail } from "./NavigationRail";
 import { NavigationButton } from "@/components/ui/navigation/navigation-button/NavigationButton";
-import { Avatar } from "@/components/ui/media/avatar/Avatar";
 
 const meta: Meta<typeof NavigationRail> = {
   title: "UI/Navigation/NavigationRail",
@@ -23,47 +22,58 @@ export const Playground: Story = {
   render: () => {
     const [selected, setSelected] = useState("apps");
     return (
-      <div className="flex flex-col items-center">
-        <button className="ml-4 w-[4.5rem] h-[4.5rem] rounded-2xl bg-surface-bright shadow-2xl flex items-center justify-center cursor-pointer hover:shadow-none transition-all">
-          <Avatar fallback="J" size="md" />
-        </button>
-        <NavigationRail>
-          <div className="w-full gap-2 flex flex-col">
-            <NavigationButton
-              icon="dashboard"
-              label="Overview"
-              selected={selected === "overview"}
-              onClick={() => setSelected("overview")}
-            />
-            <NavigationButton
-              icon="apps"
-              label="Your Apps"
-              variant="primary"
-              selected={selected === "apps"}
-              onClick={() => setSelected("apps")}
-            />
-          </div>
-          <div className="h-px rounded-full w-full bg-outline" />
-          <div className="w-full gap-2 flex flex-col">
-            <NavigationButton
-              icon="apartment"
-              label="Organizations"
-              variant="tertiary"
-              selected={selected === "org"}
-              onClick={() => setSelected("org")}
-            />
-          </div>
-          <div className="h-px rounded-full w-full bg-outline" />
-          <div className="w-full gap-2 flex flex-col">
-            <NavigationButton
-              icon="description"
-              label="Documentation"
-              selected={selected === "docs"}
-              onClick={() => setSelected("docs")}
-            />
-          </div>
-        </NavigationRail>
-      </div>
+      <NavigationRail
+        logo={
+          <NavigationButton
+            customIcon={
+              <div className="w-full h-full bg-primary/20 flex items-center justify-center">
+                <span className="text-primary font-semibold text-lg">M</span>
+              </div>
+            }
+            label="My App"
+            variant="secondary"
+            disableHoverExpand
+            className="border border-primary"
+          />
+        }
+      >
+        <div className="w-full gap-2 flex flex-col">
+          <NavigationButton
+            icon="space_dashboard"
+            label="Dashboard"
+            variant="primary"
+            selected={selected === "dashboard"}
+            onClick={() => setSelected("dashboard")}
+          />
+          <NavigationButton
+            icon="apps"
+            label="Your Apps"
+            selected={selected === "apps"}
+            onClick={() => setSelected("apps")}
+          />
+        </div>
+        <div className="h-px rounded-full w-full bg-outline" />
+        <div className="w-full gap-2 flex flex-col">
+          <NavigationButton
+            icon="extension"
+            label="Add-ons"
+            selected={selected === "addons"}
+            onClick={() => setSelected("addons")}
+          />
+          <NavigationButton
+            icon="rocket_launch"
+            label="Deployment"
+            selected={selected === "deployment"}
+            onClick={() => setSelected("deployment")}
+          />
+          <NavigationButton
+            icon="settings"
+            label="Settings"
+            selected={selected === "settings"}
+            onClick={() => setSelected("settings")}
+          />
+        </div>
+      </NavigationRail>
     );
   },
 };
