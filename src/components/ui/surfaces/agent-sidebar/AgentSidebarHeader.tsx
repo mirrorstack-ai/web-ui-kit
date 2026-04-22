@@ -176,7 +176,17 @@ export function AgentSidebarHeader({
       </div>
       {/* Overflow dropdown — rendered outside the clipped container */}
       {showOverflow && overflowTabs.length > 0 && (
-        <div ref={dropdownRef} className="absolute top-full right-12 mt-1 w-40 bg-surface-container rounded-lg shadow-lg z-50 py-1 px-1">
+        <div ref={dropdownRef} className="absolute top-[calc(100%-2px)] right-12 w-40 bg-surface-container rounded-b-lg rounded-tl-lg shadow-lg z-50 py-1 px-1">
+          {/* Inverse corner connecting to ... button */}
+          <div
+            className="absolute top-0 right-0 w-3 h-3 pointer-events-none"
+            style={{
+              transform: "translateX(100%) translateY(-100%)",
+              backgroundColor: "var(--color-surface-container)",
+              maskImage: "radial-gradient(circle 12px at 12px 12px, transparent 12px, black 12px)",
+              WebkitMaskImage: "radial-gradient(circle 12px at 12px 12px, transparent 12px, black 12px)",
+            }}
+          />
           {overflowTabs.map((tab) => (
             <button
               key={tab.id}
