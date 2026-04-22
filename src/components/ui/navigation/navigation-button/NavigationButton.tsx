@@ -36,15 +36,13 @@ const buttonStyles: Record<NavigationButtonVariant, Record<"selected" | "unselec
   },
 };
 
+const defaultHoverBg = {
+  selected: "rounded-full pl-12 pr-4 py-2 -left-1 bg-primary-container",
+  unselected: "rounded-full pl-12 pr-4 py-2 -left-1 bg-secondary-container",
+};
 const hoverBgStyles: Record<NavigationButtonVariant, Record<"selected" | "unselected", string>> = {
-  primary: {
-    selected: "rounded-full pl-12 pr-4 py-2 -left-1 bg-primary-container",
-    unselected: "rounded-full pl-12 pr-4 py-2 -left-1 bg-secondary-container",
-  },
-  secondary: {
-    selected: "rounded-full pl-12 pr-4 py-2 -left-1 bg-primary-container",
-    unselected: "rounded-full pl-12 pr-4 py-2 -left-1 bg-secondary-container",
-  },
+  primary: defaultHoverBg,
+  secondary: defaultHoverBg,
   tertiary: {
     selected: "rounded-xl pl-14 pr-4 py-2.5 left-0 bg-tertiary-container",
     unselected: "rounded-xl pl-14 pr-4 py-2.5 left-0 bg-tertiary-container",
@@ -69,15 +67,13 @@ const iconStyles: Record<NavigationButtonVariant, { selected: string; hovered: s
   },
 };
 
+const defaultHoverText = {
+  selected: "var(--color-on-primary-container)",
+  unselected: "var(--color-on-secondary-container)",
+};
 const hoverTextColors: Record<NavigationButtonVariant, Record<"selected" | "unselected", string>> = {
-  primary: {
-    selected: "var(--color-on-primary-container)",
-    unselected: "var(--color-on-secondary-container)",
-  },
-  secondary: {
-    selected: "var(--color-on-primary-container)",
-    unselected: "var(--color-on-secondary-container)",
-  },
+  primary: defaultHoverText,
+  secondary: defaultHoverText,
   tertiary: {
     selected: "var(--color-on-tertiary-container)",
     unselected: "var(--color-on-tertiary-container)",
@@ -140,8 +136,7 @@ export function NavigationButton({
         className={cn(
           "flex items-center justify-center transition-all duration-200 ease-in-out box-border relative z-10 w-10 h-10 disabled:opacity-50 disabled:cursor-not-allowed",
           customIcon ? "p-0 overflow-hidden" : "p-2.5",
-          buttonStyles[variant][selKey],
-          isHovered && "!bg-transparent",
+          !isHovered && buttonStyles[variant][selKey],
           className,
         )}
         onMouseEnter={() => setIsHovered(true)}
