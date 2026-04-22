@@ -21,10 +21,23 @@ async function loadMeta(filePath: string): Promise<{ name: string; description: 
     if (mod.meta?.name && mod.meta?.description) {
       return mod.meta;
     }
-    return null;
   } catch {
-    return null;
+    // Dynamic import failed (e.g. asset imports not resolvable by tsx).
+    // Fall back to regex extraction from source.
   }
+  return extractMeta(filePath);
+}
+
+function extractMeta(filePath: string): { name: string; description: string } | null {
+  try {
+    const src = readFileSync(filePath, "utf-8");
+    const nameMatch = src.match(/name:\s*["'`]([^"'`]+)["'`]/);
+    const descMatch = src.match(/description:\s*\n?\s*["'`]([^"'`]+)["'`]/);
+    if (nameMatch && descMatch) {
+      return { name: nameMatch[1], description: descMatch[1] };
+    }
+  } catch {}
+  return null;
 }
 
 function extractProps(filePath: string): string[] | null {
