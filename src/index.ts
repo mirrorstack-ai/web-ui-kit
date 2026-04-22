@@ -82,3 +82,7 @@ export {
   type SocialIconProps,
   type SocialProvider,
 } from "./components/ui/actions/social-button/SocialButton";
+export {
+  ReadOnlyField,
+  type ReadOnlyFieldProps,
+} from "./components/ui/data/read-only-field/ReadOnlyField";
