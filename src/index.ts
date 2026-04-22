@@ -45,6 +45,11 @@ export {
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
 export {
+  Dialog,
+  type DialogProps,
+  type DialogAction,
+} from "./components/ui/surfaces/dialog/Dialog";
+export {
   Surface,
   type SurfaceProps,
 } from "./components/ui/surfaces/surface/Surface";
