@@ -22,6 +22,10 @@ export {
   type SnackbarAction,
 } from "./components/ui/feedback/snackbar/Snackbar";
 export {
+  FloatingLabelInput,
+  type FloatingLabelInputProps,
+} from "./components/ui/inputs/floating-label-input/FloatingLabelInput";
+export {
   SegmentedButton,
   type SegmentedButtonProps,
   type SegmentedButtonOption,
