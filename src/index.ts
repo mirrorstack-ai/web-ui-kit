@@ -45,6 +45,11 @@ export {
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
 export {
+  Alert,
+  type AlertProps,
+  type AlertVariant,
+} from "./components/ui/feedback/alert/Alert";
+export {
   Dialog,
   type DialogProps,
   type DialogAction,
