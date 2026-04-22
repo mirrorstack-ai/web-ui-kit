@@ -44,3 +44,8 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
+export {
+  Avatar,
+  type AvatarProps,
+  type AvatarSize,
+} from "./components/ui/media/avatar/Avatar";
