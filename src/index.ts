@@ -65,6 +65,11 @@ export {
 } from "./components/ui/media/avatar/Avatar";
 export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
 export {
+  Combobox,
+  type ComboboxProps,
+  type ComboboxOption,
+} from "./components/ui/inputs/combobox/Combobox";
+export {
   ImageCarousel,
   type ImageCarouselProps,
   type CarouselImage,
