@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">11 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">11/11 infos</a><span class="filter-pill ok" aria-disabled="true">53 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">12 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">12/12 infos</a><span class="filter-pill ok" aria-disabled="true">56 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -2377,14 +2377,140 @@ variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="Surface">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Surface</h2>
+      <div class="badges">
+        <label for="c-10-ui-surfaces-surface-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-10-ui-surfaces-surface-info" class="badge info as-toggle">1 info</label>
+        <label for="c-10-ui-surfaces-surface-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/surfaces/surface/Surface.stories.tsx">ui-surfaces-surface · ./src/components/ui/surfaces/surface/Surface.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-10-ui-surfaces-surface-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-10-ui-surfaces-surface-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-10-ui-surfaces-surface-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">1 prop type</span>
+            </div>
+            <pre><code>Component: src/components/ui/surfaces/surface/Surface.tsx::Surface</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>children: ReactNode</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Button, Surface } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = () =&gt; &lt;Surface className=&quot;p-6&quot;&gt;Surface container with default styling&lt;/Surface&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Card Example</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const CardExample = () =&gt; (
+  &lt;Surface className=&quot;p-0 max-w-sm overflow-hidden&quot;&gt;
+    &lt;div className=&quot;aspect-video bg-surface-container&quot; /&gt;
+    &lt;div className=&quot;p-4&quot;&gt;
+      &lt;h3 className=&quot;text-base font-semibold text-on-surface&quot;&gt;Card Title&lt;/h3&gt;
+      &lt;p className=&quot;text-sm text-on-surface-variant mt-1&quot;&gt;
+        A brief description of the card content.
+      &lt;/p&gt;
+      &lt;div className=&quot;flex justify-end gap-2 mt-4&quot;&gt;
+        &lt;Button variant=&quot;text&quot; size=&quot;sm&quot;&gt;
+          Cancel
+        &lt;/Button&gt;
+        &lt;Button variant=&quot;filled&quot; size=&quot;sm&quot;&gt;
+          Action
+        &lt;/Button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/Surface&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Nested</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Nested = () =&gt; (
+  &lt;Surface className=&quot;p-6&quot;&gt;
+    &lt;h3 className=&quot;text-base font-semibold text-on-surface mb-3&quot;&gt;
+      Outer Surface
+    &lt;/h3&gt;
+    &lt;Surface className=&quot;p-4 bg-surface-container&quot;&gt;
+      &lt;p className=&quot;text-sm text-on-surface-variant&quot;&gt;
+        Nested surface with higher elevation background
+      &lt;/p&gt;
+    &lt;/Surface&gt;
+  &lt;/Surface&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="Switch">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Switch</h2>
       <div class="badges">
-        <label for="c-10-ui-inputs-switch-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-10-ui-inputs-switch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-10-ui-inputs-switch-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-11-ui-inputs-switch-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-11-ui-inputs-switch-info" class="badge info as-toggle">1 info</label>
+        <label for="c-11-ui-inputs-switch-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -2396,10 +2522,10 @@ variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-10-ui-inputs-switch-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-10-ui-inputs-switch-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-11-ui-inputs-switch-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-11-ui-inputs-switch-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-10-ui-inputs-switch-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-11-ui-inputs-switch-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
