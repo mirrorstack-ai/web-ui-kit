@@ -46,7 +46,7 @@ export const Playground: Story = {
             onClick={() => setSelected("dashboard")}
           />
           <NavigationButton
-            icon="apps"
+            icon="data_table"
             label="Your Apps"
             selected={selected === "apps"}
             onClick={() => setSelected("apps")}
