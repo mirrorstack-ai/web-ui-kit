@@ -2,6 +2,7 @@ import { type ButtonHTMLAttributes, type CSSProperties } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Progress } from "@/components/ui/feedback/progress/Progress";
+import { Icon } from "@/components/ui/media/icon/Icon";
 import { isDev } from "@/utils/env";
 import {
   type ButtonVariant,
@@ -44,13 +45,6 @@ const gapStyles: Record<ButtonSize, string> = {
   lg: "gap-3",
 };
 
-function MaterialIcon({ name, size }: { name: string; size: ButtonSize }) {
-  return (
-    <span className="material-symbols-rounded" style={{ fontSize: iconSizes[size] }}>
-      {name}
-    </span>
-  );
-}
 
 export function Button({
   variant = "filled",
@@ -98,9 +92,9 @@ export function Button({
           loading && "opacity-0",
         )}
       >
-        {leftIcon && <MaterialIcon name={leftIcon} size={size} />}
+        {leftIcon && <Icon name={leftIcon} size={iconSizes[size]} />}
         {children}
-        {rightIcon && <MaterialIcon name={rightIcon} size={size} />}
+        {rightIcon && <Icon name={rightIcon} size={iconSizes[size]} />}
       </span>
     </button>
   );

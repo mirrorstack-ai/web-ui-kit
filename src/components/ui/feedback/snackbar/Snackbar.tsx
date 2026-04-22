@@ -3,6 +3,7 @@ import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Button } from "@/components/ui/actions/button/Button";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
+import { Icon } from "@/components/ui/media/icon/Icon";
 
 export const meta: ComponentMeta = {
   name: "Snackbar",
@@ -133,14 +134,11 @@ export function Snackbar({
               <div className="w-2 h-2 rounded-full bg-warning animate-pulse shrink-0" />
             )}
             {icon && (
-              <span
-                className={cn(
-                  "material-symbols-rounded !text-xl shrink-0",
-                  variantTextColor[variant],
-                )}
-              >
-                {icon}
-              </span>
+              <Icon
+                name={icon}
+                size={20}
+                className={variantTextColor[variant]}
+              />
             )}
             <span className={cn("text-sm line-clamp-3 break-all", variantTextColor[variant])}>
               {message}

@@ -2,6 +2,7 @@ import { type ButtonHTMLAttributes } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Progress } from "@/components/ui/feedback/progress/Progress";
+import { Icon } from "@/components/ui/media/icon/Icon";
 import { isDev } from "@/utils/env";
 import {
   type ButtonVariant,
@@ -71,12 +72,7 @@ export function IconButton({
           style={{ width: iconSizes[size], height: iconSizes[size] }}
         />
       ) : (
-        <span
-          className="material-symbols-rounded"
-          style={{ fontSize: iconSizes[size] }}
-        >
-          {icon}
-        </span>
+        <Icon name={icon} size={iconSizes[size]} />
       )}
     </button>
   );
