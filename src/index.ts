@@ -96,3 +96,7 @@ export {
   ReadOnlyField,
   type ReadOnlyFieldProps,
 } from "./components/ui/data/read-only-field/ReadOnlyField";
+export {
+  ReauthDialog,
+  type ReauthDialogProps,
+} from "./components/ui/surfaces/reauth-dialog/ReauthDialog";
