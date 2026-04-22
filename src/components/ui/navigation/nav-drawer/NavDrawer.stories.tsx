@@ -15,6 +15,11 @@ const sections: NavDrawerSection[] = [
   },
   {
     items: [
+      { id: "organizations", label: "Organizations", icon: "apartment" },
+    ],
+  },
+  {
+    items: [
       { id: "sign-out", label: "Sign out", icon: "logout", variant: "danger" as const },
     ],
   },
