@@ -24,10 +24,14 @@ export const Playground: Story = {
             console.log("Reauth token:", token);
             setOpen(false);
           }}
-          onPasswordVerify={async (pw) => {
+          onEmailSendCode={async () => {
             await new Promise((r) => setTimeout(r, 1000));
-            if (pw === "password") return "mock-reauth-token";
-            throw new Error("Incorrect password");
+            return "challenge-123";
+          }}
+          onEmailVerifyCode={async (_challengeId, code) => {
+            await new Promise((r) => setTimeout(r, 1000));
+            if (code === "123456") return "mock-reauth-token";
+            throw new Error("Invalid verification code");
           }}
           onPasskeyVerify={async () => {
             await new Promise((r) => setTimeout(r, 1000));
@@ -39,7 +43,7 @@ export const Playground: Story = {
   },
 };
 
-export const PasswordOnly: Story = {
+export const EmailOnly: Story = {
   render: () => {
     const [open, setOpen] = useState(false);
     return (
@@ -49,11 +53,15 @@ export const PasswordOnly: Story = {
           open={open}
           onClose={() => setOpen(false)}
           onSuccess={() => setOpen(false)}
-          methods={["password"]}
-          onPasswordVerify={async (pw) => {
+          methods={["email"]}
+          onEmailSendCode={async () => {
             await new Promise((r) => setTimeout(r, 500));
-            if (pw === "password") return "token";
-            throw new Error("Incorrect password");
+            return "challenge-456";
+          }}
+          onEmailVerifyCode={async (_id, code) => {
+            await new Promise((r) => setTimeout(r, 500));
+            if (code === "123456") return "token";
+            throw new Error("Invalid code");
           }}
         />
       </>
