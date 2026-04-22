@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Dialog } from "@/components/ui/surfaces/dialog/Dialog";
 import { Button } from "@/components/ui/actions/button/Button";
@@ -126,6 +127,8 @@ export function ReauthDialog({
     }
   };
 
+  const linkCls = "text-sm text-primary hover:underline disabled:opacity-50";
+
   return (
     <Dialog
       open={open}
@@ -165,7 +168,7 @@ export function ReauthDialog({
                 setShowEmailFallback(true);
               }}
               disabled={isVerifying}
-              className="text-sm text-primary hover:underline disabled:opacity-50"
+              className={linkCls}
             >
               Use email verification instead
             </button>
@@ -196,7 +199,7 @@ export function ReauthDialog({
                 setShowEmailFallback(false);
               }}
               disabled={isSending}
-              className="text-sm text-primary hover:underline disabled:opacity-50"
+              className={linkCls}
             >
               Use passkey instead
             </button>
@@ -223,7 +226,7 @@ export function ReauthDialog({
             type="button"
             onClick={handleSendCode}
             disabled={isSending || isVerifying}
-            className="text-xs text-primary hover:underline disabled:opacity-50"
+            className={cn(linkCls, "text-xs")}
           >
             {isSending ? "Sending..." : "Resend code"}
           </button>

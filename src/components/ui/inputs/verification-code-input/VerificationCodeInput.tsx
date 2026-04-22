@@ -88,9 +88,7 @@ export function VerificationCodeInput({
       e.preventDefault();
       const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, length);
       if (!pasted) return;
-      const next = pasted.padEnd(length, "").split("").slice(0, length);
-      // Keep empty strings for unfilled positions
-      const filled = next.map((d) => (d === " " ? "" : d));
+      const filled = Array.from({ length }, (_, i) => pasted[i] ?? "");
       updateValue(filled);
       const focusIdx = Math.min(pasted.length, length - 1);
       focusInput(focusIdx);
