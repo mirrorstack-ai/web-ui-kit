@@ -4,7 +4,7 @@ import { Logo } from "@/components/ui/media/logo-mirrorstack/LogoMirrorStack";
 
 const apps = [
   { id: "account", label: "Account", description: "Profile & security settings", icon: "shield_person", href: "#" },
-  { id: "apps", label: "Apps", description: "Manage your applications", icon: "apps", href: "#" },
+  { id: "apps", label: "Apps", description: "Manage your applications", icon: "data_table", href: "#" },
 ];
 
 const meta: Meta<typeof AppSwitcher> = {
