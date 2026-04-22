@@ -51,7 +51,7 @@ export function NavDrawer({
     >
       {branding && <div className="pb-4 px-2 shrink-0">{branding}</div>}
 
-      <div className="flex-1 min-h-0 flex flex-col justify-center space-y-3 overflow-y-auto overscroll-none">
+      <div className="flex-1 min-h-0 flex flex-col space-y-3 overflow-y-auto overscroll-none">
         {contextSwitcher && <Surface className="p-2">{contextSwitcher}</Surface>}
 
         {sections.map((section) => (
