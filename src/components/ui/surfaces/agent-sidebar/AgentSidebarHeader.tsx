@@ -185,22 +185,20 @@ export function AgentSidebarHeader({
       </div>
       {/* Overflow dropdown — rendered outside the clipped container */}
       {showOverflow && overflowTabs.length > 0 && (
-        <div className="absolute top-full left-10 mt-1 w-48 bg-surface-container rounded-lg shadow-lg z-50">
-          <div className="py-1 px-1">
-            {overflowTabs.map((tab) => (
-              <button
-                key={tab.id}
-                className={cn(
-                  "w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2",
-                  tab.id === activeTabId ? "bg-primary/10 text-primary" : "text-on-surface hover:bg-surface-container-high",
-                )}
-                onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
-              >
-                <Icon name="auto_awesome" size={14} />
-                <span className="truncate">{tab.title}</span>
-              </button>
-            ))}
-          </div>
+        <div className="absolute top-full right-12 mt-1 w-40 bg-surface-container rounded-lg shadow-lg z-50 py-1">
+          {overflowTabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={cn(
+                "w-full px-3 py-1.5 text-left text-xs rounded transition-colors flex items-center gap-2",
+                tab.id === activeTabId ? "bg-primary/10 text-primary" : "text-on-surface hover:bg-surface-container-high",
+              )}
+              onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
+            >
+              <Icon name="auto_awesome" size={12} />
+              <span className="truncate">{tab.title}</span>
+            </button>
+          ))}
         </div>
       )}
     </div>
