@@ -49,3 +49,6 @@ export {
   type DialogProps,
   type DialogAction,
 } from "./components/ui/surfaces/dialog/Dialog";
+  Surface,
+  type SurfaceProps,
+} from "./components/ui/surfaces/surface/Surface";
