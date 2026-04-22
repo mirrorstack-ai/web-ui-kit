@@ -64,7 +64,7 @@ export function SocialButton({
       type="button"
       aria-label={!children && provider ? `Sign in with ${provider}` : undefined}
       className={cn(
-        "flex-1 h-12 flex items-center justify-center rounded-lg",
+        "flex-1 h-12 min-w-12 px-4 flex items-center justify-center rounded-lg",
         "border border-outline-variant bg-surface-container-low",
         "hover:bg-surface-container transition-colors cursor-pointer",
         "disabled:opacity-50 disabled:cursor-not-allowed",
