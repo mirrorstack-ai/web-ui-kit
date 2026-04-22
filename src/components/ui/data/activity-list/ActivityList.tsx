@@ -39,7 +39,7 @@ export function ActivityList({
   if (loading) {
     return (
       <div className={cn("py-8 text-center", className)}>
-        <Progress type="circular" size="lg" />
+        <Progress type="circular" size="sm" />
       </div>
     );
   }
@@ -80,7 +80,7 @@ export function ActivityList({
 
       {hasMore && onLoadMore && (
         <div className="mt-3 text-center">
-          <Button variant="text" onClick={onLoadMore} loading={loadingMore}>
+          <Button variant="text" size="sm" onClick={onLoadMore} loading={loadingMore}>
             Load more
           </Button>
         </div>
