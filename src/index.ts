@@ -132,3 +132,7 @@ export {
   type NavDrawerItem,
   type NavDrawerSection,
 } from "./components/ui/navigation/nav-drawer/NavDrawer";
+export {
+  AppShell,
+  type AppShellProps,
+} from "./components/layout/app-shell/app-shell/AppShell";
