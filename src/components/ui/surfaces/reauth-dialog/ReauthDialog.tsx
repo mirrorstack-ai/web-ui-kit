@@ -200,9 +200,6 @@ export function ReauthDialog({
 
       {showingEmail && codeSent && (
         <div className="flex flex-col items-center gap-4 py-2">
-          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-            <Icon name="mail" size={32} className="text-primary" />
-          </div>
           <p className="text-sm text-on-surface-variant text-center">
             Enter the 6-digit code sent to your email
           </p>
