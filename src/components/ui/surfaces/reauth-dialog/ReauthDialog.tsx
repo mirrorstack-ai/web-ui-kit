@@ -233,12 +233,7 @@ export function ReauthDialog({
           {hasPasskey && (
             <button
               type="button"
-              onClick={() => {
-                setError(null);
-                setCode("");
-                setChallengeId(null);
-                setShowEmailFallback(false);
-              }}
+              onClick={() => reset()}
               disabled={isVerifying}
               className={cn(linkCls, "text-xs")}
             >
