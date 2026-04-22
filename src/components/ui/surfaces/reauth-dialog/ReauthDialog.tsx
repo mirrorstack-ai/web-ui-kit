@@ -136,6 +136,12 @@ export function ReauthDialog({
     >
       <p className="text-sm text-on-surface-variant mb-4">{description}</p>
 
+      {error && (
+        <Alert variant="error" onDismiss={() => setError(null)} className="mb-4">
+          {error}
+        </Alert>
+      )}
+
       {!showingEmail && (
         <div className="flex flex-col items-center gap-3 py-2">
           <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
@@ -224,11 +230,6 @@ export function ReauthDialog({
         </div>
       )}
 
-      {error && (
-        <Alert variant="error" onDismiss={() => setError(null)} className="mt-4">
-          {error}
-        </Alert>
-      )}
     </Dialog>
   );
 }
