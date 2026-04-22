@@ -64,3 +64,8 @@ export {
   type AvatarSize,
 } from "./components/ui/media/avatar/Avatar";
 export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
+export {
+  ThemeToggle,
+  type ThemeToggleProps,
+  type Theme,
+} from "./components/ui/actions/theme-toggle/ThemeToggle";
