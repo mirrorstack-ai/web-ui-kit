@@ -58,3 +58,8 @@ export {
   Surface,
   type SurfaceProps,
 } from "./components/ui/surfaces/surface/Surface";
+export {
+  Avatar,
+  type AvatarProps,
+  type AvatarSize,
+} from "./components/ui/media/avatar/Avatar";
