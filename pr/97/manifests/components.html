@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2456,7 +2456,7 @@ value: string</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { ReadOnlyField } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { Badge, ReadOnlyField } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -2488,7 +2488,7 @@ value: string</code></pre>
               <pre><code>const WithSuffix = () =&gt; &lt;ReadOnlyField
     label=&quot;Status&quot;
     value=&quot;Deployed&quot;
-    suffix={&lt;span className=&quot;text-xs text-success font-medium&quot;&gt;Live&lt;/span&gt;} /&gt;;</code></pre>
+    suffix={&lt;Badge variant=&quot;success&quot; size=&quot;sm&quot;&gt;Live&lt;/Badge&gt;} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
