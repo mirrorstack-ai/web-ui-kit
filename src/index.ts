@@ -108,3 +108,8 @@ export {
   type SidebarProviderProps,
   type SidebarContextType,
 } from "./context/sidebar/SidebarProvider";
+export {
+  ActivityList,
+  type ActivityListProps,
+  type ActivityItem,
+} from "./components/ui/data/activity-list/ActivityList";
