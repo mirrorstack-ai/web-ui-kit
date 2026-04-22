@@ -55,7 +55,7 @@ describe("ReauthDialog", () => {
     );
     fireEvent.click(screen.getByText("Send verification code"));
     await vi.waitFor(() => {
-      expect(screen.getByLabelText("Verification code")).toBeInTheDocument();
+      expect(screen.getByLabelText("Digit 1")).toBeInTheDocument();
     });
   });
 });

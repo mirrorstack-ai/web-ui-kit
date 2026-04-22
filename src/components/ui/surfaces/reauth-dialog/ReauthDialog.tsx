@@ -4,7 +4,7 @@ import { Dialog } from "@/components/ui/surfaces/dialog/Dialog";
 import { Button } from "@/components/ui/actions/button/Button";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Alert } from "@/components/ui/feedback/alert/Alert";
-import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
+import { VerificationCodeInput } from "@/components/ui/inputs/verification-code-input/VerificationCodeInput";
 
 function errorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
@@ -91,22 +91,19 @@ export function ReauthDialog({
     }
   };
 
-  const handleEmailVerify = async () => {
-    if (!code || code.length !== 6) {
-      setError("Please enter the 6-digit code");
-      return;
-    }
+  const handleEmailVerify = async (verifyCode: string) => {
     if (!challengeId) return;
     setError(null);
     setIsVerifying(true);
     try {
       if (!onEmailVerifyCode)
         throw new Error("Email verification not configured");
-      const token = await onEmailVerifyCode(challengeId, code);
+      const token = await onEmailVerifyCode(challengeId, verifyCode);
       reset();
       onSuccess(token);
     } catch (err) {
       setError(errorMessage(err, "Invalid code"));
+      setCode("");
       setIsVerifying(false);
     }
   };
@@ -135,25 +132,7 @@ export function ReauthDialog({
       onClose={handleClose}
       title={title}
       className={className}
-      actions={
-        showingEmail && codeSent
-          ? [
-              {
-                label: "Cancel",
-                variant: "text" as const,
-                onClick: handleClose,
-                disabled: isVerifying,
-              },
-              {
-                label: "Verify",
-                variant: "filled" as const,
-                onClick: handleEmailVerify,
-                loading: isVerifying,
-                disabled: code.length !== 6,
-              },
-            ]
-          : undefined
-      }
+      actions={undefined}
     >
       <p className="text-sm text-on-surface-variant mb-4">{description}</p>
 
@@ -220,31 +199,28 @@ export function ReauthDialog({
       )}
 
       {showingEmail && codeSent && (
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-on-surface-variant">
-            Enter the 6-digit code sent to your email.
+        <div className="flex flex-col items-center gap-4 py-2">
+          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+            <Icon name="mail" size={32} className="text-primary" />
+          </div>
+          <p className="text-sm text-on-surface-variant text-center">
+            Enter the 6-digit code sent to your email
           </p>
-          <FloatingLabelInput
-            type="text"
-            inputMode="numeric"
-            id="reauth-code"
-            label="Verification code"
+          <VerificationCodeInput
             value={code}
-            onChange={(e) => {
-              const v = (e as React.ChangeEvent<HTMLInputElement>).target.value.replace(/\D/g, "").slice(0, 6);
-              setCode(v);
-            }}
+            onChange={setCode}
+            onComplete={handleEmailVerify}
             disabled={isVerifying}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleEmailVerify();
-            }}
-            maxLength={6}
+            error={!!error}
           />
+          {isVerifying && (
+            <p className="text-sm text-on-surface-variant">Verifying...</p>
+          )}
           <button
             type="button"
             onClick={handleSendCode}
             disabled={isSending || isVerifying}
-            className="text-sm text-primary hover:underline disabled:opacity-50 self-start"
+            className="text-sm text-primary hover:underline disabled:opacity-50"
           >
             {isSending ? "Sending..." : "Resend code"}
           </button>

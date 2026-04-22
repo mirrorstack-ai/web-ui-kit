@@ -117,3 +117,7 @@ export {
   ReauthDialog,
   type ReauthDialogProps,
 } from "./components/ui/surfaces/reauth-dialog/ReauthDialog";
+export {
+  VerificationCodeInput,
+  type VerificationCodeInputProps,
+} from "./components/ui/inputs/verification-code-input/VerificationCodeInput";
