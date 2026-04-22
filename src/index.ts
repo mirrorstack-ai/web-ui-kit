@@ -44,3 +44,4 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
+export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
