@@ -44,3 +44,8 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
+export {
+  Combobox,
+  type ComboboxProps,
+  type ComboboxOption,
+} from "./components/ui/inputs/combobox/Combobox";
