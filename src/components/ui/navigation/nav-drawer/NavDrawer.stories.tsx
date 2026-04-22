@@ -46,13 +46,12 @@ export const Playground: Story = {
     return (
       <NavDrawer
         contextSwitcher={
-          <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container transition-colors cursor-pointer">
+          <div className="flex items-center gap-3 p-3 rounded-xl">
             <Avatar size="md" fallback="J" />
             <div className="min-w-0 flex-1 space-y-0.5">
               <p className="text-sm font-medium text-on-surface truncate">John Doe</p>
               <p className="text-xs text-on-surface-variant">Personal Account</p>
             </div>
-            <Icon name="expand_more" size={16} className="text-on-surface-variant" />
           </div>
         }
         sections={sections}
