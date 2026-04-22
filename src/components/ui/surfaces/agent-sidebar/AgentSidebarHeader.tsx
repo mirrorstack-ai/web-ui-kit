@@ -181,7 +181,7 @@ export function AgentSidebarHeader({
             <button
               key={tab.id}
               className={cn(
-                "w-full px-2.5 py-1 text-left text-xs rounded-md transition-colors flex items-center gap-1.5",
+                "w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5",
                 tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
               )}
               onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
@@ -192,7 +192,7 @@ export function AgentSidebarHeader({
           ))}
           <div className="h-px bg-outline-variant mx-1 my-1" />
           <button
-            className="w-full px-2.5 py-1 text-left text-xs rounded-md transition-colors flex items-center gap-1.5 text-primary hover:bg-on-surface/10"
+            className="w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5 text-primary hover:bg-on-surface/10"
             onClick={() => { handleAddTab(); setShowOverflow(false); }}
           >
             <Icon name="add" size={12} />
