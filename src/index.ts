@@ -70,3 +70,8 @@ export {
   type BadgeVariant,
   type BadgeSize,
 } from "./components/ui/feedback/badge/Badge";
+export {
+  ThemeToggle,
+  type ThemeToggleProps,
+  type Theme,
+} from "./components/ui/actions/theme-toggle/ThemeToggle";
