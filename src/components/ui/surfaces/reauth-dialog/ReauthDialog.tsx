@@ -230,6 +230,21 @@ export function ReauthDialog({
           >
             {isSending ? "Sending..." : "Resend code"}
           </button>
+          {hasPasskey && (
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setCode("");
+                setChallengeId(null);
+                setShowEmailFallback(false);
+              }}
+              disabled={isVerifying}
+              className={cn(linkCls, "text-xs")}
+            >
+              Use passkey instead
+            </button>
+          )}
         </div>
       )}
 
