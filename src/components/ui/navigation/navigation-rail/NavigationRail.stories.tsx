@@ -24,52 +24,45 @@ export const Playground: Story = {
     const [selected, setSelected] = useState("apps");
     return (
       <div className="flex flex-col items-center">
-      <Avatar size="lg" fallback="J" square className="ml-4 mb-2" />
-      <NavigationRail
-        footer={
-          <NavigationButton
-            icon="settings"
-            label="Settings"
-            selected={selected === "settings"}
-            onClick={() => setSelected("settings")}
-          />
-        }
-      >
-        <div className="w-full gap-2 flex flex-col">
-          <NavigationButton
-            icon="dashboard"
-            label="Overview"
-            variant="primary"
-            selected={selected === "overview"}
-            onClick={() => setSelected("overview")}
-          />
-          <NavigationButton
-            icon="apps"
-            label="Your Apps"
-            selected={selected === "apps"}
-            onClick={() => setSelected("apps")}
-          />
-        </div>
-        <div className="h-px rounded-full w-full bg-outline" />
-        <div className="w-full gap-2 flex flex-col">
-          <NavigationButton
-            icon="apartment"
-            label="Organizations"
-            variant="tertiary"
-            selected={selected === "org"}
-            onClick={() => setSelected("org")}
-          />
-        </div>
-        <div className="h-px rounded-full w-full bg-outline" />
-        <div className="w-full gap-2 flex flex-col">
-          <NavigationButton
-            icon="description"
-            label="Documentation"
-            selected={selected === "docs"}
-            onClick={() => setSelected("docs")}
-          />
-        </div>
-      </NavigationRail>
+        <button className="ml-4 w-[4.5rem] h-[4.5rem] rounded-2xl bg-surface-bright shadow-2xl flex items-center justify-center cursor-pointer hover:shadow-none transition-all">
+          <Avatar fallback="J" size="md" />
+        </button>
+        <NavigationRail>
+          <div className="w-full gap-2 flex flex-col">
+            <NavigationButton
+              icon="dashboard"
+              label="Overview"
+              selected={selected === "overview"}
+              onClick={() => setSelected("overview")}
+            />
+            <NavigationButton
+              icon="apps"
+              label="Your Apps"
+              variant="primary"
+              selected={selected === "apps"}
+              onClick={() => setSelected("apps")}
+            />
+          </div>
+          <div className="h-px rounded-full w-full bg-outline" />
+          <div className="w-full gap-2 flex flex-col">
+            <NavigationButton
+              icon="apartment"
+              label="Organizations"
+              variant="tertiary"
+              selected={selected === "org"}
+              onClick={() => setSelected("org")}
+            />
+          </div>
+          <div className="h-px rounded-full w-full bg-outline" />
+          <div className="w-full gap-2 flex flex-col">
+            <NavigationButton
+              icon="description"
+              label="Documentation"
+              selected={selected === "docs"}
+              onClick={() => setSelected("docs")}
+            />
+          </div>
+        </NavigationRail>
       </div>
     );
   },
