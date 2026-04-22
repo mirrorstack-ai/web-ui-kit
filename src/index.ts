@@ -65,6 +65,11 @@ export {
 } from "./components/ui/media/avatar/Avatar";
 export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
 export {
+  ImageCarousel,
+  type ImageCarouselProps,
+  type CarouselImage,
+} from "./components/ui/media/image-carousel/ImageCarousel";
+export {
   Badge,
   type BadgeProps,
   type BadgeVariant,
