@@ -65,6 +65,24 @@ export {
 } from "./components/ui/media/avatar/Avatar";
 export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
 export {
+  Badge,
+  type BadgeProps,
+  type BadgeVariant,
+  type BadgeSize,
+} from "./components/ui/feedback/badge/Badge";
+export {
+  ThemeToggle,
+  type ThemeToggleProps,
+  type Theme,
+} from "./components/ui/actions/theme-toggle/ThemeToggle";
+export {
+  SocialButton,
+  SocialIcon,
+  type SocialButtonProps,
+  type SocialIconProps,
+  type SocialProvider,
+} from "./components/ui/actions/social-button/SocialButton";
+export {
   ReadOnlyField,
   type ReadOnlyFieldProps,
 } from "./components/ui/data/read-only-field/ReadOnlyField";
