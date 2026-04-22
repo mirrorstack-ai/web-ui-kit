@@ -7,21 +7,13 @@ const sections: NavDrawerSection[] = [
     label: "Account",
     items: [
       { id: "profile", label: "Profile", icon: "person" },
-      { id: "security", label: "Security", icon: "security" },
-      { id: "sessions", label: "Sessions", icon: "devices" },
-      { id: "passkeys", label: "Passkeys", icon: "passkey" },
-    ],
-  },
-  {
-    label: "Preferences",
-    items: [
-      { id: "appearance", label: "Appearance", icon: "palette" },
-      { id: "notifications", label: "Notifications", icon: "notifications" },
+      { id: "security", label: "Security", icon: "shield" },
+      { id: "preferences", label: "Preferences", icon: "tune" },
     ],
   },
   {
     items: [
-      { id: "signout", label: "Sign Out", icon: "logout", variant: "danger" as const },
+      { id: "sign-out", label: "Sign out", icon: "logout", variant: "danger" as const },
     ],
   },
 ];
