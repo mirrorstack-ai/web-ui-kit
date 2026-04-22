@@ -130,17 +130,17 @@ export function ReauthDialog({
     <Dialog
       open={open}
       onClose={handleClose}
-      title={title}
       className={className}
       actions={undefined}
     >
-      <p className="text-sm text-on-surface-variant mb-4">{description}</p>
-
       {error && (
         <Alert variant="error" onDismiss={() => setError(null)} className="mb-4">
           {error}
         </Alert>
       )}
+
+      <h3 className="text-lg font-semibold text-on-surface mb-2">{title}</h3>
+      <p className="text-sm text-on-surface-variant mb-4">{description}</p>
 
       {!showingEmail && (
         <div className="flex flex-col items-center gap-3 py-2">
