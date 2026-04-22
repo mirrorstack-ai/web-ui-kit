@@ -141,3 +141,8 @@ export {
   type NavigationButtonProps,
   type NavigationButtonVariant,
 } from "./components/ui/navigation/navigation-button/NavigationButton";
+export {
+  AppSwitcher,
+  type AppSwitcherProps,
+  type AppLink,
+} from "./components/ui/navigation/app-switcher/AppSwitcher";
