@@ -45,6 +45,26 @@ export {
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
 export {
+  Alert,
+  type AlertProps,
+  type AlertVariant,
+} from "./components/ui/feedback/alert/Alert";
+export {
+  Dialog,
+  type DialogProps,
+  type DialogAction,
+} from "./components/ui/surfaces/dialog/Dialog";
+export {
+  Surface,
+  type SurfaceProps,
+} from "./components/ui/surfaces/surface/Surface";
+export {
+  Avatar,
+  type AvatarProps,
+  type AvatarSize,
+} from "./components/ui/media/avatar/Avatar";
+export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
+export {
   ThemeToggle,
   type ThemeToggleProps,
   type Theme,
