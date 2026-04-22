@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ReadOnlyField } from "./ReadOnlyField";
+import { Badge } from "@/components/ui/feedback/badge/Badge";
 
 const meta: Meta<typeof ReadOnlyField> = {
   title: "UI/Data/ReadOnlyField",
@@ -32,7 +33,7 @@ export const WithSuffix: Story = {
   args: {
     label: "Status",
     value: "Deployed",
-    suffix: <span className="text-xs text-success font-medium">Live</span>,
+    suffix: <Badge variant="success" size="sm">Live</Badge>,
   },
 };
 
