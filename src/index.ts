@@ -44,3 +44,10 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
+export {
+  SocialButton,
+  SocialIcon,
+  type SocialButtonProps,
+  type SocialIconProps,
+  type SocialProvider,
+} from "./components/ui/actions/social-button/SocialButton";
