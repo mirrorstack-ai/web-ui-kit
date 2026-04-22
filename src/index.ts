@@ -44,9 +44,6 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
-<<<<<<< feat/24-logo
-export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
-=======
 export {
   Alert,
   type AlertProps,
@@ -66,4 +63,4 @@ export {
   type AvatarProps,
   type AvatarSize,
 } from "./components/ui/media/avatar/Avatar";
->>>>>>> main
+export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
