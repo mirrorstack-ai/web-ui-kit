@@ -44,3 +44,8 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
+export {
+  ImageCarousel,
+  type ImageCarouselProps,
+  type CarouselImage,
+} from "./components/ui/media/image-carousel/ImageCarousel";
