@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2748,52 +2748,45 @@ logo?: ReactNode</code></pre>
   const [selected, setSelected] = useState(&quot;apps&quot;);
   return (
     &lt;div className=&quot;flex flex-col items-center&quot;&gt;
-    &lt;Avatar size=&quot;lg&quot; fallback=&quot;J&quot; square className=&quot;ml-4 mb-2&quot; /&gt;
-    &lt;NavigationRail
-      footer={
-        &lt;NavigationButton
-          icon=&quot;settings&quot;
-          label=&quot;Settings&quot;
-          selected={selected === &quot;settings&quot;}
-          onClick={() =&gt; setSelected(&quot;settings&quot;)}
-        /&gt;
-      }
-    &gt;
-      &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
-        &lt;NavigationButton
-          icon=&quot;dashboard&quot;
-          label=&quot;Overview&quot;
-          variant=&quot;primary&quot;
-          selected={selected === &quot;overview&quot;}
-          onClick={() =&gt; setSelected(&quot;overview&quot;)}
-        /&gt;
-        &lt;NavigationButton
-          icon=&quot;apps&quot;
-          label=&quot;Your Apps&quot;
-          selected={selected === &quot;apps&quot;}
-          onClick={() =&gt; setSelected(&quot;apps&quot;)}
-        /&gt;
-      &lt;/div&gt;
-      &lt;div className=&quot;h-px rounded-full w-full bg-outline&quot; /&gt;
-      &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
-        &lt;NavigationButton
-          icon=&quot;apartment&quot;
-          label=&quot;Organizations&quot;
-          variant=&quot;tertiary&quot;
-          selected={selected === &quot;org&quot;}
-          onClick={() =&gt; setSelected(&quot;org&quot;)}
-        /&gt;
-      &lt;/div&gt;
-      &lt;div className=&quot;h-px rounded-full w-full bg-outline&quot; /&gt;
-      &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
-        &lt;NavigationButton
-          icon=&quot;description&quot;
-          label=&quot;Documentation&quot;
-          selected={selected === &quot;docs&quot;}
-          onClick={() =&gt; setSelected(&quot;docs&quot;)}
-        /&gt;
-      &lt;/div&gt;
-    &lt;/NavigationRail&gt;
+      &lt;button className=&quot;ml-4 w-[4.5rem] h-[4.5rem] rounded-2xl bg-surface-bright shadow-2xl flex items-center justify-center cursor-pointer hover:shadow-none transition-all&quot;&gt;
+        &lt;Avatar fallback=&quot;J&quot; size=&quot;md&quot; /&gt;
+      &lt;/button&gt;
+      &lt;NavigationRail&gt;
+        &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
+          &lt;NavigationButton
+            icon=&quot;dashboard&quot;
+            label=&quot;Overview&quot;
+            selected={selected === &quot;overview&quot;}
+            onClick={() =&gt; setSelected(&quot;overview&quot;)}
+          /&gt;
+          &lt;NavigationButton
+            icon=&quot;apps&quot;
+            label=&quot;Your Apps&quot;
+            variant=&quot;primary&quot;
+            selected={selected === &quot;apps&quot;}
+            onClick={() =&gt; setSelected(&quot;apps&quot;)}
+          /&gt;
+        &lt;/div&gt;
+        &lt;div className=&quot;h-px rounded-full w-full bg-outline&quot; /&gt;
+        &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
+          &lt;NavigationButton
+            icon=&quot;apartment&quot;
+            label=&quot;Organizations&quot;
+            variant=&quot;tertiary&quot;
+            selected={selected === &quot;org&quot;}
+            onClick={() =&gt; setSelected(&quot;org&quot;)}
+          /&gt;
+        &lt;/div&gt;
+        &lt;div className=&quot;h-px rounded-full w-full bg-outline&quot; /&gt;
+        &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
+          &lt;NavigationButton
+            icon=&quot;description&quot;
+            label=&quot;Documentation&quot;
+            selected={selected === &quot;docs&quot;}
+            onClick={() =&gt; setSelected(&quot;docs&quot;)}
+          /&gt;
+        &lt;/div&gt;
+      &lt;/NavigationRail&gt;
     &lt;/div&gt;
   );
 };</code></pre>
