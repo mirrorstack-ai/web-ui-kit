@@ -97,6 +97,18 @@ export {
   type ReadOnlyFieldProps,
 } from "./components/ui/data/read-only-field/ReadOnlyField";
 export {
+  ThemeProvider,
+  useTheme,
+  type ThemeProviderProps,
+  type ThemeContextType,
+} from "./context/theme/ThemeProvider";
+export {
+  SidebarProvider,
+  useSidebarWidth,
+  type SidebarProviderProps,
+  type SidebarContextType,
+} from "./context/sidebar/SidebarProvider";
+export {
   ActivityList,
   type ActivityListProps,
   type ActivityItem,
