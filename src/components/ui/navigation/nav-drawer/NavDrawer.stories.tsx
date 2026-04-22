@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { NavDrawer, type NavDrawerItem, type NavDrawerSection } from "./NavDrawer";
 import { Avatar } from "@/components/ui/media/avatar/Avatar";
+import { Icon } from "@/components/ui/media/icon/Icon";
 
 const sections: NavDrawerSection[] = [
   {
@@ -40,12 +41,13 @@ export const Playground: Story = {
     return (
       <NavDrawer
         contextSwitcher={
-          <div className="flex items-center gap-3 p-2">
-            <Avatar size="sm" fallback="J" />
-            <div className="min-w-0">
+          <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container transition-colors cursor-pointer">
+            <Avatar size="md" fallback="J" />
+            <div className="min-w-0 flex-1 space-y-0.5">
               <p className="text-sm font-medium text-on-surface truncate">John Doe</p>
-              <p className="text-xs text-on-surface-variant truncate">john@example.com</p>
+              <p className="text-xs text-on-surface-variant">Personal Account</p>
             </div>
+            <Icon name="expand_more" size={16} className="text-on-surface-variant" />
           </div>
         }
         sections={sections}
