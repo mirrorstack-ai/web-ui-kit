@@ -158,27 +158,15 @@ export function AgentSidebarHeader({
           })}
         </div>
 
-        {overflowTabs.length > 0 ? (
-          <div ref={overflowRef} className="z-10 h-10 flex justify-center">
-            <IconButton
-              icon="more_horiz"
-              variant="text"
-              size="sm"
-              className="m-auto text-on-surface"
-              onClick={() => setShowOverflow(!showOverflow)}
-              aria-label={`${overflowTabs.length} more tabs`}
-            />
-          </div>
-        ) : (
-          <div className="z-10 h-10 flex justify-center">
-            <IconButton icon="add" variant="text" size="sm" className="m-auto text-on-surface" onClick={handleAddTab} aria-label="New chat" />
-          </div>
-        )}
-
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-0.5 pr-1 shrink-0">
+      {/* Actions — outside the clipped container */}
+      <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
+        {overflowTabs.length > 0 ? (
+          <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
+        ) : (
+          <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label="New chat" />
+        )}
         <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
         <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
       </div>
