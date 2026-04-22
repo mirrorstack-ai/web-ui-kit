@@ -14,9 +14,9 @@ export interface AgentSidebarHeaderProps {
   onClose: () => void;
 }
 
-const TAB_WIDTH = 110;
+const TAB_WIDTH = 100;
 const GAP = 6;
-const RESERVED = 90;
+const ADD_BTN = 40;
 
 export function AgentSidebarHeader({
   sidebarWidth,
@@ -35,10 +35,18 @@ export function AgentSidebarHeader({
 
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
-    const available = tabsContainerRef.current.clientWidth - RESERVED;
-    const overflow = available - 40;
-    const count = Math.floor((overflow + GAP) / (TAB_WIDTH + GAP));
-    setVisibleCount(Math.max(1, Math.min(count, tabs.length)));
+    const container = tabsContainerRef.current.clientWidth;
+    const spaceForAll = tabs.length * TAB_WIDTH + (tabs.length - 1) * GAP + ADD_BTN;
+
+    if (spaceForAll <= container) {
+      setVisibleCount(tabs.length);
+      return;
+    }
+
+    // Need overflow button — subtract its width + add button
+    const available = container - ADD_BTN - ADD_BTN;
+    const count = Math.floor((available + GAP) / (TAB_WIDTH + GAP));
+    setVisibleCount(Math.max(1, count));
   }, [tabs.length]);
 
   useEffect(() => {
