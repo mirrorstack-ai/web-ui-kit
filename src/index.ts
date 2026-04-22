@@ -44,3 +44,8 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/state/dev-toolbar/DevToolbar";
+export {
+  ThemeToggle,
+  type ThemeToggleProps,
+  type Theme,
+} from "./components/ui/actions/theme-toggle/ThemeToggle";
