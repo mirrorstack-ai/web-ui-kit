@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, useRef, useCallback, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
@@ -28,9 +28,17 @@ export function ReadOnlyField({
   suffix,
   className,
 }: ReadOnlyFieldProps) {
-  const handleCopy = () => {
-    navigator.clipboard.writeText(value).then(() => onCopy?.()).catch(() => {});
-  };
+  const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 2000);
+      onCopy?.();
+    }).catch(() => {});
+  }, [value, onCopy]);
 
   return (
     <div className={className}>
@@ -48,12 +56,12 @@ export function ReadOnlyField({
         </span>
         {copyable && (
           <IconButton
-            icon="content_copy"
+            icon={copied ? "check" : "content_copy"}
             variant="text"
             size="sm"
             onClick={handleCopy}
-            aria-label={`Copy ${label}`}
-            className="shrink-0 text-on-surface-variant"
+            aria-label={copied ? "Copied" : `Copy ${label}`}
+            className={cn("shrink-0", copied ? "text-success" : "text-on-surface-variant")}
           />
         )}
         {suffix}
