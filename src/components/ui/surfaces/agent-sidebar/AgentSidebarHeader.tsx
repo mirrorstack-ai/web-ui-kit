@@ -158,8 +158,7 @@ export function AgentSidebarHeader({
           })}
         </div>
 
-        {/* Overflow trigger */}
-        {overflowTabs.length > 0 && (
+        {overflowTabs.length > 0 ? (
           <div ref={overflowRef} className="z-10 h-10 flex justify-center">
             <IconButton
               icon="more_horiz"
@@ -170,13 +169,16 @@ export function AgentSidebarHeader({
               aria-label={`${overflowTabs.length} more tabs`}
             />
           </div>
+        ) : (
+          <div className="z-10 h-10 flex justify-center">
+            <IconButton icon="add" variant="text" size="sm" className="m-auto text-on-surface" onClick={handleAddTab} aria-label="New chat" />
+          </div>
         )}
 
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-0.5 pr-1 shrink-0">
-        <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label="New chat" />
         <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
         <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
       </div>
@@ -196,6 +198,14 @@ export function AgentSidebarHeader({
               <span className="truncate">{tab.title}</span>
             </button>
           ))}
+          <div className="h-px bg-outline-variant mx-2 my-1" />
+          <button
+            className="w-full px-2.5 py-1 text-left text-xs rounded transition-colors flex items-center gap-1.5 text-primary hover:bg-surface-container-high"
+            onClick={() => { handleAddTab(); setShowOverflow(false); }}
+          >
+            <Icon name="add" size={12} />
+            <span>New chat</span>
+          </button>
         </div>
       )}
     </div>
