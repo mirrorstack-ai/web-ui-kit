@@ -75,3 +75,10 @@ export {
   type ThemeToggleProps,
   type Theme,
 } from "./components/ui/actions/theme-toggle/ThemeToggle";
+export {
+  SocialButton,
+  SocialIcon,
+  type SocialButtonProps,
+  type SocialIconProps,
+  type SocialProvider,
+} from "./components/ui/actions/social-button/SocialButton";
