@@ -97,6 +97,31 @@ export {
   type ReadOnlyFieldProps,
 } from "./components/ui/data/read-only-field/ReadOnlyField";
 export {
+  ThemeProvider,
+  useTheme,
+  type ThemeProviderProps,
+  type ThemeContextType,
+} from "./context/theme/ThemeProvider";
+export {
+  SidebarProvider,
+  useSidebarWidth,
+  type SidebarProviderProps,
+  type SidebarContextType,
+} from "./context/sidebar/SidebarProvider";
+export {
+  ActivityList,
+  type ActivityListProps,
+  type ActivityItem,
+} from "./components/ui/data/activity-list/ActivityList";
+export {
+  ReauthDialog,
+  type ReauthDialogProps,
+} from "./components/ui/surfaces/reauth-dialog/ReauthDialog";
+export {
+  VerificationCodeInput,
+  type VerificationCodeInputProps,
+} from "./components/ui/inputs/verification-code-input/VerificationCodeInput";
+export {
   NavItem,
   type NavItemProps,
   type NavItemVariant,
