@@ -132,3 +132,9 @@ export {
   type NavDrawerItem,
   type NavDrawerSection,
 } from "./components/ui/navigation/nav-drawer/NavDrawer";
+export {
+  AgentSidebarHeader,
+  type AgentSidebarHeaderProps,
+  AgentSidebarInput,
+  type AgentSidebarInputProps,
+} from "./components/ui/surfaces/agent-sidebar/AgentSidebar";
