@@ -6,6 +6,10 @@ import { Icon } from "@/components/ui/media/icon/Icon";
 import { Alert } from "@/components/ui/feedback/alert/Alert";
 import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
 
+function errorMessage(err: unknown, fallback: string): string {
+  return err instanceof Error ? err.message : fallback;
+}
+
 export const meta: ComponentMeta = {
   name: "ReauthDialog",
   description:
@@ -81,7 +85,7 @@ export function ReauthDialog({
       const id = await onEmailSendCode();
       setChallengeId(id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send code");
+      setError(errorMessage(err, "Failed to send code"));
     } finally {
       setIsSending(false);
     }
@@ -102,8 +106,7 @@ export function ReauthDialog({
       reset();
       onSuccess(token);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Invalid code");
-    } finally {
+      setError(errorMessage(err, "Invalid code"));
       setIsVerifying(false);
     }
   };
@@ -118,14 +121,10 @@ export function ReauthDialog({
       reset();
       onSuccess(token);
     } catch (err) {
-      if (err instanceof DOMException && err.name === "NotAllowedError") {
-        // User cancelled the passkey prompt
-      } else {
-        setError(
-          err instanceof Error ? err.message : "Passkey verification failed",
-        );
+      // NotAllowedError = user cancelled the passkey prompt
+      if (!(err instanceof DOMException && err.name === "NotAllowedError")) {
+        setError(errorMessage(err, "Passkey verification failed"));
       }
-    } finally {
       setIsVerifying(false);
     }
   };
