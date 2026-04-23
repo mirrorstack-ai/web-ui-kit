@@ -25,7 +25,7 @@ const TAB_IR = 12;
 const HEADER_H = 40;
 
 // History dropdown
-const HIST_W = 148;
+const HIST_W = 220;
 const HIST_NOTCH_H = 24;
 
 // Overflow dropdown notch dimensions
