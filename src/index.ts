@@ -151,3 +151,9 @@ export {
   type NotchProps,
   type NotchSide,
 } from "./components/ui/surfaces/notch/Notch";
+export {
+  AgentSidebarHeader,
+  type AgentSidebarHeaderProps,
+  AgentSidebarInput,
+  type AgentSidebarInputProps,
+} from "./components/ui/surfaces/agent-sidebar/AgentSidebar";
