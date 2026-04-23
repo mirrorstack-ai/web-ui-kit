@@ -3033,7 +3033,7 @@ width: number</code></pre>
     {([&quot;right&quot;, &quot;left&quot;, &quot;top&quot;, &quot;bottom&quot;] as const).map((side) =&gt; (
       &lt;div key={side}&gt;
         &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;{side}&lt;/p&gt;
-        &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchSide={side} notchOffset={10} /&gt;
+        &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchSide={side} notchOffset={0} /&gt;
       &lt;/div&gt;
     ))}
   &lt;/div&gt;
