@@ -100,32 +100,31 @@ function buildHeadPath(nw: number, nh: number, r: number, ir: number, atStart: b
 
   const d: string[] = [];
 
-  // Start top-left
-  d.push(`M 0,0`);
+  // The left edge at x=0 represents the body's right edge.
+  // Inverse corners match the full shape: arc going RIGHT-DOWN (sweep=0).
 
   if (!atStart) {
-    // Top-left inverse corner (body continues up)
-    d.push(`V ${topIr}`);
-    d.push(`A ${ir},${ir} 0 0,0 ${ir},0`);
+    // Top: sharp corner at (0,0), inverse corner from (0,0) to (ir, topIr)
+    d.push(`M 0,0`);
+    d.push(`A ${ir},${ir} 0 0,0 ${ir},${topIr}`);
+  } else {
+    d.push(`M 0,${topIr}`);
   }
 
-  // Top edge
+  // Top edge of notch
   d.push(`H ${w - r}`);
-  // Top-right rounded corner
   d.push(`A ${r},${r} 0 0,1 ${w},${topIr + r}`);
   // Right edge down
   d.push(`V ${topIr + nh - r}`);
-  // Bottom-right rounded corner
   d.push(`A ${r},${r} 0 0,1 ${w - r},${topIr + nh}`);
   // Bottom edge to left
   d.push(`H ${ir}`);
 
   if (!atEnd) {
-    // Bottom-left inverse corner (body continues down)
-    d.push(`A ${ir},${ir} 0 0,0 0,${h}`);
+    // Bottom inverse: from (ir, topIr+nh) to (0, topIr+nh+ir) — LEFT-DOWN
+    d.push(`A ${ir},${ir} 0 0,0 0,${topIr + nh + ir}`);
   }
 
-  // Sharp cut left edge back to start
   d.push(`V 0`);
   d.push(`Z`);
 
