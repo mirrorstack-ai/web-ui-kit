@@ -24,8 +24,9 @@ const TAB_R = 12;
 const TAB_IR = 12;
 const HEADER_H = 40;
 
-// History dropdown width
+// History dropdown
 const HIST_W = 148;
+const HIST_NOTCH_H = 20;
 
 // Overflow dropdown notch dimensions
 const DD_W = 176;
@@ -219,14 +220,14 @@ export function AgentSidebarHeader({
         <div
           ref={historyDropdownRef}
           className="absolute z-50 overflow-visible"
-          style={{ left: 4, top: `calc(100% - ${DD_NOTCH_H + 4}px)`, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+          style={{ left: 4, top: HIST_NOTCH_H, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
         >
           {histContentH > 0 && (
             <Notch
               width={HIST_W}
               height={histContentH}
               notchWidth={DD_NOTCH_W}
-              notchHeight={DD_NOTCH_H}
+              notchHeight={HIST_NOTCH_H}
               notchSide="bottom"
               notchOffset={0}
               radius={DD_R}
@@ -238,8 +239,8 @@ export function AgentSidebarHeader({
           )}
           <div
             ref={histContentRef}
-            className="relative z-10 py-1 px-1"
-            style={{ marginTop: DD_NOTCH_H, width: HIST_W }}
+            className="relative z-10 pt-2 pb-1 px-1"
+            style={{ marginTop: HIST_NOTCH_H, width: HIST_W }}
           >
             {tabs.map((tab) => (
               <div
