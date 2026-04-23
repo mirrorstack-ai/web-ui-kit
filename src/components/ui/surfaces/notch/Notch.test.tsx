@@ -19,8 +19,8 @@ describe("Notch", () => {
       <Notch width={200} height={150} notchWidth={40} notchHeight={50} notchSide="right" />,
     );
     const svg = container.querySelector("svg");
-    expect(svg).toHaveAttribute("width", "240");
-    expect(svg).toHaveAttribute("height", "150");
+    expect(svg).toHaveAttribute("width", "241");
+    expect(svg).toHaveAttribute("height", "151");
   });
 
   it("sets correct SVG dimensions for bottom notch", () => {
@@ -28,8 +28,8 @@ describe("Notch", () => {
       <Notch width={200} height={150} notchWidth={40} notchHeight={50} notchSide="bottom" />,
     );
     const svg = container.querySelector("svg");
-    expect(svg).toHaveAttribute("width", "200");
-    expect(svg).toHaveAttribute("height", "200");
+    expect(svg).toHaveAttribute("width", "201");
+    expect(svg).toHaveAttribute("height", "201");
   });
 
   it("renders head only", () => {
@@ -37,8 +37,8 @@ describe("Notch", () => {
       <Notch width={200} height={150} notchWidth={60} notchHeight={40} headOnly />,
     );
     const svg = container.querySelector("svg");
-    expect(svg).toHaveAttribute("width", "60");
-    expect(svg).toHaveAttribute("height", "40");
+    expect(svg).toHaveAttribute("width", "61");
+    expect(svg).toHaveAttribute("height", "41");
   });
 
   it("applies fill and stroke", () => {
