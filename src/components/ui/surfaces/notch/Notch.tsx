@@ -123,10 +123,18 @@ export function Notch({
   className,
   style,
 }: NotchProps) {
+  const pad = strokeWidth / 2;
+
   if (headOnly) {
     return (
-      <svg width={notchWidth} height={notchHeight} className={cn("pointer-events-none", className)} style={style}>
-        <path d={buildHeadPath(notchWidth, notchHeight, radius)} fill={fill} stroke={stroke} strokeWidth={strokeWidth} vectorEffect="non-scaling-stroke" />
+      <svg
+        width={notchWidth + strokeWidth}
+        height={notchHeight + strokeWidth}
+        viewBox={`${-pad} ${-pad} ${notchWidth + strokeWidth} ${notchHeight + strokeWidth}`}
+        className={cn("pointer-events-none", className)}
+        style={style}
+      >
+        <path d={buildHeadPath(notchWidth, notchHeight, radius)} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
       </svg>
     );
   }
@@ -191,7 +199,13 @@ export function Notch({
   }
 
   return (
-    <svg width={svgW} height={svgH} className={cn("pointer-events-none", className)} style={style}>
+    <svg
+      width={svgW + strokeWidth}
+      height={svgH + strokeWidth}
+      viewBox={`${-pad} ${-pad} ${svgW + strokeWidth} ${svgH + strokeWidth}`}
+      className={cn("pointer-events-none", className)}
+      style={style}
+    >
       <path d={path} fill={fill} stroke={stroke} strokeWidth={strokeWidth} transform={transform} />
     </svg>
   );
