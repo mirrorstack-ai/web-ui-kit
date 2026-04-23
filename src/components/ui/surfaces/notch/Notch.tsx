@@ -88,33 +88,34 @@ function buildPath(
   return d.join(" ");
 }
 
-// Head only: just the notch tab cut from the full shape.
-// Drawn as right-edge notch tab: inverse corners on left, rounded corners on right.
-// nw = notch width, nh = notch height, r = corner radius, ir = inverse radius
-// Total size: (nw + ir) wide, (nh + ir*2) tall
+// Head only: the notch tab cut from the full shape at offset=0.
+// For a right-edge notch at offset=0:
+//   - Top edge is shared with body top → normal rounded corner on top-left and top-right
+//   - Bottom has inverse corner on left (where body would continue down)
+//   - Right side has normal rounded corners
+//   - Left side: straight down, then inverse corner, then sharp cut
+// Size: (nw + ir) wide, (nh + ir) tall
 function buildHeadPath(nw: number, nh: number, r: number, ir: number) {
-  const w = nw + ir; // total width
-  const h = nh + ir * 2; // total height
+  const w = nw + ir; // total width (notch + inverse corner extends left)
+  const h = nh + ir; // total height (notch + inverse corner extends down)
 
   return [
-    // Top-left: sharp edge then inverse corner going right
+    // Top-left corner (shared with body)
     `M 0,0`,
-    `V ${ir}`,
-    `A ${ir},${ir} 0 0,0 ${ir},0`,
-    // Top edge of notch
+    // Top edge
     `H ${w - r}`,
-    // Top-right corner
+    // Top-right rounded corner
     `A ${r},${r} 0 0,1 ${w},${r}`,
     // Right edge down
-    `V ${h - r}`,
-    // Bottom-right corner
-    `A ${r},${r} 0 0,1 ${w - r},${h}`,
-    // Bottom edge back to left
+    `V ${nh - r}`,
+    // Bottom-right rounded corner
+    `A ${r},${r} 0 0,1 ${w - r},${nh}`,
+    // Bottom edge to inverse corner
     `H ${ir}`,
-    // Bottom-left inverse corner
-    `A ${ir},${ir} 0 0,0 0,${h - ir}`,
-    // Sharp edge down
-    `V ${h}`,
+    // Inverse corner (same as in full shape: concave, body continues down-left)
+    `A ${ir},${ir} 0 0,0 0,${h}`,
+    // Sharp cut at left edge
+    `V 0`,
     `Z`,
   ].join(" ");
 }
@@ -145,7 +146,7 @@ export function Notch({
     const ir = inverseRadius;
     // Path is always drawn as a right-edge tab
     const pathW = notchWidth + ir;
-    const pathH = notchHeight + ir * 2;
+    const pathH = notchHeight + ir;
     const headPath = buildHeadPath(notchWidth, notchHeight, radius, ir);
 
     // For other sides, transform the right-edge tab

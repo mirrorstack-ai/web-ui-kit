@@ -38,9 +38,9 @@ describe("Notch", () => {
     );
     const svg = container.querySelector("svg");
     // pathW = notchWidth(60) + ir(6) = 66, + strokeWidth(1) = 67
-    // pathH = notchHeight(40) + ir(6)*2 = 52, + strokeWidth(1) = 53
+    // pathH = notchHeight(40) + ir(6) = 46, + strokeWidth(1) = 47
     expect(svg).toHaveAttribute("width", "67");
-    expect(svg).toHaveAttribute("height", "53");
+    expect(svg).toHaveAttribute("height", "47");
   });
 
   it("applies fill and stroke", () => {
