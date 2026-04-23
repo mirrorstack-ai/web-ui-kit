@@ -165,17 +165,24 @@ export function AgentSidebarHeader({
       {/* Actions */}
       <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
         {overflowTabs.length > 0 ? (
-          <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
-        ) : (
-          <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label="New chat" />
-        )}
-        <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
-        <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
-      </div>
-
-      {/* Overflow dropdown */}
-      {showOverflow && overflowTabs.length > 0 && (
-        <div ref={dropdownRef} className="absolute top-full right-1 mt-0.5 w-44 bg-surface-container-low border border-primary rounded-xl shadow-lg z-50 py-1.5 px-1.5">
+          <div className="relative">
+            <IconButton icon="more_horiz" variant="text" size="sm" className={cn("text-on-surface relative z-50", showOverflow && "bg-surface-container-low rounded-t-xl border-t border-l border-r border-primary")} onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
+            {/* Dropdown anchored to ... button */}
+            {showOverflow && (
+              <div ref={dropdownRef} className="absolute top-full right-0 w-44 z-40">
+                {/* Panel body */}
+                <div className="bg-surface-container-low border border-primary border-t-0 rounded-b-xl rounded-tl-xl shadow-lg py-1.5 px-1.5">
+                  {/* Inverse corner top-right connecting to notch */}
+                  <div className="absolute -top-2 right-0 w-2 h-2 bg-surface-container-low" />
+                  {/* Inverse corner top-left of panel */}
+                  <div
+                    className="absolute top-0 -left-2 w-2 h-2 pointer-events-none"
+                    style={{
+                      backgroundColor: "var(--color-surface-container-low)",
+                      maskImage: "radial-gradient(circle 8px at 0 0, transparent 8px, black 8px)",
+                      WebkitMaskImage: "radial-gradient(circle 8px at 0 0, transparent 8px, black 8px)",
+                    }}
+                  />
           {overflowTabs.map((tab) => (
             <button
               key={tab.id}
@@ -197,8 +204,16 @@ export function AgentSidebarHeader({
             <Icon name="add" size={12} />
             <span>New chat</span>
           </button>
-        </div>
-      )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label="New chat" />
+        )}
+        <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
+        <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
+      </div>
     </div>
   );
 }
