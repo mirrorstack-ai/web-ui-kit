@@ -149,7 +149,7 @@ export function AgentSidebarHeader({
         <Notch
           width={1000}
           height={1000}
-          notchWidth={HEADER_H}
+          notchWidth={HEADER_H - TAB_IR}
           notchHeight={activeTabRect.width}
           notchSide="bottom"
           notchOffset={100}
