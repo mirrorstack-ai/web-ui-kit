@@ -2952,7 +2952,7 @@ logo?: ReactNode</code></pre>
             <pre><code>className?: string
 
 /**
- * SVG fill color. Defaults to surface-container-low. Set &quot;none&quot; to disable.
+ * Set &quot;none&quot; to disable
  */
 fill?: string = &quot;var(--color-surface-container-low)&quot;
 
@@ -2968,7 +2968,7 @@ inverseRadius?: number = 6
 notchHeight: number
 
 /**
- * Offset from start of edge. Positive = from top/left, negative = from bottom/right
+ * Positive = from top/left, negative = from bottom/right
  */
 notchOffset?: number = 0
 
@@ -2979,7 +2979,7 @@ notchWidth: number
 radius?: number = 8
 
 /**
- * SVG stroke color. Defaults to primary. Set &quot;none&quot; to disable.
+ * Set &quot;none&quot; to disable
  */
 stroke?: string = &quot;var(--color-primary)&quot;
 
@@ -3086,22 +3086,12 @@ width: number</code></pre>
               
               <pre><code>const WithOffset = () =&gt; (
   &lt;div className=&quot;grid grid-cols-2 gap-8 p-4&quot;&gt;
-    &lt;div&gt;
-      &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: 0 (start)&lt;/p&gt;
-      &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={0} /&gt;
-    &lt;/div&gt;
-    &lt;div&gt;
-      &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: 30&lt;/p&gt;
-      &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={30} /&gt;
-    &lt;/div&gt;
-    &lt;div&gt;
-      &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: -0 (end)&lt;/p&gt;
-      &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={-0} /&gt;
-    &lt;/div&gt;
-    &lt;div&gt;
-      &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: -30&lt;/p&gt;
-      &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={-30} /&gt;
-    &lt;/div&gt;
+    {[0, 30, 50, -30].map((offset) =&gt; (
+      &lt;div key={offset}&gt;
+        &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: {offset}&lt;/p&gt;
+        &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={offset} /&gt;
+      &lt;/div&gt;
+    ))}
   &lt;/div&gt;
 );</code></pre>
             </div>
