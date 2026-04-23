@@ -225,7 +225,7 @@ export function AgentSidebarHeader({
               notchWidth={DD_NOTCH_W}
               notchHeight={DD_NOTCH_H}
               notchSide="bottom"
-              notchOffset={histNotchX}
+              notchOffset={0}
               radius={DD_R}
               inverseRadius={DD_IR}
               stroke="var(--color-primary)"
