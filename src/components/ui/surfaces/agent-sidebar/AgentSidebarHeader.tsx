@@ -56,6 +56,9 @@ export function AgentSidebarHeader({
   const ddContentRef = useRef<HTMLDivElement>(null);
   const [ddContentH, setDdContentH] = useState(0);
   const [ddNotchX, setDdNotchX] = useState(0);
+  const histContentRef = useRef<HTMLDivElement>(null);
+  const [histContentH, setHistContentH] = useState(0);
+  const [histNotchX, setHistNotchX] = useState(0);
 
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
@@ -119,6 +122,18 @@ export function AgentSidebarHeader({
     document.addEventListener("mousedown", handleClick);
     return () => { document.removeEventListener("keydown", handleKey); document.removeEventListener("mousedown", handleClick); };
   }, [showHistory]);
+
+  useLayoutEffect(() => {
+    if (!showHistory || !histContentRef.current) return;
+    setHistContentH(histContentRef.current.offsetHeight);
+    const btn = historyBtnRef.current;
+    const dd = historyDropdownRef.current;
+    if (btn && dd) {
+      const btnRect = btn.getBoundingClientRect();
+      const ddRect = dd.getBoundingClientRect();
+      setHistNotchX(btnRect.left - ddRect.left);
+    }
+  }, [showHistory, tabs.length]);
 
   useLayoutEffect(() => {
     const tab = activeTabRef.current;
@@ -192,35 +207,60 @@ export function AgentSidebarHeader({
       )}
 
       {/* History */}
-      <div ref={historyBtnRef} className="absolute left-0 top-0 z-10 w-10 h-10 flex justify-center">
+      <div ref={historyBtnRef} className="absolute left-0 top-0 z-[51] w-10 h-10 flex justify-center">
         <IconButton icon="expand_more" variant="text" size="sm" className="m-auto text-on-surface" onClick={() => setShowHistory(!showHistory)} aria-label="Chat history" />
       </div>
 
-      {/* History dropdown */}
+      {/* History dropdown with notch tab connecting to the arrow button */}
       {showHistory && (
-        <div ref={historyDropdownRef} className="absolute left-1 top-full z-50 w-56 bg-surface-container-low border border-outline-variant rounded-lg shadow-lg py-1">
-          <div className="px-3 py-1.5 text-xs font-medium text-on-surface-variant">Chat history</div>
-          {tabs.map((tab) => (
-            <div
-              key={tab.id}
-              className={cn(
-                "group/item flex items-center gap-2 px-3 py-1.5 mx-1 rounded-md cursor-pointer transition-colors",
-                tab.id === activeTabId ? "bg-primary/10 text-primary" : "text-on-surface hover:bg-on-surface/8",
-              )}
-              onClick={() => { setActiveTabId(tab.id); setShowHistory(false); }}
-            >
-              <span className="text-xs truncate flex-1">{tab.title}</span>
-              {tabs.length > 1 && (
-                <div
-                  className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-70 hover:!opacity-100 hover:bg-on-surface/10 transition-opacity"
-                  onClick={(e) => { e.stopPropagation(); handleDeleteHistory(tab.id); }}
-                  aria-label={`Delete ${tab.title}`}
-                >
-                  <Icon name="delete" size={14} className="text-on-surface-variant" />
-                </div>
-              )}
-            </div>
-          ))}
+        <div
+          ref={historyDropdownRef}
+          className="absolute z-50 overflow-visible"
+          style={{ left: 1, top: `calc(100% - ${DD_NOTCH_H + 4}px)`, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+        >
+          {histContentH > 0 && (
+            <Notch
+              width={DD_W}
+              height={histContentH}
+              notchWidth={DD_NOTCH_W}
+              notchHeight={DD_NOTCH_H}
+              notchSide="bottom"
+              notchOffset={histNotchX}
+              radius={DD_R}
+              inverseRadius={DD_IR}
+              stroke="var(--color-primary)"
+              strokeWidth={1.5}
+              className="absolute top-0 left-0"
+            />
+          )}
+          <div
+            ref={histContentRef}
+            className="relative z-10 py-1.5 px-1.5"
+            style={{ marginTop: DD_NOTCH_H, width: DD_W }}
+          >
+            <div className="px-2 py-1 text-xs font-medium text-on-surface-variant">Chat history</div>
+            {tabs.map((tab) => (
+              <div
+                key={tab.id}
+                className={cn(
+                  "group/item flex items-center gap-2 px-2.5 py-1.5 rounded-md cursor-pointer transition-colors",
+                  tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
+                )}
+                onClick={() => { setActiveTabId(tab.id); setShowHistory(false); }}
+              >
+                <span className="text-xs truncate flex-1">{tab.title}</span>
+                {tabs.length > 1 && (
+                  <div
+                    className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-70 hover:!opacity-100 hover:bg-on-surface/10 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); handleDeleteHistory(tab.id); }}
+                    aria-label={`Delete ${tab.title}`}
+                  >
+                    <Icon name="delete" size={14} className="text-on-surface-variant" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
