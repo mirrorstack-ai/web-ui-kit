@@ -29,7 +29,7 @@ const HIST_W = 220;
 const HIST_NOTCH_H = 24;
 
 // Overflow dropdown notch dimensions
-const DD_W = 176;
+const DD_W = 220;
 const DD_NOTCH_W = 32; // matches IconButton sm
 const DD_NOTCH_H = 24; // full IconButton sm height (h-8)
 const DD_R = 8;
