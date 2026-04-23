@@ -215,7 +215,7 @@ export function AgentSidebarHeader({
               radius={DD_R}
               inverseRadius={DD_IR}
               stroke="var(--color-primary)"
-              strokeWidth={1.5}
+              strokeWidth={1}
               className="absolute top-0 left-0"
             />
           )}
