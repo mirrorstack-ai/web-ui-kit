@@ -57,22 +57,12 @@ export const OutlineOnly: Story = {
 export const WithOffset: Story = {
   render: () => (
     <div className="grid grid-cols-2 gap-8 p-4">
-      <div>
-        <p className="text-xs text-on-surface-variant mb-2">offset: 0 (start)</p>
-        <Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={0} />
-      </div>
-      <div>
-        <p className="text-xs text-on-surface-variant mb-2">offset: 30</p>
-        <Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={30} />
-      </div>
-      <div>
-        <p className="text-xs text-on-surface-variant mb-2">offset: -0 (end)</p>
-        <Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={-0} />
-      </div>
-      <div>
-        <p className="text-xs text-on-surface-variant mb-2">offset: -30</p>
-        <Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={-30} />
-      </div>
+      {[0, 30, 50, -30].map((offset) => (
+        <div key={offset}>
+          <p className="text-xs text-on-surface-variant mb-2">offset: {offset}</p>
+          <Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={offset} />
+        </div>
+      ))}
     </div>
   ),
 };
