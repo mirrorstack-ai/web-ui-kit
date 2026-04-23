@@ -202,7 +202,7 @@ export function AgentSidebarHeader({
         <div
           ref={dropdownRef}
           className="absolute z-50 overflow-visible"
-          style={{ right: 1, top: `calc(100% - ${DD_NOTCH_H}px)`, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+          style={{ right: 1, top: `calc(100% - ${DD_NOTCH_H + 4}px)`, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
         >
           {ddContentH > 0 && (
             <Notch
