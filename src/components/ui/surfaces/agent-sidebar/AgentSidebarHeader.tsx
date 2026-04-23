@@ -187,7 +187,7 @@ export function AgentSidebarHeader({
       {/* Actions */}
       <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
         {overflowTabs.length > 0 ? (
-          <div ref={triggerBtnRef}>
+          <div ref={triggerBtnRef} className="relative z-[51]">
             <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
           </div>
         ) : (
@@ -215,6 +215,7 @@ export function AgentSidebarHeader({
               radius={DD_R}
               inverseRadius={DD_IR}
               stroke="var(--color-primary)"
+              strokeWidth={1.5}
               className="absolute top-0 left-0"
             />
           )}
