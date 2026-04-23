@@ -239,7 +239,7 @@ export function AgentSidebarHeader({
           )}
           <div
             ref={histContentRef}
-            className="relative z-10 pt-2 pb-1.5 px-1.5"
+            className="relative z-10 pt-2 pb-1.5 px-1.5 flex flex-col gap-0.5"
             style={{ marginTop: HIST_NOTCH_H, width: HIST_W }}
           >
             {tabs.map((tab) => (
@@ -351,7 +351,7 @@ export function AgentSidebarHeader({
           )}
           <div
             ref={ddContentRef}
-            className="relative z-10 pt-2 pb-1.5 px-1.5"
+            className="relative z-10 pt-2 pb-1.5 px-1.5 flex flex-col gap-0.5"
             style={{ marginTop: DD_NOTCH_H, width: DD_W }}
           >
             {overflowTabs.map((tab) => (
