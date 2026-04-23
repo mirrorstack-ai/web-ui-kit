@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
 import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
+import { Notch } from "@/components/ui/surfaces/notch/Notch";
 
 interface ChatTab {
   id: string;
@@ -18,6 +19,13 @@ const TAB_WIDTH = 100;
 const GAP = 6;
 const ADD_BTN = 40;
 
+// Overflow dropdown notch dimensions
+const DD_W = 176;
+const DD_NOTCH_W = 32; // matches IconButton sm
+const DD_NOTCH_H = 20; // must be >= DD_R + DD_IR for valid arcs
+const DD_R = 10;
+const DD_IR = 6;
+
 export function AgentSidebarHeader({
   sidebarWidth,
   onToggleCollapse,
@@ -32,7 +40,11 @@ export function AgentSidebarHeader({
   const nextIdRef = useRef(2);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const overflowRef = useRef<HTMLDivElement>(null);
+  const triggerBtnRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const ddContentRef = useRef<HTMLDivElement>(null);
+  const [ddContentH, setDdContentH] = useState(0);
+  const [ddNotchX, setDdNotchX] = useState(0);
 
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
@@ -82,6 +94,18 @@ export function AgentSidebarHeader({
     document.addEventListener("mousedown", handleClick);
     return () => { document.removeEventListener("keydown", handleKey); document.removeEventListener("mousedown", handleClick); };
   }, [showOverflow]);
+
+  useLayoutEffect(() => {
+    if (!showOverflow || !ddContentRef.current) return;
+    setDdContentH(ddContentRef.current.offsetHeight);
+    const triggerBtn = triggerBtnRef.current;
+    const dd = dropdownRef.current;
+    if (triggerBtn && dd) {
+      const btnRect = triggerBtn.getBoundingClientRect();
+      const ddRect = dd.getBoundingClientRect();
+      setDdNotchX(btnRect.left - ddRect.left);
+    }
+  }, [showOverflow, overflowTabs.length]);
 
   const handleAddTab = () => {
     const id = String(nextIdRef.current++);
@@ -163,7 +187,9 @@ export function AgentSidebarHeader({
       {/* Actions */}
       <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
         {overflowTabs.length > 0 ? (
-          <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
+          <div ref={triggerBtnRef}>
+            <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
+          </div>
         ) : (
           <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label="New chat" />
         )}
@@ -171,30 +197,54 @@ export function AgentSidebarHeader({
         <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
       </div>
 
-      {/* Overflow dropdown — simple bordered card until NotchedOutline (#112) is built */}
+      {/* Overflow dropdown with notch tab connecting to the ... button */}
       {showOverflow && overflowTabs.length > 0 && (
-        <div ref={dropdownRef} className="absolute top-full right-0 mt-0.5 w-44 bg-surface-container-low border border-primary rounded-lg shadow-lg z-50 py-1.5 px-1.5">
-          {overflowTabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={cn(
-                "w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5",
-                tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
-              )}
-              onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
-            >
-              <Icon name="auto_awesome" size={12} />
-              <span className="truncate">{tab.title}</span>
-            </button>
-          ))}
-          <div className="h-px bg-outline-variant mx-1 my-1" />
-          <button
-            className="w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5 text-primary hover:bg-on-surface/10"
-            onClick={() => { handleAddTab(); setShowOverflow(false); }}
+        <div
+          ref={dropdownRef}
+          className="absolute z-50"
+          style={{ right: 0, top: `calc(100% - ${DD_NOTCH_H}px)`, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+        >
+          {ddContentH > 0 && (
+            <Notch
+              width={DD_W}
+              height={ddContentH}
+              notchWidth={DD_NOTCH_W}
+              notchHeight={DD_NOTCH_H}
+              notchSide="bottom"
+              notchOffset={ddNotchX}
+              radius={DD_R}
+              inverseRadius={DD_IR}
+              stroke="var(--color-outline-variant)"
+              className="absolute top-0 left-0"
+            />
+          )}
+          <div
+            ref={ddContentRef}
+            className="relative z-10 py-1.5 px-1.5"
+            style={{ marginTop: DD_NOTCH_H, width: DD_W }}
           >
-            <Icon name="add" size={12} />
-            <span>New chat</span>
-          </button>
+            {overflowTabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={cn(
+                  "w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5",
+                  tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
+                )}
+                onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
+              >
+                <Icon name="auto_awesome" size={12} />
+                <span className="truncate">{tab.title}</span>
+              </button>
+            ))}
+            <div className="h-px bg-outline-variant mx-1 my-1" />
+            <button
+              className="w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5 text-primary hover:bg-on-surface/10"
+              onClick={() => { handleAddTab(); setShowOverflow(false); }}
+            >
+              <Icon name="add" size={12} />
+              <span>New chat</span>
+            </button>
+          </div>
         </div>
       )}
     </div>
