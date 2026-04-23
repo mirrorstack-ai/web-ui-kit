@@ -266,7 +266,7 @@ const OverflowDropdown = forwardRef<HTMLDivElement, OverflowDropdownProps>(
       <div
         ref={ref}
         className="absolute z-50"
-        style={{ top: 0, right: 0, width: totalW, height: totalH }}
+        style={{ top: 0, right: -NOTCH_W, width: totalW, height: totalH }}
       >
         <svg
           className="absolute inset-0 pointer-events-none"
