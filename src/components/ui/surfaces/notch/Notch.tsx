@@ -106,7 +106,7 @@ function buildHeadPath(nw: number, nh: number, r: number, ir: number, atStart: b
   if (!atStart) {
     // Top-left inverse corner (body continues up)
     d.push(`V ${topIr}`);
-    d.push(`A ${ir},${ir} 0 0,0 ${ir},0`);
+    d.push(`A ${ir},${ir} 0 0,1 ${ir},0`);
   }
 
   // Top edge
@@ -122,7 +122,7 @@ function buildHeadPath(nw: number, nh: number, r: number, ir: number, atStart: b
 
   if (!atEnd) {
     // Bottom-left inverse corner (body continues down)
-    d.push(`A ${ir},${ir} 0 0,0 0,${h}`);
+    d.push(`A ${ir},${ir} 0 0,1 0,${h}`);
   }
 
   // Sharp cut left edge back to start
