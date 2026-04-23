@@ -151,7 +151,7 @@ export function AgentSidebarHeader({
           height={1000}
           notchWidth={HEADER_H}
           notchHeight={activeTabRect.width}
-          notchSide="top"
+          notchSide="bottom"
           notchOffset={100}
           radius={TAB_R}
           inverseRadius={TAB_IR}
