@@ -29,7 +29,7 @@ const DD_W = 176;
 const DD_NOTCH_W = 32; // matches IconButton sm
 const DD_NOTCH_H = 32; // full IconButton sm height (h-8)
 const DD_R = 8;
-const DD_IR = 5;
+const DD_IR = 8;
 
 export function AgentSidebarHeader({
   sidebarWidth,
@@ -42,10 +42,13 @@ export function AgentSidebarHeader({
   const [activeTabId, setActiveTabId] = useState("1");
   const [visibleCount, setVisibleCount] = useState(tabs.length);
   const [showOverflow, setShowOverflow] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const nextIdRef = useRef(2);
   const headerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLDivElement>(null);
   const [activeTabRect, setActiveTabRect] = useState<{ left: number; width: number } | null>(null);
+  const historyBtnRef = useRef<HTMLDivElement>(null);
+  const historyDropdownRef = useRef<HTMLDivElement>(null);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const overflowRef = useRef<HTMLDivElement>(null);
   const triggerBtnRef = useRef<HTMLDivElement>(null);
@@ -103,6 +106,20 @@ export function AgentSidebarHeader({
     return () => { document.removeEventListener("keydown", handleKey); document.removeEventListener("mousedown", handleClick); };
   }, [showOverflow]);
 
+  useEffect(() => {
+    if (!showHistory) return;
+    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowHistory(false); };
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (historyBtnRef.current?.contains(target)) return;
+      if (historyDropdownRef.current?.contains(target)) return;
+      setShowHistory(false);
+    };
+    document.addEventListener("keydown", handleKey);
+    document.addEventListener("mousedown", handleClick);
+    return () => { document.removeEventListener("keydown", handleKey); document.removeEventListener("mousedown", handleClick); };
+  }, [showHistory]);
+
   useLayoutEffect(() => {
     const tab = activeTabRef.current;
     const header = headerRef.current;
@@ -128,6 +145,17 @@ export function AgentSidebarHeader({
     const id = String(nextIdRef.current++);
     setTabs((prev) => [...prev, { id, title: `Chat ${id}` }]);
     setActiveTabId(id);
+  };
+
+  const handleDeleteHistory = (tabId: string) => {
+    if (tabs.length === 1) return;
+    const idx = tabs.findIndex((t) => t.id === tabId);
+    const newTabs = tabs.filter((t) => t.id !== tabId);
+    setTabs(newTabs);
+    if (tabId === activeTabId) {
+      const next = newTabs[Math.min(idx, newTabs.length - 1)];
+      if (next) setActiveTabId(next.id);
+    }
   };
 
   const handleCloseTab = (tabId: string, e: React.MouseEvent) => {
@@ -164,9 +192,37 @@ export function AgentSidebarHeader({
       )}
 
       {/* History */}
-      <div className="absolute left-0 top-0 z-10 w-10 h-10 flex justify-center">
-        <IconButton icon="stat_minus_1" variant="text" size="sm" className="m-auto text-on-surface" aria-label="Chat history" />
+      <div ref={historyBtnRef} className="absolute left-0 top-0 z-10 w-10 h-10 flex justify-center">
+        <IconButton icon="expand_more" variant="text" size="sm" className="m-auto text-on-surface" onClick={() => setShowHistory(!showHistory)} aria-label="Chat history" />
       </div>
+
+      {/* History dropdown */}
+      {showHistory && (
+        <div ref={historyDropdownRef} className="absolute left-1 top-full z-50 w-56 bg-surface-container-low border border-outline-variant rounded-lg shadow-lg py-1">
+          <div className="px-3 py-1.5 text-xs font-medium text-on-surface-variant">Chat history</div>
+          {tabs.map((tab) => (
+            <div
+              key={tab.id}
+              className={cn(
+                "group/item flex items-center gap-2 px-3 py-1.5 mx-1 rounded-md cursor-pointer transition-colors",
+                tab.id === activeTabId ? "bg-primary/10 text-primary" : "text-on-surface hover:bg-on-surface/8",
+              )}
+              onClick={() => { setActiveTabId(tab.id); setShowHistory(false); }}
+            >
+              <span className="text-xs truncate flex-1">{tab.title}</span>
+              {tabs.length > 1 && (
+                <div
+                  className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-70 hover:!opacity-100 hover:bg-on-surface/10 transition-opacity"
+                  onClick={(e) => { e.stopPropagation(); handleDeleteHistory(tab.id); }}
+                  aria-label={`Delete ${tab.title}`}
+                >
+                  <Icon name="delete" size={14} className="text-on-surface-variant" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Tabs */}
       <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 gap-1.5">
