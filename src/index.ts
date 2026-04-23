@@ -147,6 +147,11 @@ export {
   type AppLink,
 } from "./components/ui/navigation/app-switcher/AppSwitcher";
 export {
+  Notch,
+  type NotchProps,
+  type NotchSide,
+} from "./components/ui/surfaces/notch/Notch";
+export {
   AgentSidebarHeader,
   type AgentSidebarHeaderProps,
   AgentSidebarInput,
