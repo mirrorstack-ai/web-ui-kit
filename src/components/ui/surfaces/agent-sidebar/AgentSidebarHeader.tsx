@@ -206,7 +206,7 @@ export function AgentSidebarHeader({
           stroke="none"
           headOnly
           className="absolute z-[5]"
-          style={{ left: activeTabRect.left - TAB_IR, top: 4 }}
+          style={{ left: activeTabRect.left - TAB_IR, top: 0 }}
         />
       )}
 
@@ -246,7 +246,7 @@ export function AgentSidebarHeader({
               <div
                 key={tab.id}
                 className={cn(
-                  "group/item flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors",
+                  "group/item flex items-center gap-0.5 px-1.5 py-0.5 rounded cursor-pointer transition-colors",
                   tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
                 )}
                 onClick={() => { setActiveTabId(tab.id); setShowHistory(false); }}
@@ -268,8 +268,8 @@ export function AgentSidebarHeader({
       )}
 
       {/* Tabs */}
-      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 gap-1.5">
-        <div role="tablist" aria-label="Chat sessions" className="flex h-full gap-1.5">
+      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 gap-0.5.5">
+        <div role="tablist" aria-label="Chat sessions" className="flex h-full gap-0.5.5">
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
@@ -358,7 +358,7 @@ export function AgentSidebarHeader({
               <button
                 key={tab.id}
                 className={cn(
-                  "w-full px-1.5 py-0.5 text-left text-[11px] rounded transition-colors flex items-center gap-1",
+                  "w-full px-1.5 py-0.5 text-left text-[11px] rounded transition-colors flex items-center gap-0.5",
                   tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
                 )}
                 onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
@@ -368,7 +368,7 @@ export function AgentSidebarHeader({
             ))}
             <div className="h-px bg-outline-variant mx-1 my-0.5" />
             <button
-              className="w-full px-1.5 py-0.5 text-left text-[11px] rounded transition-colors flex items-center gap-1 text-primary hover:bg-on-surface/10"
+              className="w-full px-1.5 py-0.5 text-left text-[11px] rounded transition-colors flex items-center gap-0.5 text-primary hover:bg-on-surface/10"
               onClick={() => { handleAddTab(); setShowOverflow(false); }}
             >
               <Icon name="add" size={12} />
