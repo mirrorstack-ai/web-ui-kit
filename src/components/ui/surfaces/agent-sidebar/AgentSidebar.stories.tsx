@@ -7,7 +7,7 @@ const meta: Meta = {
   title: "UI/Surfaces/AgentSidebar",
   decorators: [
     (Story) => (
-      <div className="h-[500px] w-[400px] border border-outline-variant rounded-2xl overflow-hidden flex flex-col">
+      <div className="h-[500px] w-[400px] rounded-2xl overflow-hidden flex flex-col">
         <Story />
       </div>
     ),

@@ -231,9 +231,12 @@ interface OverflowDropdownProps {
   onAddTab: () => void;
 }
 
-const NOTCH_W = 36;
+const NOTCH_W = 32;
 const NOTCH_H = 40;
-const PANEL_W = 176;
+const PANEL_W = 180;
+// Right offset: collapse(32) + gap(2) + close(32) + pr(4) = 70, but the ... btn is 32px wide
+// So notch right edge should be at right: ~38px (after ... button ends before collapse starts)
+const DROPDOWN_RIGHT = 38;
 
 const OverflowDropdown = forwardRef<HTMLDivElement, OverflowDropdownProps>(
   function OverflowDropdown({ tabs, activeTabId, onSelect, onAddTab }, ref) {
@@ -253,7 +256,7 @@ const OverflowDropdown = forwardRef<HTMLDivElement, OverflowDropdownProps>(
       <div
         ref={ref}
         className="absolute z-50"
-        style={{ top: 0, right: 0, width: PANEL_W, height: totalH }}
+        style={{ top: 0, right: DROPDOWN_RIGHT, width: PANEL_W, height: totalH }}
       >
         <svg
           className="absolute inset-0 pointer-events-none"
