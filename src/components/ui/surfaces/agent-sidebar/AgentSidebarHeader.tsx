@@ -3,6 +3,54 @@ import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
 
+/** Draws the unified notch+panel SVG path */
+function OverflowOutline({ notchW, notchH, panelW, panelH, r, concave }: {
+  notchW: number; notchH: number; panelW: number; panelH: number; r: number; concave: number;
+}) {
+  const totalH = notchH + panelH;
+  const nLeft = panelW - notchW;
+  const d = [
+    // Start at top-left of notch
+    `M ${nLeft + r},0`,
+    `H ${panelW - r}`,
+    `A ${r},${r} 0 0,1 ${panelW},${r}`,
+    // Down right side of notch
+    `V ${notchH - concave}`,
+    // Concave corner where notch meets panel right
+    `A ${concave},${concave} 0 0,0 ${panelW + concave},${notchH}`,
+    // This goes off-panel, skip — just go straight down
+  ].join(" ");
+
+  // Simpler: just draw the full shape
+  const path = [
+    `M ${nLeft + r},0`,
+    `H ${panelW - r}`,
+    `A ${r},${r} 0 0,1 ${panelW},${r}`,
+    `V ${notchH}`,
+    `H ${panelW}`,
+    `V ${totalH - r}`,
+    `A ${r},${r} 0 0,1 ${panelW - r},${totalH}`,
+    `H ${r}`,
+    `A ${r},${r} 0 0,1 0,${totalH - r}`,
+    `V ${notchH + r}`,
+    `A ${r},${r} 0 0,1 ${r},${notchH}`,
+    `H ${nLeft - concave}`,
+    `A ${concave},${concave} 0 0,0 ${nLeft},${notchH - concave}`,
+    `V ${r}`,
+    `A ${r},${r} 0 0,1 ${nLeft + r},0`,
+    `Z`,
+  ].join(" ");
+
+  return (
+    <path
+      d={path}
+      fill="var(--color-surface-container-low)"
+      stroke="var(--color-primary)"
+      strokeWidth="1"
+    />
+  );
+}
+
 interface ChatTab {
   id: string;
   title: string;
@@ -25,6 +73,8 @@ export function AgentSidebarHeader({
 }: AgentSidebarHeaderProps) {
   const isCollapsed = sidebarWidth <= 350;
 
+  const [dropdownContentHeight, setDropdownContentHeight] = useState(100);
+  const dropdownContentRef = useRef<HTMLDivElement>(null);
   const [tabs, setTabs] = useState<ChatTab[]>([{ id: "1", title: "Chat 1" }]);
   const [activeTabId, setActiveTabId] = useState("1");
   const [visibleCount, setVisibleCount] = useState(tabs.length);
@@ -70,6 +120,13 @@ export function AgentSidebarHeader({
     visibleTabs = swapped.slice(0, visibleCount);
     overflowTabs = swapped.slice(visibleCount);
   }
+
+  // Measure dropdown content height for SVG
+  useEffect(() => {
+    if (showOverflow && dropdownContentRef.current) {
+      setDropdownContentHeight(dropdownContentRef.current.offsetHeight);
+    }
+  }, [showOverflow, overflowTabs.length]);
 
   // Close overflow on outside click / Escape
   useEffect(() => {
@@ -174,21 +231,14 @@ export function AgentSidebarHeader({
         <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
         <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
       </div>
-      {/* Overflow dropdown — rendered outside the clipped container */}
+      {/* Overflow dropdown — SVG outline for unified notch+panel shape */}
       {showOverflow && overflowTabs.length > 0 && (
-        <div ref={dropdownRef} className="absolute top-full right-4 z-40">
-          {/* Notch tab behind ... button */}
-          <div className="absolute -top-10 right-0 w-10 h-10 bg-surface-container-low rounded-t-xl border-t border-l border-r border-primary" />
-          {/* Inverse corner left of notch */}
-          <div
-            className="absolute -top-3 right-10 w-3 h-3 pointer-events-none"
-            style={{
-              backgroundColor: "var(--color-surface-container-low)",
-              maskImage: "radial-gradient(circle 12px at 0 0, transparent 12px, black 12px)",
-              WebkitMaskImage: "radial-gradient(circle 12px at 0 0, transparent 12px, black 12px)",
-            }}
-          />
-          <div className="bg-surface-container-low rounded-b-xl rounded-tl-xl border border-primary border-t-0 shadow-lg py-1.5 px-1.5">
+        <div ref={dropdownRef} className="absolute -top-0.5 right-4 z-40" style={{ width: 176 }}>
+          {/* SVG unified outline — notch on top-right + panel body */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: "visible", top: -40 }}>
+            <OverflowOutline notchW={40} notchH={40} panelW={176} panelH={dropdownContentHeight} r={12} concave={8} />
+          </svg>
+          <div ref={dropdownContentRef} className="relative z-10 py-1.5 px-1.5">
           {overflowTabs.map((tab) => (
             <button
               key={tab.id}
