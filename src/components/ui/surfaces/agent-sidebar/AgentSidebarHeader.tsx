@@ -261,7 +261,7 @@ export function AgentSidebarHeader({
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTabId(tab.id)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTabId(tab.id); } }}
-                className={cn("group relative h-full flex", overflowTabs.length > 0 && "flex-1")}
+                className="group relative h-full flex flex-1"
               >
                 <div
                   className={cn(
@@ -269,7 +269,7 @@ export function AgentSidebarHeader({
                     isActive
                       ? "text-inverse-on-surface z-10 min-w-[100px]"
                       : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50 min-w-[80px]",
-                    overflowTabs.length > 0 ? "w-full" : isActive ? "max-w-[200px]" : "max-w-[140px]",
+                    "w-full",
                   )}
                 >
                   <span className="text-[13px] font-normal truncate flex-1">{tab.title}</span>
