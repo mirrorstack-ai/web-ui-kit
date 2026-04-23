@@ -52,19 +52,19 @@ export function AgentSidebarInput({
     setText(e.target.value);
   };
 
-  const iconBtnCls = "text-inverse-on-surface hover:bg-primary-container hover:text-primary";
+  const iconBtnCls = "text-inverse-on-surface/60 hover:text-inverse-on-surface";
 
   return (
     <div className="p-3 pt-2 shrink-0 flex flex-col">
-      <div className="w-full p-1">
-        <span className="text-background/80 text-sm">
+      <div className="w-full px-1 pb-1">
+        <span className="text-inverse-on-surface/40 text-xs">
           Tip — ctrl + c to interrupt
         </span>
       </div>
-      <div className="flex flex-col w-full border-3 border-inverse-primary rounded-xl">
+      <div className="flex flex-col w-full border border-outline-variant/30 rounded-xl bg-inverse-on-surface/8">
         <div
           className={cn(
-            "justify-between w-full p-0.5 flex gap-0.5",
+            "justify-between w-full p-1 flex gap-0.5",
             isMultiline ? "flex-col" : "flex-row items-center",
           )}
         >
@@ -77,7 +77,7 @@ export function AgentSidebarInput({
                 onKeyDown={handleKeyDown}
                 onCompositionStart={() => setIsComposing(true)}
                 onCompositionEnd={() => setIsComposing(false)}
-                className="w-full text-on-secondary rounded-lg px-2 py-1 resize-none focus:outline-none bg-transparent"
+                className="w-full text-inverse-on-surface placeholder:text-inverse-on-surface/30 rounded-lg px-2 py-1 resize-none focus:outline-none bg-transparent text-sm"
                 placeholder={placeholder}
                 aria-label="Message to agent"
                 rows={1}
@@ -104,7 +104,7 @@ export function AgentSidebarInput({
                   icon="send"
                   variant="filled"
                   size="sm"
-                  className="bg-tertiary-container hover:bg-tertiary-container-dim"
+                  className="bg-primary text-on-primary"
                   onClick={send}
                   aria-label="Send message"
                 />
@@ -127,7 +127,7 @@ export function AgentSidebarInput({
                 onKeyDown={handleKeyDown}
                 onCompositionStart={() => setIsComposing(true)}
                 onCompositionEnd={() => setIsComposing(false)}
-                className="w-full text-on-secondary rounded-lg px-2 py-1 resize-none focus:outline-none bg-transparent"
+                className="w-full text-inverse-on-surface placeholder:text-inverse-on-surface/30 rounded-lg px-2 py-1 resize-none focus:outline-none bg-transparent text-sm"
                 placeholder={placeholder}
                 aria-label="Message to agent"
                 rows={1}
@@ -145,7 +145,7 @@ export function AgentSidebarInput({
                   icon="send"
                   variant="filled"
                   size="sm"
-                  className="bg-tertiary-container hover:bg-tertiary-container-dim"
+                  className="bg-primary text-on-primary"
                   onClick={send}
                   aria-label="Send message"
                 />
