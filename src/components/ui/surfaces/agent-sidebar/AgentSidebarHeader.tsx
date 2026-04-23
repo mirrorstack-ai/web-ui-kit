@@ -22,7 +22,7 @@ const ADD_BTN = 40;
 // Overflow dropdown notch dimensions
 const DD_W = 176;
 const DD_NOTCH_W = 32; // matches IconButton sm
-const DD_NOTCH_H = 20; // must be >= DD_R + DD_IR for valid arcs
+const DD_NOTCH_H = 32; // full IconButton sm height (h-8)
 const DD_R = 10;
 const DD_IR = 6;
 
@@ -201,8 +201,8 @@ export function AgentSidebarHeader({
       {showOverflow && overflowTabs.length > 0 && (
         <div
           ref={dropdownRef}
-          className="absolute z-50"
-          style={{ right: 0, top: `calc(100% - ${DD_NOTCH_H}px)`, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+          className="absolute z-50 overflow-visible"
+          style={{ right: 1, top: `calc(100% - ${DD_NOTCH_H}px)`, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
         >
           {ddContentH > 0 && (
             <Notch
@@ -214,7 +214,7 @@ export function AgentSidebarHeader({
               notchOffset={ddNotchX}
               radius={DD_R}
               inverseRadius={DD_IR}
-              stroke="var(--color-outline-variant)"
+              stroke="var(--color-primary)"
               className="absolute top-0 left-0"
             />
           )}
