@@ -3112,17 +3112,21 @@ width: number</code></pre>
               </div>
               
               
-              <pre><code>const HeadOnly = () =&gt; &lt;Notch
-    width={200}
-    height={150}
-    notchWidth={60}
-    notchHeight={40}
-    notchSide=&quot;right&quot;
-    notchOffset={0}
-    radius={8}
-    inverseRadius={6}
-    strokeWidth={1}
-    headOnly /&gt;;</code></pre>
+              <pre><code>const HeadOnly = () =&gt; (
+  &lt;div className=&quot;grid grid-cols-2 gap-8 p-4&quot;&gt;
+    {([&quot;right&quot;, &quot;left&quot;, &quot;top&quot;, &quot;bottom&quot;] as const).map((side) =&gt; (
+      &lt;div key={side}&gt;
+        &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;headOnly — {side}&lt;/p&gt;
+        &lt;Notch
+          width={160} height={120}
+          notchWidth={60} notchHeight={40}
+          notchSide={side}
+          headOnly
+        /&gt;
+      &lt;/div&gt;
+    ))}
+  &lt;/div&gt;
+);</code></pre>
             </div>
         </div>
     
