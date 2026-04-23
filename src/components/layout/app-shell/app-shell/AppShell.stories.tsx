@@ -1,7 +1,8 @@
-import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AppShell } from "./AppShell";
-import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
+import { NavigationRail } from "@/components/ui/navigation/navigation-rail/NavigationRail";
+import { NavigationButton } from "@/components/ui/navigation/navigation-button/NavigationButton";
+import { Avatar } from "@/components/ui/media/avatar/Avatar";
 
 const meta: Meta<typeof AppShell> = {
   title: "Layout/AppShell",
@@ -15,36 +16,35 @@ export default meta;
 type Story = StoryObj<typeof AppShell>;
 
 export const Playground: Story = {
-  render: () => {
-    const [agentOpen, setAgentOpen] = useState(false);
-    return (
-      <AppShell
-        navigation={
-          <div className="pl-2 py-4">
-            <div className="ml-2 px-4 py-6 gap-4 flex flex-col items-center rounded-2xl shadow-2xl bg-surface-bright">
-              <IconButton icon="home" variant="tonal" size="sm" aria-label="Home" />
-              <IconButton icon="search" variant="text" size="sm" aria-label="Search" />
-              <IconButton icon="notifications" variant="text" size="sm" aria-label="Notifications" />
-            </div>
-          </div>
-        }
-        agentSidebar={
-          <div className="rounded-2xl bg-on-background h-full flex flex-col">
-            <div className="flex-1 p-4 text-inverse-on-surface text-sm">
-              Agent chat content...
-            </div>
-          </div>
-        }
-        agentSidebarOpen={agentOpen}
-        onAgentSidebarToggle={() => setAgentOpen(!agentOpen)}
-      >
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-on-surface mb-4">Dashboard</h1>
-          <p className="text-on-surface-variant">
-            Main content area. The agent sidebar can be toggled with the floating button.
-          </p>
+  render: () => (
+    <AppShell
+      navigation={
+        <NavigationRail
+          header={
+            <Avatar fallback="M" size="md" square />
+          }
+          footer={
+            <NavigationButton icon="settings" label="Settings" variant="secondary" />
+          }
+        >
+          <NavigationButton icon="home" label="Home" variant="primary" />
+          <NavigationButton icon="data_table" label="Apps" variant="secondary" />
+          <NavigationButton icon="notifications" label="Alerts" variant="secondary" />
+        </NavigationRail>
+      }
+      agentSidebarContent={
+        <div className="text-inverse-on-surface text-sm">
+          Chat messages would appear here...
         </div>
-      </AppShell>
-    );
-  },
+      }
+      onAgentSend={(msg) => console.log("Send:", msg)}
+    >
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-on-surface mb-4">Dashboard</h1>
+        <p className="text-on-surface-variant">
+          Main content area. The agent sidebar can be toggled with the floating button.
+        </p>
+      </div>
+    </AppShell>
+  ),
 };

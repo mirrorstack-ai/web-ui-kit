@@ -2,6 +2,9 @@ import { useState, useRef, useEffect, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
+import { SidebarProvider, useSidebarWidth } from "@/context/sidebar/SidebarProvider";
+import { AgentSidebarHeader } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarHeader";
+import { AgentSidebarInput } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarInput";
 
 export const meta: ComponentMeta = {
   name: "AppShell",
@@ -14,28 +17,44 @@ const PADDING = 20;
 
 export interface AppShellProps {
   children: ReactNode;
+  /** Navigation slot — inject a NavigationRail, NavDrawer, or custom nav */
   navigation?: ReactNode;
+  /** App switcher slot — positioned top-left after nav area */
   appSwitcher?: ReactNode;
+  /** Class for the outer shell */
   className?: string;
+  /** Class for the app switcher container */
   appSwitcherClassName?: string;
+  /** Class for the content area */
   contentClassName?: string;
-  agentSidebar?: ReactNode;
-  agentSidebarOpen?: boolean;
-  onAgentSidebarToggle?: () => void;
+  /** Agent sidebar chat content */
+  agentSidebarContent?: ReactNode;
+  onAgentSend?: (message: string) => void;
+  onAgentAttachFile?: () => void;
+  onAgentMic?: () => void;
 }
 
-export function AppShell({
+export function AppShell(props: AppShellProps) {
+  return (
+    <SidebarProvider defaultWidth={0}>
+      <AppShellInner {...props} />
+    </SidebarProvider>
+  );
+}
+
+function AppShellInner({
   children,
   navigation,
   appSwitcher,
   className,
   appSwitcherClassName = "max-w-7xl",
   contentClassName,
-  agentSidebar,
-  agentSidebarOpen = false,
-  onAgentSidebarToggle,
+  agentSidebarContent,
+  onAgentSend,
+  onAgentAttachFile,
+  onAgentMic,
 }: AppShellProps) {
-  const [sidebarWidth, setSidebarWidth] = useState(MIN_WIDTH);
+  const { sidebarWidth, setSidebarWidth } = useSidebarWidth();
   const [isResizing, setIsResizing] = useState(false);
   const [windowWidth, setWindowWidth] = useState(0);
   const startX = useRef(0);
@@ -53,7 +72,7 @@ export function AppShell({
   }, []);
 
   const isOverlaying =
-    agentSidebarOpen &&
+    sidebarWidth > 0 &&
     windowWidth > 0 &&
     windowWidth < sidebarWidth + 800;
 
@@ -88,10 +107,21 @@ export function AppShell({
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
     };
-  }, [isResizing]);
+  }, [isResizing, setSidebarWidth]);
+
+  const handleToggleCollapse = () => {
+    if (sidebarWidth <= MIN_WIDTH) {
+      setSidebarWidth(Math.min((windowWidth || 1000) * 0.5, maxWidthRef.current));
+    } else {
+      setSidebarWidth(MIN_WIDTH);
+    }
+  };
+
+  const handleClose = () => setSidebarWidth(0);
 
   return (
     <div className="h-dvh flex bg-background text-on-background overflow-hidden">
+      {/* Left: app content area */}
       <div className="flex-1 min-w-0 h-dvh overflow-hidden">
         <div className={cn("mx-auto w-full h-full relative", className)}>
           {appSwitcher && (
@@ -111,7 +141,7 @@ export function AppShell({
               </div>
             )}
 
-            <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
+            <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative">
               <main className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
                 <div
                   className={cn(
@@ -128,7 +158,8 @@ export function AppShell({
         </div>
       </div>
 
-      {agentSidebarOpen && agentSidebar && (
+      {/* Right: agent sidebar */}
+      {sidebarWidth > 0 && (
         <div
           className={cn(
             "flex justify-end shrink-0",
@@ -142,7 +173,7 @@ export function AppShell({
           {isOverlaying && (
             <div
               className="fixed inset-0 bg-black/20 -z-10"
-              onClick={onAgentSidebarToggle}
+              onClick={handleClose}
             />
           )}
 
@@ -151,23 +182,41 @@ export function AppShell({
               className="w-2 flex cursor-ew-resize z-20 rounded-full hover:bg-primary-container transition-colors shrink-0"
               onMouseDown={startResize}
             />
+
             <div
               className="overflow-hidden relative my-2 mr-2 flex flex-col"
               style={{ width: `${sidebarWidth}px`, height: "calc(100vh - 1rem)" }}
             >
-              {agentSidebar}
+              <AgentSidebarHeader
+                sidebarWidth={sidebarWidth}
+                onToggleCollapse={handleToggleCollapse}
+                onClose={handleClose}
+              />
+
+              <div className="rounded-2xl bg-on-background h-full flex flex-col">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
+                  {agentSidebarContent}
+                </div>
+
+                <AgentSidebarInput
+                  onSend={onAgentSend}
+                  onAttachFile={onAgentAttachFile}
+                  onMic={onAgentMic}
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {!agentSidebarOpen && agentSidebar && (
+      {/* Agent toggle button */}
+      {sidebarWidth === 0 && (
         <IconButton
           icon="smart_toy"
           variant="tonal"
           size="md"
           className="fixed top-2 right-2 z-50"
-          onClick={onAgentSidebarToggle}
+          onClick={() => setSidebarWidth(MIN_WIDTH)}
           aria-label="Open agent"
         />
       )}
