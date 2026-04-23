@@ -88,36 +88,48 @@ function buildPath(
   return d.join(" ");
 }
 
-// Head only: the notch tab cut from the full shape at offset=0.
-// For a right-edge notch at offset=0:
-//   - Top edge is shared with body top → normal rounded corner on top-left and top-right
-//   - Bottom has inverse corner on left (where body would continue down)
-//   - Right side has normal rounded corners
-//   - Left side: straight down, then inverse corner, then sharp cut
-// Size: (nw + ir) wide, (nh + ir) tall
-function buildHeadPath(nw: number, nh: number, r: number, ir: number) {
-  const w = nw + ir; // total width (notch + inverse corner extends left)
-  const h = nh + ir; // total height (notch + inverse corner extends down)
+// Head only: the notch tab cut from the full shape.
+// atStart: notch at edge start → top-left is sharp, bottom-left has inverse corner
+// atEnd: notch at edge end → bottom-left is sharp, top-left has inverse corner
+// middle: both top-left and bottom-left have inverse corners
+function buildHeadPath(nw: number, nh: number, r: number, ir: number, atStart: boolean, atEnd: boolean) {
+  const w = nw + ir; // inverse corner extends left
+  const topIr = atStart ? 0 : ir;
+  const botIr = atEnd ? 0 : ir;
+  const h = nh + topIr + botIr;
 
-  return [
-    // Top-left corner (shared with body)
-    `M 0,0`,
-    // Top edge
-    `H ${w - r}`,
-    // Top-right rounded corner
-    `A ${r},${r} 0 0,1 ${w},${r}`,
-    // Right edge down
-    `V ${nh - r}`,
-    // Bottom-right rounded corner
-    `A ${r},${r} 0 0,1 ${w - r},${nh}`,
-    // Bottom edge to inverse corner
-    `H ${ir}`,
-    // Inverse corner (same as in full shape: concave, body continues down-left)
-    `A ${ir},${ir} 0 0,0 0,${h}`,
-    // Sharp cut at left edge
-    `V 0`,
-    `Z`,
-  ].join(" ");
+  const d: string[] = [];
+
+  // Start top-left
+  d.push(`M 0,0`);
+
+  if (!atStart) {
+    // Top-left inverse corner (body continues up)
+    d.push(`V ${topIr}`);
+    d.push(`A ${ir},${ir} 0 0,0 ${ir},0`);
+  }
+
+  // Top edge
+  d.push(`H ${w - r}`);
+  // Top-right rounded corner
+  d.push(`A ${r},${r} 0 0,1 ${w},${topIr + r}`);
+  // Right edge down
+  d.push(`V ${topIr + nh - r}`);
+  // Bottom-right rounded corner
+  d.push(`A ${r},${r} 0 0,1 ${w - r},${topIr + nh}`);
+  // Bottom edge to left
+  d.push(`H ${ir}`);
+
+  if (!atEnd) {
+    // Bottom-left inverse corner (body continues down)
+    d.push(`A ${ir},${ir} 0 0,0 0,${h}`);
+  }
+
+  // Sharp cut left edge back to start
+  d.push(`V 0`);
+  d.push(`Z`);
+
+  return d.join(" ");
 }
 
 function resolveOffset(offset: number, edge: number, notch: number) {
@@ -144,10 +156,19 @@ export function Notch({
 
   if (headOnly) {
     const ir = inverseRadius;
-    // Path is always drawn as a right-edge tab
+    const horiz = notchSide === "right" || notchSide === "left";
+    const edge = horiz ? height : width;
+    const notchLen = horiz ? notchHeight : notchWidth;
+    const resolvedOff = resolveOffset(notchOffset, edge, notchLen);
+    const minGap = radius + ir;
+    const atStart = resolvedOff === 0 || resolvedOff < minGap;
+    const atEnd = (edge - notchLen - resolvedOff) === 0 || (edge - notchLen - resolvedOff) < minGap;
+
+    const topIr = atStart ? 0 : ir;
+    const botIr = atEnd ? 0 : ir;
     const pathW = notchWidth + ir;
-    const pathH = notchHeight + ir;
-    const headPath = buildHeadPath(notchWidth, notchHeight, radius, ir);
+    const pathH = notchHeight + topIr + botIr;
+    const headPath = buildHeadPath(notchWidth, notchHeight, radius, ir, atStart, atEnd);
 
     // For other sides, transform the right-edge tab
     let svgW: number, svgH: number;

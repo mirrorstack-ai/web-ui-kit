@@ -37,8 +37,9 @@ describe("Notch", () => {
       <Notch width={200} height={150} notchWidth={60} notchHeight={40} headOnly />,
     );
     const svg = container.querySelector("svg");
-    // pathW = notchWidth(60) + ir(6) = 66, + strokeWidth(1) = 67
-    // pathH = notchHeight(40) + ir(6) = 46, + strokeWidth(1) = 47
+    // offset=0 → atStart=true, topIr=0, botIr=6
+    // pathW = 60 + 6 = 66, + stroke = 67
+    // pathH = 40 + 0 + 6 = 46, + stroke = 47
     expect(svg).toHaveAttribute("width", "67");
     expect(svg).toHaveAttribute("height", "47");
   });

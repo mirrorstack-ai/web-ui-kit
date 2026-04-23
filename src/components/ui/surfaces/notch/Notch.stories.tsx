@@ -94,3 +94,22 @@ export const HeadOnly: Story = {
     </div>
   ),
 };
+
+export const HeadOnlyWithOffset: Story = {
+  render: () => (
+    <div className="grid grid-cols-2 gap-8 p-4">
+      {(["right", "left", "top", "bottom"] as const).map((side) => (
+        <div key={side}>
+          <p className="text-xs text-on-surface-variant mb-2">headOnly — {side} — offset 30</p>
+          <Notch
+            width={160} height={120}
+            notchWidth={60} notchHeight={40}
+            notchSide={side}
+            notchOffset={30}
+            headOnly
+          />
+        </div>
+      ))}
+    </div>
+  ),
+};
