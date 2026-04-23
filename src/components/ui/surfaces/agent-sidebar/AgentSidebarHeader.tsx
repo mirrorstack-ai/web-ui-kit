@@ -220,7 +220,7 @@ export function AgentSidebarHeader({
         <div
           ref={historyDropdownRef}
           className="absolute z-50 overflow-visible"
-          style={{ left: 4, top: HIST_NOTCH_H, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+          style={{ left: 4, top: 0, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
         >
           {histContentH > 0 && (
             <Notch
