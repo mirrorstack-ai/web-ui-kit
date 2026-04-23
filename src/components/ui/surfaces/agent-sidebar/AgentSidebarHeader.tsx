@@ -26,7 +26,7 @@ const HEADER_H = 40;
 
 // History dropdown
 const HIST_W = 148;
-const HIST_NOTCH_H = 20;
+const HIST_NOTCH_H = 28;
 
 // Overflow dropdown notch dimensions
 const DD_W = 176;
@@ -220,7 +220,7 @@ export function AgentSidebarHeader({
         <div
           ref={historyDropdownRef}
           className="absolute z-50 overflow-visible"
-          style={{ left: 4, top: 0, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+          style={{ left: 4, top: 6, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
         >
           {histContentH > 0 && (
             <Notch
