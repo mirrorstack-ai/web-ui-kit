@@ -161,7 +161,6 @@ export function AgentSidebarHeader({
                         <div className="absolute right-0 w-3 h-3 pointer-events-none" style={{ bottom: 0, transform: "translateX(100%)", backgroundColor: "var(--color-on-background)", maskImage: "radial-gradient(circle 12px at 12px 0, transparent 12px, black 12px)", WebkitMaskImage: "radial-gradient(circle 12px at 12px 0, transparent 12px, black 12px)" }} />
                       </>
                     )}
-                    <Icon name="auto_awesome" size={14} className="shrink-0" />
                     <span className="text-[13px] font-normal truncate flex-1">{tab.title}</span>
                     {tabs.length > 1 && <span className="w-5 h-5 shrink-0" />}
                   </div>
@@ -233,7 +232,6 @@ export function AgentSidebarHeader({
                 )}
                 onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
               >
-                <Icon name="auto_awesome" size={12} />
                 <span className="truncate">{tab.title}</span>
               </button>
             ))}
