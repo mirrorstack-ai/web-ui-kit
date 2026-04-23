@@ -88,30 +88,32 @@ function buildPath(
   return d.join(" ");
 }
 
-// Hat shape: rounded top, flat bottom with inverse corners extending outward
-function buildHeadPath(w: number, h: number, r: number, ir: number) {
-  // Total width = ir + w + ir (inverse corners extend beyond the tab)
+// Head only: just the notch tab cut from the full shape.
+// Drawn as right-edge notch tab: inverse corners on left, rounded corners on right.
+// nw = notch width, nh = notch height, r = corner radius, ir = inverse radius
+// Total size: (nw + ir) wide, (nh + ir*2) tall
+function buildHeadPath(nw: number, nh: number, r: number, ir: number) {
+  const w = nw + ir; // total width
+  const h = nh + ir * 2; // total height
+
   return [
-    // Start at bottom-left (below the inverse corner)
-    `M 0,${h}`,
-    // Up to inverse corner
-    `V ${h - ir}`,
-    // Inverse corner bottom-left (concave)
-    `A ${ir},${ir} 0 0,0 ${ir},${h}`,
-    // Flat bottom of tab (but we're going up into the tab)
-    // Actually: go up the left side of the tab
-    `V ${r}`,
-    // Top-left corner
-    `A ${r},${r} 0 0,1 ${ir + r},0`,
-    // Top edge
-    `H ${ir + w - r}`,
+    // Top-left: sharp edge then inverse corner going right
+    `M 0,0`,
+    `V ${ir}`,
+    `A ${ir},${ir} 0 0,0 ${ir},0`,
+    // Top edge of notch
+    `H ${w - r}`,
     // Top-right corner
-    `A ${r},${r} 0 0,1 ${ir + w},${r}`,
-    // Right side down
-    `V ${h}`,
-    // Inverse corner bottom-right (concave)
-    `A ${ir},${ir} 0 0,0 ${ir + w + ir},${h - ir}`,
-    // Down to bottom
+    `A ${r},${r} 0 0,1 ${w},${r}`,
+    // Right edge down
+    `V ${h - r}`,
+    // Bottom-right corner
+    `A ${r},${r} 0 0,1 ${w - r},${h}`,
+    // Bottom edge back to left
+    `H ${ir}`,
+    // Bottom-left inverse corner
+    `A ${ir},${ir} 0 0,0 0,${h - ir}`,
+    // Sharp edge down
     `V ${h}`,
     `Z`,
   ].join(" ");
@@ -141,16 +143,42 @@ export function Notch({
 
   if (headOnly) {
     const ir = inverseRadius;
-    const totalW = notchWidth + ir * 2;
+    // Path is always drawn as a right-edge tab
+    const pathW = notchWidth + ir;
+    const pathH = notchHeight + ir * 2;
+    const headPath = buildHeadPath(notchWidth, notchHeight, radius, ir);
+
+    // For other sides, transform the right-edge tab
+    let svgW: number, svgH: number;
+    let transform: string | undefined;
+
+    switch (notchSide) {
+      case "right":
+        svgW = pathW; svgH = pathH;
+        break;
+      case "left":
+        svgW = pathW; svgH = pathH;
+        transform = `translate(${pathW}, 0) scale(-1, 1)`;
+        break;
+      case "bottom":
+        svgW = pathH; svgH = pathW;
+        transform = `translate(0, ${pathW}) rotate(-90)`;
+        break;
+      case "top":
+        svgW = pathH; svgH = pathW;
+        transform = `translate(${pathH}, 0) rotate(90)`;
+        break;
+    }
+
     return (
       <svg
-        width={totalW + strokeWidth}
-        height={notchHeight + strokeWidth}
-        viewBox={`${-pad} ${-pad} ${totalW + strokeWidth} ${notchHeight + strokeWidth}`}
+        width={svgW + strokeWidth}
+        height={svgH + strokeWidth}
+        viewBox={`${-pad} ${-pad} ${svgW + strokeWidth} ${svgH + strokeWidth}`}
         className={cn("pointer-events-none", className)}
         style={style}
       >
-        <path d={buildHeadPath(notchWidth, notchHeight, radius, ir)} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
+        <path d={headPath} fill={fill} stroke={stroke} strokeWidth={strokeWidth} vectorEffect="non-scaling-stroke" transform={transform} />
       </svg>
     );
   }
