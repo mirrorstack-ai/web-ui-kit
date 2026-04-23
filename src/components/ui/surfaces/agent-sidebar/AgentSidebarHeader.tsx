@@ -3,54 +3,6 @@ import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
 
-/** Draws the unified notch+panel SVG path */
-function OverflowOutline({ notchW, notchH, panelW, panelH, r, concave }: {
-  notchW: number; notchH: number; panelW: number; panelH: number; r: number; concave: number;
-}) {
-  const totalH = notchH + panelH;
-  const nLeft = panelW - notchW;
-  const d = [
-    // Start at top-left of notch
-    `M ${nLeft + r},0`,
-    `H ${panelW - r}`,
-    `A ${r},${r} 0 0,1 ${panelW},${r}`,
-    // Down right side of notch
-    `V ${notchH - concave}`,
-    // Concave corner where notch meets panel right
-    `A ${concave},${concave} 0 0,0 ${panelW + concave},${notchH}`,
-    // This goes off-panel, skip — just go straight down
-  ].join(" ");
-
-  // Simpler: just draw the full shape
-  const path = [
-    `M ${nLeft + r},0`,
-    `H ${panelW - r}`,
-    `A ${r},${r} 0 0,1 ${panelW},${r}`,
-    `V ${notchH}`,
-    `H ${panelW}`,
-    `V ${totalH - r}`,
-    `A ${r},${r} 0 0,1 ${panelW - r},${totalH}`,
-    `H ${r}`,
-    `A ${r},${r} 0 0,1 0,${totalH - r}`,
-    `V ${notchH + r}`,
-    `A ${r},${r} 0 0,1 ${r},${notchH}`,
-    `H ${nLeft - concave}`,
-    `A ${concave},${concave} 0 0,0 ${nLeft},${notchH - concave}`,
-    `V ${r}`,
-    `A ${r},${r} 0 0,1 ${nLeft + r},0`,
-    `Z`,
-  ].join(" ");
-
-  return (
-    <path
-      d={path}
-      fill="var(--color-surface-container-low)"
-      stroke="var(--color-primary)"
-      strokeWidth="1"
-    />
-  );
-}
-
 interface ChatTab {
   id: string;
   title: string;
@@ -73,8 +25,6 @@ export function AgentSidebarHeader({
 }: AgentSidebarHeaderProps) {
   const isCollapsed = sidebarWidth <= 350;
 
-  const [dropdownContentHeight, setDropdownContentHeight] = useState(100);
-  const dropdownContentRef = useRef<HTMLDivElement>(null);
   const [tabs, setTabs] = useState<ChatTab[]>([{ id: "1", title: "Chat 1" }]);
   const [activeTabId, setActiveTabId] = useState("1");
   const [visibleCount, setVisibleCount] = useState(tabs.length);
@@ -94,7 +44,6 @@ export function AgentSidebarHeader({
       return;
     }
 
-    // Need overflow button — subtract its width
     const available = container - ADD_BTN;
     const count = Math.floor((available + GAP) / (TAB_WIDTH + GAP));
     setVisibleCount(Math.max(1, count));
@@ -110,7 +59,7 @@ export function AgentSidebarHeader({
     return () => observer.disconnect();
   }, [calculateVisible]);
 
-  // Ensure active tab is always visible by swapping it into visible range
+  // Ensure active tab is always visible
   let visibleTabs = tabs.slice(0, visibleCount);
   let overflowTabs = tabs.slice(visibleCount);
   const activeIdx = tabs.findIndex((t) => t.id === activeTabId);
@@ -120,13 +69,6 @@ export function AgentSidebarHeader({
     visibleTabs = swapped.slice(0, visibleCount);
     overflowTabs = swapped.slice(visibleCount);
   }
-
-  // Measure dropdown content height for SVG
-  useEffect(() => {
-    if (showOverflow && dropdownContentRef.current) {
-      setDropdownContentHeight(dropdownContentRef.current.offsetHeight);
-    }
-  }, [showOverflow, overflowTabs.length]);
 
   // Close overflow on outside click / Escape
   useEffect(() => {
@@ -168,7 +110,7 @@ export function AgentSidebarHeader({
         <IconButton icon="stat_minus_1" variant="text" size="sm" className="m-auto text-on-surface" aria-label="Chat history" />
       </div>
 
-      {/* Tabs + add */}
+      {/* Tabs */}
       <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 gap-1.5">
         <div role="tablist" aria-label="Chat sessions" className="flex h-full gap-1.5">
           {visibleTabs.map((tab) => {
@@ -218,10 +160,9 @@ export function AgentSidebarHeader({
             );
           })}
         </div>
-
       </div>
 
-      {/* Actions — outside the clipped container */}
+      {/* Actions */}
       <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
         {overflowTabs.length > 0 ? (
           <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
@@ -231,14 +172,10 @@ export function AgentSidebarHeader({
         <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
         <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
       </div>
-      {/* Overflow dropdown — SVG outline for unified notch+panel shape */}
+
+      {/* Overflow dropdown */}
       {showOverflow && overflowTabs.length > 0 && (
-        <div ref={dropdownRef} className="absolute -top-0.5 right-4 z-40" style={{ width: 176 }}>
-          {/* SVG unified outline — notch on top-right + panel body */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: "visible", top: -40 }}>
-            <OverflowOutline notchW={40} notchH={40} panelW={176} panelH={dropdownContentHeight} r={12} concave={8} />
-          </svg>
-          <div ref={dropdownContentRef} className="relative z-10 py-1.5 px-1.5">
+        <div ref={dropdownRef} className="absolute top-full right-1 mt-0.5 w-44 bg-surface-container-low border border-primary rounded-xl shadow-lg z-50 py-1.5 px-1.5">
           {overflowTabs.map((tab) => (
             <button
               key={tab.id}
@@ -260,7 +197,6 @@ export function AgentSidebarHeader({
             <Icon name="add" size={12} />
             <span>New chat</span>
           </button>
-          </div>
         </div>
       )}
     </div>
