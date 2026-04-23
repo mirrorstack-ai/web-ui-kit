@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
@@ -17,55 +17,6 @@ export interface AgentSidebarHeaderProps {
 const TAB_WIDTH = 100;
 const GAP = 6;
 const ADD_BTN = 40;
-
-// SVG path: notch top-right, panel below — mirrored AppSwitcher approach
-const R = 8;
-const CR = 6;
-
-// Notch extends RIGHT from panel body. Total width = pw + nw.
-// Panel: x=0..pw, y=nh..nh+ph
-// Notch: x=pw..pw+nw, y=0..nh (extends right and up from panel top-right)
-function buildOutline(nw: number, nh: number, pw: number, ph: number) {
-  const tw = pw + nw; // total width
-  const th = nh + ph; // total height
-
-  return [
-    // Start at panel top-left
-    `M ${R},${nh}`,
-    // Panel top edge to where notch starts
-    `H ${pw - CR}`,
-    // Inverse concave corner (panel meets notch)
-    `A ${CR},${CR} 0 0,0 ${pw},${nh - CR}`,
-    // Notch left edge up
-    `V ${R}`,
-    // Notch top-left corner
-    `A ${R},${R} 0 0,1 ${pw + R},0`,
-    // Notch top edge
-    `H ${tw - R}`,
-    // Notch top-right corner
-    `A ${R},${R} 0 0,1 ${tw},${R}`,
-    // Notch right edge down
-    `V ${nh}`,
-    // Panel right edge down (panel right = notch right here, panel extends full width)
-    // Actually panel is narrower — go left then down
-    // No: panel right edge is at pw, notch right is at tw
-    // After notch bottom-right, go left to panel right, then down
-    `H ${pw}`,
-    // Panel right edge down (but panel right = pw < tw, no corner needed at pw,nh since notch covers it)
-    `V ${th - R}`,
-    // Panel bottom-right corner
-    `A ${R},${R} 0 0,1 ${pw - R},${th}`,
-    // Panel bottom edge
-    `H ${R}`,
-    // Panel bottom-left corner
-    `A ${R},${R} 0 0,1 0,${th - R}`,
-    // Panel left edge up
-    `V ${nh + R}`,
-    // Panel top-left corner
-    `A ${R},${R} 0 0,1 ${R},${nh}`,
-    `Z`,
-  ].join(" ");
-}
 
 export function AgentSidebarHeader({
   sidebarWidth,
@@ -220,80 +171,17 @@ export function AgentSidebarHeader({
         <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
       </div>
 
-      {/* Overflow dropdown with SVG outline */}
+      {/* Overflow dropdown — simple bordered card until NotchedOutline (#112) is built */}
       {showOverflow && overflowTabs.length > 0 && (
-        <OverflowDropdown
-          ref={dropdownRef}
-          tabs={overflowTabs}
-          activeTabId={activeTabId}
-          onSelect={(id) => { setActiveTabId(id); setShowOverflow(false); }}
-          onAddTab={() => { handleAddTab(); setShowOverflow(false); }}
-        />
-      )}
-    </div>
-  );
-}
-
-interface OverflowDropdownProps {
-  tabs: ChatTab[];
-  activeTabId: string;
-  onSelect: (id: string) => void;
-  onAddTab: () => void;
-}
-
-const NOTCH_W = 34;
-const NOTCH_H = 40;
-const PANEL_W = 176;
-// Notch extends right from panel. Total SVG width = PANEL_W + NOTCH_W.
-// Position: panel right-aligned with sidebar (right: 0), notch sticks out right.
-
-const OverflowDropdown = forwardRef<HTMLDivElement, OverflowDropdownProps>(
-  function OverflowDropdown({ tabs, activeTabId, onSelect, onAddTab }, ref) {
-    const contentRef = useRef<HTMLDivElement>(null);
-    const [panelH, setPanelH] = useState(80);
-
-    useEffect(() => {
-      if (contentRef.current) {
-        setPanelH(contentRef.current.offsetHeight);
-      }
-    }, [tabs.length]);
-
-    const totalW = PANEL_W + NOTCH_W;
-    const path = buildOutline(NOTCH_W, NOTCH_H, PANEL_W, panelH);
-    const totalH = NOTCH_H + panelH;
-
-    return (
-      <div
-        ref={ref}
-        className="absolute z-50"
-        style={{ top: 0, right: -NOTCH_W, width: totalW, height: totalH }}
-      >
-        <svg
-          className="absolute inset-0 pointer-events-none"
-          width={totalW}
-          height={totalH}
-          style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.08))" }}
-        >
-          <path
-            d={path}
-            fill="var(--color-surface-container-low)"
-            stroke="var(--color-primary)"
-            strokeWidth="1"
-          />
-        </svg>
-        <div
-          ref={contentRef}
-          className="absolute py-1.5 px-1.5"
-          style={{ top: NOTCH_H, left: 0, width: PANEL_W }}
-        >
-          {tabs.map((tab) => (
+        <div ref={dropdownRef} className="absolute top-full right-0 mt-0.5 w-44 bg-surface-container-low border border-primary rounded-lg shadow-lg z-50 py-1.5 px-1.5">
+          {overflowTabs.map((tab) => (
             <button
               key={tab.id}
               className={cn(
                 "w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5",
                 tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
               )}
-              onClick={() => onSelect(tab.id)}
+              onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
             >
               <Icon name="auto_awesome" size={12} />
               <span className="truncate">{tab.title}</span>
@@ -302,13 +190,13 @@ const OverflowDropdown = forwardRef<HTMLDivElement, OverflowDropdownProps>(
           <div className="h-px bg-outline-variant mx-1 my-1" />
           <button
             className="w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5 text-primary hover:bg-on-surface/10"
-            onClick={onAddTab}
+            onClick={() => { handleAddTab(); setShowOverflow(false); }}
           >
             <Icon name="add" size={12} />
             <span>New chat</span>
           </button>
         </div>
-      </div>
-    );
-  },
-);
+      )}
+    </div>
+  );
+}
