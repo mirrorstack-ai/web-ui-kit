@@ -88,17 +88,31 @@ function buildPath(
   return d.join(" ");
 }
 
-function buildHeadPath(w: number, h: number, r: number) {
+// Hat shape: rounded top, flat bottom with inverse corners extending outward
+function buildHeadPath(w: number, h: number, r: number, ir: number) {
+  // Total width = ir + w + ir (inverse corners extend beyond the tab)
   return [
-    `M ${r},0`,
-    `H ${w - r}`,
-    `A ${r},${r} 0 0,1 ${w},${r}`,
-    `V ${h - r}`,
-    `A ${r},${r} 0 0,1 ${w - r},${h}`,
-    `H ${r}`,
-    `A ${r},${r} 0 0,1 0,${h - r}`,
+    // Start at bottom-left (below the inverse corner)
+    `M 0,${h}`,
+    // Up to inverse corner
+    `V ${h - ir}`,
+    // Inverse corner bottom-left (concave)
+    `A ${ir},${ir} 0 0,0 ${ir},${h}`,
+    // Flat bottom of tab (but we're going up into the tab)
+    // Actually: go up the left side of the tab
     `V ${r}`,
-    `A ${r},${r} 0 0,1 ${r},0`,
+    // Top-left corner
+    `A ${r},${r} 0 0,1 ${ir + r},0`,
+    // Top edge
+    `H ${ir + w - r}`,
+    // Top-right corner
+    `A ${r},${r} 0 0,1 ${ir + w},${r}`,
+    // Right side down
+    `V ${h}`,
+    // Inverse corner bottom-right (concave)
+    `A ${ir},${ir} 0 0,0 ${ir + w + ir},${h - ir}`,
+    // Down to bottom
+    `V ${h}`,
     `Z`,
   ].join(" ");
 }
@@ -126,15 +140,17 @@ export function Notch({
   const pad = strokeWidth / 2;
 
   if (headOnly) {
+    const ir = inverseRadius;
+    const totalW = notchWidth + ir * 2;
     return (
       <svg
-        width={notchWidth + strokeWidth}
+        width={totalW + strokeWidth}
         height={notchHeight + strokeWidth}
-        viewBox={`${-pad} ${-pad} ${notchWidth + strokeWidth} ${notchHeight + strokeWidth}`}
+        viewBox={`${-pad} ${-pad} ${totalW + strokeWidth} ${notchHeight + strokeWidth}`}
         className={cn("pointer-events-none", className)}
         style={style}
       >
-        <path d={buildHeadPath(notchWidth, notchHeight, radius)} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
+        <path d={buildHeadPath(notchWidth, notchHeight, radius, ir)} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
       </svg>
     );
   }
