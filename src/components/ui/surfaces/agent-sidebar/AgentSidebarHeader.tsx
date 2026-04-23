@@ -19,6 +19,11 @@ const TAB_WIDTH = 100;
 const GAP = 6;
 const ADD_BTN = 40;
 
+// Active tab notch (headOnly)
+const TAB_R = 12;
+const TAB_IR = 12;
+const HEADER_H = 40;
+
 // Overflow dropdown notch dimensions
 const DD_W = 176;
 const DD_NOTCH_W = 32; // matches IconButton sm
@@ -38,6 +43,9 @@ export function AgentSidebarHeader({
   const [visibleCount, setVisibleCount] = useState(tabs.length);
   const [showOverflow, setShowOverflow] = useState(false);
   const nextIdRef = useRef(2);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const activeTabRef = useRef<HTMLDivElement>(null);
+  const [activeTabRect, setActiveTabRect] = useState<{ left: number; width: number } | null>(null);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const overflowRef = useRef<HTMLDivElement>(null);
   const triggerBtnRef = useRef<HTMLDivElement>(null);
@@ -96,6 +104,15 @@ export function AgentSidebarHeader({
   }, [showOverflow]);
 
   useLayoutEffect(() => {
+    const tab = activeTabRef.current;
+    const header = headerRef.current;
+    if (!tab || !header) { setActiveTabRect(null); return; }
+    const tRect = tab.getBoundingClientRect();
+    const hRect = header.getBoundingClientRect();
+    setActiveTabRect({ left: tRect.left - hRect.left, width: tRect.width });
+  }, [activeTabId, visibleCount]);
+
+  useLayoutEffect(() => {
     if (!showOverflow || !ddContentRef.current) return;
     setDdContentH(ddContentRef.current.offsetHeight);
     const triggerBtn = triggerBtnRef.current;
@@ -126,7 +143,26 @@ export function AgentSidebarHeader({
   };
 
   return (
-    <div className="relative flex items-center h-10 shrink-0">
+    <div ref={headerRef} className="relative flex items-center h-10 shrink-0">
+      {/* Active tab notch shape (rendered at header level to avoid overflow clip) */}
+      {activeTabRect && (
+        <Notch
+          width={1000}
+          height={1000}
+          notchWidth={HEADER_H}
+          notchHeight={activeTabRect.width}
+          notchSide="top"
+          notchOffset={100}
+          radius={TAB_R}
+          inverseRadius={TAB_IR}
+          fill="var(--color-on-background)"
+          stroke="none"
+          headOnly
+          className="absolute z-[5]"
+          style={{ left: activeTabRect.left - TAB_IR, top: 0 }}
+        />
+      )}
+
       {/* History */}
       <div className="absolute left-0 top-0 z-10 w-10 h-10 flex justify-center">
         <IconButton icon="stat_minus_1" variant="text" size="sm" className="m-auto text-on-surface" aria-label="Chat history" />
@@ -141,6 +177,7 @@ export function AgentSidebarHeader({
               <div key={tab.id} className="group relative h-full flex">
                 <div
                   role="tab"
+                  ref={isActive ? activeTabRef : undefined}
                   aria-selected={isActive}
                   tabIndex={isActive ? 0 : -1}
                   onClick={() => setActiveTabId(tab.id)}
@@ -151,16 +188,10 @@ export function AgentSidebarHeader({
                     className={cn(
                       "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none",
                       isActive
-                        ? "rounded-t-xl bg-on-background text-inverse-on-surface z-10 min-w-[100px] max-w-[200px]"
+                        ? "text-inverse-on-surface z-10 min-w-[100px] max-w-[200px]"
                         : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50 min-w-[80px] max-w-[140px]",
                     )}
                   >
-                    {isActive && (
-                      <>
-                        <div className="absolute left-0 w-3 h-3 pointer-events-none" style={{ bottom: 0, transform: "translateX(-100%)", backgroundColor: "var(--color-on-background)", maskImage: "radial-gradient(circle 12px at 0 0, transparent 12px, black 12px)", WebkitMaskImage: "radial-gradient(circle 12px at 0 0, transparent 12px, black 12px)" }} />
-                        <div className="absolute right-0 w-3 h-3 pointer-events-none" style={{ bottom: 0, transform: "translateX(100%)", backgroundColor: "var(--color-on-background)", maskImage: "radial-gradient(circle 12px at 12px 0, transparent 12px, black 12px)", WebkitMaskImage: "radial-gradient(circle 12px at 12px 0, transparent 12px, black 12px)" }} />
-                      </>
-                    )}
                     <span className="text-[13px] font-normal truncate flex-1">{tab.title}</span>
                     {tabs.length > 1 && <span className="w-5 h-5 shrink-0" />}
                   </div>
