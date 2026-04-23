@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
@@ -17,6 +17,31 @@ export interface AgentSidebarHeaderProps {
 const TAB_WIDTH = 100;
 const GAP = 6;
 const ADD_BTN = 40;
+
+// SVG path: notch top-right, panel below — mirrored AppSwitcher approach
+const R = 12;
+
+function buildOutline(nw: number, nh: number, pw: number, ph: number) {
+  const th = nh + ph;
+  const nl = pw - nw; // notch left x
+
+  return [
+    `M ${nl + R},0`,
+    `H ${pw - R}`,
+    `A ${R},${R} 0 0,1 ${pw},${R}`,
+    `V ${th - R}`,
+    `A ${R},${R} 0 0,1 ${pw - R},${th}`,
+    `H ${R}`,
+    `A ${R},${R} 0 0,1 0,${th - R}`,
+    `V ${nh + R}`,
+    `A ${R},${R} 0 0,1 ${R},${nh}`,
+    `H ${nl - R}`,
+    `A ${R},${R} 0 0,0 ${nl},${nh - R}`,
+    `V ${R}`,
+    `A ${R},${R} 0 0,1 ${nl + R},0`,
+    `Z`,
+  ].join(" ");
+}
 
 export function AgentSidebarHeader({
   sidebarWidth,
@@ -59,7 +84,6 @@ export function AgentSidebarHeader({
     return () => observer.disconnect();
   }, [calculateVisible]);
 
-  // Ensure active tab is always visible
   let visibleTabs = tabs.slice(0, visibleCount);
   let overflowTabs = tabs.slice(visibleCount);
   const activeIdx = tabs.findIndex((t) => t.id === activeTabId);
@@ -70,7 +94,6 @@ export function AgentSidebarHeader({
     overflowTabs = swapped.slice(visibleCount);
   }
 
-  // Close overflow on outside click / Escape
   useEffect(() => {
     if (!showOverflow) return;
     const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowOverflow(false); };
@@ -165,32 +188,85 @@ export function AgentSidebarHeader({
       {/* Actions */}
       <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
         {overflowTabs.length > 0 ? (
-          <div className="relative">
-            <IconButton icon="more_horiz" variant="text" size="sm" className={cn("text-on-surface relative z-50", showOverflow && "bg-surface-container-low rounded-t-xl border-t border-l border-r border-primary")} onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
-            {/* Dropdown anchored to ... button */}
-            {showOverflow && (
-              <div ref={dropdownRef} className="absolute top-full right-0 w-44 z-40">
-                {/* Panel body */}
-                <div className="bg-surface-container-low border border-primary border-t-0 rounded-b-xl rounded-tl-xl shadow-lg py-1.5 px-1.5">
-                  {/* Inverse corner top-right connecting to notch */}
-                  <div className="absolute -top-2 right-0 w-2 h-2 bg-surface-container-low" />
-                  {/* Inverse corner top-left of panel */}
-                  <div
-                    className="absolute top-0 -left-2 w-2 h-2 pointer-events-none"
-                    style={{
-                      backgroundColor: "var(--color-surface-container-low)",
-                      maskImage: "radial-gradient(circle 8px at 0 0, transparent 8px, black 8px)",
-                      WebkitMaskImage: "radial-gradient(circle 8px at 0 0, transparent 8px, black 8px)",
-                    }}
-                  />
-          {overflowTabs.map((tab) => (
+          <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
+        ) : (
+          <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label="New chat" />
+        )}
+        <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
+        <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
+      </div>
+
+      {/* Overflow dropdown with SVG outline */}
+      {showOverflow && overflowTabs.length > 0 && (
+        <OverflowDropdown
+          ref={dropdownRef}
+          tabs={overflowTabs}
+          activeTabId={activeTabId}
+          onSelect={(id) => { setActiveTabId(id); setShowOverflow(false); }}
+          onAddTab={() => { handleAddTab(); setShowOverflow(false); }}
+        />
+      )}
+    </div>
+  );
+}
+
+interface OverflowDropdownProps {
+  tabs: ChatTab[];
+  activeTabId: string;
+  onSelect: (id: string) => void;
+  onAddTab: () => void;
+}
+
+const NOTCH_W = 36;
+const NOTCH_H = 40;
+const PANEL_W = 176;
+
+const OverflowDropdown = forwardRef<HTMLDivElement, OverflowDropdownProps>(
+  function OverflowDropdown({ tabs, activeTabId, onSelect, onAddTab }, ref) {
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [panelH, setPanelH] = useState(80);
+
+    useEffect(() => {
+      if (contentRef.current) {
+        setPanelH(contentRef.current.offsetHeight);
+      }
+    }, [tabs.length]);
+
+    const path = buildOutline(NOTCH_W, NOTCH_H, PANEL_W, panelH);
+    const totalH = NOTCH_H + panelH;
+
+    return (
+      <div
+        ref={ref}
+        className="absolute z-50"
+        style={{ top: 0, right: 4, width: PANEL_W, height: totalH }}
+      >
+        <svg
+          className="absolute inset-0 pointer-events-none"
+          width={PANEL_W}
+          height={totalH}
+          style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.08))" }}
+        >
+          <path
+            d={path}
+            fill="var(--color-surface-container-low)"
+            stroke="var(--color-primary)"
+            strokeWidth="1"
+          />
+        </svg>
+        <div
+          ref={contentRef}
+          className="absolute py-1.5 px-1.5"
+          style={{ top: NOTCH_H, left: 0, width: PANEL_W }}
+        >
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               className={cn(
                 "w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5",
                 tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
               )}
-              onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
+              onClick={() => onSelect(tab.id)}
             >
               <Icon name="auto_awesome" size={12} />
               <span className="truncate">{tab.title}</span>
@@ -199,21 +275,13 @@ export function AgentSidebarHeader({
           <div className="h-px bg-outline-variant mx-1 my-1" />
           <button
             className="w-full px-2.5 py-1.5 text-left text-xs rounded-md transition-colors flex items-center gap-1.5 text-primary hover:bg-on-surface/10"
-            onClick={() => { handleAddTab(); setShowOverflow(false); }}
+            onClick={onAddTab}
           >
             <Icon name="add" size={12} />
             <span>New chat</span>
           </button>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label="New chat" />
-        )}
-        <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
-        <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  },
+);
