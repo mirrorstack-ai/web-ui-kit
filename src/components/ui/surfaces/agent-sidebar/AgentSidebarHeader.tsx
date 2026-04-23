@@ -19,25 +19,39 @@ const GAP = 6;
 const ADD_BTN = 40;
 
 // SVG path: notch top-right, panel below — mirrored AppSwitcher approach
-const R = 12;
+const R = 8; // corner radius
+const CR = 6; // concave (inverse) corner radius
 
 function buildOutline(nw: number, nh: number, pw: number, ph: number) {
   const th = nh + ph;
   const nl = pw - nw; // notch left x
 
   return [
+    // Top-left of notch
     `M ${nl + R},0`,
+    // Top edge of notch
     `H ${pw - R}`,
+    // Top-right corner of notch
     `A ${R},${R} 0 0,1 ${pw},${R}`,
+    // Right edge all the way down (notch + panel share right edge)
     `V ${th - R}`,
+    // Bottom-right corner
     `A ${R},${R} 0 0,1 ${pw - R},${th}`,
+    // Bottom edge
     `H ${R}`,
+    // Bottom-left corner
     `A ${R},${R} 0 0,1 0,${th - R}`,
+    // Left edge of panel up
     `V ${nh + R}`,
+    // Top-left corner of panel
     `A ${R},${R} 0 0,1 ${R},${nh}`,
-    `H ${nl - R}`,
-    `A ${R},${R} 0 0,0 ${nl},${nh - R}`,
+    // Top edge of panel to inverse corner
+    `H ${nl - CR}`,
+    // Inverse concave corner (bottom-left of notch)
+    `A ${CR},${CR} 0 0,0 ${nl},${nh - CR}`,
+    // Left edge of notch up
     `V ${R}`,
+    // Top-left corner of notch
     `A ${R},${R} 0 0,1 ${nl + R},0`,
     `Z`,
   ].join(" ");
@@ -239,7 +253,7 @@ const OverflowDropdown = forwardRef<HTMLDivElement, OverflowDropdownProps>(
       <div
         ref={ref}
         className="absolute z-50"
-        style={{ top: 0, right: 4, width: PANEL_W, height: totalH }}
+        style={{ top: 0, right: 0, width: PANEL_W, height: totalH }}
       >
         <svg
           className="absolute inset-0 pointer-events-none"
