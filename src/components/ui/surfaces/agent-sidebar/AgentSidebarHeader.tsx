@@ -62,7 +62,6 @@ export function AgentSidebarHeader({
   const [ddNotchX, setDdNotchX] = useState(0);
   const histContentRef = useRef<HTMLDivElement>(null);
   const [histContentH, setHistContentH] = useState(0);
-  const [histNotchX, setHistNotchX] = useState(0);
 
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
@@ -130,13 +129,6 @@ export function AgentSidebarHeader({
   useLayoutEffect(() => {
     if (!showHistory || !histContentRef.current) return;
     setHistContentH(histContentRef.current.offsetHeight);
-    const btn = historyBtnRef.current;
-    const dd = historyDropdownRef.current;
-    if (btn && dd) {
-      const btnRect = btn.getBoundingClientRect();
-      const ddRect = dd.getBoundingClientRect();
-      setHistNotchX(btnRect.left - ddRect.left);
-    }
   }, [showHistory, tabs.length]);
 
   useLayoutEffect(() => {
@@ -166,19 +158,7 @@ export function AgentSidebarHeader({
     setActiveTabId(id);
   };
 
-  const handleDeleteHistory = (tabId: string) => {
-    if (tabs.length === 1) return;
-    const idx = tabs.findIndex((t) => t.id === tabId);
-    const newTabs = tabs.filter((t) => t.id !== tabId);
-    setTabs(newTabs);
-    if (tabId === activeTabId) {
-      const next = newTabs[Math.min(idx, newTabs.length - 1)];
-      if (next) setActiveTabId(next.id);
-    }
-  };
-
-  const handleCloseTab = (tabId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const removeTab = (tabId: string) => {
     if (tabs.length === 1) return;
     const idx = tabs.findIndex((t) => t.id === tabId);
     const newTabs = tabs.filter((t) => t.id !== tabId);
@@ -255,7 +235,7 @@ export function AgentSidebarHeader({
                 {tabs.length > 1 && (
                   <div
                     className="w-4 h-4 shrink-0 flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-70 hover:!opacity-100 hover:bg-on-surface/10 transition-opacity"
-                    onClick={(e) => { e.stopPropagation(); handleDeleteHistory(tab.id); }}
+                    onClick={(e) => { e.stopPropagation(); removeTab(tab.id); }}
                     aria-label={`Delete ${tab.title}`}
                   >
                     <Icon name="close" size={12} className="text-on-surface-variant" />
@@ -302,7 +282,7 @@ export function AgentSidebarHeader({
                         ? "text-inverse-on-surface hover:bg-inverse-on-surface/20 opacity-70 hover:opacity-100"
                         : "text-on-surface hover:bg-on-surface/10 opacity-0 group-hover:opacity-70 group-hover:hover:opacity-100",
                     )}
-                    onClick={(e) => handleCloseTab(tab.id, e)}
+                    onClick={(e) => { e.stopPropagation(); removeTab(tab.id); }}
                     aria-label={`Close ${tab.title}`}
                   >
                     <Icon name="close" size={14} />
