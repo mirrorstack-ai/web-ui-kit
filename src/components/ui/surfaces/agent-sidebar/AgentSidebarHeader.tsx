@@ -26,12 +26,12 @@ const HEADER_H = 40;
 
 // History dropdown
 const HIST_W = 148;
-const HIST_NOTCH_H = 28;
+const HIST_NOTCH_H = 24;
 
 // Overflow dropdown notch dimensions
 const DD_W = 176;
 const DD_NOTCH_W = 32; // matches IconButton sm
-const DD_NOTCH_H = 32; // full IconButton sm height (h-8)
+const DD_NOTCH_H = 24; // full IconButton sm height (h-8)
 const DD_R = 8;
 const DD_IR = 8;
 
@@ -206,7 +206,7 @@ export function AgentSidebarHeader({
           stroke="none"
           headOnly
           className="absolute z-[5]"
-          style={{ left: activeTabRect.left - TAB_IR, top: 0 }}
+          style={{ left: activeTabRect.left - TAB_IR, top: 4 }}
         />
       )}
 
@@ -220,7 +220,7 @@ export function AgentSidebarHeader({
         <div
           ref={historyDropdownRef}
           className="absolute z-50 overflow-visible"
-          style={{ left: 4, top: 6, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+          style={{ left: 4, top: 4, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
         >
           {histContentH > 0 && (
             <Notch
@@ -332,7 +332,7 @@ export function AgentSidebarHeader({
         <div
           ref={dropdownRef}
           className="absolute z-50 overflow-visible"
-          style={{ right: 8, top: `calc(100% - ${DD_NOTCH_H + 4}px)`, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+          style={{ right: 8, top: 4, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
         >
           {ddContentH > 0 && (
             <Notch
