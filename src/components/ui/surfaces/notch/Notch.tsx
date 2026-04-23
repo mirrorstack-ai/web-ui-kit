@@ -1,0 +1,154 @@
+import type { CSSProperties } from "react";
+import { cn } from "@/utils/cn";
+import type { ComponentMeta } from "@/types/component-meta";
+
+export const meta: ComponentMeta = {
+  name: "Notch",
+  description: "SVG shape with a notch tab on any edge",
+};
+
+export type NotchSide = "top" | "bottom" | "left" | "right";
+
+export interface NotchProps {
+  width: number;
+  height: number;
+  notchWidth: number;
+  notchHeight: number;
+  notchSide?: NotchSide;
+  /** Offset from start of edge. Positive = from top/left, negative = from bottom/right */
+  notchOffset?: number;
+  radius?: number;
+  inverseRadius?: number;
+  /** SVG fill color. Defaults to surface-container-low. Set "none" to disable. */
+  fill?: string;
+  /** SVG stroke color. Defaults to primary. Set "none" to disable. */
+  stroke?: string;
+  strokeWidth?: number;
+  /** Render only the notch tab, no body */
+  headOnly?: boolean;
+  className?: string;
+  style?: CSSProperties;
+}
+
+/**
+ * Builds path for body + notch on the RIGHT edge.
+ * Other sides use SVG transform.
+ */
+function buildPath(
+  w: number, h: number,
+  nw: number, nh: number,
+  ny: number,
+  r: number, ir: number,
+) {
+  const tw = w + nw;
+  const nb = ny + nh;
+
+  return [
+    `M ${r},0`,
+    `H ${w - r}`,
+    `A ${r},${r} 0 0,1 ${w},${r}`,
+    `V ${ny - ir}`,
+    `A ${ir},${ir} 0 0,0 ${w + ir},${ny}`,
+    `H ${tw - r}`,
+    `A ${r},${r} 0 0,1 ${tw},${ny + r}`,
+    `V ${nb - r}`,
+    `A ${r},${r} 0 0,1 ${tw - r},${nb}`,
+    `H ${w + ir}`,
+    `A ${ir},${ir} 0 0,0 ${w},${nb + ir}`,
+    `V ${h - r}`,
+    `A ${r},${r} 0 0,1 ${w - r},${h}`,
+    `H ${r}`,
+    `A ${r},${r} 0 0,1 0,${h - r}`,
+    `V ${r}`,
+    `A ${r},${r} 0 0,1 ${r},0`,
+    `Z`,
+  ].join(" ");
+}
+
+function buildHeadPath(w: number, h: number, r: number) {
+  return [
+    `M ${r},0`,
+    `H ${w - r}`,
+    `A ${r},${r} 0 0,1 ${w},${r}`,
+    `V ${h - r}`,
+    `A ${r},${r} 0 0,1 ${w - r},${h}`,
+    `H ${r}`,
+    `A ${r},${r} 0 0,1 0,${h - r}`,
+    `V ${r}`,
+    `A ${r},${r} 0 0,1 ${r},0`,
+    `Z`,
+  ].join(" ");
+}
+
+function resolveOffset(offset: number, edge: number, notch: number) {
+  return offset >= 0 ? offset : edge - notch + offset;
+}
+
+export function Notch({
+  width,
+  height,
+  notchWidth,
+  notchHeight,
+  notchSide = "right",
+  notchOffset = 0,
+  radius = 8,
+  inverseRadius = 6,
+  fill = "var(--color-surface-container-low)",
+  stroke = "var(--color-primary)",
+  strokeWidth = 1,
+  headOnly = false,
+  className,
+  style,
+}: NotchProps) {
+  if (headOnly) {
+    return (
+      <svg width={notchWidth} height={notchHeight} className={cn("pointer-events-none", className)} style={style}>
+        <path d={buildHeadPath(notchWidth, notchHeight, radius)} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
+      </svg>
+    );
+  }
+
+  const horiz = notchSide === "right" || notchSide === "left";
+
+  // Always build path as "notch on right edge"
+  // For top/bottom: swap axes — treat width as height and vice versa
+  const bw = horiz ? width : height;
+  const bh = horiz ? height : width;
+  const bnw = horiz ? notchWidth : notchHeight;
+  const bnh = horiz ? notchHeight : notchWidth;
+  const edge = horiz ? height : width;
+  const notchLen = horiz ? notchHeight : notchWidth;
+  const ny = resolveOffset(notchOffset, edge, notchLen);
+
+  const path = buildPath(bw, bh, bnw, bnh, ny, radius, inverseRadius);
+
+  const svgW = horiz ? width + notchWidth : width;
+  const svgH = horiz ? height : height + notchHeight;
+
+  // Transform to target side
+  let transform: string | undefined;
+  const pw = bw + bnw; // path total width
+  const ph = bh; // path total height
+
+  switch (notchSide) {
+    case "right":
+      break;
+    case "left":
+      transform = `translate(${pw}, 0) scale(-1, 1)`;
+      break;
+    case "bottom":
+      // path is drawn horizontally (notch on right), rotate -90° to put notch on bottom
+      transform = `translate(0, ${pw}) rotate(-90)`;
+      break;
+    case "top":
+      // rotate -90° then flip vertically
+      transform = `translate(${ph}, 0) rotate(90)`;
+      break;
+  }
+
+  return (
+    <svg width={svgW} height={svgH} className={cn("pointer-events-none", className)} style={style}>
+      <path d={path} fill={fill} stroke={stroke} strokeWidth={strokeWidth} transform={transform} />
+    </svg>
+  );
+}
