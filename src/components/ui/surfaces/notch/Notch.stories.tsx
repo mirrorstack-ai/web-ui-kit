@@ -39,7 +39,7 @@ export const AllSides: Story = {
       {(["right", "left", "top", "bottom"] as const).map((side) => (
         <div key={side}>
           <p className="text-xs text-on-surface-variant mb-2">{side}</p>
-          <Notch width={160} height={120} notchWidth={36} notchHeight={40} notchSide={side} notchOffset={10} />
+          <Notch width={160} height={120} notchWidth={36} notchHeight={40} notchSide={side} notchOffset={0} />
         </div>
       ))}
     </div>

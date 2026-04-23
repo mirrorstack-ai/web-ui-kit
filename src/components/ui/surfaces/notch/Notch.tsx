@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
+import { isDev } from "@/utils/env";
 
 export const meta: ComponentMeta = {
   name: "Notch",
@@ -42,27 +43,49 @@ function buildPath(
 ) {
   const tw = w + nw;
   const nb = ny + nh;
+  const atStart = ny === 0;
+  const atEnd = nb >= h;
+  const d: string[] = [];
 
-  return [
-    `M ${r},0`,
-    `H ${w - r}`,
-    `A ${r},${r} 0 0,1 ${w},${r}`,
-    `V ${ny - ir}`,
-    `A ${ir},${ir} 0 0,0 ${w + ir},${ny}`,
-    `H ${tw - r}`,
-    `A ${r},${r} 0 0,1 ${tw},${ny + r}`,
-    `V ${nb - r}`,
-    `A ${r},${r} 0 0,1 ${tw - r},${nb}`,
-    `H ${w + ir}`,
-    `A ${ir},${ir} 0 0,0 ${w},${nb + ir}`,
-    `V ${h - r}`,
-    `A ${r},${r} 0 0,1 ${w - r},${h}`,
-    `H ${r}`,
-    `A ${r},${r} 0 0,1 0,${h - r}`,
-    `V ${r}`,
-    `A ${r},${r} 0 0,1 ${r},0`,
-    `Z`,
-  ].join(" ");
+  // Top-left corner
+  d.push(`M ${r},0`);
+
+  if (atStart) {
+    // Notch starts at top — no body corner on top-right, notch IS the top-right
+    d.push(`H ${tw - r}`);
+    d.push(`A ${r},${r} 0 0,1 ${tw},${r}`);
+  } else {
+    // Body top-right corner, then inverse corner down to notch
+    d.push(`H ${w - r}`);
+    d.push(`A ${r},${r} 0 0,1 ${w},${r}`);
+    d.push(`V ${ny - ir}`);
+    d.push(`A ${ir},${ir} 0 0,0 ${w + ir},${ny}`);
+    d.push(`H ${tw - r}`);
+    d.push(`A ${r},${r} 0 0,1 ${tw},${ny + r}`);
+  }
+
+  if (atEnd) {
+    // Notch ends at bottom — notch IS the bottom-right
+    d.push(`V ${h - r}`);
+    d.push(`A ${r},${r} 0 0,1 ${tw - r},${h}`);
+  } else {
+    // Notch bottom-right corner, inverse corner, then body bottom-right
+    d.push(`V ${nb - r}`);
+    d.push(`A ${r},${r} 0 0,1 ${tw - r},${nb}`);
+    d.push(`H ${w + ir}`);
+    d.push(`A ${ir},${ir} 0 0,0 ${w},${nb + ir}`);
+    d.push(`V ${h - r}`);
+    d.push(`A ${r},${r} 0 0,1 ${w - r},${h}`);
+  }
+
+  // Bottom-left and left edge
+  d.push(`H ${r}`);
+  d.push(`A ${r},${r} 0 0,1 0,${h - r}`);
+  d.push(`V ${r}`);
+  d.push(`A ${r},${r} 0 0,1 ${r},0`);
+  d.push(`Z`);
+
+  return d.join(" ");
 }
 
 function buildHeadPath(w: number, h: number, r: number) {
@@ -103,7 +126,7 @@ export function Notch({
   if (headOnly) {
     return (
       <svg width={notchWidth} height={notchHeight} className={cn("pointer-events-none", className)} style={style}>
-        <path d={buildHeadPath(notchWidth, notchHeight, radius)} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
+        <path d={buildHeadPath(notchWidth, notchHeight, radius)} fill={fill} stroke={stroke} strokeWidth={strokeWidth} vectorEffect="non-scaling-stroke" />
       </svg>
     );
   }
@@ -118,7 +141,28 @@ export function Notch({
   const bnh = horiz ? notchHeight : notchWidth;
   const edge = horiz ? height : width;
   const notchLen = horiz ? notchHeight : notchWidth;
-  const ny = resolveOffset(notchOffset, edge, notchLen);
+  const rawNy = resolveOffset(notchOffset, edge, notchLen);
+  const minGap = radius + inverseRadius;
+
+  // Offset must be 0 or >= minGap from either edge
+  let ny = rawNy;
+  if (ny > 0 && ny < minGap) {
+    if (isDev) {
+      console.warn(
+        `[Notch] notchOffset ${notchOffset} is too small — must be 0 or >= ${minGap} (radius + inverseRadius). Clamping to 0.`,
+      );
+    }
+    ny = 0;
+  }
+  const endGap = edge - notchLen - ny;
+  if (endGap > 0 && endGap < minGap) {
+    if (isDev) {
+      console.warn(
+        `[Notch] notch is too close to the far edge — gap ${endGap} < ${minGap}. Clamping to edge.`,
+      );
+    }
+    ny = edge - notchLen;
+  }
 
   const path = buildPath(bw, bh, bnw, bnh, ny, radius, inverseRadius);
 
