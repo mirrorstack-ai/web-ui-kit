@@ -174,34 +174,34 @@ export function AgentSidebarHeader({
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
-              <div key={tab.id} className="group relative h-full flex">
+              <div
+                key={tab.id}
+                role="tab"
+                ref={isActive ? activeTabRef : undefined}
+                aria-selected={isActive}
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => setActiveTabId(tab.id)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTabId(tab.id); } }}
+                className="group relative h-full flex"
+              >
                 <div
-                  role="tab"
-                  ref={isActive ? activeTabRef : undefined}
-                  aria-selected={isActive}
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => setActiveTabId(tab.id)}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTabId(tab.id); } }}
-                  className="relative h-full flex"
+                  className={cn(
+                    "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none",
+                    isActive
+                      ? "text-inverse-on-surface z-10 min-w-[100px] max-w-[200px]"
+                      : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50 min-w-[80px] max-w-[140px]",
+                  )}
                 >
-                  <div
-                    className={cn(
-                      "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none",
-                      isActive
-                        ? "text-inverse-on-surface z-10 min-w-[100px] max-w-[200px]"
-                        : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50 min-w-[80px] max-w-[140px]",
-                    )}
-                  >
-                    <span className="text-[13px] font-normal truncate flex-1">{tab.title}</span>
-                    {tabs.length > 1 && <span className="w-5 h-5 shrink-0" />}
-                  </div>
+                  <span className="text-[13px] font-normal truncate flex-1">{tab.title}</span>
+                  {tabs.length > 1 && <span className="w-5 h-5 shrink-0" />}
                 </div>
                 {tabs.length > 1 && (
                   <div
                     className={cn(
                       "absolute right-1 top-1/2 -translate-y-1/2 z-20 w-5 h-5 flex items-center justify-center rounded-full transition-opacity cursor-pointer",
-                      isActive ? "text-inverse-on-surface hover:bg-inverse-on-surface/20 opacity-70 hover:opacity-100" : "text-on-surface hover:bg-on-surface/10 opacity-70 hover:opacity-100",
-                      isActive ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-70 group-hover:hover:opacity-100",
+                      isActive
+                        ? "text-inverse-on-surface hover:bg-inverse-on-surface/20 opacity-70 hover:opacity-100"
+                        : "text-on-surface hover:bg-on-surface/10 opacity-0 group-hover:opacity-70 group-hover:hover:opacity-100",
                     )}
                     onClick={(e) => handleCloseTab(tab.id, e)}
                     aria-label={`Close ${tab.title}`}
