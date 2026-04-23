@@ -30,8 +30,10 @@ export function AgentSidebarInput({
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 150)}px`;
-    setIsMultiline(text.includes("\n") || el.scrollHeight > el.clientHeight + 2);
+    const scrollH = el.scrollHeight;
+    const singleLineH = parseInt(getComputedStyle(el).lineHeight) || 20;
+    el.style.height = `${Math.min(scrollH, 150)}px`;
+    setIsMultiline(scrollH > singleLineH + 4);
   }, [text]);
 
   const send = () => {
