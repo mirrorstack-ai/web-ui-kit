@@ -249,7 +249,7 @@ export function AgentSidebarHeader({
 
       {/* Tabs */}
       <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 gap-1.5">
-        <div role="tablist" aria-label="Chat sessions" className="flex h-full gap-1.5">
+        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 h-full gap-1.5">
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
