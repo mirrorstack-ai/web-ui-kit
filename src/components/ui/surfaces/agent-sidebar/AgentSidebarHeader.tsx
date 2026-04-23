@@ -234,9 +234,9 @@ interface OverflowDropdownProps {
 const NOTCH_W = 32;
 const NOTCH_H = 40;
 const PANEL_W = 180;
-// Right offset: collapse(32) + gap(2) + close(32) + pr(4) = 70, but the ... btn is 32px wide
-// So notch right edge should be at right: ~38px (after ... button ends before collapse starts)
-const DROPDOWN_RIGHT = 38;
+// ... button is 3rd from right: close(32) + gap(2) + collapse(32) + gap(2) + pr(4) = 72
+// Notch right edge should align with ... button's right edge
+const DROPDOWN_RIGHT = 72;
 
 const OverflowDropdown = forwardRef<HTMLDivElement, OverflowDropdownProps>(
   function OverflowDropdown({ tabs, activeTabId, onSelect, onAddTab }, ref) {
