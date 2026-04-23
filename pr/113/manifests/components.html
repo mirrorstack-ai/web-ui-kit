@@ -3079,21 +3079,31 @@ width: number</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Negative Offset</span>
+                <span class="ex-name">With Offset</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const NegativeOffset = () =&gt; &lt;Notch
-    width={200}
-    height={150}
-    notchWidth={40}
-    notchHeight={50}
-    notchSide=&quot;right&quot;
-    notchOffset={-10}
-    radius={8}
-    inverseRadius={6}
-    strokeWidth={1} /&gt;;</code></pre>
+              <pre><code>const WithOffset = () =&gt; (
+  &lt;div className=&quot;grid grid-cols-2 gap-8 p-4&quot;&gt;
+    &lt;div&gt;
+      &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: 0 (start)&lt;/p&gt;
+      &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={0} /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: 30&lt;/p&gt;
+      &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={30} /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: -0 (end)&lt;/p&gt;
+      &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={-0} /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: -30&lt;/p&gt;
+      &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={-30} /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
