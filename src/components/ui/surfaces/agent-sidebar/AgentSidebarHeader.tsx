@@ -251,7 +251,7 @@ export function AgentSidebarHeader({
                 )}
                 onClick={() => { setActiveTabId(tab.id); setShowHistory(false); }}
               >
-                <span className="text-[11px] truncate flex-1">{tab.title}</span>
+                <span className="text-xs truncate flex-1">{tab.title}</span>
                 {tabs.length > 1 && (
                   <div
                     className="w-4 h-4 shrink-0 flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-70 hover:!opacity-100 hover:bg-on-surface/10 transition-opacity"
@@ -358,7 +358,7 @@ export function AgentSidebarHeader({
               <button
                 key={tab.id}
                 className={cn(
-                  "w-full px-1.5 py-0.5 text-left text-[11px] rounded transition-colors flex items-center gap-0.5",
+                  "w-full px-1.5 py-0.5 text-left text-xs rounded transition-colors flex items-center gap-0.5",
                   tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
                 )}
                 onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
@@ -368,7 +368,7 @@ export function AgentSidebarHeader({
             ))}
             <div className="h-px bg-outline-variant mx-1 my-0.5" />
             <button
-              className="w-full px-1.5 py-0.5 text-left text-[11px] rounded transition-colors flex items-center gap-0.5 text-primary hover:bg-on-surface/10"
+              className="w-full px-1.5 py-0.5 text-left text-xs rounded transition-colors flex items-center gap-0.5 text-primary hover:bg-on-surface/10"
               onClick={() => { handleAddTab(); setShowOverflow(false); }}
             >
               <Icon name="add" size={12} />
