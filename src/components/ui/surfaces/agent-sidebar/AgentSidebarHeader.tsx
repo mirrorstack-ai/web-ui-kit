@@ -23,8 +23,8 @@ const ADD_BTN = 40;
 const DD_W = 176;
 const DD_NOTCH_W = 32; // matches IconButton sm
 const DD_NOTCH_H = 32; // full IconButton sm height (h-8)
-const DD_R = 10;
-const DD_IR = 6;
+const DD_R = 8;
+const DD_IR = 5;
 
 export function AgentSidebarHeader({
   sidebarWidth,
@@ -215,7 +215,7 @@ export function AgentSidebarHeader({
               radius={DD_R}
               inverseRadius={DD_IR}
               stroke="var(--color-primary)"
-              strokeWidth={1}
+              strokeWidth={1.5}
               className="absolute top-0 left-0"
             />
           )}
