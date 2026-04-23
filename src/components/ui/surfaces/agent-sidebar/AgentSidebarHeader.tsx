@@ -24,6 +24,9 @@ const TAB_R = 12;
 const TAB_IR = 12;
 const HEADER_H = 40;
 
+// History dropdown width
+const HIST_W = 148;
+
 // Overflow dropdown notch dimensions
 const DD_W = 176;
 const DD_NOTCH_W = 32; // matches IconButton sm
@@ -211,7 +214,7 @@ export function AgentSidebarHeader({
         <IconButton icon="expand_more" variant="text" size="sm" className="m-auto text-on-surface" onClick={() => setShowHistory(!showHistory)} aria-label="Chat history" />
       </div>
 
-      {/* History dropdown with notch tab connecting to the arrow button */}
+      {/* History dropdown */}
       {showHistory && (
         <div
           ref={historyDropdownRef}
@@ -220,7 +223,7 @@ export function AgentSidebarHeader({
         >
           {histContentH > 0 && (
             <Notch
-              width={DD_W}
+              width={HIST_W}
               height={histContentH}
               notchWidth={DD_NOTCH_W}
               notchHeight={DD_NOTCH_H}
@@ -235,15 +238,14 @@ export function AgentSidebarHeader({
           )}
           <div
             ref={histContentRef}
-            className="relative z-10 py-1.5 px-1.5"
-            style={{ marginTop: DD_NOTCH_H, width: DD_W }}
+            className="relative z-10 py-1 px-1"
+            style={{ marginTop: DD_NOTCH_H, width: HIST_W }}
           >
-            <div className="px-2 py-1 text-xs font-medium text-on-surface-variant">Chat history</div>
             {tabs.map((tab) => (
               <div
                 key={tab.id}
                 className={cn(
-                  "group/item flex items-center gap-2 px-2.5 py-1.5 rounded-md cursor-pointer transition-colors",
+                  "group/item flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors",
                   tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
                 )}
                 onClick={() => { setActiveTabId(tab.id); setShowHistory(false); }}
@@ -251,11 +253,11 @@ export function AgentSidebarHeader({
                 <span className="text-xs truncate flex-1">{tab.title}</span>
                 {tabs.length > 1 && (
                   <div
-                    className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-70 hover:!opacity-100 hover:bg-on-surface/10 transition-opacity"
+                    className="w-4 h-4 shrink-0 flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-70 hover:!opacity-100 hover:bg-on-surface/10 transition-opacity"
                     onClick={(e) => { e.stopPropagation(); handleDeleteHistory(tab.id); }}
                     aria-label={`Delete ${tab.title}`}
                   >
-                    <Icon name="delete" size={14} className="text-on-surface-variant" />
+                    <Icon name="close" size={12} className="text-on-surface-variant" />
                   </div>
                 )}
               </div>
