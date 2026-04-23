@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">28 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">28/28 infos</a><span class="filter-pill ok" aria-disabled="true">110 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><span class="filter-pill ok" aria-disabled="true">28 components ok</span><a class="filter-pill info" data-k="infos" href="#filter-infos">28/28 infos</a><span class="filter-pill ok" aria-disabled="true">111 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2913,7 +2913,7 @@ logo?: ReactNode</code></pre>
       <div class="badges">
         <label for="c-16-ui-surfaces-notch-props" class="badge ok as-toggle">14 prop types</label>
         <label for="c-16-ui-surfaces-notch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-16-ui-surfaces-notch-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-16-ui-surfaces-notch-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -3121,6 +3121,30 @@ width: number</code></pre>
           width={160} height={120}
           notchWidth={60} notchHeight={40}
           notchSide={side}
+          headOnly
+        /&gt;
+      &lt;/div&gt;
+    ))}
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Head Only With Offset</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const HeadOnlyWithOffset = () =&gt; (
+  &lt;div className=&quot;grid grid-cols-2 gap-8 p-4&quot;&gt;
+    {([&quot;right&quot;, &quot;left&quot;, &quot;top&quot;, &quot;bottom&quot;] as const).map((side) =&gt; (
+      &lt;div key={side}&gt;
+        &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;headOnly — {side} — offset 30&lt;/p&gt;
+        &lt;Notch
+          width={160} height={120}
+          notchWidth={60} notchHeight={40}
+          notchSide={side}
+          notchOffset={30}
           headOnly
         /&gt;
       &lt;/div&gt;
