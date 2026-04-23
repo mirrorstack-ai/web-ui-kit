@@ -176,19 +176,19 @@ export function AgentSidebarHeader({
       </div>
       {/* Overflow dropdown — rendered outside the clipped container */}
       {showOverflow && overflowTabs.length > 0 && (
-        <div ref={dropdownRef} className="absolute top-0 right-12 w-40 z-40">
-          {/* Notch behind the ... button */}
-          <div className="absolute top-0 -right-8 w-8 h-10 bg-surface-container rounded-t-lg" />
-          {/* Inverse corner where notch meets dropdown */}
+        <div ref={dropdownRef} className="absolute top-full right-4 z-40">
+          {/* Notch tab behind ... button */}
+          <div className="absolute -top-10 right-0 w-10 h-10 bg-surface-container-low rounded-t-xl border-t border-l border-r border-primary" />
+          {/* Inverse corner left of notch */}
           <div
-            className="absolute top-10 -right-8 w-3 h-3 pointer-events-none"
+            className="absolute -top-3 right-10 w-3 h-3 pointer-events-none"
             style={{
-              backgroundColor: "var(--color-surface-container)",
-              maskImage: "radial-gradient(circle 12px at 12px 0, transparent 12px, black 12px)",
-              WebkitMaskImage: "radial-gradient(circle 12px at 12px 0, transparent 12px, black 12px)",
+              backgroundColor: "var(--color-surface-container-low)",
+              maskImage: "radial-gradient(circle 12px at 0 0, transparent 12px, black 12px)",
+              WebkitMaskImage: "radial-gradient(circle 12px at 0 0, transparent 12px, black 12px)",
             }}
           />
-          <div className="mt-10 bg-surface-container rounded-b-lg rounded-tl-lg shadow-lg py-1 px-1">
+          <div className="bg-surface-container-low rounded-b-xl rounded-tl-xl border border-primary border-t-0 shadow-lg py-1.5 px-1.5">
           {overflowTabs.map((tab) => (
             <button
               key={tab.id}
