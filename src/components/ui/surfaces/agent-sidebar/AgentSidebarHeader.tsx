@@ -199,7 +199,8 @@ export function AgentSidebarHeader({
                 {tabs.length > 1 && (
                   <div
                     className={cn(
-                      "absolute right-1 top-1/2 -translate-y-1/2 z-20 w-5 h-5 flex items-center justify-center rounded-full hover:bg-inverse-on-surface/15 transition-opacity cursor-pointer",
+                      "absolute right-1 z-20 w-5 h-5 flex items-center justify-center rounded-full hover:bg-inverse-on-surface/15 transition-opacity cursor-pointer",
+                      isActive ? "top-[9px]" : "top-1/2 -translate-y-1/2",
                       isActive ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-70 group-hover:hover:opacity-100",
                     )}
                     onClick={(e) => handleCloseTab(tab.id, e)}
