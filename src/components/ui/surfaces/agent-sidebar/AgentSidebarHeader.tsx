@@ -239,14 +239,14 @@ export function AgentSidebarHeader({
           )}
           <div
             ref={histContentRef}
-            className="relative z-10 pt-1.5 pb-1 px-1"
+            className="relative z-10 pt-2 pb-1.5 px-1.5"
             style={{ marginTop: HIST_NOTCH_H, width: HIST_W }}
           >
             {tabs.map((tab) => (
               <div
                 key={tab.id}
                 className={cn(
-                  "group/item flex items-center gap-1 px-2 py-1 rounded-md cursor-pointer transition-colors",
+                  "group/item flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors",
                   tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
                 )}
                 onClick={() => { setActiveTabId(tab.id); setShowHistory(false); }}
@@ -268,8 +268,8 @@ export function AgentSidebarHeader({
       )}
 
       {/* Tabs */}
-      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 gap-0.5.5">
-        <div role="tablist" aria-label="Chat sessions" className="flex h-full gap-0.5.5">
+      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 gap-1.5">
+        <div role="tablist" aria-label="Chat sessions" className="flex h-full gap-1.5">
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
@@ -351,14 +351,14 @@ export function AgentSidebarHeader({
           )}
           <div
             ref={ddContentRef}
-            className="relative z-10 pt-1.5 pb-1 px-1"
+            className="relative z-10 pt-2 pb-1.5 px-1.5"
             style={{ marginTop: DD_NOTCH_H, width: DD_W }}
           >
             {overflowTabs.map((tab) => (
               <button
                 key={tab.id}
                 className={cn(
-                  "w-full px-2 py-1 text-left text-sm rounded-md transition-colors flex items-center gap-1",
+                  "w-full px-2 py-1 text-left text-sm rounded-md transition-colors flex items-center gap-1.5",
                   tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
                 )}
                 onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
@@ -366,9 +366,9 @@ export function AgentSidebarHeader({
                 <span className="truncate">{tab.title}</span>
               </button>
             ))}
-            <div className="h-px bg-outline-variant mx-1 my-0.5" />
+            <div className="h-px bg-outline-variant mx-1.5 my-1" />
             <button
-              className="w-full px-2 py-1 text-left text-sm rounded-md transition-colors flex items-center gap-1 text-primary hover:bg-on-surface/10"
+              className="w-full px-2 py-1 text-left text-sm rounded-md transition-colors flex items-center gap-1.5 text-primary hover:bg-on-surface/10"
               onClick={() => { handleAddTab(); setShowOverflow(false); }}
             >
               <Icon name="add" size={12} />
