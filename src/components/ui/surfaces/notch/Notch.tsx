@@ -97,17 +97,23 @@ function buildHeadPath(nw: number, nh: number, r: number, ir: number) {
   const h = nh + ir * 2; // total height
 
   return [
+    // Top-left: sharp edge then inverse corner going right
     `M 0,0`,
     `V ${ir}`,
-    // Top-left inverse corner — large-arc=1 to flip the curve direction
-    `A ${ir},${ir} 0 1,0 ${ir},0`,
+    `A ${ir},${ir} 0 0,0 ${ir},0`,
+    // Top edge of notch
     `H ${w - r}`,
+    // Top-right corner
     `A ${r},${r} 0 0,1 ${w},${r}`,
+    // Right edge down
     `V ${h - r}`,
+    // Bottom-right corner
     `A ${r},${r} 0 0,1 ${w - r},${h}`,
+    // Bottom edge back to left
     `H ${ir}`,
-    // Bottom-left inverse corner — large-arc=1
-    `A ${ir},${ir} 0 1,0 0,${h - ir}`,
+    // Bottom-left inverse corner
+    `A ${ir},${ir} 0 0,0 0,${h - ir}`,
+    // Sharp edge down
     `V ${h}`,
     `Z`,
   ].join(" ");
