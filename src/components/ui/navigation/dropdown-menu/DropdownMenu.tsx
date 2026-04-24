@@ -3,12 +3,19 @@ import {
   useRef,
   useEffect,
   useCallback,
+  useLayoutEffect,
   useId,
   type ReactNode,
 } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
+import { Notch } from "@/components/ui/surfaces/notch/Notch";
+
+const DD_NOTCH_W = 32;
+const DD_NOTCH_H = 24;
+const DD_R = 8;
+const DD_IR = 8;
 
 export const meta: ComponentMeta = {
   name: "DropdownMenu",
@@ -56,7 +63,12 @@ export function DropdownMenu({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentH, setContentH] = useState(0);
+  const [notchX, setNotchX] = useState(0);
+  const [menuW, setMenuW] = useState(0);
   const menuId = useId();
 
   const actionableIndices = items
@@ -115,6 +127,19 @@ export function DropdownMenu({
     };
   }, [open, closeMenu]);
 
+  useLayoutEffect(() => {
+    if (!open || !contentRef.current) return;
+    setContentH(contentRef.current.offsetHeight);
+    setMenuW(contentRef.current.offsetWidth);
+    const btn = triggerRef.current;
+    const dd = menuRef.current;
+    if (btn && dd) {
+      const btnRect = btn.getBoundingClientRect();
+      const ddRect = dd.getBoundingClientRect();
+      setNotchX(btnRect.left - ddRect.left);
+    }
+  }, [open, items.length]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
@@ -169,6 +194,8 @@ export function DropdownMenu({
   return (
     <div ref={containerRef} className={cn("relative inline-block", className)}>
       <div
+        ref={triggerRef}
+        className="relative z-[51]"
         onClick={() => {
           if (open) {
             closeMenu();
@@ -188,59 +215,81 @@ export function DropdownMenu({
           tabIndex={-1}
           onKeyDown={handleKeyDown}
           className={cn(
-            "absolute z-50 mt-1 min-w-[180px] rounded-xl bg-surface-container py-1 shadow-md outline-none",
+            "absolute z-50 overflow-visible outline-none",
             align === "end" ? "right-0" : "left-0",
           )}
+          style={{ top: 4, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
         >
-          {items.map((entry, index) => {
-            if (isSeparator(entry)) {
+          {contentH > 0 && menuW > 0 && (
+            <Notch
+              width={menuW}
+              height={contentH}
+              notchWidth={DD_NOTCH_W}
+              notchHeight={DD_NOTCH_H}
+              notchSide="bottom"
+              notchOffset={align === "end" ? -notchX : notchX}
+              radius={DD_R}
+              inverseRadius={DD_IR}
+              stroke="var(--color-primary)"
+              strokeWidth={1.5}
+              className="absolute top-0 left-0"
+            />
+          )}
+          <div
+            ref={contentRef}
+            className="relative z-10 min-w-[180px] py-1.5 px-1"
+            style={{ marginTop: DD_NOTCH_H }}
+          >
+            {items.map((entry, index) => {
+              if (isSeparator(entry)) {
+                return (
+                  <div
+                    key={`sep-${index}`}
+                    role="separator"
+                    className="my-1 h-px bg-outline-variant mx-1.5"
+                  />
+                );
+              }
+
+              const item = entry;
+              const isActive = index === activeIndex;
+              const isDanger = item.variant === "danger";
+
               return (
                 <div
-                  key={`sep-${index}`}
-                  role="separator"
-                  className="my-1 h-px bg-outline-variant"
-                />
+                  key={item.id}
+                  role="menuitem"
+                  aria-disabled={item.disabled || undefined}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors rounded-md",
+                    item.disabled && "pointer-events-none opacity-38",
+                    isDanger ? "text-error" : "text-on-surface",
+                    isActive &&
+                      (isDanger
+                        ? "bg-error/8"
+                        : "bg-on-surface/8"),
+                  )}
+                  onClick={() => {
+                    if (item.disabled) return;
+                    onSelect(item);
+                    closeMenu();
+                  }}
+                  onMouseEnter={() => {
+                    if (!item.disabled) setActiveIndex(index);
+                  }}
+                >
+                  {item.icon && (
+                    <Icon
+                      name={item.icon}
+                      size={20}
+                      className={isDanger ? "text-error" : "text-on-surface-variant"}
+                    />
+                  )}
+                  {item.label}
+                </div>
               );
-            }
-
-            const item = entry;
-            const isActive = index === activeIndex;
-            const isDanger = item.variant === "danger";
-
-            return (
-              <div
-                key={item.id}
-                role="menuitem"
-                aria-disabled={item.disabled || undefined}
-                className={cn(
-                  "flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors",
-                  item.disabled && "pointer-events-none opacity-38",
-                  isDanger ? "text-error" : "text-on-surface",
-                  isActive &&
-                    (isDanger
-                      ? "bg-error/8"
-                      : "bg-on-surface/8"),
-                )}
-                onClick={() => {
-                  if (item.disabled) return;
-                  onSelect(item);
-                  closeMenu();
-                }}
-                onMouseEnter={() => {
-                  if (!item.disabled) setActiveIndex(index);
-                }}
-              >
-                {item.icon && (
-                  <Icon
-                    name={item.icon}
-                    size={20}
-                    className={isDanger ? "text-error" : "text-on-surface-variant"}
-                  />
-                )}
-                {item.label}
-              </div>
-            );
-          })}
+            })}
+          </div>
         </div>
       )}
     </div>

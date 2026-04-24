@@ -20,7 +20,7 @@ type Story = StoryObj<typeof DropdownMenu>;
 export const Playground: Story = {
   args: {
     trigger: (
-      <IconButton icon="more_vert" aria-label="Open menu" variant="text" />
+      <IconButton icon="more_vert" aria-label="Open menu" variant="filled" />
     ),
     items: [
       { id: "edit", label: "Edit", icon: "edit" },
