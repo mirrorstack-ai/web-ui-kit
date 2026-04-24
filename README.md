@@ -25,8 +25,10 @@ Import the theme tokens in your app's `globals.css`:
 
 ```css
 @import "tailwindcss";
-@source "@mirrorstack-ai/web-ui-kit/src/components";
-@import "@mirrorstack-ai/web-ui-kit/src/theme.css";
+@import "@mirrorstack-ai/web-ui-kit/theme.css";
+
+/* Tailwind v4 skips node_modules by default — this tells it to scan web-ui-kit's compiled output for class names */
+@source "../../node_modules/@mirrorstack-ai/web-ui-kit/dist";
 ```
 
 Add the Material Symbols font in your HTML `<head>`:
