@@ -13,7 +13,7 @@ import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
 
 const DD_NOTCH_W = 40;
-const DD_NOTCH_H = 24;
+const DD_NOTCH_H = 40;
 const DD_R = 12;
 const DD_IR = 10;
 
