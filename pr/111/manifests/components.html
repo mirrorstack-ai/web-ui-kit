@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/30 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">30/30 infos</a><span class="filter-pill ok" aria-disabled="true">115 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/30 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">30/30 infos</a><span class="filter-pill ok" aria-disabled="true">117 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1072,7 +1072,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
       <div class="badges">
         <label for="c-3-layout-appshell-props" class="badge ok as-toggle">10 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -1156,18 +1156,26 @@ onAgentSend?: (message: string) =&gt; void</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { AppShell, NavigationButton, NavigationRail } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import {
+    AppShell,
+    AppSwitcher,
+    Avatar,
+    Logo,
+    NavDrawer,
+    NavigationButton,
+    NavigationRail,
+} from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Playground</span>
+                <span class="ex-name">With Navigation Rail</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Playground = () =&gt; {
+              <pre><code>const WithNavigationRail = () =&gt; {
   const [selected, setSelected] = useState(&quot;apps&quot;);
   return (
     &lt;AppShell
@@ -1225,6 +1233,14 @@ onAgentSend?: (message: string) =&gt; void</code></pre>
           &lt;/div&gt;
         &lt;/NavigationRail&gt;
       }
+      appSwitcher={
+        &lt;AppSwitcher
+          currentApp=&quot;Account&quot;
+          logo={&lt;div className=&quot;w-8 h-8&quot;&gt;&lt;Logo /&gt;&lt;/div&gt;}
+          apps={apps}
+          activeAppId=&quot;account&quot;
+        /&gt;
+      }
       agentSidebarContent={
         &lt;div className=&quot;text-inverse-on-surface text-sm&quot;&gt;
           Chat messages would appear here...
@@ -1232,12 +1248,119 @@ onAgentSend?: (message: string) =&gt; void</code></pre>
       }
       onAgentSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
     &gt;
-      &lt;div className=&quot;max-w-4xl mx-auto&quot;&gt;
-        &lt;h1 className=&quot;text-2xl font-bold text-on-surface mb-4&quot;&gt;Dashboard&lt;/h1&gt;
-        &lt;p className=&quot;text-on-surface-variant&quot;&gt;
-          Main content area. The agent sidebar can be toggled with the floating button.
-        &lt;/p&gt;
-      &lt;/div&gt;
+      &lt;DemoContent /&gt;
+    &lt;/AppShell&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Nav Drawer</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithNavDrawer = () =&gt; {
+  const [active, setActive] = useState(&quot;profile&quot;);
+  return (
+    &lt;AppShell
+      navigation={
+        &lt;NavDrawer
+          contextSwitcher={
+            &lt;div className=&quot;flex items-center gap-3 p-3 rounded-xl&quot;&gt;
+              &lt;Avatar size=&quot;md&quot; fallback=&quot;J&quot; /&gt;
+              &lt;div className=&quot;min-w-0 flex-1 space-y-0.5&quot;&gt;
+                &lt;p className=&quot;text-sm font-medium text-on-surface truncate&quot;&gt;John Doe&lt;/p&gt;
+                &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;Personal Account&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          }
+          sections={navSections}
+          activeItemId={active}
+          onItemClick={(item: NavDrawerItem) =&gt; setActive(item.id)}
+        /&gt;
+      }
+      appSwitcher={
+        &lt;AppSwitcher
+          currentApp=&quot;Account&quot;
+          logo={&lt;div className=&quot;w-8 h-8&quot;&gt;&lt;Logo /&gt;&lt;/div&gt;}
+          apps={apps}
+          activeAppId=&quot;account&quot;
+        /&gt;
+      }
+      agentSidebarContent={
+        &lt;div className=&quot;text-inverse-on-surface text-sm&quot;&gt;
+          Chat messages would appear here...
+        &lt;/div&gt;
+      }
+      onAgentSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+    &gt;
+      &lt;DemoContent /&gt;
+    &lt;/AppShell&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = () =&gt; {
+  const [selected, setSelected] = useState(&quot;apps&quot;);
+  return (
+    &lt;AppShell
+      navigation={
+        &lt;NavigationRail
+          logo={
+            &lt;NavigationButton
+              customIcon={
+                &lt;div className=&quot;w-full h-full bg-primary/20 flex items-center justify-center&quot;&gt;
+                  &lt;span className=&quot;text-primary font-semibold text-lg&quot;&gt;M&lt;/span&gt;
+                &lt;/div&gt;
+              }
+              label=&quot;My App&quot;
+              variant=&quot;secondary&quot;
+              disableHoverExpand
+              className=&quot;border border-primary&quot;
+            /&gt;
+          }
+        &gt;
+          &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
+            &lt;NavigationButton
+              icon=&quot;space_dashboard&quot;
+              label=&quot;Dashboard&quot;
+              variant=&quot;primary&quot;
+              selected={selected === &quot;dashboard&quot;}
+              onClick={() =&gt; setSelected(&quot;dashboard&quot;)}
+            /&gt;
+            &lt;NavigationButton
+              icon=&quot;data_table&quot;
+              label=&quot;Your Apps&quot;
+              selected={selected === &quot;apps&quot;}
+              onClick={() =&gt; setSelected(&quot;apps&quot;)}
+            /&gt;
+          &lt;/div&gt;
+          &lt;div className=&quot;h-px rounded-full w-full bg-outline&quot; /&gt;
+          &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
+            &lt;NavigationButton
+              icon=&quot;settings&quot;
+              label=&quot;Settings&quot;
+              selected={selected === &quot;settings&quot;}
+              onClick={() =&gt; setSelected(&quot;settings&quot;)}
+            /&gt;
+          &lt;/div&gt;
+        &lt;/NavigationRail&gt;
+      }
+      agentSidebarContent={
+        &lt;div className=&quot;text-inverse-on-surface text-sm&quot;&gt;
+          Chat messages would appear here...
+        &lt;/div&gt;
+      }
+      onAgentSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+    &gt;
+      &lt;DemoContent /&gt;
     &lt;/AppShell&gt;
   );
 };</code></pre>
