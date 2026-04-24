@@ -157,3 +157,7 @@ export {
   AgentSidebarInput,
   type AgentSidebarInputProps,
 } from "./components/ui/surfaces/agent-sidebar/AgentSidebar";
+export {
+  AppShell,
+  type AppShellProps,
+} from "./components/layout/app-shell/app-shell/AppShell";

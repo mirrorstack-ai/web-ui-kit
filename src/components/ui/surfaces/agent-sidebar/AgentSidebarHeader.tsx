@@ -138,7 +138,7 @@ export function AgentSidebarHeader({
     const tRect = tab.getBoundingClientRect();
     const hRect = header.getBoundingClientRect();
     setActiveTabRect({ left: tRect.left - hRect.left, width: tRect.width });
-  }, [activeTabId, visibleCount]);
+  }, [activeTabId, visibleCount, sidebarWidth]);
 
   useLayoutEffect(() => {
     if (!showOverflow || !ddContentRef.current) return;
@@ -248,8 +248,8 @@ export function AgentSidebarHeader({
       )}
 
       {/* Tabs */}
-      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 gap-1.5">
-        <div role="tablist" aria-label="Chat sessions" className="flex h-full gap-1.5">
+      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 pr-1.5 gap-1.5">
+        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 h-full gap-1.5">
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
@@ -261,14 +261,15 @@ export function AgentSidebarHeader({
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTabId(tab.id)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTabId(tab.id); } }}
-                className="group relative h-full flex"
+                className="group relative h-full flex flex-1"
               >
                 <div
                   className={cn(
                     "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none",
                     isActive
-                      ? "text-inverse-on-surface z-10 min-w-[100px] max-w-[200px]"
-                      : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50 min-w-[80px] max-w-[140px]",
+                      ? "text-inverse-on-surface z-10 min-w-[100px]"
+                      : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50 min-w-[80px]",
+                    "w-full",
                   )}
                 >
                   <span className="text-[13px] font-normal truncate flex-1">{tab.title}</span>
