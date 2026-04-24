@@ -9,17 +9,17 @@ export const meta: ComponentMeta = {
     "Social-login button with built-in brand icon for Google, Discord, OpenID, or LINE",
 };
 
-const providerIcons: Record<string, typeof GoogleIcon> = {
+export type SocialProvider = "google" | "discord" | "openid" | "line";
+
+const providerIcons: Record<SocialProvider, typeof GoogleIcon> = {
   google: GoogleIcon,
   discord: DiscordIcon,
   openid: OpenIdIcon,
   line: LineIcon,
 };
 
-export type SocialProvider = keyof typeof providerIcons;
-
 export interface SocialIconProps {
-  provider: string;
+  provider: SocialProvider;
   size?: number;
   className?: string;
 }

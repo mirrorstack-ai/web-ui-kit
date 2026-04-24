@@ -13,13 +13,9 @@ export interface LogoProps {
 
 const maskStyle: React.CSSProperties = {
   maskImage: `url(${logoDataUrl})`,
-  WebkitMaskImage: `url(${logoDataUrl})`,
   maskSize: "contain",
-  WebkitMaskSize: "contain",
   maskRepeat: "no-repeat",
-  WebkitMaskRepeat: "no-repeat",
   maskPosition: "center",
-  WebkitMaskPosition: "center",
 };
 
 export function Logo({ className }: LogoProps) {
