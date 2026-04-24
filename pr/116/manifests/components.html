@@ -2453,11 +2453,14 @@ title?: string</code></pre>
             </div>
             <pre><code>Component: src/components/ui/navigation/dropdown-menu/DropdownMenu.tsx::DropdownMenu</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>align?: &quot;start&quot; | &quot;end&quot; = &quot;start&quot;
-
-className?: string
+            <pre><code>className?: string
 
 items: DropdownMenuEntry[]
+
+/**
+ * Horizontal offset from trigger. Positive = from start (left), negative = from end (right)
+ */
+offset?: number = 0
 
 onSelect: (item: DropdownMenuItem) =&gt; void
 
