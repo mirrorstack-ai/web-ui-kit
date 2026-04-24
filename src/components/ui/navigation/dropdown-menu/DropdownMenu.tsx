@@ -12,7 +12,7 @@ import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
 
-const DD_NOTCH_W = 40;
+const DD_NOTCH_W = 48;
 const DD_NOTCH_H = 40;
 const DD_R = 12;
 const DD_IR = 10;
@@ -214,11 +214,12 @@ export function DropdownMenu({
           role="menu"
           tabIndex={-1}
           onKeyDown={handleKeyDown}
-          className={cn(
-            "absolute z-50 overflow-visible outline-none",
-            align === "end" ? "right-0" : "left-0",
-          )}
-          style={{ top: 4, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+          className="absolute z-50 overflow-visible outline-none"
+          style={{
+            top: -4,
+            [align === "end" ? "right" : "left"]: -4,
+            filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
+          }}
         >
           {contentH > 0 && menuW > 0 && (
             <Notch
