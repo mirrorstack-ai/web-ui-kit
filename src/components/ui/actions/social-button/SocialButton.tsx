@@ -1,10 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
-import googleSvg from "@/assets/social/google.svg";
-import discordSvg from "@/assets/social/discord.svg";
-import openidSvg from "@/assets/social/openid.svg";
-import lineSvg from "@/assets/social/line.svg";
+import { GoogleIcon, DiscordIcon, OpenIdIcon, LineIcon } from "./social-icons";
 
 export const meta: ComponentMeta = {
   name: "SocialButton",
@@ -12,20 +9,14 @@ export const meta: ComponentMeta = {
     "Social-login button with built-in brand icon for Google, Discord, OpenID, or LINE",
 };
 
-type SvgImport = string | { src: string };
-
-function resolveUrl(svg: SvgImport): string {
-  return typeof svg === "string" ? svg : svg.src;
-}
-
-const providerAssets: Record<string, SvgImport> = {
-  google: googleSvg,
-  discord: discordSvg,
-  openid: openidSvg,
-  line: lineSvg,
+const providerIcons: Record<string, typeof GoogleIcon> = {
+  google: GoogleIcon,
+  discord: DiscordIcon,
+  openid: OpenIdIcon,
+  line: LineIcon,
 };
 
-export type SocialProvider = keyof typeof providerAssets;
+export type SocialProvider = keyof typeof providerIcons;
 
 export interface SocialIconProps {
   provider: string;
@@ -34,17 +25,9 @@ export interface SocialIconProps {
 }
 
 export function SocialIcon({ provider, size = 20, className }: SocialIconProps) {
-  const svg = providerAssets[provider];
-  if (!svg) return null;
-  return (
-    <img
-      src={resolveUrl(svg)}
-      alt=""
-      width={size}
-      height={size}
-      className={className}
-    />
-  );
+  const IconComponent = providerIcons[provider];
+  if (!IconComponent) return null;
+  return <IconComponent width={size} height={size} className={className} />;
 }
 
 export interface SocialButtonProps
@@ -72,14 +55,7 @@ export function SocialButton({
       )}
       {...props}
     >
-      {children ??
-        (provider && (
-          <img
-            src={resolveUrl(providerAssets[provider])}
-            alt=""
-            style={{ width: 20, height: 20 }}
-          />
-        ))}
+      {children ?? (provider && <SocialIcon provider={provider} size={20} />)}
     </button>
   );
 }
