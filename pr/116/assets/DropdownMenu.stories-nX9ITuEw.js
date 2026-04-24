@@ -1,0 +1,22 @@
+import{r as o,j as s}from"./iframe-QEqhylTD.js";import{c as f}from"./cn-IyxL_b2c.js";import{I as A}from"./Icon-C-UfAMsC.js";import{I as C}from"./IconButton-l7Ol_qif.js";import"./preload-helper-PPVm8Dsz.js";import"./Progress-A9Pnaltc.js";import"./button-styles-DvQkePbc.js";function y(r){return"type"in r&&r.type==="separator"}function D(r){return!y(r)&&!r.disabled}function h({items:r,onSelect:p,trigger:k,align:I="start",className:E}){const[l,b]=o.useState(!1),[d,c]=o.useState(-1),v=o.useRef(null),g=o.useRef(null),M=o.useId(),t=r.map((n,e)=>D(n)?e:-1).filter(n=>n!==-1),x=o.useCallback(n=>{const e=t.indexOf(n);return e===-1?t[0]??-1:t[(e+1)%t.length]??-1},[t]),w=o.useCallback(n=>{const e=t.indexOf(n);return e===-1?t[t.length-1]??-1:t[(e-1+t.length)%t.length]??-1},[t]),j=o.useCallback(()=>{b(!0),c(t[0]??-1)},[t]),i=o.useCallback(()=>{b(!1),c(-1)},[]);o.useEffect(()=>{if(!l)return;const n=requestAnimationFrame(()=>{g.current?.focus()}),e=a=>{v.current?.contains(a.target)||i()};return document.addEventListener("mousedown",e),()=>{cancelAnimationFrame(n),document.removeEventListener("mousedown",e)}},[l,i]);const N=o.useCallback(n=>{switch(n.key){case"ArrowDown":{n.preventDefault(),c(e=>x(e));break}case"ArrowUp":{n.preventDefault(),c(e=>w(e));break}case"Home":{n.preventDefault(),c(t[0]??-1);break}case"End":{n.preventDefault(),c(t[t.length-1]??-1);break}case"Enter":case" ":{if(n.preventDefault(),d>=0){const e=r[d];e&&D(e)&&(p(e),i())}break}case"Escape":{n.preventDefault(),i();break}case"Tab":{i();break}}},[x,w,t,d,r,p,i]);return s.jsxs("div",{ref:v,className:f("relative inline-block",E),children:[s.jsx("div",{onClick:()=>{l?i():j()},children:k}),l&&s.jsx("div",{ref:g,id:M,role:"menu",tabIndex:-1,onKeyDown:N,className:f("absolute z-50 mt-1 min-w-[180px] rounded-xl bg-surface-container py-1 shadow-md outline-none",I==="end"?"right-0":"left-0"),children:r.map((n,e)=>{if(y(n))return s.jsx("div",{role:"separator",className:"my-1 h-px bg-outline-variant"},`sep-${e}`);const a=n,S=e===d,m=a.variant==="danger";return s.jsxs("div",{role:"menuitem","aria-disabled":a.disabled||void 0,className:f("flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors",a.disabled&&"pointer-events-none opacity-38",m?"text-error":"text-on-surface",S&&(m?"bg-error/8":"bg-on-surface/8")),onClick:()=>{a.disabled||(p(a),i())},onMouseEnter:()=>{a.disabled||c(e)},children:[a.icon&&s.jsx(A,{name:a.icon,size:20,className:m?"text-error":"text-on-surface-variant"}),a.label]},a.id)})})]})}h.__docgenInfo={description:"",methods:[],displayName:"DropdownMenu",props:{items:{required:!0,tsType:{name:"Array",elements:[{name:"union",raw:"DropdownMenuItem | DropdownMenuSeparator",elements:[{name:"DropdownMenuItem"},{name:"DropdownMenuSeparator"}]}],raw:"DropdownMenuEntry[]"},description:""},onSelect:{required:!0,tsType:{name:"signature",type:"function",raw:"(item: DropdownMenuItem) => void",signature:{arguments:[{type:{name:"DropdownMenuItem"},name:"item"}],return:{name:"void"}}},description:""},trigger:{required:!0,tsType:{name:"ReactNode"},description:""},align:{required:!1,tsType:{name:"union",raw:'"start" | "end"',elements:[{name:"literal",value:'"start"'},{name:"literal",value:'"end"'}]},description:"",defaultValue:{value:'"start"',computed:!1}},className:{required:!1,tsType:{name:"string"},description:""}}};const B={title:"UI/Navigation/DropdownMenu",component:h,decorators:[r=>s.jsx("div",{className:"p-8 min-h-[300px]",children:s.jsx(r,{})})]},u={args:{trigger:s.jsx(C,{icon:"more_vert","aria-label":"Open menu",variant:"text"}),items:[{id:"edit",label:"Edit",icon:"edit"},{id:"duplicate",label:"Duplicate",icon:"content_copy"},{type:"separator"},{id:"delete",label:"Delete",icon:"delete",variant:"danger"}],onSelect:r=>console.log("Selected:",r.id)}};u.parameters={...u.parameters,docs:{...u.parameters?.docs,source:{originalSource:`{
+  args: {
+    trigger: <IconButton icon="more_vert" aria-label="Open menu" variant="text" />,
+    items: [{
+      id: "edit",
+      label: "Edit",
+      icon: "edit"
+    }, {
+      id: "duplicate",
+      label: "Duplicate",
+      icon: "content_copy"
+    }, {
+      type: "separator" as const
+    }, {
+      id: "delete",
+      label: "Delete",
+      icon: "delete",
+      variant: "danger" as const
+    }],
+    onSelect: item => console.log("Selected:", item.id)
+  }
+}`,...u.parameters?.docs?.source}}};const F=["Playground"];export{u as Playground,F as __namedExportsOrder,B as default};
