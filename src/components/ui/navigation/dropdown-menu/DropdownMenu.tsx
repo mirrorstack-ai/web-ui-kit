@@ -12,10 +12,10 @@ import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
 
-const DD_NOTCH_W = 32;
+const DD_NOTCH_W = 40;
 const DD_NOTCH_H = 24;
-const DD_R = 8;
-const DD_IR = 8;
+const DD_R = 12;
+const DD_IR = 10;
 
 export const meta: ComponentMeta = {
   name: "DropdownMenu",
