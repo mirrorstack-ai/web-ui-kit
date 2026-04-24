@@ -147,6 +147,13 @@ export {
   type AppLink,
 } from "./components/ui/navigation/app-switcher/AppSwitcher";
 export {
+  DropdownMenu,
+  type DropdownMenuProps,
+  type DropdownMenuItem,
+  type DropdownMenuEntry,
+  type DropdownMenuSeparator,
+} from "./components/ui/navigation/dropdown-menu/DropdownMenu";
+export {
   Notch,
   type NotchProps,
   type NotchSide,
@@ -157,6 +164,10 @@ export {
   AgentSidebarInput,
   type AgentSidebarInputProps,
 } from "./components/ui/surfaces/agent-sidebar/AgentSidebar";
+export {
+  DropZone,
+  type DropZoneProps,
+} from "./components/ui/files/drop-zone/DropZone";
 export {
   AppShell,
   type AppShellProps,
