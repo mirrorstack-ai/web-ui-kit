@@ -60,6 +60,8 @@ function AppShellInner({
   const startX = useRef(0);
   const startWidth = useRef(0);
   const maxWidthRef = useRef(800);
+  const dragWidthRef = useRef(0);
+  const sidebarElRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const update = () => {
@@ -89,11 +91,15 @@ function AppShellInner({
 
     const onMove = (e: MouseEvent) => {
       const diff = startX.current - e.clientX;
-      const next = startWidth.current + diff;
-      setSidebarWidth(Math.min(Math.max(next, MIN_WIDTH), maxWidthRef.current));
+      const next = Math.min(Math.max(startWidth.current + diff, MIN_WIDTH), maxWidthRef.current);
+      dragWidthRef.current = next;
+      if (sidebarElRef.current) {
+        sidebarElRef.current.style.width = `${next}px`;
+      }
     };
 
     const onUp = () => {
+      setSidebarWidth(dragWidthRef.current);
       setIsResizing(false);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
@@ -108,6 +114,9 @@ function AppShellInner({
       document.body.style.userSelect = "";
     };
   }, [isResizing, setSidebarWidth]);
+
+  // Keep dragWidthRef in sync when sidebar opens
+  useEffect(() => { dragWidthRef.current = sidebarWidth; }, [sidebarWidth]);
 
   const handleToggleCollapse = () => {
     if (sidebarWidth <= MIN_WIDTH) {
@@ -184,6 +193,7 @@ function AppShellInner({
             />
 
             <div
+              ref={sidebarElRef}
               className="overflow-hidden relative my-2 mr-2 flex flex-col"
               style={{ width: `${sidebarWidth}px`, height: "calc(100vh - 1rem)" }}
             >
