@@ -138,7 +138,7 @@ export function AgentSidebarHeader({
     const tRect = tab.getBoundingClientRect();
     const hRect = header.getBoundingClientRect();
     setActiveTabRect({ left: tRect.left - hRect.left, width: tRect.width });
-  }, [activeTabId, visibleCount]);
+  }, [activeTabId, visibleCount, sidebarWidth]);
 
   useLayoutEffect(() => {
     if (!showOverflow || !ddContentRef.current) return;
