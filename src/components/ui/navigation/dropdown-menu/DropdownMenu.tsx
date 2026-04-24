@@ -61,7 +61,7 @@ export function DropdownMenu({
   offset = 0,
   className,
 }: DropdownMenuProps) {
-  const fromEnd = offset < 0;
+  const fromEnd = offset < 0 || Object.is(offset, -0);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -213,7 +213,7 @@ export function DropdownMenu({
           className="absolute z-50 overflow-visible outline-none"
           style={{
             top: -7,
-            [fromEnd ? "right" : "left"]: -7 - Math.abs(offset),
+            [fromEnd ? "right" : "left"]: (fromEnd? -5 : -7) - Math.abs(offset),
             filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
           }}
         >
