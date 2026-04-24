@@ -12,8 +12,8 @@ import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
 
-const DD_NOTCH_W = 48;
-const DD_NOTCH_H = 40;
+const DD_NOTCH_W = 52;
+const DD_NOTCH_H = 46;
 const DD_R = 12;
 const DD_IR = 10;
 
@@ -41,7 +41,8 @@ export interface DropdownMenuProps {
   items: DropdownMenuEntry[];
   onSelect: (item: DropdownMenuItem) => void;
   trigger: ReactNode;
-  align?: "start" | "end";
+  /** Horizontal offset from trigger. Positive = from start (left), negative = from end (right) */
+  offset?: number;
   className?: string;
 }
 
@@ -57,9 +58,10 @@ export function DropdownMenu({
   items,
   onSelect,
   trigger,
-  align = "start",
+  offset = 0,
   className,
 }: DropdownMenuProps) {
+  const fromEnd = offset < 0;
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -217,7 +219,7 @@ export function DropdownMenu({
           className="absolute z-50 overflow-visible outline-none"
           style={{
             top: -4,
-            [align === "end" ? "right" : "left"]: -4,
+            [fromEnd ? "right" : "left"]: Math.abs(offset) - 4,
             filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
           }}
         >
@@ -228,7 +230,7 @@ export function DropdownMenu({
               notchWidth={DD_NOTCH_W}
               notchHeight={DD_NOTCH_H}
               notchSide="bottom"
-              notchOffset={align === "end" ? -notchX : notchX}
+              notchOffset={fromEnd ? -notchX : notchX}
               radius={DD_R}
               inverseRadius={DD_IR}
               stroke="var(--color-primary)"
