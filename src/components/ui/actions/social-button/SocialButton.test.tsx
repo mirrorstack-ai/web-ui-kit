@@ -35,13 +35,13 @@ describe("SocialButton", () => {
 });
 
 describe("SocialIcon", () => {
-  it("renders an img for known provider", () => {
+  it("renders an svg for known provider", () => {
     const { container } = render(<SocialIcon provider="google" />);
-    expect(container.querySelector("img")).toBeInTheDocument();
+    expect(container.querySelector("svg")).toBeInTheDocument();
   });
 
   it("returns null for unknown provider", () => {
     const { container } = render(<SocialIcon provider="unknown" />);
-    expect(container.querySelector("img")).not.toBeInTheDocument();
+    expect(container.querySelector("svg")).not.toBeInTheDocument();
   });
 });
