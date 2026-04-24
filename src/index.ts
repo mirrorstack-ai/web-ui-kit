@@ -165,6 +165,10 @@ export {
   type AgentSidebarInputProps,
 } from "./components/ui/surfaces/agent-sidebar/AgentSidebar";
 export {
+  DropZone,
+  type DropZoneProps,
+} from "./components/ui/files/drop-zone/DropZone";
+export {
   AppShell,
   type AppShellProps,
 } from "./components/layout/app-shell/app-shell/AppShell";
