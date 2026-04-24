@@ -65,12 +65,10 @@ export function DropdownMenu({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentH, setContentH] = useState(0);
   const [menuW, setMenuW] = useState(0);
-  const [triggerW, setTriggerW] = useState(0);
   const menuId = useId();
 
   const actionableIndices = items
@@ -133,7 +131,6 @@ export function DropdownMenu({
     if (!open || !contentRef.current) return;
     setContentH(contentRef.current.offsetHeight);
     setMenuW(contentRef.current.offsetWidth);
-    if (triggerRef.current) setTriggerW(triggerRef.current.offsetWidth);
   }, [open, items.length]);
 
   const handleKeyDown = useCallback(
@@ -190,7 +187,6 @@ export function DropdownMenu({
   return (
     <div ref={containerRef} className={cn("relative inline-block", className)}>
       <div
-        ref={triggerRef}
         className="relative z-[51]"
         onClick={() => {
           if (open) {
