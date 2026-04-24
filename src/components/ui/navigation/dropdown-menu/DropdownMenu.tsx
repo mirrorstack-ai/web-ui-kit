@@ -65,11 +65,9 @@ export function DropdownMenu({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentH, setContentH] = useState(0);
-  const [notchX, setNotchX] = useState(0);
   const [menuW, setMenuW] = useState(0);
   const menuId = useId();
 
@@ -133,13 +131,6 @@ export function DropdownMenu({
     if (!open || !contentRef.current) return;
     setContentH(contentRef.current.offsetHeight);
     setMenuW(contentRef.current.offsetWidth);
-    const btn = triggerRef.current;
-    const dd = menuRef.current;
-    if (btn && dd) {
-      const btnRect = btn.getBoundingClientRect();
-      const ddRect = dd.getBoundingClientRect();
-      setNotchX(btnRect.left - ddRect.left);
-    }
   }, [open, items.length]);
 
   const handleKeyDown = useCallback(
@@ -196,7 +187,6 @@ export function DropdownMenu({
   return (
     <div ref={containerRef} className={cn("relative inline-block", className)}>
       <div
-        ref={triggerRef}
         className="relative z-[51]"
         onClick={() => {
           if (open) {
@@ -219,7 +209,7 @@ export function DropdownMenu({
           className="absolute z-50 overflow-visible outline-none"
           style={{
             top: -4,
-            [fromEnd ? "right" : "left"]: Math.abs(offset) - 4,
+            [fromEnd ? "right" : "left"]: -4,
             filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
           }}
         >
@@ -230,7 +220,7 @@ export function DropdownMenu({
               notchWidth={DD_NOTCH_W}
               notchHeight={DD_NOTCH_H}
               notchSide="bottom"
-              notchOffset={fromEnd ? -notchX : notchX}
+              notchOffset={offset}
               radius={DD_R}
               inverseRadius={DD_IR}
               stroke="var(--color-primary)"
