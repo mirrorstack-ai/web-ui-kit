@@ -147,6 +147,13 @@ export {
   type AppLink,
 } from "./components/ui/navigation/app-switcher/AppSwitcher";
 export {
+  DropdownMenu,
+  type DropdownMenuProps,
+  type DropdownMenuItem,
+  type DropdownMenuEntry,
+  type DropdownMenuSeparator,
+} from "./components/ui/navigation/dropdown-menu/DropdownMenu";
+export {
   Notch,
   type NotchProps,
   type NotchSide,
