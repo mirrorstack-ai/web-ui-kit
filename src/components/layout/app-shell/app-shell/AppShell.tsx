@@ -136,7 +136,7 @@ function AppShellInner({
 
           <div className="h-full flex">
             {navigation && (
-              <div className="hidden lg:flex h-full shrink-0 items-center">
+              <div className="hidden lg:flex h-full shrink-0 items-center [&>*]:max-h-[calc(100%-2rem)]">
                 {navigation}
               </div>
             )}
