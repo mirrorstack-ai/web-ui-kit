@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">122 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">123 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -1091,7 +1091,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
       <div class="badges">
         <label for="c-3-layout-appshell-props" class="badge ok as-toggle">11 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -1184,6 +1184,7 @@ onAgentSend?: (message: string) =&gt; void</code></pre>
     AppShell,
     AppSwitcher,
     Avatar,
+    Button,
     Logo,
     NavDrawer,
     NavigationButton,
@@ -1320,6 +1321,64 @@ onAgentSend?: (message: string) =&gt; void</code></pre>
       onAgentSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
     &gt;
       &lt;DemoContent /&gt;
+    &lt;/AppShell&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Snackbar</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithSnackbar = () =&gt; {
+  const [selected, setSelected] = useState(&quot;apps&quot;);
+  return (
+    &lt;AppShell
+      navigation={
+        &lt;NavigationRail
+          logo={
+            &lt;NavigationButton
+              customIcon={
+                &lt;div className=&quot;w-full h-full bg-primary/20 flex items-center justify-center&quot;&gt;
+                  &lt;span className=&quot;text-primary font-semibold text-lg&quot;&gt;M&lt;/span&gt;
+                &lt;/div&gt;
+              }
+              label=&quot;My App&quot;
+              variant=&quot;secondary&quot;
+              disableHoverExpand
+              className=&quot;border border-primary&quot;
+            /&gt;
+          }
+        &gt;
+          &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
+            &lt;NavigationButton
+              icon=&quot;space_dashboard&quot;
+              label=&quot;Dashboard&quot;
+              variant=&quot;primary&quot;
+              selected={selected === &quot;dashboard&quot;}
+              onClick={() =&gt; setSelected(&quot;dashboard&quot;)}
+            /&gt;
+            &lt;NavigationButton
+              icon=&quot;data_table&quot;
+              label=&quot;Your Apps&quot;
+              selected={selected === &quot;apps&quot;}
+              onClick={() =&gt; setSelected(&quot;apps&quot;)}
+            /&gt;
+          &lt;/div&gt;
+        &lt;/NavigationRail&gt;
+      }
+      appSwitcher={
+        &lt;AppSwitcher
+          currentApp=&quot;Account&quot;
+          logo={&lt;div className=&quot;w-8 h-8&quot;&gt;&lt;Logo /&gt;&lt;/div&gt;}
+          apps={apps}
+          activeAppId=&quot;account&quot;
+        /&gt;
+      }
+    &gt;
+      &lt;SnackbarDemoContent /&gt;
     &lt;/AppShell&gt;
   );
 };</code></pre>
