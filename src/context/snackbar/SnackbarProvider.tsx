@@ -139,6 +139,10 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
   const prevDirty = useRef(false);
   const isFirstRender = useRef(true);
 
+  // Keep latest callbacks/snapshot in refs so snackbar onClick always uses current values
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
   useEffect(() => {
     if (isFirstRender.current) {
       savedRef.current = options.snapshot;
@@ -155,9 +159,9 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
         action: {
           label: "Save",
           onClick: () => {
-            savedRef.current = options.snapshot;
+            savedRef.current = optionsRef.current.snapshot;
             prevDirty.current = false;
-            options.onSave();
+            optionsRef.current.onSave();
             dismissSnackbar();
             setTimeout(() => {
               showSnackbar({ message: "Saved", variant: "success" });
@@ -168,7 +172,7 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
           label: "Reset",
           onClick: () => {
             prevDirty.current = false;
-            options.onReset();
+            optionsRef.current.onReset();
             dismissSnackbar();
           },
         },
