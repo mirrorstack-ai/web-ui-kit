@@ -122,14 +122,13 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     disabled && "opacity-50 cursor-not-allowed hover:border-outline-variant",
   );
 
-  const labelLeft = isSmall ? "left-2.5" : "left-3";
   const labelClassName = cn(
     "absolute z-10 font-normal px-1",
     "bg-surface-container-low rounded-md transition-all duration-200 ease-in-out",
     "origin-top-left pointer-events-none",
-    isSmall ? "text-sm left-3 top-2.5" : "text-base left-4 top-4",
-    `peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:${labelLeft}`,
-    `peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:${labelLeft}`,
+    isSmall
+      ? "text-sm left-3 top-2.5 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2.5 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2.5"
+      : "text-base left-4 top-4 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-3 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-3",
     error
       ? "text-error peer-focus:text-error"
       : "text-on-surface-variant peer-focus:text-primary",
