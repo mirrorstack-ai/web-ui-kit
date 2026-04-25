@@ -117,7 +117,8 @@ export function Snackbar({
     >
       <div
         className={cn(
-          "w-full max-w-lg bg-surface-container-high border rounded-2xl shadow-md",
+          "w-full bg-surface-container-high border rounded-2xl shadow-md",
+          !inline && "max-w-lg",
           variantBorder[variant],
         )}
       >
