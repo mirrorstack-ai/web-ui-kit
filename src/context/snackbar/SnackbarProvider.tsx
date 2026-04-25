@@ -1,0 +1,222 @@
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  Snackbar,
+  SNACKBAR_EXIT_MS,
+  type SnackbarAction,
+  type SnackbarVariant,
+} from "@/components/ui/feedback/snackbar/Snackbar";
+
+export interface SnackbarOptions {
+  message: string;
+  variant?: SnackbarVariant;
+  action?: SnackbarAction;
+  secondaryAction?: SnackbarAction;
+  loading?: boolean;
+  duration?: number;
+}
+
+interface SnackbarContextType {
+  showSnackbar: (options: SnackbarOptions) => void;
+  updateSnackbar: (options: Partial<SnackbarOptions>) => void;
+  dismissSnackbar: () => void;
+  /** Internal — used by SnackbarOutlet */
+  _internal: {
+    current: SnackbarOptions | null;
+    open: boolean;
+    registerOutlet: () => () => void;
+  };
+}
+
+const SnackbarContext = createContext<SnackbarContextType | undefined>(undefined);
+
+export interface SnackbarProviderProps {
+  children: ReactNode;
+}
+
+export function SnackbarProvider({ children }: SnackbarProviderProps) {
+  const [current, setCurrent] = useState<SnackbarOptions | null>(null);
+  const [open, setOpen] = useState(false);
+  const [outletCount, setOutletCount] = useState(0);
+  const cleanupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const dismissSnackbar = useCallback(() => {
+    setOpen(false);
+    cleanupTimerRef.current = setTimeout(() => {
+      setCurrent(null);
+      cleanupTimerRef.current = null;
+    }, SNACKBAR_EXIT_MS);
+  }, []);
+
+  const showSnackbar = useCallback((options: SnackbarOptions) => {
+    if (cleanupTimerRef.current) {
+      clearTimeout(cleanupTimerRef.current);
+      cleanupTimerRef.current = null;
+    }
+    setCurrent(options);
+    setOpen(true);
+  }, []);
+
+  const updateSnackbar = useCallback((partial: Partial<SnackbarOptions>) => {
+    setCurrent((prev) => (prev ? { ...prev, ...partial } : prev));
+  }, []);
+
+  const registerOutlet = useCallback(() => {
+    setOutletCount((c) => c + 1);
+    return () => setOutletCount((c) => c - 1);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (cleanupTimerRef.current) {
+        clearTimeout(cleanupTimerRef.current);
+      }
+    };
+  }, []);
+
+  const hasOutlet = outletCount > 0;
+
+  const contextValue = useMemo(
+    () => ({
+      showSnackbar,
+      updateSnackbar,
+      dismissSnackbar,
+      _internal: { current, open, registerOutlet },
+    }),
+    [showSnackbar, updateSnackbar, dismissSnackbar, current, open, registerOutlet],
+  );
+
+  return (
+    <SnackbarContext.Provider value={contextValue}>
+      {children}
+      {!hasOutlet && current && (
+        <Snackbar
+          message={current.message}
+          variant={current.variant}
+          action={current.action}
+          secondaryAction={current.secondaryAction}
+          loading={current.loading}
+          duration={current.duration}
+          onDismiss={dismissSnackbar}
+          open={open}
+        />
+      )}
+    </SnackbarContext.Provider>
+  );
+}
+
+export function useSnackbar() {
+  const context = useContext(SnackbarContext);
+  if (context === undefined) {
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
+  }
+  return {
+    showSnackbar: context.showSnackbar,
+    updateSnackbar: context.updateSnackbar,
+    dismissSnackbar: context.dismissSnackbar,
+  };
+}
+
+export interface UseUnsavedSnackbarOptions {
+  snapshot: string;
+  message?: string;
+  onSave: () => void;
+  onReset: () => void;
+}
+
+export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
+  const { showSnackbar, dismissSnackbar } = useSnackbar();
+  const savedRef = useRef(options.snapshot);
+  const isDirty = options.snapshot !== savedRef.current;
+  const prevDirty = useRef(false);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      savedRef.current = options.snapshot;
+      isFirstRender.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isDirty && !prevDirty.current) {
+      showSnackbar({
+        message: options.message ?? "Unsaved changes",
+        variant: "unsave",
+        duration: 0,
+        action: {
+          label: "Save",
+          onClick: () => {
+            savedRef.current = options.snapshot;
+            prevDirty.current = false;
+            options.onSave();
+            dismissSnackbar();
+            setTimeout(() => {
+              showSnackbar({ message: "Saved", variant: "success" });
+            }, 50);
+          },
+        },
+        secondaryAction: {
+          label: "Reset",
+          onClick: () => {
+            prevDirty.current = false;
+            options.onReset();
+            dismissSnackbar();
+          },
+        },
+      });
+    } else if (!isDirty && prevDirty.current) {
+      dismissSnackbar();
+    }
+    prevDirty.current = isDirty;
+  }, [isDirty, options.snapshot]);
+
+  return { isDirty, savedRef };
+}
+
+export interface SnackbarOutletProps {
+  className?: string;
+}
+
+/**
+ * Place inside a content area to center the snackbar over that area.
+ * Pass a className to offset for sidebars (e.g. "lg:left-72").
+ */
+export function SnackbarOutlet({ className }: SnackbarOutletProps) {
+  const context = useContext(SnackbarContext);
+  const registerOutlet = context?._internal.registerOutlet;
+
+  useEffect(() => {
+    return registerOutlet?.();
+  }, [registerOutlet]);
+
+  if (!context) return null;
+
+  const { _internal, dismissSnackbar } = context;
+  const { current, open } = _internal;
+
+  if (!current && !open) return null;
+
+  return (
+    <Snackbar
+      message={current?.message ?? ""}
+      variant={current?.variant}
+      action={current?.action}
+      secondaryAction={current?.secondaryAction}
+      loading={current?.loading}
+      duration={current?.duration}
+      onDismiss={dismissSnackbar}
+      open={open}
+      inline
+      className={className}
+    />
+  );
+}

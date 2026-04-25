@@ -109,6 +109,16 @@ export {
   type SidebarContextType,
 } from "./context/sidebar/SidebarProvider";
 export {
+  SnackbarProvider,
+  SnackbarOutlet,
+  useSnackbar,
+  useUnsavedSnackbar,
+  type SnackbarProviderProps,
+  type SnackbarOptions,
+  type SnackbarOutletProps,
+  type UseUnsavedSnackbarOptions,
+} from "./context/snackbar/SnackbarProvider";
+export {
   ActivityList,
   type ActivityListProps,
   type ActivityItem,

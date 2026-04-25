@@ -7,6 +7,8 @@ import { AppSwitcher } from "@/components/ui/navigation/app-switcher/AppSwitcher
 import { Logo } from "@/components/ui/media/logo-mirrorstack/LogoMirrorStack";
 import { NavDrawer, type NavDrawerItem } from "@/components/ui/navigation/nav-drawer/NavDrawer";
 import { Avatar } from "@/components/ui/media/avatar/Avatar";
+import { Button } from "@/components/ui/actions/button/Button";
+import { useSnackbar } from "@/context/snackbar/SnackbarProvider";
 
 const meta: Meta<typeof AppShell> = {
   title: "Layout/AppShell",
@@ -171,6 +173,92 @@ export const WithNavDrawer: Story = {
         onAgentSend={(msg) => console.log("Send:", msg)}
       >
         <DemoContent />
+      </AppShell>
+    );
+  },
+};
+
+function SnackbarDemoContent() {
+  const { showSnackbar } = useSnackbar();
+  return (
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold text-on-surface mb-4">Dashboard</h1>
+      <p className="text-on-surface-variant mb-6">
+        The snackbar outlet centers over the content area, not the full viewport. Click the button to see it.
+      </p>
+      <div className="flex gap-3">
+        <Button
+          onClick={() =>
+            showSnackbar({ message: "Saved", variant: "success" })
+          }
+        >
+          Show Snackbar
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() =>
+            showSnackbar({
+              message: "Failed to save",
+              variant: "error",
+              action: { label: "Retry", onClick: () => {} },
+            })
+          }
+        >
+          Show with Action
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export const WithSnackbar: Story = {
+  render: () => {
+    const [selected, setSelected] = useState("apps");
+    return (
+      <AppShell
+        navigation={
+          <NavigationRail
+            logo={
+              <NavigationButton
+                customIcon={
+                  <div className="w-full h-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-primary font-semibold text-lg">M</span>
+                  </div>
+                }
+                label="My App"
+                variant="secondary"
+                disableHoverExpand
+                className="border border-primary"
+              />
+            }
+          >
+            <div className="w-full gap-2 flex flex-col">
+              <NavigationButton
+                icon="space_dashboard"
+                label="Dashboard"
+                variant="primary"
+                selected={selected === "dashboard"}
+                onClick={() => setSelected("dashboard")}
+              />
+              <NavigationButton
+                icon="data_table"
+                label="Your Apps"
+                selected={selected === "apps"}
+                onClick={() => setSelected("apps")}
+              />
+            </div>
+          </NavigationRail>
+        }
+        appSwitcher={
+          <AppSwitcher
+            currentApp="Account"
+            logo={<div className="w-8 h-8"><Logo /></div>}
+            apps={apps}
+            activeAppId="account"
+          />
+        }
+      >
+        <SnackbarDemoContent />
       </AppShell>
     );
   },
