@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">125 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">126 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2809,7 +2809,7 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
       <div class="badges">
         
         <label for="c-13-ui-inputs-floatinglabelinput-info" class="badge info as-toggle">1 info</label>
-        <label for="c-13-ui-inputs-floatinglabelinput-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-13-ui-inputs-floatinglabelinput-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -2989,6 +2989,41 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
         type=&quot;url&quot;
         value={url}
         onChange={(e) =&gt; setUrl(e.target.value)}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Small Hidden Label</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const SmallHiddenLabel = () =&gt; {
+  const [title, setTitle] = useState(&quot;&quot;);
+  const [url, setUrl] = useState(&quot;&quot;);
+  return (
+    &lt;div className=&quot;flex gap-2 max-w-md&quot;&gt;
+      &lt;FloatingLabelInput
+        label=&quot;Title&quot;
+        id=&quot;link-title-hl&quot;
+        size=&quot;sm&quot;
+        hideLabel
+        value={title}
+        onChange={(e) =&gt; setTitle(e.target.value)}
+        className=&quot;w-1/3&quot;
+      /&gt;
+      &lt;FloatingLabelInput
+        label=&quot;URL&quot;
+        id=&quot;link-url-hl&quot;
+        size=&quot;sm&quot;
+        hideLabel
+        type=&quot;url&quot;
+        value={url}
+        onChange={(e) =&gt; setUrl(e.target.value)}
+        className=&quot;flex-1&quot;
       /&gt;
     &lt;/div&gt;
   );
