@@ -18,6 +18,10 @@ export interface AlertProps {
   children: ReactNode;
   className?: string;
   onDismiss?: () => void;
+  /** Override the default icon for this variant. */
+  icon?: string;
+  /** Override the default icon size (default: 20). */
+  iconSize?: number;
 }
 
 const variantStyles: Record<AlertVariant, string> = {
@@ -40,6 +44,8 @@ export function Alert({
   children,
   className,
   onDismiss,
+  icon,
+  iconSize,
 }: AlertProps) {
   return (
     <div
@@ -52,8 +58,8 @@ export function Alert({
     >
       <div className="flex items-center">
         <Icon
-          name={variantIcons[variant]}
-          size={20}
+          name={icon ?? variantIcons[variant]}
+          size={iconSize ?? 20}
           className="shrink-0"
         />
         <div className="ml-3 flex-1">

@@ -248,19 +248,16 @@ export function ReauthDialog({
       )}
 
       {showingEmail && showPasskeySetup && (
-        <div className="mt-4 flex items-center gap-3 rounded-md border border-outline-variant bg-surface-variant/40 p-3">
-          <Icon name="passkey" size={20} className="text-primary shrink-0" />
-          <p className="text-sm text-on-surface">
-            <button
-              type="button"
-              onClick={onPasskeySetup}
-              className="text-primary underline underline-offset-2 hover:text-primary/80"
-            >
-              Set up a passkey
-            </button>
-            {" for faster verification next time"}
-          </p>
-        </div>
+        <Alert variant="info" icon="passkey" iconSize={28} className="mt-4">
+          <button
+            type="button"
+            onClick={onPasskeySetup}
+            className="text-primary underline underline-offset-2 hover:text-primary/80"
+          >
+            Set up a passkey
+          </button>
+          {" for faster verification next time"}
+        </Alert>
       )}
 
     </Dialog>
