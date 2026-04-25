@@ -168,7 +168,7 @@ function AppShellInner({
                   {children}
                 </div>
               </main>
-              <SnackbarOutlet />
+              <SnackbarOutlet className={cn("mx-auto w-full px-6", contentClassName)} />
             </div>
           </div>
         </div>

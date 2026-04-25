@@ -103,9 +103,9 @@ export function Snackbar({
   return (
     <div
       className={cn(
-        "z-50 flex justify-center px-4",
+        "z-50 flex justify-center",
         "transition-all duration-300 ease-out",
-        inline ? "absolute bottom-4 inset-x-0" : "fixed bottom-4 inset-x-0",
+        inline ? "absolute bottom-4 inset-x-0" : "fixed bottom-4 inset-x-0 px-4",
         visible && open
           ? "translate-y-0 opacity-100"
           : "translate-y-8 opacity-0 pointer-events-none",
@@ -117,7 +117,8 @@ export function Snackbar({
     >
       <div
         className={cn(
-          "w-full max-w-lg bg-surface-container-high border rounded-2xl shadow-md",
+          "w-full bg-surface-container-high border rounded-2xl shadow-md",
+          !inline && "max-w-lg",
           variantBorder[variant],
         )}
       >
