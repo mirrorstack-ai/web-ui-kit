@@ -30,6 +30,8 @@ export interface ReauthDialogProps {
   onEmailVerifyCode?: (challengeId: string, code: string) => Promise<string>;
   /** Run WebAuthn ceremony, returns reauth token. */
   onPasskeyVerify?: () => Promise<string>;
+  /** Optional. When provided and the user has no passkey, surfaces a setup recommendation in the email flow. */
+  onPasskeySetup?: () => void;
   className?: string;
 }
 
@@ -43,10 +45,12 @@ export function ReauthDialog({
   onEmailSendCode,
   onEmailVerifyCode,
   onPasskeyVerify,
+  onPasskeySetup,
   className,
 }: ReauthDialogProps) {
   const hasPasskey = methods.includes("passkey");
   const hasEmail = methods.includes("email");
+  const showPasskeySetup = !hasPasskey && !!onPasskeySetup;
 
   const [code, setCode] = useState("");
   const [challengeId, setChallengeId] = useState<string | null>(null);
@@ -240,6 +244,24 @@ export function ReauthDialog({
               Use passkey instead
             </button>
           )}
+        </div>
+      )}
+
+      {showingEmail && showPasskeySetup && (
+        <div className="mt-4 flex items-start gap-3 rounded-md border border-outline-variant bg-surface-variant/40 p-3">
+          <Icon name="passkey" size={20} className="text-primary mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm text-on-surface">
+              Set up a passkey for faster verification next time
+            </p>
+            <button
+              type="button"
+              onClick={onPasskeySetup}
+              className={cn(linkCls, "mt-1")}
+            >
+              Set up passkey
+            </button>
+          </div>
         </div>
       )}
 

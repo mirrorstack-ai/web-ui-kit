@@ -58,4 +58,36 @@ describe("ReauthDialog", () => {
       expect(screen.getByLabelText("Digit 1")).toBeInTheDocument();
     });
   });
+
+  it("shows passkey setup recommendation in email-only flow when callback provided", () => {
+    const onPasskeySetup = vi.fn();
+    render(
+      <ReauthDialog
+        {...defaultProps}
+        methods={["email"]}
+        onPasskeySetup={onPasskeySetup}
+      />,
+    );
+    const cta = screen.getByText("Set up passkey");
+    expect(cta).toBeInTheDocument();
+    fireEvent.click(cta);
+    expect(onPasskeySetup).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not show passkey setup recommendation when methods includes passkey", () => {
+    render(
+      <ReauthDialog
+        {...defaultProps}
+        methods={["passkey", "email"]}
+        onPasskeySetup={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByText("Use email verification instead"));
+    expect(screen.queryByText("Set up passkey")).not.toBeInTheDocument();
+  });
+
+  it("does not show passkey setup recommendation when callback omitted", () => {
+    render(<ReauthDialog {...defaultProps} methods={["email"]} />);
+    expect(screen.queryByText("Set up passkey")).not.toBeInTheDocument();
+  });
 });
