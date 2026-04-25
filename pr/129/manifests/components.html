@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">121 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">122 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -948,9 +948,9 @@ export const Playground: StoryObj = {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Alert</h2>
       <div class="badges">
-        <label for="c-2-ui-feedback-alert-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-2-ui-feedback-alert-props" class="badge ok as-toggle">7 prop types</label>
         <label for="c-2-ui-feedback-alert-info" class="badge info as-toggle">1 info</label>
-        <label for="c-2-ui-feedback-alert-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-2-ui-feedback-alert-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -982,13 +982,23 @@ export const Playground: StoryObj = {
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">5 prop types</span>
+              <span class="badge ok">7 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/feedback/alert/Alert.tsx::Alert</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>children: ReactNode
 
 className?: string
+
+/**
+ * Override the default icon for this variant.
+ */
+icon?: string
+
+/**
+ * Override the default icon size (default: 20).
+ */
+iconSize?: number
 
 onDismiss?: () =&gt; void
 
@@ -1053,6 +1063,15 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
               
               
               <pre><code>const Dismissible = () =&gt; &lt;Alert variant=&quot;warning&quot; title=&quot;Connection unstable&quot; onDismiss={() =&gt; {}}&gt;Some features may not work correctly.&lt;/Alert&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Custom Icon</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithCustomIcon = () =&gt; &lt;Alert variant=&quot;info&quot; icon=&quot;passkey&quot; iconSize={28}&gt;Set up a passkey for faster verification next time.&lt;/Alert&gt;;</code></pre>
             </div>
         </div>
     
