@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">124 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">126 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -2809,7 +2809,7 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
       <div class="badges">
         
         <label for="c-13-ui-inputs-floatinglabelinput-info" class="badge info as-toggle">1 info</label>
-        <label for="c-13-ui-inputs-floatinglabelinput-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-13-ui-inputs-floatinglabelinput-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -2857,7 +2857,7 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
               </div>
               
               
-              <pre><code>const Playground = () =&gt; &lt;FloatingLabelInput label=&quot;Email&quot; id=&quot;email&quot; /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;FloatingLabelInput label=&quot;Email&quot; id=&quot;email&quot; size=&quot;md&quot; hideLabel={false} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -2909,6 +2909,8 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
               <pre><code>const ErrorState = () =&gt; &lt;FloatingLabelInput
     label=&quot;Email&quot;
     id=&quot;email-error&quot;
+    size=&quot;md&quot;
+    hideLabel={false}
     error
     helperText=&quot;Please enter a valid email address&quot;
     value=&quot;invalid&quot; /&gt;;</code></pre>
@@ -2942,7 +2944,13 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
               </div>
               
               
-              <pre><code>const Disabled = () =&gt; &lt;FloatingLabelInput label=&quot;Read only&quot; id=&quot;disabled&quot; disabled value=&quot;Cannot edit this&quot; /&gt;;</code></pre>
+              <pre><code>const Disabled = () =&gt; &lt;FloatingLabelInput
+    label=&quot;Read only&quot;
+    id=&quot;disabled&quot;
+    size=&quot;md&quot;
+    hideLabel={false}
+    disabled
+    value=&quot;Cannot edit this&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -2954,7 +2962,75 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
               <pre><code>const WithHelperText = () =&gt; &lt;FloatingLabelInput
     label=&quot;Username&quot;
     id=&quot;username&quot;
+    size=&quot;md&quot;
+    hideLabel={false}
     helperText=&quot;3-20 characters, letters and numbers only&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Small</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Small = () =&gt; {
+  const [title, setTitle] = useState(&quot;&quot;);
+  const [url, setUrl] = useState(&quot;&quot;);
+  return (
+    &lt;div className=&quot;space-y-2 max-w-md&quot;&gt;
+      &lt;FloatingLabelInput
+        label=&quot;Title&quot;
+        id=&quot;link-title&quot;
+        size=&quot;sm&quot;
+        value={title}
+        onChange={(e) =&gt; setTitle(e.target.value)}
+      /&gt;
+      &lt;FloatingLabelInput
+        label=&quot;URL&quot;
+        id=&quot;link-url&quot;
+        size=&quot;sm&quot;
+        type=&quot;url&quot;
+        value={url}
+        onChange={(e) =&gt; setUrl(e.target.value)}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Small Hidden Label</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const SmallHiddenLabel = () =&gt; {
+  const [title, setTitle] = useState(&quot;&quot;);
+  const [url, setUrl] = useState(&quot;&quot;);
+  return (
+    &lt;div className=&quot;flex gap-2 max-w-md&quot;&gt;
+      &lt;FloatingLabelInput
+        label=&quot;Title&quot;
+        id=&quot;link-title-hl&quot;
+        size=&quot;sm&quot;
+        hideLabel
+        value={title}
+        onChange={(e) =&gt; setTitle(e.target.value)}
+        className=&quot;w-1/3&quot;
+      /&gt;
+      &lt;FloatingLabelInput
+        label=&quot;URL&quot;
+        id=&quot;link-url-hl&quot;
+        size=&quot;sm&quot;
+        hideLabel
+        type=&quot;url&quot;
+        value={url}
+        onChange={(e) =&gt; setUrl(e.target.value)}
+        className=&quot;flex-1&quot;
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
