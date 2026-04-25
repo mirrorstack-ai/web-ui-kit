@@ -27,6 +27,8 @@ export interface AppShellProps {
   appSwitcherClassName?: string;
   /** Class for the content area */
   contentClassName?: string;
+  /** Class for the navigation wrapper (override responsive visibility) */
+  navClassName?: string;
   /** Agent sidebar chat content */
   agentSidebarContent?: ReactNode;
   onAgentSend?: (message: string) => void;
@@ -49,6 +51,7 @@ function AppShellInner({
   className,
   appSwitcherClassName = "max-w-7xl",
   contentClassName,
+  navClassName,
   agentSidebarContent,
   onAgentSend,
   onAgentAttachFile,
@@ -145,7 +148,7 @@ function AppShellInner({
 
           <div className="h-full flex">
             {navigation && (
-              <div className="hidden lg:flex h-full shrink-0 items-center [&>*]:h-auto">
+              <div className={cn("hidden lg:flex h-full shrink-0 items-center [&>*]:h-auto", navClassName)}>
                 {navigation}
               </div>
             )}
