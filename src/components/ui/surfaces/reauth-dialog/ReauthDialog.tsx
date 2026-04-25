@@ -252,14 +252,12 @@ export function ReauthDialog({
           type="button"
           onClick={onPasskeySetup}
           className={cn(
-            "mt-4 flex w-full items-center gap-3 rounded-md border border-outline-variant bg-surface-variant/40 p-3 text-left",
-            "hover:bg-surface-variant/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+            "mt-4 inline-flex items-center gap-2 text-sm text-primary underline underline-offset-2",
+            "hover:text-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
           )}
         >
-          <Icon name="passkey" size={20} className="text-primary shrink-0" />
-          <span className="text-sm text-on-surface">
-            Set up a passkey for faster verification next time
-          </span>
+          <Icon name="passkey" size={16} className="text-primary shrink-0" />
+          <span>Set up a passkey for faster verification next time</span>
         </button>
       )}
 
