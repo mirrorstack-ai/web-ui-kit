@@ -264,6 +264,103 @@ export const WithSnackbar: Story = {
   },
 };
 
+function SnackbarScrollableDemoContent() {
+  const { showSnackbar } = useSnackbar();
+  return (
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold text-on-surface mb-4">Long Page</h1>
+      <p className="text-on-surface-variant mb-6">
+        Scroll the content area down. The "Show snackbar" button at the top will
+        move out of view, but the snackbar must stay pinned to the bottom of the
+        visible content area.
+      </p>
+      <div className="mb-6">
+        <Button
+          onClick={() =>
+            showSnackbar({
+              message: "Snackbar stays pinned while content scrolls",
+              variant: "success",
+            })
+          }
+        >
+          Show snackbar
+        </Button>
+      </div>
+      <div className="flex flex-col gap-3">
+        {Array.from({ length: 30 }, (_, i) => (
+          <div
+            key={i}
+            className="h-24 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant"
+          >
+            Card {i + 1}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export const SnackbarWithScrollableContent: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Demonstrates that the SnackbarOutlet stays pinned to the bottom of the visible content area while the inner content scrolls. Scroll the content — the snackbar must remain visible even after the trigger button leaves the viewport.",
+      },
+    },
+  },
+  render: () => {
+    const [selected, setSelected] = useState("apps");
+    return (
+      <AppShell
+        navigation={
+          <NavigationRail
+            logo={
+              <NavigationButton
+                customIcon={
+                  <div className="w-full h-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-primary font-semibold text-lg">M</span>
+                  </div>
+                }
+                label="My App"
+                variant="secondary"
+                disableHoverExpand
+                className="border border-primary"
+              />
+            }
+          >
+            <div className="w-full gap-2 flex flex-col">
+              <NavigationButton
+                icon="space_dashboard"
+                label="Dashboard"
+                variant="primary"
+                selected={selected === "dashboard"}
+                onClick={() => setSelected("dashboard")}
+              />
+              <NavigationButton
+                icon="data_table"
+                label="Your Apps"
+                selected={selected === "apps"}
+                onClick={() => setSelected("apps")}
+              />
+            </div>
+          </NavigationRail>
+        }
+        appSwitcher={
+          <AppSwitcher
+            currentApp="Account"
+            logo={<div className="w-8 h-8"><Logo /></div>}
+            apps={apps}
+            activeAppId="account"
+          />
+        }
+      >
+        <SnackbarScrollableDemoContent />
+      </AppShell>
+    );
+  },
+};
+
 export const Playground: Story = {
   render: () => {
     const [selected, setSelected] = useState("apps");
