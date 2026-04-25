@@ -158,7 +158,7 @@ function AppShellInner({
                 <div
                   className={cn(
                     "mx-auto w-full px-6 pb-8",
-                    appSwitcher ? "pt-20" : "pt-6",
+                    appSwitcher ? "pt-8" : "pt-6",
                     contentClassName,
                   )}
                 >
