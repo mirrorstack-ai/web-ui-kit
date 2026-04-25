@@ -68,7 +68,7 @@ describe("ReauthDialog", () => {
         onPasskeySetup={onPasskeySetup}
       />,
     );
-    const cta = screen.getByText("Set up passkey");
+    const cta = screen.getByText("Set up a passkey for faster verification next time");
     expect(cta).toBeInTheDocument();
     fireEvent.click(cta);
     expect(onPasskeySetup).toHaveBeenCalledTimes(1);
@@ -83,11 +83,15 @@ describe("ReauthDialog", () => {
       />,
     );
     fireEvent.click(screen.getByText("Use email verification instead"));
-    expect(screen.queryByText("Set up passkey")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Set up a passkey for faster verification next time"),
+    ).not.toBeInTheDocument();
   });
 
   it("does not show passkey setup recommendation when callback omitted", () => {
     render(<ReauthDialog {...defaultProps} methods={["email"]} />);
-    expect(screen.queryByText("Set up passkey")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Set up a passkey for faster verification next time"),
+    ).not.toBeInTheDocument();
   });
 });
