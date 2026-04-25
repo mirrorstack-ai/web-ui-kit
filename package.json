@@ -1,7 +1,7 @@
 {
   "name": "@mirrorstack-ai/web-ui-kit",
   "packageManager": "pnpm@10.29.3",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
