@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1089,7 +1089,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppShell</h2>
       <div class="badges">
-        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">12 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
         <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">5 stories</label>
         
@@ -1123,7 +1123,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">11 prop types</span>
+              <span class="badge ok">12 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/app-shell/app-shell/AppShell.tsx::AppShell</code></pre>
             <pre><code>Props:</code></pre>
@@ -1168,7 +1168,12 @@ onAgentAttachFile?: () =&gt; void
 
 onAgentMic?: () =&gt; void
 
-onAgentSend?: (message: string) =&gt; void</code></pre>
+onAgentSend?: (message: string) =&gt; void
+
+/**
+ * Class for the snackbar container (e.g. max-w-2xl mx-auto)
+ */
+snackbarClassName?: string</code></pre>
           </div>
         </div>
     
