@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2857,7 +2857,7 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
               </div>
               
               
-              <pre><code>const Playground = () =&gt; &lt;FloatingLabelInput label=&quot;Email&quot; id=&quot;email&quot; size=&quot;md&quot; /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;FloatingLabelInput label=&quot;Email&quot; id=&quot;email&quot; size=&quot;md&quot; hideLabel={false} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -2910,6 +2910,7 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
     label=&quot;Email&quot;
     id=&quot;email-error&quot;
     size=&quot;md&quot;
+    hideLabel={false}
     error
     helperText=&quot;Please enter a valid email address&quot;
     value=&quot;invalid&quot; /&gt;;</code></pre>
@@ -2947,6 +2948,7 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
     label=&quot;Read only&quot;
     id=&quot;disabled&quot;
     size=&quot;md&quot;
+    hideLabel={false}
     disabled
     value=&quot;Cannot edit this&quot; /&gt;;</code></pre>
             </div>
@@ -2961,6 +2963,7 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
     label=&quot;Username&quot;
     id=&quot;username&quot;
     size=&quot;md&quot;
+    hideLabel={false}
     helperText=&quot;3-20 characters, letters and numbers only&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
