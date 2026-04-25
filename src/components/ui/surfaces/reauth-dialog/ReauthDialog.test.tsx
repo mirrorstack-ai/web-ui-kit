@@ -68,10 +68,26 @@ describe("ReauthDialog", () => {
         onPasskeySetup={onPasskeySetup}
       />,
     );
-    const cta = screen.getByText("Set up a passkey for faster verification next time");
-    expect(cta).toBeInTheDocument();
-    fireEvent.click(cta);
+    const link = screen.getByRole("button", { name: "Set up a passkey" });
+    expect(link).toBeInTheDocument();
+    expect(screen.getByText(/for faster verification next time/)).toBeInTheDocument();
+    fireEvent.click(link);
     expect(onPasskeySetup).toHaveBeenCalledTimes(1);
+  });
+
+  it("only the 'Set up a passkey' phrase is interactive in the setup banner", () => {
+    const onPasskeySetup = vi.fn();
+    render(
+      <ReauthDialog
+        {...defaultProps}
+        methods={["email"]}
+        onPasskeySetup={onPasskeySetup}
+      />,
+    );
+    const trailingText = screen.getByText(/for faster verification next time/);
+    fireEvent.click(trailingText);
+    expect(onPasskeySetup).not.toHaveBeenCalled();
+    expect(trailingText.closest("button")).toBeNull();
   });
 
   it("does not show passkey setup recommendation when methods includes passkey", () => {
@@ -84,14 +100,14 @@ describe("ReauthDialog", () => {
     );
     fireEvent.click(screen.getByText("Use email verification instead"));
     expect(
-      screen.queryByText("Set up a passkey for faster verification next time"),
+      screen.queryByRole("button", { name: "Set up a passkey" }),
     ).not.toBeInTheDocument();
   });
 
   it("does not show passkey setup recommendation when callback omitted", () => {
     render(<ReauthDialog {...defaultProps} methods={["email"]} />);
     expect(
-      screen.queryByText("Set up a passkey for faster verification next time"),
+      screen.queryByRole("button", { name: "Set up a passkey" }),
     ).not.toBeInTheDocument();
   });
 });
