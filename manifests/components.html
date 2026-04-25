@@ -1070,7 +1070,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppShell</h2>
       <div class="badges">
-        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">11 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
         <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">3 stories</label>
         
@@ -1104,7 +1104,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">10 prop types</span>
+              <span class="badge ok">11 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/app-shell/app-shell/AppShell.tsx::AppShell</code></pre>
             <pre><code>Props:</code></pre>
@@ -1134,6 +1134,11 @@ className?: string
  * Class for the content area
  */
 contentClassName?: string
+
+/**
+ * Class for the navigation wrapper (override responsive visibility)
+ */
+navClassName?: string
 
 /**
  * Navigation slot — inject a NavigationRail, NavDrawer, or custom nav
