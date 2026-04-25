@@ -8,6 +8,8 @@ const meta: Meta<typeof FloatingLabelInput> = {
   args: {
     label: "Email",
     id: "email",
+    size: "md",
+    hideLabel: false,
   },
 };
 
@@ -87,5 +89,61 @@ export const WithHelperText: Story = {
     label: "Username",
     id: "username",
     helperText: "3-20 characters, letters and numbers only",
+  },
+};
+
+export const Small: Story = {
+  render: () => {
+    const [title, setTitle] = useState("");
+    const [url, setUrl] = useState("");
+    return (
+      <div className="space-y-2 max-w-md">
+        <FloatingLabelInput
+          label="Title"
+          id="link-title"
+          size="sm"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <FloatingLabelInput
+          label="URL"
+          id="link-url"
+          size="sm"
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+      </div>
+    );
+  },
+};
+
+export const SmallHiddenLabel: Story = {
+  render: () => {
+    const [title, setTitle] = useState("");
+    const [url, setUrl] = useState("");
+    return (
+      <div className="flex gap-2 max-w-md">
+        <FloatingLabelInput
+          label="Title"
+          id="link-title-hl"
+          size="sm"
+          hideLabel
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-1/3"
+        />
+        <FloatingLabelInput
+          label="URL"
+          id="link-url-hl"
+          size="sm"
+          hideLabel
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          className="flex-1"
+        />
+      </div>
+    );
   },
 };

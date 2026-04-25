@@ -13,15 +13,20 @@ export const meta: ComponentMeta = {
     "Text input or textarea with floating label animation, password toggle, and character counter.",
 };
 
+export type FloatingLabelInputSize = "sm" | "md";
+
 type BaseProps = {
   label: string;
   containerClassName?: string;
   error?: boolean;
   helperText?: string;
+  size?: FloatingLabelInputSize;
+  /** Hide the floating label (useful for compact inline inputs) */
+  hideLabel?: boolean;
 };
 
 type InputModeProps = BaseProps &
-  Omit<InputHTMLAttributes<HTMLInputElement>, "placeholder"> & {
+  Omit<InputHTMLAttributes<HTMLInputElement>, "placeholder" | "size"> & {
     multiline?: false;
     showPasswordToggle?: boolean;
     rows?: never;
@@ -29,7 +34,7 @@ type InputModeProps = BaseProps &
   };
 
 type TextareaModeProps = BaseProps &
-  Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "placeholder"> & {
+  Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "placeholder" | "size"> & {
     multiline: true;
     showPasswordToggle?: never;
     rows?: number;
@@ -47,6 +52,8 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     error = false,
     helperText,
     disabled,
+    size = "md",
+    hideLabel = false,
     multiline,
     maxLength,
   } = props;
@@ -74,8 +81,9 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
 
   const userPlaceholder = (props as { placeholder?: string }).placeholder;
   const hasValue = typeof value === "string" ? value.length > 0 : !!value;
-  const visiblePlaceholder =
-    focused && !hasValue && userPlaceholder ? userPlaceholder : " ";
+  const visiblePlaceholder = hideLabel
+    ? (userPlaceholder || label)
+    : (focused && !hasValue && userPlaceholder ? userPlaceholder : " ");
 
   const originalOnFocus = (props as { onFocus?: (e: React.FocusEvent) => void }).onFocus;
   const originalOnBlur = (props as { onBlur?: (e: React.FocusEvent) => void }).onBlur;
@@ -89,15 +97,18 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     originalOnBlur?.(e);
   };
 
+  const isSmall = size === "sm";
+
   const fieldClassName = cn(
-    "peer w-full rounded-lg px-4 bg-transparent border-0 outline-none",
+    "peer w-full rounded-lg bg-transparent border-0 outline-none",
     "text-on-surface transition-colors disabled:cursor-not-allowed",
     error ? "focus:text-error" : "focus:text-primary",
+    isSmall ? "px-3 text-sm" : "px-4",
     multiline
       ? showCounter
         ? "pt-3 pb-6 resize-none"
         : "pt-3 pb-2 resize-none"
-      : "py-4",
+      : isSmall ? "py-2.5" : "py-4",
     !multiline && showPasswordToggle && type === "password" && "pr-12",
     className,
   );
@@ -111,13 +122,14 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     disabled && "opacity-50 cursor-not-allowed hover:border-outline-variant",
   );
 
+  const labelLeft = isSmall ? "left-2.5" : "left-3";
   const labelClassName = cn(
-    "absolute text-base z-10 font-normal left-4 top-4 px-1",
+    "absolute z-10 font-normal px-1",
     "bg-surface-container-low rounded-md transition-all duration-200 ease-in-out",
     "origin-top-left pointer-events-none",
-    "peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-3",
-    "peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0",
-    "peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-3",
+    isSmall ? "text-sm left-3 top-2.5" : "text-base left-4 top-4",
+    `peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:${labelLeft}`,
+    `peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:${labelLeft}`,
     error
       ? "text-error peer-focus:text-error"
       : "text-on-surface-variant peer-focus:text-primary",
@@ -136,6 +148,7 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
             rows={(props as TextareaModeProps).rows}
             className={fieldClassName}
             placeholder={visiblePlaceholder}
+            aria-label={hideLabel ? label : undefined}
             aria-describedby={counterId}
             onFocus={handleFocus as React.FocusEventHandler<HTMLTextAreaElement>}
             onBlur={handleBlur as React.FocusEventHandler<HTMLTextAreaElement>}
@@ -150,13 +163,16 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
             type={inputType}
             className={fieldClassName}
             placeholder={visiblePlaceholder}
+            aria-label={hideLabel ? label : undefined}
             onFocus={handleFocus as React.FocusEventHandler<HTMLInputElement>}
             onBlur={handleBlur as React.FocusEventHandler<HTMLInputElement>}
           />
         )}
-        <label htmlFor={id} className={labelClassName}>
-          {label}
-        </label>
+        {!hideLabel && (
+          <label htmlFor={id} className={labelClassName}>
+            {label}
+          </label>
+        )}
         {showPasswordToggle && type === "password" && (
           <IconButton
             icon={showPassword ? "visibility_off" : "visibility"}
