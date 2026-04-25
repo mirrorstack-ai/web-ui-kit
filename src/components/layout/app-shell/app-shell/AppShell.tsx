@@ -16,6 +16,7 @@ export const meta: ComponentMeta = {
 const MIN_WIDTH = 350;
 const PADDING = 20;
 
+
 export interface AppShellProps {
   children: ReactNode;
   /** Navigation slot — inject a NavigationRail, NavDrawer, or custom nav */
@@ -166,9 +167,11 @@ function AppShellInner({
                   )}
                 >
                   {children}
+                  <div className="sticky bottom-4">
+                    <SnackbarOutlet />
+                  </div>
                 </div>
               </main>
-              <SnackbarOutlet />
             </div>
           </div>
         </div>
