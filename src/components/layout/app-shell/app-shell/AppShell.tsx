@@ -30,6 +30,8 @@ export interface AppShellProps {
   contentClassName?: string;
   /** Class for the navigation wrapper (override responsive visibility) */
   navClassName?: string;
+  /** Class for the snackbar container (e.g. max-w-2xl mx-auto) */
+  snackbarClassName?: string;
   /** Agent sidebar chat content */
   agentSidebarContent?: ReactNode;
   onAgentSend?: (message: string) => void;
@@ -55,6 +57,7 @@ function AppShellInner({
   appSwitcherClassName = "max-w-7xl",
   contentClassName,
   navClassName,
+  snackbarClassName,
   agentSidebarContent,
   onAgentSend,
   onAgentAttachFile,
@@ -168,7 +171,7 @@ function AppShellInner({
                   {children}
                 </div>
               </main>
-              <SnackbarOutlet />
+              <SnackbarOutlet className={snackbarClassName} />
             </div>
           </div>
         </div>
