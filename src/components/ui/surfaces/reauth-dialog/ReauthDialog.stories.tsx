@@ -89,3 +89,33 @@ export const PasskeyOnly: Story = {
     );
   },
 };
+
+export const PasskeySetupRecommendation: Story = {
+  render: () => {
+    const [open, setOpen] = useState(false);
+    return (
+      <>
+        <Button onClick={() => setOpen(true)}>Sensitive Action</Button>
+        <ReauthDialog
+          open={open}
+          onClose={() => setOpen(false)}
+          onSuccess={() => setOpen(false)}
+          methods={["email"]}
+          onEmailSendCode={async () => {
+            await new Promise((r) => setTimeout(r, 500));
+            return "challenge-789";
+          }}
+          onEmailVerifyCode={async (_id, code) => {
+            await new Promise((r) => setTimeout(r, 500));
+            if (code === "123456") return "token";
+            throw new Error("Invalid code");
+          }}
+          onPasskeySetup={() => {
+            console.log("navigate to /me/security");
+            setOpen(false);
+          }}
+        />
+      </>
+    );
+  },
+};

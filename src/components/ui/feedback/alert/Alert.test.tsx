@@ -50,4 +50,28 @@ describe("Alert", () => {
     );
     expect(screen.getByRole("alert")).toHaveClass("mt-4");
   });
+
+  it("renders override icon when icon prop is provided", () => {
+    render(
+      <Alert variant="info" icon="passkey">
+        Set up a passkey
+      </Alert>,
+    );
+    expect(screen.getByText("passkey")).toBeInTheDocument();
+    expect(screen.queryByText("info")).not.toBeInTheDocument();
+  });
+
+  it("respects iconSize override", () => {
+    render(
+      <Alert variant="info" icon="passkey" iconSize={28}>
+        Big icon
+      </Alert>,
+    );
+    expect(screen.getByText("passkey")).toHaveStyle({ fontSize: "28px" });
+  });
+
+  it("uses default icon size of 20 when iconSize not provided", () => {
+    render(<Alert variant="info">Default size</Alert>);
+    expect(screen.getByText("info")).toHaveStyle({ fontSize: "20px" });
+  });
 });

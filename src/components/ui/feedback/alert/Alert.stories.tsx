@@ -49,3 +49,12 @@ export const Dismissible: Story = {
     onDismiss: () => {},
   },
 };
+
+export const WithCustomIcon: Story = {
+  args: {
+    variant: "info",
+    icon: "passkey",
+    iconSize: 28,
+    children: "Set up a passkey for faster verification next time.",
+  },
+};
