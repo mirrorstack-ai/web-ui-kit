@@ -160,7 +160,7 @@ function AppShellInner({
               <main className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
                 <div
                   className={cn(
-                    "mx-auto w-full px-6 pb-8",
+                    "mx-auto w-full px-6 pb-24",
                     appSwitcher ? "pt-20" : "pt-6",
                     contentClassName,
                   )}
