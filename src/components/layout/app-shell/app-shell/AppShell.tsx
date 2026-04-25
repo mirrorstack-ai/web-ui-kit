@@ -3,6 +3,7 @@ import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { SidebarProvider, useSidebarWidth } from "@/context/sidebar/SidebarProvider";
+import { SnackbarProvider, SnackbarOutlet } from "@/context/snackbar/SnackbarProvider";
 import { AgentSidebarHeader } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarHeader";
 import { AgentSidebarInput } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarInput";
 
@@ -39,7 +40,9 @@ export interface AppShellProps {
 export function AppShell(props: AppShellProps) {
   return (
     <SidebarProvider defaultWidth={0}>
-      <AppShellInner {...props} />
+      <SnackbarProvider>
+        <AppShellInner {...props} />
+      </SnackbarProvider>
     </SidebarProvider>
   );
 }
@@ -164,6 +167,7 @@ function AppShellInner({
                 >
                   {children}
                 </div>
+                <SnackbarOutlet />
               </main>
             </div>
           </div>
