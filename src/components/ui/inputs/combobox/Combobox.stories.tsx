@@ -105,3 +105,48 @@ export const Disabled: Story = {
     </div>
   ),
 };
+
+export const Small: Story = {
+  render: () => {
+    const [value, setValue] = useState("");
+    return (
+      <div className="max-w-sm">
+        <Combobox
+          label="Pronouns"
+          value={value}
+          onChange={setValue}
+          size="sm"
+          options={[
+            { value: "", label: "Prefer not to say" },
+            { value: "he/him", label: "he/him" },
+            { value: "she/her", label: "she/her" },
+            { value: "they/them", label: "they/them" },
+          ]}
+        />
+      </div>
+    );
+  },
+};
+
+export const SmallHiddenLabel: Story = {
+  render: () => {
+    const [value, setValue] = useState("");
+    return (
+      <div className="max-w-sm">
+        <Combobox
+          label="Pronouns"
+          value={value}
+          onChange={setValue}
+          size="sm"
+          hideLabel
+          options={[
+            { value: "", label: "Prefer not to say" },
+            { value: "he/him", label: "he/him" },
+            { value: "she/her", label: "she/her" },
+            { value: "they/them", label: "they/them" },
+          ]}
+        />
+      </div>
+    );
+  },
+};

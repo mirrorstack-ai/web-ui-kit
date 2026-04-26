@@ -14,6 +14,8 @@ export interface ComboboxOption {
   label: string;
 }
 
+export type ComboboxSize = "sm" | "md";
+
 export interface ComboboxProps {
   label: string;
   value: string;
@@ -25,6 +27,8 @@ export interface ComboboxProps {
   error?: boolean;
   helperText?: string;
   className?: string;
+  size?: ComboboxSize;
+  hideLabel?: boolean;
 }
 
 function normalizeOption(opt: string | ComboboxOption): ComboboxOption {
@@ -42,6 +46,8 @@ export function Combobox({
   error = false,
   helperText,
   className,
+  size = "md",
+  hideLabel = false,
 }: ComboboxProps) {
   const options = useMemo(() => rawOptions.map(normalizeOption), [rawOptions]);
 
@@ -192,9 +198,11 @@ export function Combobox({
           onFocus={handleFocus}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder=" "
+          placeholder={hideLabel ? label : " "}
+          aria-label={hideLabel ? label : undefined}
           className={cn(
-            "peer w-full rounded-lg px-4 py-4 bg-transparent border-0 outline-none text-on-surface transition-colors disabled:cursor-not-allowed",
+            "peer w-full rounded-lg bg-transparent border-0 outline-none text-on-surface transition-colors disabled:cursor-not-allowed",
+            size === "sm" ? "px-3 py-2.5 text-sm" : "px-4 py-4",
             error ? "focus:text-error" : "focus:text-primary",
           )}
           autoComplete="off"
@@ -204,19 +212,22 @@ export function Combobox({
           aria-controls={listboxId}
           aria-activedescendant={activeOptionId}
         />
-        <label
-          htmlFor={inputId}
-          className={cn(
-            "absolute text-base z-10 font-normal left-4 top-4 px-1 bg-surface-container-low rounded-md transition-all duration-200 ease-in-out origin-top-left pointer-events-none",
-            "peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-3",
-            "peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-3",
-            error
-              ? "text-error peer-focus:text-error"
-              : "text-on-surface-variant peer-focus:text-primary",
-          )}
-        >
-          {label}
-        </label>
+        {!hideLabel && (
+          <label
+            htmlFor={inputId}
+            className={cn(
+              "absolute z-10 font-normal px-1 bg-surface-container-low rounded-md transition-all duration-200 ease-in-out origin-top-left pointer-events-none",
+              size === "sm"
+                ? "text-sm left-3 top-2.5 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2.5 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2.5"
+                : "text-base left-4 top-4 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-3 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-3",
+              error
+                ? "text-error peer-focus:text-error"
+                : "text-on-surface-variant peer-focus:text-primary",
+            )}
+          >
+            {label}
+          </label>
+        )}
         <button
           type="button"
           tabIndex={-1}
