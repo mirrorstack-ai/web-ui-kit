@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">126 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/32 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">32/32 infos</a><span class="filter-pill ok" aria-disabled="true">128 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -2091,9 +2091,9 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Combobox</h2>
       <div class="badges">
-        <label for="c-8-ui-inputs-combobox-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-8-ui-inputs-combobox-props" class="badge ok as-toggle">12 prop types</label>
         <label for="c-8-ui-inputs-combobox-info" class="badge info as-toggle">1 info</label>
-        <label for="c-8-ui-inputs-combobox-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-8-ui-inputs-combobox-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -2125,7 +2125,7 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">10 prop types</span>
+              <span class="badge ok">12 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/inputs/combobox/Combobox.tsx::Combobox</code></pre>
             <pre><code>Props:</code></pre>
@@ -2139,6 +2139,8 @@ freeform?: boolean = false
 
 helperText?: string
 
+hideLabel?: boolean = false
+
 id?: string
 
 label: string
@@ -2146,6 +2148,8 @@ label: string
 onChange: (value: string) =&gt; void
 
 options: (string | ComboboxOption)[]
+
+size?: &quot;sm&quot; | &quot;md&quot; = &quot;md&quot;
 
 value: string</code></pre>
           </div>
@@ -2271,6 +2275,61 @@ value: string</code></pre>
     /&gt;
   &lt;/div&gt;
 );</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Small</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Small = () =&gt; {
+  const [value, setValue] = useState(&quot;&quot;);
+  return (
+    &lt;div className=&quot;max-w-sm&quot;&gt;
+      &lt;Combobox
+        label=&quot;Pronouns&quot;
+        value={value}
+        onChange={setValue}
+        size=&quot;sm&quot;
+        options={[
+          { value: &quot;&quot;, label: &quot;Prefer not to say&quot; },
+          { value: &quot;he/him&quot;, label: &quot;he/him&quot; },
+          { value: &quot;she/her&quot;, label: &quot;she/her&quot; },
+          { value: &quot;they/them&quot;, label: &quot;they/them&quot; },
+        ]}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Small Hidden Label</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const SmallHiddenLabel = () =&gt; {
+  const [value, setValue] = useState(&quot;&quot;);
+  return (
+    &lt;div className=&quot;max-w-sm&quot;&gt;
+      &lt;Combobox
+        label=&quot;Pronouns&quot;
+        value={value}
+        onChange={setValue}
+        size=&quot;sm&quot;
+        hideLabel
+        options={[
+          { value: &quot;&quot;, label: &quot;Prefer not to say&quot; },
+          { value: &quot;he/him&quot;, label: &quot;he/him&quot; },
+          { value: &quot;she/her&quot;, label: &quot;she/her&quot; },
+          { value: &quot;they/them&quot;, label: &quot;they/them&quot; },
+        ]}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
