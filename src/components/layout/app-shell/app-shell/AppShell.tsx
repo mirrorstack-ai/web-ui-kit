@@ -154,7 +154,7 @@ function AppShellInner({
 
           <div className="h-full flex">
             {navigation && (
-              <div className={cn("hidden lg:flex h-full shrink-0 items-center [&>*]:h-auto", navClassName)}>
+              <div className={cn("hidden lg:flex flex-col h-full shrink-0 justify-center", navClassName)}>
                 {navigation}
               </div>
             )}
