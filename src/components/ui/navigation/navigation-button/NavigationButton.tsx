@@ -21,18 +21,35 @@ export interface NavigationButtonProps
   disableHoverExpand?: boolean;
 }
 
-const buttonStyles: Record<NavigationButtonVariant, Record<"selected" | "unselected", string>> = {
+/** Shape styles: resting shape, and a smaller radius on hover for the morph effect. */
+const shapeStyles: Record<NavigationButtonVariant, Record<"selected" | "unselected", { rest: string; hover: string }>> = {
   primary: {
-    selected: "bg-primary-container rounded-full cursor-default",
-    unselected: "cursor-pointer",
+    selected: { rest: "rounded-full cursor-default", hover: "rounded-full cursor-default" },
+    unselected: { rest: "cursor-pointer", hover: "rounded-lg cursor-pointer" },
   },
   secondary: {
-    selected: "bg-primary-container rounded-full cursor-default",
-    unselected: "rounded-xl cursor-pointer",
+    selected: { rest: "rounded-full cursor-default", hover: "rounded-full cursor-default" },
+    unselected: { rest: "rounded-xl cursor-pointer", hover: "rounded-lg cursor-pointer" },
   },
   tertiary: {
-    selected: "bg-tertiary-container rounded-xl cursor-default",
-    unselected: "border border-tertiary rounded-xl cursor-pointer",
+    selected: { rest: "rounded-xl cursor-default", hover: "rounded-xl cursor-default" },
+    unselected: { rest: "rounded-xl cursor-pointer", hover: "rounded-lg cursor-pointer" },
+  },
+};
+
+/** Styles that only apply when NOT hovered (bg, border). */
+const bgStyles: Record<NavigationButtonVariant, Record<"selected" | "unselected", string>> = {
+  primary: {
+    selected: "bg-primary-container",
+    unselected: "",
+  },
+  secondary: {
+    selected: "bg-primary-container",
+    unselected: "",
+  },
+  tertiary: {
+    selected: "bg-tertiary-container",
+    unselected: "border border-tertiary",
   },
 };
 
@@ -136,7 +153,8 @@ export function NavigationButton({
         className={cn(
           "flex items-center justify-center transition-all duration-200 ease-in-out box-border relative z-10 w-10 h-10 disabled:opacity-50 disabled:cursor-not-allowed",
           customIcon ? "p-0 overflow-hidden" : "p-2.5",
-          !isHovered && buttonStyles[variant][selKey],
+          isHovered ? shapeStyles[variant][selKey].hover : shapeStyles[variant][selKey].rest,
+          !isHovered && bgStyles[variant][selKey],
           className,
         )}
         onMouseEnter={() => setIsHovered(true)}
