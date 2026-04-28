@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Surface } from "./Surface";
-import { Button } from "@/components/ui/actions/button/Button";
 
 const meta: Meta<typeof Surface> = {
   title: "UI/Surfaces/Surface",
@@ -19,49 +18,11 @@ export const Playground: Story = {
   },
 };
 
-export const CardExample: Story = {
-  render: () => (
-    <Surface className="p-0 max-w-sm overflow-hidden">
-      <div className="aspect-video bg-surface-container" />
-      <div className="p-4">
-        <h3 className="text-base font-semibold text-on-surface">Card Title</h3>
-        <p className="text-sm text-on-surface-variant mt-1">
-          A brief description of the card content.
-        </p>
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="text" size="sm">
-            Cancel
-          </Button>
-          <Button variant="filled" size="sm">
-            Action
-          </Button>
-        </div>
-      </div>
-    </Surface>
-  ),
-};
-
 export const Interactive: Story = {
   args: {
     interactive: true,
     children: "Hover over me — interactive surface with hover styles",
   },
-};
-
-export const InteractiveCard: Story = {
-  render: () => (
-    <Surface interactive className="p-0 max-w-sm overflow-hidden">
-      <div className="aspect-video bg-surface-container" />
-      <div className="p-4">
-        <h3 className="text-base font-semibold text-on-surface">
-          Clickable Card
-        </h3>
-        <p className="text-sm text-on-surface-variant mt-1">
-          An interactive surface that responds to hover.
-        </p>
-      </div>
-    </Surface>
-  ),
 };
 
 export const Nested: Story = {

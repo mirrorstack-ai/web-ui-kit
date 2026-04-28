@@ -60,6 +60,10 @@ export {
   type SurfaceProps,
 } from "./components/ui/surfaces/surface/Surface";
 export {
+  Card,
+  type CardProps,
+} from "./components/ui/surfaces/card/Card";
+export {
   Avatar,
   type AvatarProps,
   type AvatarSize,
