@@ -10,13 +10,22 @@ export const meta: ComponentMeta = {
 
 export interface SurfaceProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
+  /** Adds hover background, transition, and pointer cursor. */
+  interactive?: boolean;
 }
 
-export function Surface({ children, className, ...props }: SurfaceProps) {
+export function Surface({
+  children,
+  className,
+  interactive,
+  ...props
+}: SurfaceProps) {
   return (
     <div
       className={cn(
         "rounded-2xl bg-surface-container-low border border-outline-variant",
+        interactive &&
+          "hover:bg-surface-container transition-colors cursor-pointer",
         className,
       )}
       {...props}

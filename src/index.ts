@@ -1,4 +1,5 @@
 export { cn } from "./utils/cn";
+export { formatDate, formatRelativeDate } from "./utils/date";
 export { Icon, type IconProps } from "./components/ui/media/icon/Icon";
 export { isDev, isProd, isStorybook } from "./utils/env";
 export { Button, type ButtonProps } from "./components/ui/actions/button/Button";
@@ -182,6 +183,10 @@ export {
   DropZone,
   type DropZoneProps,
 } from "./components/ui/files/drop-zone/DropZone";
+export {
+  EmptyState,
+  type EmptyStateProps,
+} from "./components/ui/feedback/empty-state/EmptyState";
 export {
   AppShell,
   type AppShellProps,
