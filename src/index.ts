@@ -55,6 +55,10 @@ export {
   type DialogAction,
 } from "./components/ui/surfaces/dialog/Dialog";
 export {
+  ConfirmDialog,
+  type ConfirmDialogProps,
+} from "./components/ui/surfaces/confirm-dialog/ConfirmDialog";
+export {
   Surface,
   type SurfaceProps,
 } from "./components/ui/surfaces/surface/Surface";
