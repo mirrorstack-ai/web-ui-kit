@@ -81,6 +81,10 @@ export {
   type BadgeSize,
 } from "./components/ui/feedback/badge/Badge";
 export {
+  Skeleton,
+  type SkeletonProps,
+} from "./components/ui/feedback/skeleton/Skeleton";
+export {
   ThemeToggle,
   type ThemeToggleProps,
   type Theme,
