@@ -180,6 +180,10 @@ export {
   type DropZoneProps,
 } from "./components/ui/files/drop-zone/DropZone";
 export {
+  EmptyState,
+  type EmptyStateProps,
+} from "./components/ui/feedback/empty-state/EmptyState";
+export {
   AppShell,
   type AppShellProps,
 } from "./components/layout/app-shell/app-shell/AppShell";
