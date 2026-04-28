@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/35 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">35/35 infos</a><span class="filter-pill ok" aria-disabled="true">144 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/35 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">35/35 infos</a><span class="filter-pill ok" aria-disabled="true">142 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -5950,7 +5950,7 @@ provider?: &quot;google&quot; | &quot;discord&quot; | &quot;openid&quot; | &quot
       <div class="badges">
         <label for="c-31-ui-surfaces-surface-props" class="badge ok as-toggle">2 prop types</label>
         <label for="c-31-ui-surfaces-surface-info" class="badge info as-toggle">1 info</label>
-        <label for="c-31-ui-surfaces-surface-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-31-ui-surfaces-surface-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -6003,7 +6003,7 @@ interactive?: boolean</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { Button, Surface } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { Surface } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -6018,60 +6018,12 @@ interactive?: boolean</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Card Example</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const CardExample = () =&gt; (
-  &lt;Surface className=&quot;p-0 max-w-sm overflow-hidden&quot;&gt;
-    &lt;div className=&quot;aspect-video bg-surface-container&quot; /&gt;
-    &lt;div className=&quot;p-4&quot;&gt;
-      &lt;h3 className=&quot;text-base font-semibold text-on-surface&quot;&gt;Card Title&lt;/h3&gt;
-      &lt;p className=&quot;text-sm text-on-surface-variant mt-1&quot;&gt;
-        A brief description of the card content.
-      &lt;/p&gt;
-      &lt;div className=&quot;flex justify-end gap-2 mt-4&quot;&gt;
-        &lt;Button variant=&quot;text&quot; size=&quot;sm&quot;&gt;
-          Cancel
-        &lt;/Button&gt;
-        &lt;Button variant=&quot;filled&quot; size=&quot;sm&quot;&gt;
-          Action
-        &lt;/Button&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/Surface&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
                 <span class="ex-name">Interactive</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
               <pre><code>const Interactive = () =&gt; &lt;Surface className=&quot;p-6&quot; interactive&gt;Hover over me — interactive surface with hover styles&lt;/Surface&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Interactive Card</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const InteractiveCard = () =&gt; (
-  &lt;Surface interactive className=&quot;p-0 max-w-sm overflow-hidden&quot;&gt;
-    &lt;div className=&quot;aspect-video bg-surface-container&quot; /&gt;
-    &lt;div className=&quot;p-4&quot;&gt;
-      &lt;h3 className=&quot;text-base font-semibold text-on-surface&quot;&gt;
-        Clickable Card
-      &lt;/h3&gt;
-      &lt;p className=&quot;text-sm text-on-surface-variant mt-1&quot;&gt;
-        An interactive surface that responds to hover.
-      &lt;/p&gt;
-    &lt;/div&gt;
-  &lt;/Surface&gt;
-);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
