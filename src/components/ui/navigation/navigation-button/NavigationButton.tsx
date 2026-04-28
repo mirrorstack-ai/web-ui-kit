@@ -25,15 +25,15 @@ export interface NavigationButtonProps
 const shapeStyles: Record<NavigationButtonVariant, Record<"selected" | "unselected", { rest: string; hover: string }>> = {
   primary: {
     selected: { rest: "rounded-full cursor-default", hover: "rounded-full cursor-default" },
-    unselected: { rest: "cursor-pointer", hover: "rounded-lg cursor-pointer" },
+    unselected: { rest: "cursor-pointer", hover: "rounded-md cursor-pointer" },
   },
   secondary: {
     selected: { rest: "rounded-full cursor-default", hover: "rounded-full cursor-default" },
-    unselected: { rest: "rounded-xl cursor-pointer", hover: "rounded-lg cursor-pointer" },
+    unselected: { rest: "rounded-xl cursor-pointer", hover: "rounded-md cursor-pointer" },
   },
   tertiary: {
     selected: { rest: "rounded-xl cursor-default", hover: "rounded-xl cursor-default" },
-    unselected: { rest: "rounded-xl cursor-pointer", hover: "rounded-lg cursor-pointer" },
+    unselected: { rest: "rounded-xl cursor-pointer", hover: "rounded-md cursor-pointer" },
   },
 };
 
@@ -165,7 +165,7 @@ export function NavigationButton({
         {icon && !customIcon ? (
           <Icon name={icon} size={24} className={cn("shrink-0", iconColor)} />
         ) : customIcon ? (
-          <div className="w-full h-full shrink-0">{customIcon}</div>
+          <div className="w-full h-full shrink-0 rounded-[inherit]">{customIcon}</div>
         ) : null}
       </button>
     </div>
