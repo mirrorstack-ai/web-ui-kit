@@ -45,7 +45,7 @@ export function NavDrawer({
   return (
     <aside
       className={cn(
-        "w-72 shrink-0 h-full flex flex-col p-4 overflow-hidden",
+        "w-72 shrink-0 max-h-full flex flex-col p-4 overflow-hidden",
         className,
       )}
     >
