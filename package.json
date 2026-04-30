@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "clsx": "^2.0.0",
+    "react-easy-crop": "^5.5.7",
     "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
