@@ -1,7 +1,7 @@
 {
   "name": "@mirrorstack-ai/web-ui-kit",
   "packageManager": "pnpm@10.29.3",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "clsx": "^2.0.0",
+    "react-easy-crop": "^5.5.7",
     "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
