@@ -70,20 +70,24 @@ export function AvatarCropper({
       imageElementRef.current = null;
       return;
     }
+    // aborted gates the load callbacks against rapid file change.
+    // Without it, an in-flight onload from a previous file can fire
+    // after this effect's cleanup ran, restoring a stale (revoked-URL)
+    // image element and re-enabling Save against broken bytes.
+    let aborted = false;
     const url = URL.createObjectURL(file);
     setImageUrl(url);
     setImageReady(false);
 
     const img = new Image();
     img.onload = () => {
+      if (aborted) return;
       imageElementRef.current = img;
       setImageReady(true);
     };
     img.onerror = () => {
+      if (aborted) return;
       // Save stays disabled (imageReady false). Cancel still works.
-      // Surfacing here would mean a callback prop the consumer didn't
-      // ask for; staying quiet is more in line with the dialog's
-      // input-only contract.
       imageElementRef.current = null;
       if (isDev) {
         console.warn("[AvatarCropper] failed to decode image; Save is disabled");
@@ -92,6 +96,7 @@ export function AvatarCropper({
     img.src = url;
 
     return () => {
+      aborted = true;
       URL.revokeObjectURL(url);
       imageElementRef.current = null;
     };
@@ -112,8 +117,18 @@ export function AvatarCropper({
   const handleSave = useCallback(async () => {
     const img = imageElementRef.current;
     if (!file || !croppedArea || !img) return;
-    const blob = await produceCroppedBlob(img, croppedArea, file.type, outputSize, quality);
-    if (blob) await onSave(blob);
+    try {
+      const blob = await produceCroppedBlob(img, croppedArea, file.type, outputSize, quality);
+      if (blob) await onSave(blob);
+    } catch (err) {
+      // onSave's lifecycle (saving prop, error UI) is the consumer's
+      // contract — we catch here to keep an async rejection from
+      // bubbling out of Dialog's sync onClick as an unhandled
+      // rejection.
+      if (isDev) {
+        console.warn("[AvatarCropper] onSave threw; consumer should handle:", err);
+      }
+    }
   }, [file, croppedArea, onSave, outputSize, quality]);
 
   const saveDisabled = !!saving || !imageReady;

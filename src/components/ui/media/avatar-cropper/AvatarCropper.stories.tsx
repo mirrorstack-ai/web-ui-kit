@@ -84,11 +84,14 @@ export const Playground: Story = {
           onCancel={() => setPendingFile(null)}
           onSave={async (blob) => {
             setSaving(true);
-            // Simulate an upload roundtrip so the loading state is visible.
-            await new Promise((r) => setTimeout(r, 600));
-            setResultUrl(URL.createObjectURL(blob));
-            setSaving(false);
-            setPendingFile(null);
+            try {
+              // Simulate an upload roundtrip so the loading state is visible.
+              await new Promise((r) => setTimeout(r, 600));
+              setResultUrl(URL.createObjectURL(blob));
+              setPendingFile(null);
+            } finally {
+              setSaving(false);
+            }
           }}
         />
       </div>
