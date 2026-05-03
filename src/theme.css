@@ -246,6 +246,42 @@ body {
   50% { transform: scaleY(1); }
 }
 
+/* Scrollbar — themed to match design tokens.
+   Chromium 121+: when `scrollbar-color` is set, it overrides
+   ::-webkit-scrollbar* rules entirely (so border-padding tricks fail).
+   Gate the modern API to Firefox only; let Chromium use the webkit
+   pseudo-elements below. */
+@supports not selector(::-webkit-scrollbar-thumb) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-outline-variant) transparent;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-outline-variant);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-outline);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Material Symbols Rounded */
 .material-symbols-rounded {
   font-family: "Material Symbols Rounded";
