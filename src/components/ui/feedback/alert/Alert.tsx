@@ -70,7 +70,7 @@ export function Alert({
         )}
         <div className={cn("flex-1", !hideIcon && "ml-3")}>
           {title && <h3 className="text-sm font-medium">{title}</h3>}
-          <div className={cn("text-sm", title && "mt-1")}>{children}</div>
+          <div className={cn("text-sm", title && "mt-1.5")}>{children}</div>
         </div>
         {onDismiss && (
           <IconButton
