@@ -103,7 +103,7 @@ export function Snackbar({
   return (
     <div
       className={cn(
-        "z-50 flex justify-center px-4",
+        "z-[70] flex justify-center px-4",
         "transition-all duration-300 ease-out",
         inline ? "absolute bottom-4 inset-x-0" : "fixed bottom-4 inset-x-0",
         visible && open

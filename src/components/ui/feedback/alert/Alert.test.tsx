@@ -75,7 +75,7 @@ describe("Alert", () => {
     expect(screen.getByText("info")).toHaveStyle({ fontSize: "20px" });
   });
 
-  it("hides leading icon when hideIcon is set", () => {
+  it("hides leading icon and drops content margin when hideIcon is set", () => {
     render(
       <Alert variant="error" hideIcon>
         Hidden icon
@@ -83,6 +83,9 @@ describe("Alert", () => {
     );
     // The variant-default icon name "error" should not render as a child.
     expect(screen.queryByText("error")).not.toBeInTheDocument();
-    expect(screen.getByText("Hidden icon")).toBeInTheDocument();
+    const text = screen.getByText("Hidden icon");
+    // Without an icon there's nothing to offset, so the content container
+    // must drop its ml-3 — otherwise the alert sits with phantom left padding.
+    expect(text.parentElement).not.toHaveClass("ml-3");
   });
 });
