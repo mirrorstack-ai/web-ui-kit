@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/37 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">37/37 infos</a><span class="filter-pill ok" aria-disabled="true">148 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/37 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">37/37 infos</a><span class="filter-pill ok" aria-disabled="true">149 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -950,7 +950,7 @@ export const Playground: StoryObj = {
       <div class="badges">
         <label for="c-2-ui-feedback-alert-props" class="badge ok as-toggle">8 prop types</label>
         <label for="c-2-ui-feedback-alert-info" class="badge info as-toggle">1 info</label>
-        <label for="c-2-ui-feedback-alert-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-2-ui-feedback-alert-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -1078,6 +1078,15 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
               
               
               <pre><code>const WithCustomIcon = () =&gt; &lt;Alert variant=&quot;info&quot; icon=&quot;passkey&quot; iconSize={28}&gt;Set up a passkey for faster verification next time.&lt;/Alert&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Hide Icon</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const HideIcon = () =&gt; &lt;Alert variant=&quot;error&quot; title=&quot;Before you continue&quot; hideIcon&gt;Useful when the surrounding container (like a destructive Dialog) already conveys severity and a leading icon would crowd the title.&lt;/Alert&gt;;</code></pre>
             </div>
         </div>
     
