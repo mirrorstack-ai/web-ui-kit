@@ -242,7 +242,7 @@ export function Combobox({
               inputRef.current?.focus();
             }
           }}
-          className="absolute right-3 p-1 text-on-surface-variant hover:text-primary transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-on-surface-variant hover:text-primary transition-colors"
         >
           <Icon
             name="expand_more"
