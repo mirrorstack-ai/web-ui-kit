@@ -51,10 +51,18 @@ export {
   type AlertVariant,
 } from "./components/ui/feedback/alert/Alert";
 export {
+  ConsequencesNotice,
+  type ConsequencesNoticeProps,
+} from "./components/ui/feedback/consequences-notice/ConsequencesNotice";
+export {
   Dialog,
   type DialogProps,
   type DialogAction,
 } from "./components/ui/surfaces/dialog/Dialog";
+export {
+  TypeToConfirmDialog,
+  type TypeToConfirmDialogProps,
+} from "./components/ui/surfaces/type-to-confirm-dialog/TypeToConfirmDialog";
 export {
   Surface,
   type SurfaceProps,
