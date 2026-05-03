@@ -23,7 +23,7 @@ const meta: Meta<typeof SettingRow> = {
 export default meta;
 type Story = StoryObj<typeof SettingRow>;
 
-export const Default: Story = {};
+export const Playground: Story = {};
 
 export const Warning: Story = {
   args: { tone: "warning" },

@@ -47,7 +47,7 @@ export function SettingRow({
           <p className="text-xs text-on-surface-variant">{description}</p>
         )}
       </div>
-      <div className="shrink-0">{control}</div>
+      <div className="shrink-0 flex items-center">{control}</div>
     </div>
   );
 }
