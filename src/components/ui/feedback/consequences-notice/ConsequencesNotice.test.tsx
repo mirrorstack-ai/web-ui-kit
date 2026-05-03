@@ -5,9 +5,10 @@ import { ConsequencesNotice } from "./ConsequencesNotice";
 afterEach(cleanup);
 
 describe("ConsequencesNotice", () => {
-  it("renders default title and a bullet per item", () => {
+  it("renders the title and a bullet per item", () => {
     render(
       <ConsequencesNotice
+        title="Before you continue"
         items={["First consequence", "Second consequence"]}
       />,
     );
@@ -20,6 +21,7 @@ describe("ConsequencesNotice", () => {
   it("accepts ReactNode items so callers can embed strong/links", () => {
     render(
       <ConsequencesNotice
+        title="t"
         items={[
           <>
             You can restore within <strong>90 days</strong>.
@@ -31,15 +33,17 @@ describe("ConsequencesNotice", () => {
   });
 
   it("hides the leading variant icon (delegates to Alert hideIcon)", () => {
-    render(<ConsequencesNotice items={["x"]} />);
+    render(<ConsequencesNotice title="t" items={["x"]} />);
     // The error variant's default icon is "error" — should not appear.
     expect(screen.queryByText("error")).not.toBeInTheDocument();
   });
 
   it("uses error variant by default and accepts an override", () => {
-    const { rerender } = render(<ConsequencesNotice items={["x"]} />);
+    const { rerender } = render(<ConsequencesNotice title="t" items={["x"]} />);
     expect(screen.getByRole("alert")).toHaveClass("text-error");
-    rerender(<ConsequencesNotice items={["x"]} variant="warning" />);
+    rerender(
+      <ConsequencesNotice title="t" items={["x"]} variant="warning" />,
+    );
     expect(screen.getByRole("alert")).toHaveClass("text-warning");
   });
 });

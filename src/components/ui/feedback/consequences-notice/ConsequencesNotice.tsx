@@ -16,8 +16,12 @@ export interface ConsequencesNoticeProps {
    * actions (rotating a key, toggling beta).
    */
   variant?: AlertVariant;
-  /** Heading. Default "Before you continue". */
-  title?: string;
+  /**
+   * Heading. Required so the kit doesn't ship product copy — callers
+   * supply something contextual (e.g. "Before you continue", "Deleting
+   * this app will:", "Heads up").
+   */
+  title: string;
   /** One bullet per item. ReactNode so callers can mix in <strong>, links, etc. */
   items: ReactNode[];
   className?: string;
@@ -25,7 +29,7 @@ export interface ConsequencesNoticeProps {
 
 export function ConsequencesNotice({
   variant = "error",
-  title = "Before you continue",
+  title,
   items,
   className,
 }: ConsequencesNoticeProps) {

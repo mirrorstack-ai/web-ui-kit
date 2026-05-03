@@ -33,6 +33,7 @@ export const DisableAccount: Story = {
           confirmActionLabel="Disable account"
           consequences={
             <ConsequencesNotice
+              title="Before you continue"
               items={[
                 "You'll be signed out of every device immediately.",
                 "API tokens and modules linked to this account stop working.",

@@ -5,6 +5,7 @@ const meta: Meta<typeof ConsequencesNotice> = {
   title: "UI/Feedback/ConsequencesNotice",
   component: ConsequencesNotice,
   args: {
+    title: "Before you continue",
     items: [
       "You'll be signed out of every device immediately.",
       "API tokens and modules linked to this account stop working.",

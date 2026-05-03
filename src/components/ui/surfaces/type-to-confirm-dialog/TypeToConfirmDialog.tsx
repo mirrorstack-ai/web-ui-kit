@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 
 import { Dialog } from "@/components/ui/surfaces/dialog/Dialog";
 import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
@@ -39,7 +39,9 @@ export interface TypeToConfirmDialogProps {
   /**
    * Notice/consequences body. Shown in BOTH stages so the user sees the same
    * information at the warn step and again when typing to confirm. Typically
-   * a `<ConsequencesNotice />`.
+   * a `<ConsequencesNotice />`. Should be stateless — it mounts twice (once
+   * per stage Dialog), so any internal state will reset on the warn→type
+   * transition.
    */
   consequences?: ReactNode;
   /** Loading state for the confirm action. Disables Cancel + Confirm while true. */
@@ -61,6 +63,7 @@ export function TypeToConfirmDialog({
 }: TypeToConfirmDialogProps) {
   const [stage, setStage] = useState<"warn" | "type">("warn");
   const [input, setInput] = useState("");
+  const inputId = useId();
 
   // Reset stage and input whenever the flow closes so the next open starts
   // fresh at the warn step. Doing this in an effect (instead of inside
@@ -75,6 +78,12 @@ export function TypeToConfirmDialog({
 
   const matched = input.trim().toLowerCase() === phrase.toLowerCase();
   const resolvedConfirmTitle = confirmTitle ?? `Type '${phrase}' to confirm`;
+  const cancelAction = (disabled?: boolean) => ({
+    label: "Cancel",
+    variant: "text" as const,
+    onClick: onClose,
+    disabled,
+  });
 
   return (
     <>
@@ -83,7 +92,7 @@ export function TypeToConfirmDialog({
         onClose={onClose}
         title={warnTitle}
         actions={[
-          { label: "Cancel", variant: "text", onClick: onClose },
+          cancelAction(),
           {
             label: warnActionLabel,
             variant: "filled",
@@ -100,12 +109,7 @@ export function TypeToConfirmDialog({
         onClose={onClose}
         title={resolvedConfirmTitle}
         actions={[
-          {
-            label: "Cancel",
-            variant: "text",
-            onClick: onClose,
-            disabled: loading,
-          },
+          cancelAction(loading),
           {
             label: confirmActionLabel,
             variant: "filled",
@@ -126,7 +130,7 @@ export function TypeToConfirmDialog({
             below.
           </p>
           <FloatingLabelInput
-            id="type-to-confirm-input"
+            id={inputId}
             type="text"
             label="Confirmation"
             size="sm"
