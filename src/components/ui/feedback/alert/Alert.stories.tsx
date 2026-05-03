@@ -58,3 +58,13 @@ export const WithCustomIcon: Story = {
     children: "Set up a passkey for faster verification next time.",
   },
 };
+
+export const HideIcon: Story = {
+  args: {
+    variant: "error",
+    title: "Before you continue",
+    hideIcon: true,
+    children:
+      "Useful when the surrounding container (like a destructive Dialog) already conveys severity and a leading icon would crowd the title.",
+  },
+};

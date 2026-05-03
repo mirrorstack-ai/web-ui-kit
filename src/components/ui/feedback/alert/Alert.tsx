@@ -22,6 +22,9 @@ export interface AlertProps {
   icon?: string;
   /** Override the default icon size (default: 20). */
   iconSize?: number;
+  /** Hide the leading icon entirely. Useful when the alert sits inside a
+   * dialog or section that already conveys severity. */
+  hideIcon?: boolean;
 }
 
 const variantStyles: Record<AlertVariant, string> = {
@@ -46,6 +49,7 @@ export function Alert({
   onDismiss,
   icon,
   iconSize,
+  hideIcon,
 }: AlertProps) {
   return (
     <div
@@ -57,14 +61,16 @@ export function Alert({
       role="alert"
     >
       <div className="flex items-center">
-        <Icon
-          name={icon ?? variantIcons[variant]}
-          size={iconSize ?? 20}
-          className="shrink-0"
-        />
-        <div className="ml-3 flex-1">
+        {!hideIcon && (
+          <Icon
+            name={icon ?? variantIcons[variant]}
+            size={iconSize ?? 20}
+            className="shrink-0"
+          />
+        )}
+        <div className={cn("flex-1", !hideIcon && "ml-3")}>
           {title && <h3 className="text-sm font-medium">{title}</h3>}
-          <div className={cn("text-sm", title && "mt-1")}>{children}</div>
+          <div className={cn("text-sm", title && "mt-1.5")}>{children}</div>
         </div>
         {onDismiss && (
           <IconButton
