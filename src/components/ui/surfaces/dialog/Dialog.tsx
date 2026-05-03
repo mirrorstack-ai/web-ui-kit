@@ -123,10 +123,10 @@ export function Dialog({
     <>
       <div
         aria-hidden="true"
-        className="!m-0 fixed inset-0 z-50 bg-black/50"
+        className="!m-0 fixed inset-0 z-[60] bg-black/50"
         onClick={() => onClose?.()}
       />
-      <div className="!m-0 fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+      <div className="!m-0 fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
         <div
           ref={dialogRef}
           tabIndex={-1}

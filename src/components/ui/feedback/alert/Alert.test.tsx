@@ -74,4 +74,15 @@ describe("Alert", () => {
     render(<Alert variant="info">Default size</Alert>);
     expect(screen.getByText("info")).toHaveStyle({ fontSize: "20px" });
   });
+
+  it("hides leading icon when hideIcon is set", () => {
+    render(
+      <Alert variant="error" hideIcon>
+        Hidden icon
+      </Alert>,
+    );
+    // The variant-default icon name "error" should not render as a child.
+    expect(screen.queryByText("error")).not.toBeInTheDocument();
+    expect(screen.getByText("Hidden icon")).toBeInTheDocument();
+  });
 });
