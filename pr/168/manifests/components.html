@@ -2806,9 +2806,11 @@ value: string</code></pre>
 items: ReactNode[]
 
 /**
- * Heading. Default &quot;Before you continue&quot;.
+ * Heading. Required so the kit doesn&#39;t ship product copy — callers
+ * supply something contextual (e.g. &quot;Before you continue&quot;, &quot;Deleting
+ * this app will:&quot;, &quot;Heads up&quot;).
  */
-title?: string = &quot;Before you continue&quot;
+title: string
 
 /**
  * Visual tone. Defaults to &quot;error&quot; since the component&#39;s primary use is
@@ -2839,6 +2841,7 @@ variant?: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;
               
               
               <pre><code>const Playground = () =&gt; &lt;ConsequencesNotice
+    title=&quot;Before you continue&quot;
     items={[
       &quot;You&#39;ll be signed out of every device immediately.&quot;,
       &quot;API tokens and modules linked to this account stop working.&quot;,
@@ -2857,12 +2860,12 @@ variant?: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;
               
               
               <pre><code>const Warning = () =&gt; &lt;ConsequencesNotice
+    title=&quot;Heads up&quot;
     items={[
       &quot;This rotation invalidates all existing tokens.&quot;,
       &quot;Any module currently authenticating with the old token will fail until redeployed.&quot;,
     ]}
-    variant=&quot;warning&quot;
-    title=&quot;Heads up&quot; /&gt;;</code></pre>
+    variant=&quot;warning&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -2872,6 +2875,7 @@ variant?: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;
               
               
               <pre><code>const AppDeletion = () =&gt; &lt;ConsequencesNotice
+    title=&quot;Deleting this app will:&quot;
     items={[
       &quot;Stop all running modules associated with the app.&quot;,
       &quot;Revoke API tokens scoped to this app.&quot;,
@@ -2879,8 +2883,7 @@ variant?: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;
         Schedule the app&#39;s data for deletion in &lt;strong&gt;30 days&lt;/strong&gt;.
       &lt;/&gt;,
       &quot;Cancel any active subscriptions.&quot;,
-    ]}
-    title=&quot;Deleting this app will:&quot; /&gt;;</code></pre>
+    ]} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -6905,7 +6908,9 @@ confirmTitle?: string
 /**
  * Notice/consequences body. Shown in BOTH stages so the user sees the same
  * information at the warn step and again when typing to confirm. Typically
- * a `&lt;ConsequencesNotice /&gt;`.
+ * a `&lt;ConsequencesNotice /&gt;`. Should be stateless — it mounts twice (once
+ * per stage Dialog), so any internal state will reset on the warn→type
+ * transition.
  */
 consequences?: ReactNode
 
@@ -6986,6 +6991,7 @@ warnTitle: string</code></pre>
         confirmActionLabel=&quot;Disable account&quot;
         consequences={
           &lt;ConsequencesNotice
+            title=&quot;Before you continue&quot;
             items={[
               &quot;You&#39;ll be signed out of every device immediately.&quot;,
               &quot;API tokens and modules linked to this account stop working.&quot;,
