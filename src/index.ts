@@ -68,6 +68,10 @@ export {
   type SurfaceProps,
 } from "./components/ui/surfaces/surface/Surface";
 export {
+  SettingsSection,
+  type SettingsSectionProps,
+} from "./components/ui/surfaces/settings-section/SettingsSection";
+export {
   Card,
   type CardProps,
 } from "./components/ui/surfaces/card/Card";
