@@ -41,6 +41,10 @@ export interface AppShellProps {
   /** Past conversations grouped by date — shown in the agent header history dropdown. */
   agentHistory?: AgentSidebarHistoryGroup[];
   onSelectAgentHistoryItem?: (id: string) => void;
+  /** Slot pinned directly above the agent input — used for messages the user
+   *  sent while the agent was still responding (queued input). Stays in view
+   *  with the input even when the messages list scrolls. */
+  agentPendingContent?: ReactNode;
 }
 
 export function AppShell(props: AppShellProps) {
@@ -68,6 +72,7 @@ function AppShellInner({
   onAgentMic,
   agentHistory,
   onSelectAgentHistoryItem,
+  agentPendingContent,
 }: AppShellProps) {
   const { sidebarWidth, setSidebarWidth } = useSidebarWidth();
   const [isResizing, setIsResizing] = useState(false);
@@ -222,10 +227,16 @@ function AppShellInner({
                 onSelectHistoryItem={onSelectAgentHistoryItem}
               />
 
-              <div className="rounded-2xl bg-on-background h-full flex flex-col">
+              <div className="rounded-2xl bg-on-background flex-1 min-h-0 flex flex-col">
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
                   {agentSidebarContent}
                 </div>
+
+                {agentPendingContent && (
+                  <div className="shrink-0 px-4 pt-2 pb-0.5">
+                    {agentPendingContent}
+                  </div>
+                )}
 
                 <AgentSidebarInput
                   onSend={onAgentSend}
