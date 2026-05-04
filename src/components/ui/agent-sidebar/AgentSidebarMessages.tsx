@@ -4,6 +4,13 @@ import {
   AgentSidebarUserMessage,
   AgentSidebarAgentMessage,
 } from "./AgentSidebarMessage";
+import {
+  AgentSidebarMultiQuestion,
+  type AgentSidebarQuestion,
+  type AgentSidebarMultiQuestionStatus,
+  type AgentSidebarMultiQuestionAnswer,
+  type AgentSidebarMultiQuestionLayout,
+} from "./AgentSidebarMultiQuestion";
 
 export type AgentSidebarMessage =
   | {
@@ -16,10 +23,25 @@ export type AgentSidebarMessage =
       role: "agent";
       content: string;
       streaming?: boolean;
+    }
+  | {
+      id: string;
+      role: "agent";
+      kind: "multi-question";
+      title: string;
+      description?: string;
+      questions: AgentSidebarQuestion[];
+      submitLabel?: string;
+      status?: AgentSidebarMultiQuestionStatus;
+      layout?: AgentSidebarMultiQuestionLayout;
     };
 
 export interface AgentSidebarMessagesProps {
   messages: AgentSidebarMessage[];
+  onSubmitMultiQuestion?: (
+    messageId: string,
+    answers: Record<string, AgentSidebarMultiQuestionAnswer>,
+  ) => void;
   /** Auto-scroll to the latest message. Default: true. */
   autoScroll?: boolean;
   className?: string;
@@ -39,6 +61,7 @@ function findScrollParent(el: HTMLElement | null): HTMLElement | null {
 
 export function AgentSidebarMessages({
   messages,
+  onSubmitMultiQuestion,
   autoScroll = true,
   className,
 }: AgentSidebarMessagesProps) {
@@ -74,6 +97,20 @@ export function AgentSidebarMessages({
       {messages.map((m) => {
         if (m.role === "user") {
           return <AgentSidebarUserMessage key={m.id} content={m.content} />;
+        }
+        if ("kind" in m) {
+          return (
+            <AgentSidebarMultiQuestion
+              key={m.id}
+              title={m.title}
+              description={m.description}
+              questions={m.questions}
+              submitLabel={m.submitLabel}
+              status={m.status}
+              layout={m.layout}
+              onSubmit={(answers) => onSubmitMultiQuestion?.(m.id, answers)}
+            />
+          );
         }
         return (
           <AgentSidebarAgentMessage
