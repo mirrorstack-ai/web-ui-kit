@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
+import { Icon } from "@/components/ui/media/icon/Icon";
 import {
   AgentSidebarUserMessage,
   AgentSidebarAgentMessage,
@@ -67,30 +68,38 @@ export function AgentSidebarMessages({
 }: AgentSidebarMessagesProps) {
   const endRef = useRef<HTMLDivElement>(null);
   const isFirstRunRef = useRef(true);
-  const wasNearBottomRef = useRef(true);
+  const isAtBottomRef = useRef(true);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
-  // If the user scrolled up to read history we don't yank the view back down
-  // on every streamed token.
   useEffect(() => {
     const parent = findScrollParent(endRef.current);
     if (!parent) return;
-    const onScroll = () => {
+    const update = () => {
       const distance = parent.scrollHeight - parent.scrollTop - parent.clientHeight;
-      wasNearBottomRef.current = distance <= NEAR_BOTTOM_PX;
+      const near = distance <= NEAR_BOTTOM_PX;
+      if (near !== isAtBottomRef.current) {
+        isAtBottomRef.current = near;
+        setIsAtBottom(near);
+      }
     };
-    parent.addEventListener("scroll", onScroll, { passive: true });
-    return () => parent.removeEventListener("scroll", onScroll);
+    update();
+    parent.addEventListener("scroll", update, { passive: true });
+    return () => parent.removeEventListener("scroll", update);
   }, []);
 
   useEffect(() => {
     if (!autoScroll) return;
-    if (!isFirstRunRef.current && !wasNearBottomRef.current) return;
+    if (!isFirstRunRef.current && !isAtBottomRef.current) return;
     endRef.current?.scrollIntoView({
       behavior: isFirstRunRef.current ? "auto" : "smooth",
       block: "end",
     });
     isFirstRunRef.current = false;
   }, [messages, autoScroll]);
+
+  const scrollToBottom = () => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  };
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
@@ -121,6 +130,20 @@ export function AgentSidebarMessages({
         );
       })}
       <div ref={endRef} />
+      {!isAtBottom && (
+        // -mt-4 cancels the parent's gap-4 so the sticky pill sits flush
+        // against the last message instead of adding a gap row of layout.
+        <div className="sticky bottom-2 z-10 flex justify-center pointer-events-none -mt-4">
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            className="pointer-events-auto inline-flex items-center gap-1 rounded-full bg-inverse-on-surface/[0.12] backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-inverse-on-surface hover:bg-inverse-on-surface/[0.20] transition-colors shadow-sm"
+          >
+            <Icon name="arrow_downward" size={14} />
+            Back to bottom
+          </button>
+        </div>
+      )}
     </div>
   );
 }
