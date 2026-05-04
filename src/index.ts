@@ -64,6 +64,11 @@ export {
   type TypeToConfirmDialogProps,
 } from "./components/ui/surfaces/type-to-confirm-dialog/TypeToConfirmDialog";
 export {
+  EditableField,
+  type EditableFieldProps,
+} from "./components/ui/inputs/editable-field/EditableField";
+export { useEditableFields } from "./components/ui/inputs/editable-field/use-editable-fields";
+export {
   Surface,
   type SurfaceProps,
 } from "./components/ui/surfaces/surface/Surface";
