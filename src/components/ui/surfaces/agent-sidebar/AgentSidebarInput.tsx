@@ -1,7 +1,7 @@
 import {
   useState,
   useRef,
-  useEffect,
+  useLayoutEffect,
   type KeyboardEvent,
   type ChangeEvent,
 } from "react";
@@ -24,7 +24,7 @@ export function AgentSidebarInput({
   const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";

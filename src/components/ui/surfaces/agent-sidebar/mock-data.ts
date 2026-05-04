@@ -1,19 +1,7 @@
 import type { AgentSidebarMessage } from "./AgentSidebarMessages";
+import type { AgentSidebarHistoryGroup } from "./types";
 
-export interface AgentSidebarHistoryItem {
-  id: string;
-  title: string;
-  /** ISO 8601 UTC string. */
-  updatedAt: string;
-}
-
-export interface AgentSidebarHistoryGroup {
-  /** Display label, e.g. "Today", "Yesterday", "Earlier". */
-  label: string;
-  items: AgentSidebarHistoryItem[];
-}
-
-export const mockAgentHistory: AgentSidebarHistoryGroup[] = [
+export const mockAgentHistory: AgentSidebarHistoryGroup[] = Object.freeze([
   {
     label: "Today",
     items: [
@@ -36,9 +24,9 @@ export const mockAgentHistory: AgentSidebarHistoryGroup[] = [
       { id: "h-7", title: "Connect Google account", updatedAt: "2026-04-22T07:05:00Z" },
     ],
   },
-];
+]) as AgentSidebarHistoryGroup[];
 
-export const mockAgentMessages: AgentSidebarMessage[] = [
+export const mockAgentMessages: AgentSidebarMessage[] = Object.freeze([
   {
     id: "m-1",
     role: "user",
@@ -50,4 +38,4 @@ export const mockAgentMessages: AgentSidebarMessage[] = [
     content:
       "Sure — I can help with that. Let me know which one you'd like to start with.",
   },
-];
+]) as AgentSidebarMessage[];

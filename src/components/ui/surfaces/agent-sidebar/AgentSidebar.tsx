@@ -20,8 +20,7 @@ export {
   type AgentSidebarMessagesProps,
 } from "./AgentSidebarMessages";
 export {
-  mockAgentHistory,
-  mockAgentMessages,
   type AgentSidebarHistoryGroup,
   type AgentSidebarHistoryItem,
-} from "./mock-data";
+} from "./types";
+export { mockAgentHistory, mockAgentMessages } from "./mock-data";

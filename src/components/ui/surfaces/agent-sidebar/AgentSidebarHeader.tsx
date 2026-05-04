@@ -3,7 +3,7 @@ import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
-import type { AgentSidebarHistoryGroup } from "./mock-data";
+import type { AgentSidebarHistoryGroup } from "./types";
 
 interface ChatTab {
   id: string;
@@ -144,7 +144,7 @@ export function AgentSidebarHeader({
     const tRect = tab.getBoundingClientRect();
     const hRect = header.getBoundingClientRect();
     setActiveTabRect({ left: tRect.left - hRect.left, width: tRect.width });
-  }, [activeTabId, visibleCount, sidebarWidth]);
+  }, [activeTabId, visibleCount, sidebarWidth, tabs.length]);
 
   useLayoutEffect(() => {
     if (!showOverflow || !ddContentRef.current) return;
@@ -238,28 +238,30 @@ export function AgentSidebarHeader({
                   <div className="px-2 pt-1 pb-0.5 text-[10px] font-medium uppercase tracking-wide text-on-surface-variant">
                     {group.label}
                   </div>
-                  {group.items.map((item) => (
-                    <div
-                      key={item.id}
-                      role="button"
-                      tabIndex={0}
-                      className="group/item flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors text-on-surface hover:bg-on-surface/10"
-                      onClick={() => {
-                        onSelectHistoryItem?.(item.id);
-                        setShowHistory(false);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          onSelectHistoryItem?.(item.id);
-                          setShowHistory(false);
-                        }
-                      }}
-                    >
-                      <Icon name="chat_bubble_outline" size={14} className="text-on-surface-variant shrink-0" />
-                      <span className="text-sm truncate flex-1">{item.title}</span>
-                    </div>
-                  ))}
+                  {group.items.map((item) => {
+                    const select = () => {
+                      onSelectHistoryItem?.(item.id);
+                      setShowHistory(false);
+                    };
+                    return (
+                      <div
+                        key={item.id}
+                        role="button"
+                        tabIndex={0}
+                        className="group/item flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors text-on-surface hover:bg-on-surface/10"
+                        onClick={select}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            select();
+                          }
+                        }}
+                      >
+                        <Icon name="chat_bubble_outline" size={14} className="text-on-surface-variant shrink-0" />
+                        <span className="text-sm truncate flex-1">{item.title}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               ))
             )}

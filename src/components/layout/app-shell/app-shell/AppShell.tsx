@@ -6,7 +6,7 @@ import { SidebarProvider, useSidebarWidth } from "@/context/sidebar/SidebarProvi
 import { SnackbarProvider, SnackbarOutlet } from "@/context/snackbar/SnackbarProvider";
 import { AgentSidebarHeader } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarHeader";
 import { AgentSidebarInput } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarInput";
-import type { AgentSidebarHistoryGroup } from "@/components/ui/surfaces/agent-sidebar/mock-data";
+import type { AgentSidebarHistoryGroup } from "@/components/ui/surfaces/agent-sidebar/types";
 
 export const meta: ComponentMeta = {
   name: "AppShell",
@@ -71,7 +71,9 @@ function AppShellInner({
 }: AppShellProps) {
   const { sidebarWidth, setSidebarWidth } = useSidebarWidth();
   const [isResizing, setIsResizing] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window === "undefined" ? 0 : window.innerWidth,
+  );
   const startX = useRef(0);
   const startWidth = useRef(0);
   const maxWidthRef = useRef(800);
