@@ -6,6 +6,7 @@ import { SidebarProvider, useSidebarWidth } from "@/context/sidebar/SidebarProvi
 import { SnackbarProvider, SnackbarOutlet } from "@/context/snackbar/SnackbarProvider";
 import { AgentSidebarHeader } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarHeader";
 import { AgentSidebarInput } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarInput";
+import type { AgentSidebarHistoryGroup } from "@/components/ui/surfaces/agent-sidebar/mock-data";
 
 export const meta: ComponentMeta = {
   name: "AppShell",
@@ -37,6 +38,9 @@ export interface AppShellProps {
   onAgentSend?: (message: string) => void;
   onAgentAttachFile?: () => void;
   onAgentMic?: () => void;
+  /** Past conversations grouped by date — shown in the agent header history dropdown. */
+  agentHistory?: AgentSidebarHistoryGroup[];
+  onSelectAgentHistoryItem?: (id: string) => void;
 }
 
 export function AppShell(props: AppShellProps) {
@@ -62,6 +66,8 @@ function AppShellInner({
   onAgentSend,
   onAgentAttachFile,
   onAgentMic,
+  agentHistory,
+  onSelectAgentHistoryItem,
 }: AppShellProps) {
   const { sidebarWidth, setSidebarWidth } = useSidebarWidth();
   const [isResizing, setIsResizing] = useState(false);
@@ -210,6 +216,8 @@ function AppShellInner({
                 sidebarWidth={sidebarWidth}
                 onToggleCollapse={handleToggleCollapse}
                 onClose={handleClose}
+                history={agentHistory}
+                onSelectHistoryItem={onSelectAgentHistoryItem}
               />
 
               <div className="rounded-2xl bg-on-background h-full flex flex-col">

@@ -91,9 +91,10 @@ export function AgentSidebarInput({
           <div className="flex-1" />
           <IconButton
             icon="send"
-            variant="filled"
+            variant="tonal"
+            color="primary"
             size="sm"
-            className="bg-primary text-on-primary"
+            className="hover:bg-primary hover:text-on-primary"
             onClick={send}
             aria-label="Send message"
           />

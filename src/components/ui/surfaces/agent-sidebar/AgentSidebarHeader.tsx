@@ -3,6 +3,7 @@ import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
+import type { AgentSidebarHistoryGroup } from "./mock-data";
 
 interface ChatTab {
   id: string;
@@ -13,6 +14,9 @@ export interface AgentSidebarHeaderProps {
   sidebarWidth: number;
   onToggleCollapse: () => void;
   onClose: () => void;
+  /** Past conversations grouped by date — shown in the arrow-down dropdown. */
+  history?: AgentSidebarHistoryGroup[];
+  onSelectHistoryItem?: (id: string) => void;
 }
 
 const TAB_WIDTH = 100;
@@ -39,6 +43,8 @@ export function AgentSidebarHeader({
   sidebarWidth,
   onToggleCollapse,
   onClose,
+  history,
+  onSelectHistoryItem,
 }: AgentSidebarHeaderProps) {
   const isCollapsed = sidebarWidth <= 350;
 
@@ -129,7 +135,7 @@ export function AgentSidebarHeader({
   useLayoutEffect(() => {
     if (!showHistory || !histContentRef.current) return;
     setHistContentH(histContentRef.current.offsetHeight);
-  }, [showHistory, tabs.length]);
+  }, [showHistory, history]);
 
   useLayoutEffect(() => {
     const tab = activeTabRef.current;
@@ -219,30 +225,44 @@ export function AgentSidebarHeader({
           )}
           <div
             ref={histContentRef}
-            className="relative z-10 pt-2 pb-1.5 px-1.5 flex flex-col gap-0.5"
+            className="relative z-10 pt-2 pb-1.5 px-1.5 flex flex-col gap-1 max-h-[60vh] overflow-y-auto"
             style={{ marginTop: HIST_NOTCH_H, width: HIST_W }}
           >
-            {tabs.map((tab) => (
-              <div
-                key={tab.id}
-                className={cn(
-                  "group/item flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors",
-                  tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
-                )}
-                onClick={() => { setActiveTabId(tab.id); setShowHistory(false); }}
-              >
-                <span className="text-sm truncate flex-1">{tab.title}</span>
-                {tabs.length > 1 && (
-                  <div
-                    className="w-4 h-4 shrink-0 flex items-center justify-center rounded-full opacity-0 group-hover/item:opacity-70 hover:!opacity-100 hover:bg-on-surface/10 transition-opacity"
-                    onClick={(e) => { e.stopPropagation(); removeTab(tab.id); }}
-                    aria-label={`Delete ${tab.title}`}
-                  >
-                    <Icon name="close" size={12} className="text-on-surface-variant" />
-                  </div>
-                )}
+            {!history || history.length === 0 ? (
+              <div className="px-2 py-3 text-xs text-on-surface-variant text-center">
+                No previous conversations
               </div>
-            ))}
+            ) : (
+              history.map((group) => (
+                <div key={group.label} className="flex flex-col gap-0.5">
+                  <div className="px-2 pt-1 pb-0.5 text-[10px] font-medium uppercase tracking-wide text-on-surface-variant">
+                    {group.label}
+                  </div>
+                  {group.items.map((item) => (
+                    <div
+                      key={item.id}
+                      role="button"
+                      tabIndex={0}
+                      className="group/item flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors text-on-surface hover:bg-on-surface/10"
+                      onClick={() => {
+                        onSelectHistoryItem?.(item.id);
+                        setShowHistory(false);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelectHistoryItem?.(item.id);
+                          setShowHistory(false);
+                        }
+                      }}
+                    >
+                      <Icon name="chat_bubble_outline" size={14} className="text-on-surface-variant shrink-0" />
+                      <span className="text-sm truncate flex-1">{item.title}</span>
+                    </div>
+                  ))}
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
