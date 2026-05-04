@@ -1590,6 +1590,42 @@ export const MultiQuestionTabs: StoryObj = {
               },
             ],
           },
+          {
+            id: &quot;addons&quot;,
+            type: &quot;choice&quot;,
+            style: &quot;cards&quot;,
+            multiple: true,
+            label: &quot;Add-on services&quot;,
+            tabLabel: &quot;Add-ons&quot;,
+            description:
+              &quot;Pick any infrastructure you also want scaffolded. Multiple selections allowed.&quot;,
+            options: [
+              {
+                value: &quot;redis&quot;,
+                label: &quot;Redis cache&quot;,
+                description:
+                  &quot;In-memory cache + queue. Recommended for sessions, rate-limit, and pub-sub.&quot;,
+              },
+              {
+                value: &quot;s3&quot;,
+                label: &quot;Object storage (S3)&quot;,
+                description:
+                  &quot;For user uploads, exports, backups. Bucket + signed-URL helpers ship with it.&quot;,
+              },
+              {
+                value: &quot;ses&quot;,
+                label: &quot;Transactional email&quot;,
+                description:
+                  &quot;AWS SES wired up with verified-domain check and a default template package.&quot;,
+              },
+              {
+                value: &quot;otel&quot;,
+                label: &quot;OpenTelemetry&quot;,
+                description:
+                  &quot;Traces + metrics exporter. Adds the OTEL SDK and a default collector config.&quot;,
+              },
+            ],
+          },
         ]}
       /&gt;
     );
@@ -1621,6 +1657,20 @@ export const MultiQuestionList: StoryObj = {
               { value: &quot;system&quot;, label: &quot;System&quot; },
               { value: &quot;light&quot;, label: &quot;Light&quot; },
               { value: &quot;dark&quot;, label: &quot;Dark&quot; },
+            ],
+          },
+          {
+            id: &quot;channels&quot;,
+            type: &quot;choice&quot;,
+            style: &quot;segmented&quot;,
+            multiple: true,
+            label: &quot;Notify me via&quot;,
+            description: &quot;Pick any channels you want product updates on.&quot;,
+            options: [
+              { value: &quot;email&quot;, label: &quot;Email&quot; },
+              { value: &quot;push&quot;, label: &quot;Push&quot; },
+              { value: &quot;sms&quot;, label: &quot;SMS&quot; },
+              { value: &quot;slack&quot;, label: &quot;Slack&quot; },
             ],
           },
           {
@@ -1772,6 +1822,42 @@ export const MultiQuestionList: StoryObj = {
             },
           ],
         },
+        {
+          id: &quot;addons&quot;,
+          type: &quot;choice&quot;,
+          style: &quot;cards&quot;,
+          multiple: true,
+          label: &quot;Add-on services&quot;,
+          tabLabel: &quot;Add-ons&quot;,
+          description:
+            &quot;Pick any infrastructure you also want scaffolded. Multiple selections allowed.&quot;,
+          options: [
+            {
+              value: &quot;redis&quot;,
+              label: &quot;Redis cache&quot;,
+              description:
+                &quot;In-memory cache + queue. Recommended for sessions, rate-limit, and pub-sub.&quot;,
+            },
+            {
+              value: &quot;s3&quot;,
+              label: &quot;Object storage (S3)&quot;,
+              description:
+                &quot;For user uploads, exports, backups. Bucket + signed-URL helpers ship with it.&quot;,
+            },
+            {
+              value: &quot;ses&quot;,
+              label: &quot;Transactional email&quot;,
+              description:
+                &quot;AWS SES wired up with verified-domain check and a default template package.&quot;,
+            },
+            {
+              value: &quot;otel&quot;,
+              label: &quot;OpenTelemetry&quot;,
+              description:
+                &quot;Traces + metrics exporter. Adds the OTEL SDK and a default collector config.&quot;,
+            },
+          ],
+        },
       ]}
     /&gt;
   );
@@ -1806,6 +1892,20 @@ export const MultiQuestionList: StoryObj = {
             { value: &quot;system&quot;, label: &quot;System&quot; },
             { value: &quot;light&quot;, label: &quot;Light&quot; },
             { value: &quot;dark&quot;, label: &quot;Dark&quot; },
+          ],
+        },
+        {
+          id: &quot;channels&quot;,
+          type: &quot;choice&quot;,
+          style: &quot;segmented&quot;,
+          multiple: true,
+          label: &quot;Notify me via&quot;,
+          description: &quot;Pick any channels you want product updates on.&quot;,
+          options: [
+            { value: &quot;email&quot;, label: &quot;Email&quot; },
+            { value: &quot;push&quot;, label: &quot;Push&quot; },
+            { value: &quot;sms&quot;, label: &quot;SMS&quot; },
+            { value: &quot;slack&quot;, label: &quot;Slack&quot; },
           ],
         },
         {
@@ -8396,6 +8496,42 @@ export const MultiQuestionTabs: StoryObj = {
               },
             ],
           },
+          {
+            id: &quot;addons&quot;,
+            type: &quot;choice&quot;,
+            style: &quot;cards&quot;,
+            multiple: true,
+            label: &quot;Add-on services&quot;,
+            tabLabel: &quot;Add-ons&quot;,
+            description:
+              &quot;Pick any infrastructure you also want scaffolded. Multiple selections allowed.&quot;,
+            options: [
+              {
+                value: &quot;redis&quot;,
+                label: &quot;Redis cache&quot;,
+                description:
+                  &quot;In-memory cache + queue. Recommended for sessions, rate-limit, and pub-sub.&quot;,
+              },
+              {
+                value: &quot;s3&quot;,
+                label: &quot;Object storage (S3)&quot;,
+                description:
+                  &quot;For user uploads, exports, backups. Bucket + signed-URL helpers ship with it.&quot;,
+              },
+              {
+                value: &quot;ses&quot;,
+                label: &quot;Transactional email&quot;,
+                description:
+                  &quot;AWS SES wired up with verified-domain check and a default template package.&quot;,
+              },
+              {
+                value: &quot;otel&quot;,
+                label: &quot;OpenTelemetry&quot;,
+                description:
+                  &quot;Traces + metrics exporter. Adds the OTEL SDK and a default collector config.&quot;,
+              },
+            ],
+          },
         ]}
       /&gt;
     );
@@ -8427,6 +8563,20 @@ export const MultiQuestionList: StoryObj = {
               { value: &quot;system&quot;, label: &quot;System&quot; },
               { value: &quot;light&quot;, label: &quot;Light&quot; },
               { value: &quot;dark&quot;, label: &quot;Dark&quot; },
+            ],
+          },
+          {
+            id: &quot;channels&quot;,
+            type: &quot;choice&quot;,
+            style: &quot;segmented&quot;,
+            multiple: true,
+            label: &quot;Notify me via&quot;,
+            description: &quot;Pick any channels you want product updates on.&quot;,
+            options: [
+              { value: &quot;email&quot;, label: &quot;Email&quot; },
+              { value: &quot;push&quot;, label: &quot;Push&quot; },
+              { value: &quot;sms&quot;, label: &quot;SMS&quot; },
+              { value: &quot;slack&quot;, label: &quot;Slack&quot; },
             ],
           },
           {
@@ -8578,6 +8728,42 @@ export const MultiQuestionList: StoryObj = {
             },
           ],
         },
+        {
+          id: &quot;addons&quot;,
+          type: &quot;choice&quot;,
+          style: &quot;cards&quot;,
+          multiple: true,
+          label: &quot;Add-on services&quot;,
+          tabLabel: &quot;Add-ons&quot;,
+          description:
+            &quot;Pick any infrastructure you also want scaffolded. Multiple selections allowed.&quot;,
+          options: [
+            {
+              value: &quot;redis&quot;,
+              label: &quot;Redis cache&quot;,
+              description:
+                &quot;In-memory cache + queue. Recommended for sessions, rate-limit, and pub-sub.&quot;,
+            },
+            {
+              value: &quot;s3&quot;,
+              label: &quot;Object storage (S3)&quot;,
+              description:
+                &quot;For user uploads, exports, backups. Bucket + signed-URL helpers ship with it.&quot;,
+            },
+            {
+              value: &quot;ses&quot;,
+              label: &quot;Transactional email&quot;,
+              description:
+                &quot;AWS SES wired up with verified-domain check and a default template package.&quot;,
+            },
+            {
+              value: &quot;otel&quot;,
+              label: &quot;OpenTelemetry&quot;,
+              description:
+                &quot;Traces + metrics exporter. Adds the OTEL SDK and a default collector config.&quot;,
+            },
+          ],
+        },
       ]}
     /&gt;
   );
@@ -8612,6 +8798,20 @@ export const MultiQuestionList: StoryObj = {
             { value: &quot;system&quot;, label: &quot;System&quot; },
             { value: &quot;light&quot;, label: &quot;Light&quot; },
             { value: &quot;dark&quot;, label: &quot;Dark&quot; },
+          ],
+        },
+        {
+          id: &quot;channels&quot;,
+          type: &quot;choice&quot;,
+          style: &quot;segmented&quot;,
+          multiple: true,
+          label: &quot;Notify me via&quot;,
+          description: &quot;Pick any channels you want product updates on.&quot;,
+          options: [
+            { value: &quot;email&quot;, label: &quot;Email&quot; },
+            { value: &quot;push&quot;, label: &quot;Push&quot; },
+            { value: &quot;sms&quot;, label: &quot;SMS&quot; },
+            { value: &quot;slack&quot;, label: &quot;Slack&quot; },
           ],
         },
         {
