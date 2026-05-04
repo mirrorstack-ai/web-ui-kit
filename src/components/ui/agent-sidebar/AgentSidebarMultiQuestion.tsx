@@ -126,17 +126,17 @@ function formatAnswer(
 // agent sidebar. Targets the components' bordered wrapper (`bg-surface-container-low`
 // → inverse fill) and the input/textarea element text/placeholder colors.
 const inverseFieldContainer = cn(
-  "[&>div]:!bg-inverse-on-surface/[0.06]",
-  "[&>div]:!border-outline-variant/30",
-  "[&>div]:hover:!border-outline-variant/50",
-  "[&>div]:focus-within:!border-inverse-primary/60",
-  "[&>div]:focus-within:!ring-inverse-primary/30",
+  "[&>div]:bg-inverse-on-surface/[0.06]!",
+  "[&>div]:border-outline-variant/30!",
+  "[&>div]:hover:border-outline-variant/50!",
+  "[&>div]:focus-within:border-inverse-primary/60!",
+  "[&>div]:focus-within:ring-inverse-primary/30!",
 );
 
 const inverseFieldInput = cn(
-  "!text-inverse-on-surface",
-  "placeholder:!text-inverse-on-surface/40",
-  "focus:!text-inverse-on-surface",
+  "text-inverse-on-surface!",
+  "placeholder:text-inverse-on-surface/40!",
+  "focus:text-inverse-on-surface!",
 );
 
 function renderField(
@@ -487,7 +487,7 @@ export function AgentSidebarMultiQuestion({
               size="sm"
               onClick={handleSubmit}
               rightIcon="check"
-              className="!bg-inverse-primary/15 !text-inverse-primary hover:!bg-inverse-primary hover:!text-inverse-surface"
+              className="bg-inverse-primary/15! text-inverse-primary! hover:bg-inverse-primary! hover:text-inverse-surface!"
             >
               {submitLabel}
             </Button>
