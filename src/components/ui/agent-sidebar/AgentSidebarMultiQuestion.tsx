@@ -1,0 +1,492 @@
+import { useState, type ReactNode } from "react";
+import { cn } from "@/utils/cn";
+import { Icon } from "@/components/ui/media/icon/Icon";
+import { Button } from "@/components/ui/actions/button/Button";
+import { Combobox } from "@/components/ui/inputs/combobox/Combobox";
+import { SegmentedButton } from "@/components/ui/inputs/segmented-button/SegmentedButton";
+
+interface QuestionBase {
+  id: string;
+  label: string;
+  /** Extra explanatory text shown prominently in tabs layout, and below the label in list layout. */
+  description?: string;
+  /** Short label used on the tab pill in tabs layout. Defaults to `label`. */
+  tabLabel?: string;
+}
+
+export type AgentSidebarQuestion =
+  | (QuestionBase & {
+      type: "text";
+      placeholder?: string;
+      defaultValue?: string;
+    })
+  | (QuestionBase & {
+      type: "textarea";
+      placeholder?: string;
+      defaultValue?: string;
+    })
+  | (QuestionBase & {
+      type: "select";
+      options: { value: string; label: string }[];
+      defaultValue?: string;
+    })
+  | (QuestionBase & {
+      type: "toggle";
+      defaultValue?: boolean;
+    })
+  | (QuestionBase & {
+      type: "choice";
+      options: {
+        value: string;
+        label: string;
+        description?: string;
+      }[];
+      defaultValue?: string;
+    });
+
+export type AgentSidebarMultiQuestionStatus = "pending" | "submitted";
+
+export type AgentSidebarMultiQuestionAnswer = string | boolean;
+
+export type AgentSidebarMultiQuestionLayout = "list" | "tabs";
+
+export interface AgentSidebarMultiQuestionProps {
+  title: string;
+  description?: string;
+  questions: AgentSidebarQuestion[];
+  submitLabel?: string;
+  status?: AgentSidebarMultiQuestionStatus;
+  onSubmit?: (answers: Record<string, AgentSidebarMultiQuestionAnswer>) => void;
+  className?: string;
+  /** "tabs" (default) shows one question at a time with a tab pill row + description.
+   *  "list" stacks all fields vertically with compact labels. */
+  layout?: AgentSidebarMultiQuestionLayout;
+}
+
+const REVIEW_TAB_ID = "__review__";
+
+const borderByStatus: Record<AgentSidebarMultiQuestionStatus, string> = {
+  pending: "border-outline-variant/30",
+  submitted: "border-inverse-primary/40",
+};
+
+const headerByStatus: Record<
+  AgentSidebarMultiQuestionStatus,
+  { text: string; color: string; icon: string }
+> = {
+  pending: {
+    text: "Answer to continue",
+    color: "text-inverse-on-surface/55",
+    icon: "edit_note",
+  },
+  submitted: { text: "Submitted", color: "text-inverse-primary", icon: "check_circle" },
+};
+
+function initialAnswers(
+  questions: AgentSidebarQuestion[],
+): Record<string, AgentSidebarMultiQuestionAnswer> {
+  const out: Record<string, AgentSidebarMultiQuestionAnswer> = {};
+  for (const q of questions) {
+    if (q.type === "toggle") out[q.id] = q.defaultValue ?? false;
+    else if (q.type === "select")
+      out[q.id] = q.defaultValue ?? q.options[0]?.value ?? "";
+    else if (q.type === "choice") out[q.id] = q.defaultValue ?? "";
+    else out[q.id] = q.defaultValue ?? "";
+  }
+  return out;
+}
+
+function isAnswered(
+  q: AgentSidebarQuestion,
+  value: AgentSidebarMultiQuestionAnswer,
+): boolean {
+  if (q.type === "toggle") return value !== (q.defaultValue ?? false);
+  if (typeof value !== "string") return false;
+  if (q.type === "select")
+    return value !== (q.defaultValue ?? q.options[0]?.value ?? "");
+  if (q.type === "choice") return value.length > 0;
+  return value.trim().length > 0;
+}
+
+function formatAnswer(
+  q: AgentSidebarQuestion,
+  value: AgentSidebarMultiQuestionAnswer,
+): string {
+  if (q.type === "toggle") return value ? "On" : "Off";
+  if (typeof value !== "string" || value.length === 0) return "";
+  if (q.type === "choice" || q.type === "select") {
+    const opt = q.options.find((o) => o.value === value);
+    return opt?.label ?? value;
+  }
+  return value;
+}
+
+const fieldCls =
+  "w-full rounded-md bg-inverse-on-surface/[0.06] border border-transparent px-2.5 py-1.5 text-sm text-inverse-on-surface placeholder:text-inverse-on-surface/30 focus:outline-none focus:border-inverse-primary/60 focus:bg-inverse-on-surface/[0.08] disabled:opacity-50";
+
+function renderField(
+  q: AgentSidebarQuestion,
+  value: AgentSidebarMultiQuestionAnswer,
+  setAnswer: (id: string, v: AgentSidebarMultiQuestionAnswer) => void,
+  submitted: boolean,
+): ReactNode {
+  const fieldId = `mq-${q.id}`;
+  if (q.type === "text") {
+    return (
+      <input
+        id={fieldId}
+        type="text"
+        className={fieldCls}
+        placeholder={q.placeholder}
+        value={typeof value === "string" ? value : ""}
+        onChange={(e) => setAnswer(q.id, e.target.value)}
+        disabled={submitted}
+      />
+    );
+  }
+  if (q.type === "textarea") {
+    return (
+      <textarea
+        id={fieldId}
+        className={cn(fieldCls, "resize-none min-h-[60px]")}
+        placeholder={q.placeholder}
+        rows={3}
+        value={typeof value === "string" ? value : ""}
+        onChange={(e) => setAnswer(q.id, e.target.value)}
+        disabled={submitted}
+      />
+    );
+  }
+  if (q.type === "select") {
+    return (
+      <Combobox
+        id={fieldId}
+        label={q.label}
+        hideLabel
+        size="sm"
+        disabled={submitted}
+        value={typeof value === "string" ? value : ""}
+        onChange={(v) => setAnswer(q.id, v)}
+        options={q.options}
+      />
+    );
+  }
+  if (q.type === "choice") {
+    const current = typeof value === "string" ? value : "";
+    return (
+      <div role="radiogroup" aria-labelledby={fieldId} className="flex flex-col gap-1.5">
+        {q.options.map((opt) => {
+          const selected = opt.value === current;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              disabled={submitted}
+              onClick={() => setAnswer(q.id, selected ? "" : opt.value)}
+              className={cn(
+                "group flex items-start gap-2.5 rounded-md border px-3 py-2.5 text-left transition-colors disabled:opacity-50",
+                selected
+                  ? "border-inverse-primary/60 bg-inverse-primary/[0.08]"
+                  : "border-outline-variant/25 bg-inverse-on-surface/[0.03] hover:border-outline-variant/50 hover:bg-inverse-on-surface/[0.06]",
+              )}
+            >
+              <span
+                className={cn(
+                  "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                  selected
+                    ? "border-inverse-primary"
+                    : "border-inverse-on-surface/30 group-hover:border-inverse-on-surface/50",
+                )}
+              >
+                {selected && (
+                  <span className="block h-1.5 w-1.5 rounded-full bg-inverse-primary" />
+                )}
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-medium text-inverse-on-surface">
+                  {opt.label}
+                </span>
+                {opt.description && (
+                  <span className="block text-xs text-inverse-on-surface/60 mt-0.5 leading-relaxed">
+                    {opt.description}
+                  </span>
+                )}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+  return (
+    <button
+      id={fieldId}
+      type="button"
+      role="switch"
+      aria-checked={!!value}
+      disabled={submitted}
+      onClick={() => setAnswer(q.id, !value)}
+      className={cn(
+        "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-50",
+        value ? "bg-inverse-primary" : "bg-inverse-on-surface/20",
+      )}
+    >
+      <span
+        className={cn(
+          "inline-block h-4 w-4 rounded-full bg-inverse-surface shadow transition-transform",
+          value ? "translate-x-[18px]" : "translate-x-0.5",
+        )}
+      />
+    </button>
+  );
+}
+
+export function AgentSidebarMultiQuestion({
+  title,
+  description,
+  questions,
+  submitLabel = "Submit",
+  status = "pending",
+  onSubmit,
+  className,
+  layout = "tabs",
+}: AgentSidebarMultiQuestionProps) {
+  const [answers, setAnswers] = useState(() => initialAnswers(questions));
+  const [activeTabId, setActiveTabId] = useState<string>(
+    questions[0]?.id ?? REVIEW_TAB_ID,
+  );
+  const submitted = status === "submitted";
+  const header = headerByStatus[status];
+
+  const setAnswer = (id: string, value: AgentSidebarMultiQuestionAnswer) => {
+    setAnswers((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = () => onSubmit?.(answers);
+
+  const isReview = activeTabId === REVIEW_TAB_ID;
+  const activeIdx = questions.findIndex((q) => q.id === activeTabId);
+  const active = activeIdx >= 0 ? questions[activeIdx] : null;
+  const safeIdx = activeIdx >= 0 ? activeIdx : 0;
+
+  return (
+    <div
+      className={cn(
+        "rounded-lg border bg-inverse-on-surface/[0.03] transition-colors",
+        borderByStatus[status],
+        className,
+      )}
+    >
+      <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1">
+        <Icon name={header.icon} size={12} className={header.color} />
+        <span
+          className={cn(
+            "text-[10px] font-medium uppercase tracking-[0.08em]",
+            header.color,
+          )}
+        >
+          {header.text}
+        </span>
+      </div>
+
+      <div className="px-3 pb-3">
+        <div className="text-sm font-medium text-inverse-on-surface leading-snug">
+          {title}
+        </div>
+        {description && (
+          <div className="text-xs text-inverse-on-surface/55 mt-0.5 leading-snug">
+            {description}
+          </div>
+        )}
+
+        {layout === "tabs" && !submitted ? (
+          <>
+            <div className="mt-3">
+              <SegmentedButton
+                aria-label="Select a question"
+                size="sm"
+                value={activeTabId}
+                onChange={(id) => setActiveTabId(id)}
+                options={[
+                  ...questions.map((q) => {
+                    const answered = isAnswered(q, answers[q.id]);
+                    return {
+                      value: q.id,
+                      label: q.tabLabel ?? q.label,
+                      tone: answered ? "muted" : "warn",
+                    } as const;
+                  }),
+                  { value: REVIEW_TAB_ID, label: "Review" },
+                ]}
+              />
+            </div>
+
+            {isReview ? (
+              <div className="mt-3 flex flex-col gap-2">
+                {questions.map((q) => {
+                  const value = answers[q.id];
+                  const answered = isAnswered(q, value);
+                  const ans = formatAnswer(q, value);
+                  const filled = answered && !!ans;
+                  return (
+                    <div
+                      key={q.id}
+                      className="flex flex-col gap-0.5 rounded-md bg-inverse-on-surface/[0.04] px-3 py-2"
+                    >
+                      <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-inverse-on-surface/55">
+                        {q.label}
+                      </span>
+                      {filled ? (
+                        <span className="text-sm text-inverse-on-surface">{ans}</span>
+                      ) : (
+                        <span className="text-sm italic text-warning-container">
+                          Not answered
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : active ? (
+              <div className="mt-3 rounded-md border border-outline-variant/20 px-3 py-3 flex flex-col gap-2">
+                <div className="text-sm font-medium text-inverse-on-surface leading-snug">
+                  {active.label}
+                </div>
+                {active.description && (
+                  <div className="text-xs text-inverse-on-surface/65 leading-relaxed">
+                    {active.description}
+                  </div>
+                )}
+                <div className={cn(active.type === "toggle" && "flex justify-end")}>
+                  {renderField(active, answers[active.id], setAnswer, submitted)}
+                </div>
+              </div>
+            ) : null}
+          </>
+        ) : layout === "tabs" && submitted ? (
+          <div className="mt-3 flex flex-col gap-2">
+            {questions.map((q) => {
+              const value = answers[q.id];
+              const answered = isAnswered(q, value);
+              const ans = formatAnswer(q, value);
+              const filled = answered && !!ans;
+              return (
+                <div
+                  key={q.id}
+                  className="flex flex-col gap-0.5 rounded-md bg-inverse-on-surface/[0.04] px-3 py-2"
+                >
+                  <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-inverse-on-surface/55">
+                    {q.label}
+                  </span>
+                  {filled ? (
+                    <span className="text-sm text-inverse-on-surface">{ans}</span>
+                  ) : (
+                    <span className="text-sm italic text-warning-container">
+                      Not answered
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mt-2.5 flex flex-col gap-2.5">
+            {questions.map((q) => {
+              const value = answers[q.id];
+              const fieldId = `mq-${q.id}`;
+              if (q.type === "toggle") {
+                return (
+                  <div
+                    key={q.id}
+                    className="flex items-center justify-between gap-3 rounded-md bg-inverse-on-surface/[0.06] px-2.5 py-2"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <label
+                        htmlFor={fieldId}
+                        className="text-sm text-inverse-on-surface block"
+                      >
+                        {q.label}
+                      </label>
+                      {q.description && (
+                        <span className="text-xs text-inverse-on-surface/55 block mt-0.5">
+                          {q.description}
+                        </span>
+                      )}
+                    </div>
+                    {renderField(q, value, setAnswer, submitted)}
+                  </div>
+                );
+              }
+              return (
+                <div key={q.id} className="flex flex-col gap-1">
+                  <label
+                    htmlFor={fieldId}
+                    className="text-[10px] font-medium uppercase tracking-[0.08em] text-inverse-on-surface/55"
+                  >
+                    {q.label}
+                  </label>
+                  {q.description && (
+                    <span className="text-xs text-inverse-on-surface/55 -mt-0.5">
+                      {q.description}
+                    </span>
+                  )}
+                  {renderField(q, value, setAnswer, submitted)}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {!submitted && (
+          <div className="mt-3 flex items-center justify-between gap-2">
+            {layout === "tabs" && questions.length > 1 && !isReview ? (
+              <div className="flex gap-1">
+                <Button
+                  variant="text"
+                  size="sm"
+                  disabled={safeIdx === 0}
+                  onClick={() => {
+                    const next = questions[Math.max(0, safeIdx - 1)];
+                    if (next) setActiveTabId(next.id);
+                  }}
+                  leftIcon="arrow_back"
+                  className="text-inverse-on-surface/60 hover:text-inverse-on-surface hover:bg-inverse-on-surface/10"
+                >
+                  Prev
+                </Button>
+                <Button
+                  variant="text"
+                  size="sm"
+                  disabled={safeIdx === questions.length - 1}
+                  onClick={() => {
+                    const next =
+                      questions[Math.min(questions.length - 1, safeIdx + 1)];
+                    if (next) setActiveTabId(next.id);
+                  }}
+                  rightIcon="arrow_forward"
+                  className="text-inverse-on-surface/60 hover:text-inverse-on-surface hover:bg-inverse-on-surface/10"
+                >
+                  Next
+                </Button>
+              </div>
+            ) : (
+              <span />
+            )}
+            <Button
+              variant="tonal"
+              color="primary"
+              size="sm"
+              onClick={handleSubmit}
+              rightIcon="check"
+              className="hover:bg-primary hover:text-on-primary"
+            >
+              {submitLabel}
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -30,6 +30,8 @@ export {
   SegmentedButton,
   type SegmentedButtonProps,
   type SegmentedButtonOption,
+  type SegmentedButtonSize,
+  type SegmentedButtonOptionTone,
 } from "./components/ui/inputs/segmented-button/SegmentedButton";
 export {
   Switch,
@@ -212,6 +214,12 @@ export {
   type AgentSidebarUserMessageProps,
   AgentSidebarAgentMessage,
   type AgentSidebarAgentMessageProps,
+  AgentSidebarMultiQuestion,
+  type AgentSidebarMultiQuestionProps,
+  type AgentSidebarQuestion,
+  type AgentSidebarMultiQuestionStatus,
+  type AgentSidebarMultiQuestionAnswer,
+  type AgentSidebarMultiQuestionLayout,
   AgentSidebarMessages,
   type AgentSidebarMessage,
   type AgentSidebarMessagesProps,

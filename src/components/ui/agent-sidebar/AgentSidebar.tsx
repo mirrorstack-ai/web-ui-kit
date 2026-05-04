@@ -15,6 +15,14 @@ export {
   type AgentSidebarAgentMessageProps,
 } from "./AgentSidebarMessage";
 export {
+  AgentSidebarMultiQuestion,
+  type AgentSidebarMultiQuestionProps,
+  type AgentSidebarQuestion,
+  type AgentSidebarMultiQuestionStatus,
+  type AgentSidebarMultiQuestionAnswer,
+  type AgentSidebarMultiQuestionLayout,
+} from "./AgentSidebarMultiQuestion";
+export {
   AgentSidebarMessages,
   type AgentSidebarMessage,
   type AgentSidebarMessagesProps,
