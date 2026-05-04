@@ -146,6 +146,7 @@ const inverseFieldInput = cn(
   "text-inverse-on-surface!",
   "placeholder:text-inverse-on-surface/40!",
   "focus:text-inverse-on-surface!",
+  "py-1.5!",
 );
 
 // Override SegmentedButton's per-button bg/text on the inverse-themed sidebar
