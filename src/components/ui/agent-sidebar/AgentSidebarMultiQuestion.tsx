@@ -271,6 +271,35 @@ export function AgentSidebarMultiQuestion({
   const active = activeIdx >= 0 ? questions[activeIdx] : null;
   const safeIdx = activeIdx >= 0 ? activeIdx : 0;
 
+  const summaries = questions.map((q) => {
+    const value = answers[q.id];
+    const answered = isAnswered(q, value);
+    const ans = formatAnswer(q, value);
+    return { q, value, answered, ans, filled: answered && !!ans };
+  });
+
+  const renderSummary = () => (
+    <div className="mt-3 flex flex-col gap-2">
+      {summaries.map(({ q, ans, filled }) => (
+        <div
+          key={q.id}
+          className="flex flex-col gap-0.5 rounded-md bg-inverse-on-surface/[0.04] px-3 py-2"
+        >
+          <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-inverse-on-surface/55">
+            {q.label}
+          </span>
+          {filled ? (
+            <span className="text-sm text-inverse-on-surface">{ans}</span>
+          ) : (
+            <span className="text-sm italic text-warning-container">
+              Not answered
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div
       className={cn(
@@ -310,45 +339,20 @@ export function AgentSidebarMultiQuestion({
                 value={activeTabId}
                 onChange={(id) => setActiveTabId(id)}
                 options={[
-                  ...questions.map((q) => {
-                    const answered = isAnswered(q, answers[q.id]);
-                    return {
-                      value: q.id,
-                      label: q.tabLabel ?? q.label,
-                      tone: answered ? "muted" : "warn",
-                    } as const;
-                  }),
+                  ...summaries.map(({ q, answered }) => ({
+                    value: q.id,
+                    label: q.tabLabel ?? q.label,
+                    tone: (answered ? "muted" : "warning") as
+                      | "muted"
+                      | "warning",
+                  })),
                   { value: REVIEW_TAB_ID, label: "Review" },
                 ]}
               />
             </div>
 
             {isReview ? (
-              <div className="mt-3 flex flex-col gap-2">
-                {questions.map((q) => {
-                  const value = answers[q.id];
-                  const answered = isAnswered(q, value);
-                  const ans = formatAnswer(q, value);
-                  const filled = answered && !!ans;
-                  return (
-                    <div
-                      key={q.id}
-                      className="flex flex-col gap-0.5 rounded-md bg-inverse-on-surface/[0.04] px-3 py-2"
-                    >
-                      <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-inverse-on-surface/55">
-                        {q.label}
-                      </span>
-                      {filled ? (
-                        <span className="text-sm text-inverse-on-surface">{ans}</span>
-                      ) : (
-                        <span className="text-sm italic text-warning-container">
-                          Not answered
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              renderSummary()
             ) : active ? (
               <div className="mt-3 rounded-md border border-outline-variant/20 px-3 py-3 flex flex-col gap-2">
                 <div className="text-sm font-medium text-inverse-on-surface leading-snug">
@@ -366,31 +370,7 @@ export function AgentSidebarMultiQuestion({
             ) : null}
           </>
         ) : layout === "tabs" && submitted ? (
-          <div className="mt-3 flex flex-col gap-2">
-            {questions.map((q) => {
-              const value = answers[q.id];
-              const answered = isAnswered(q, value);
-              const ans = formatAnswer(q, value);
-              const filled = answered && !!ans;
-              return (
-                <div
-                  key={q.id}
-                  className="flex flex-col gap-0.5 rounded-md bg-inverse-on-surface/[0.04] px-3 py-2"
-                >
-                  <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-inverse-on-surface/55">
-                    {q.label}
-                  </span>
-                  {filled ? (
-                    <span className="text-sm text-inverse-on-surface">{ans}</span>
-                  ) : (
-                    <span className="text-sm italic text-warning-container">
-                      Not answered
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          renderSummary()
         ) : (
           <div className="mt-2.5 flex flex-col gap-2.5">
             {questions.map((q) => {

@@ -8,7 +8,7 @@ export const meta: ComponentMeta = {
     "Horizontal group of toggle buttons where exactly one option is selected at a time",
 };
 
-export type SegmentedButtonOptionTone = "default" | "warn" | "muted";
+export type SegmentedButtonOptionTone = "default" | "warning" | "muted";
 
 export interface SegmentedButtonOption<T extends string = string> {
   readonly value: T;
@@ -72,7 +72,7 @@ export function SegmentedButton<T extends string = string>({
             sizeStyles[size],
             value === opt.value
               ? "bg-primary text-on-primary"
-              : opt.tone === "warn"
+              : opt.tone === "warning"
                 ? "bg-warning-container text-on-warning-container hover:bg-warning/20"
                 : opt.tone === "muted"
                   ? "bg-surface-container/40 text-on-surface-variant/70 hover:bg-surface-container hover:text-on-surface-variant"
