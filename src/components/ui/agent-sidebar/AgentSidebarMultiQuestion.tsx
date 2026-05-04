@@ -542,6 +542,7 @@ export function AgentSidebarMultiQuestion({
               size="sm"
               onClick={handleSubmit}
               rightIcon="check"
+              className="hover:bg-primary! hover:text-on-primary!"
             >
               {submitLabel}
             </Button>
