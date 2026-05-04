@@ -6,7 +6,7 @@ afterEach(cleanup);
 
 describe("EditableField", () => {
   function setup(over: Partial<React.ComponentProps<typeof EditableField>> = {}) {
-    const onEditToggle = vi.fn();
+    const onEdit = vi.fn();
     const onChange = vi.fn();
     const utils = render(
       <EditableField
@@ -14,12 +14,12 @@ describe("EditableField", () => {
         label="Name"
         value="Alice"
         editing={false}
-        onEditToggle={onEditToggle}
+        onEdit={onEdit}
         onChange={onChange}
         {...over}
       />,
     );
-    return { ...utils, onEditToggle, onChange };
+    return { ...utils, onEdit, onChange };
   }
 
   it("read mode renders the value", () => {
@@ -32,10 +32,10 @@ describe("EditableField", () => {
     expect(getByText("—")).toBeInTheDocument();
   });
 
-  it("read mode edit button calls onEditToggle", () => {
-    const { getByLabelText, onEditToggle } = setup();
+  it("read mode edit button calls onEdit", () => {
+    const { getByLabelText, onEdit } = setup();
     fireEvent.click(getByLabelText("Edit Name"));
-    expect(onEditToggle).toHaveBeenCalledOnce();
+    expect(onEdit).toHaveBeenCalledOnce();
   });
 
   it("edit mode renders an input with the value", () => {
@@ -51,10 +51,9 @@ describe("EditableField", () => {
     expect(onChange).toHaveBeenCalledWith("Bob");
   });
 
-  it("edit mode check button calls onEditToggle", () => {
-    const { getByLabelText, onEditToggle } = setup({ editing: true });
-    fireEvent.click(getByLabelText("Done editing Name"));
-    expect(onEditToggle).toHaveBeenCalledOnce();
+  it("edit mode does NOT render a commit button (saving is the parent form's job)", () => {
+    const { queryByLabelText } = setup({ editing: true });
+    expect(queryByLabelText("Done editing Name")).not.toBeInTheDocument();
   });
 
   it("edit mode shows error text when error is provided", () => {

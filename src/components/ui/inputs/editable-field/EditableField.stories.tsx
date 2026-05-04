@@ -29,7 +29,7 @@ function ControlledStory({
         label="Module name"
         value={value}
         editing={editing}
-        onEditToggle={() => setEditing((e) => !e)}
+        onEdit={() => setEditing(true)}
         onChange={setValue}
         error={initialError}
       />
@@ -59,6 +59,12 @@ export const WithError: Story = {
   ),
 };
 
+/**
+ * Real consumer pattern: edit pencil flips into edit mode; the user
+ * types; the parent form's unsaved-changes snackbar handles save and
+ * calls fields.reset() on commit. The component itself never renders
+ * a "save" button.
+ */
 export const MultipleFields: Story = {
   render: () => {
     function Demo() {
@@ -72,7 +78,7 @@ export const MultipleFields: Story = {
             label="Module name"
             value={name}
             editing={fields.isEditing("name")}
-            onEditToggle={() => fields.toggleEdit("name")}
+            onEdit={() => fields.startEdit("name")}
             onChange={setName}
           />
           <EditableField
@@ -80,10 +86,17 @@ export const MultipleFields: Story = {
             label="Slug"
             value={slug}
             editing={fields.isEditing("slug")}
-            onEditToggle={() => fields.toggleEdit("slug")}
+            onEdit={() => fields.startEdit("slug")}
             onChange={setSlug}
             mono
           />
+          <button
+            type="button"
+            className="text-xs text-on-surface-variant"
+            onClick={fields.reset}
+          >
+            (simulated save → reset all)
+          </button>
         </div>
       );
     }

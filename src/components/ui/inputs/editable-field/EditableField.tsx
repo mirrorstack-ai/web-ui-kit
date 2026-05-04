@@ -7,7 +7,7 @@ import { ReadOnlyField } from "@/components/ui/data/read-only-field/ReadOnlyFiel
 export const meta: ComponentMeta = {
   name: "EditableField",
   description:
-    "Per-field read↔edit toggle for plain text values. Read mode shows ReadOnlyField with an edit IconButton; edit mode shows FloatingLabelInput with a check IconButton. Pair with `useEditableFields()` for centralized form state. For fields with bespoke display (e.g. slug with `@user/` prefix) keep inline JSX.",
+    "Per-field read→edit transition for plain text values. Read mode shows ReadOnlyField with an edit IconButton that flips the field into edit mode. Edit mode shows label + FloatingLabelInput; there is intentionally NO commit button — saving is the parent form's job (typically via useUnsavedSnackbar). Exit edit mode by calling useEditableFields().reset() inside your save/cancel handlers. For fields with bespoke display (e.g. slug with `@user/` prefix) keep inline JSX.",
 };
 
 export interface EditableFieldProps {
@@ -19,8 +19,8 @@ export interface EditableFieldProps {
   value: string;
   /** Whether the field is currently in edit mode (controlled). */
   editing: boolean;
-  /** Toggle edit mode. Caller decides whether toggling exits / commits. */
-  onEditToggle: () => void;
+  /** Called when the read-mode edit pencil is clicked — flips into edit mode. */
+  onEdit: () => void;
   /** Update the value while in edit mode. */
   onChange: (value: string) => void;
   /** Show value as monospace in read mode. */
@@ -36,7 +36,7 @@ export function EditableField({
   label,
   value,
   editing,
-  onEditToggle,
+  onEdit,
   onChange,
   mono,
   error,
@@ -55,7 +55,7 @@ export function EditableField({
             aria-label={`Edit ${label}`}
             variant="text"
             size="sm"
-            onClick={onEditToggle}
+            onClick={onEdit}
           />
         }
       />
@@ -67,26 +67,16 @@ export function EditableField({
       <label htmlFor={id} className="block text-sm font-medium text-on-surface mb-2">
         {label}
       </label>
-      <div className="flex items-center gap-2">
-        <FloatingLabelInput
-          id={id}
-          label={label}
-          size="sm"
-          hideLabel
-          value={value}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
-          error={!!error}
-          autoFocus
-          containerClassName="flex-1"
-        />
-        <IconButton
-          icon="check"
-          aria-label={`Done editing ${label}`}
-          variant="text"
-          size="sm"
-          onClick={onEditToggle}
-        />
-      </div>
+      <FloatingLabelInput
+        id={id}
+        label={label}
+        size="sm"
+        hideLabel
+        value={value}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+        error={!!error}
+        autoFocus
+      />
       {error && <p className="text-xs text-error mt-1">{error}</p>}
     </div>
   );
