@@ -131,6 +131,8 @@ export function AgentSidebarMessages({
       })}
       <div ref={endRef} />
       {!isAtBottom && (
+        // -mt-4 cancels the parent's gap-4 so the sticky pill sits flush
+        // against the last message instead of adding a gap row of layout.
         <div className="sticky bottom-2 z-10 flex justify-center pointer-events-none -mt-4">
           <button
             type="button"

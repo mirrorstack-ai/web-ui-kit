@@ -233,10 +233,8 @@ function AppShellInner({
                 </div>
 
                 {agentPendingContent && (
-                  <div className="shrink-0 px-3 pt-2 pb-1">
-                    <div className="rounded-xl bg-inverse-on-surface/[0.06] backdrop-blur-md border border-inverse-on-surface/[0.08] p-3">
-                      {agentPendingContent}
-                    </div>
+                  <div className="shrink-0 mx-3 mt-2 mb-1 rounded-xl bg-inverse-on-surface/[0.06] backdrop-blur-md border border-inverse-on-surface/[0.08] p-3">
+                    {agentPendingContent}
                   </div>
                 )}
 
