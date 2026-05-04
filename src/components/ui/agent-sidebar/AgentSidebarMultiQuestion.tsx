@@ -131,42 +131,40 @@ function formatAnswer(
   return value;
 }
 
-// Override FloatingLabelInput / Combobox internals for the inverse-themed
-// agent sidebar. Targets the components' bordered wrapper (`bg-surface-container-low`
-// → inverse fill) and the input/textarea element text/placeholder colors.
-const inverseFieldContainer = cn(
-  "[&>div]:bg-inverse-on-surface/[0.06]!",
-  "[&>div]:border-outline-variant/30!",
-  "[&>div]:hover:border-outline-variant/50!",
-  "[&>div]:focus-within:border-inverse-primary/60!",
-  "[&>div]:focus-within:ring-inverse-primary/30!",
-);
-
-const inverseFieldInput = cn(
-  "text-inverse-on-surface!",
-  "placeholder:text-inverse-on-surface/40!",
-  "focus:text-inverse-on-surface!",
-  "py-1.5!",
-);
-
-// Override SegmentedButton's per-button bg/text on the inverse-themed sidebar
-// so single-select segmented matches the inverse-primary chip palette used
-// by multi-select segmented above.
-const inverseSegmentedClass = cn(
-  "flex-wrap",
-  "[&>button[aria-pressed=true]]:bg-inverse-primary!",
-  "[&>button[aria-pressed=true]]:text-inverse-surface!",
-  "[&>button[aria-pressed=false]]:bg-inverse-on-surface/[0.06]!",
-  "[&>button[aria-pressed=false]]:text-inverse-on-surface/70!",
-  "[&>button[aria-pressed=false]]:hover:bg-inverse-on-surface/[0.12]!",
-  "[&>button[aria-pressed=false]]:hover:text-inverse-on-surface!",
-);
-
-const inverseSwitchClass = cn(
-  "aria-checked:bg-inverse-primary!",
-  "aria-[checked=false]:bg-inverse-on-surface/20!",
-  "[&>span]:bg-inverse-surface!",
-);
+// Reskin kit primitives (FloatingLabelInput / SegmentedButton / Switch) for
+// the inverse-themed agent sidebar. Each entry uses arbitrary descendant or
+// state-variant selectors with v4 trailing `!` to override the primitive's
+// internal default tokens. Until those primitives gain a first-class
+// `inverse` mode, these overrides are the bridge.
+const inverseOverrides = {
+  fieldContainer: cn(
+    "[&>div]:bg-inverse-on-surface/[0.06]!",
+    "[&>div]:border-outline-variant/30!",
+    "[&>div]:hover:border-outline-variant/50!",
+    "[&>div]:focus-within:border-inverse-primary/60!",
+    "[&>div]:focus-within:ring-inverse-primary/30!",
+  ),
+  fieldInput: cn(
+    "text-inverse-on-surface!",
+    "placeholder:text-inverse-on-surface/40!",
+    "focus:text-inverse-on-surface!",
+    "py-1.5!",
+  ),
+  segmented: cn(
+    "flex-wrap",
+    "[&>button[aria-pressed=true]]:bg-inverse-primary!",
+    "[&>button[aria-pressed=true]]:text-inverse-surface!",
+    "[&>button[aria-pressed=false]]:bg-inverse-on-surface/[0.06]!",
+    "[&>button[aria-pressed=false]]:text-inverse-on-surface/70!",
+    "[&>button[aria-pressed=false]]:hover:bg-inverse-on-surface/[0.12]!",
+    "[&>button[aria-pressed=false]]:hover:text-inverse-on-surface!",
+  ),
+  switch: cn(
+    "aria-checked:bg-inverse-primary!",
+    "aria-[checked=false]:bg-inverse-on-surface/20!",
+    "[&>span]:bg-inverse-surface!",
+  ),
+};
 
 function renderField(
   q: AgentSidebarQuestion,
@@ -188,8 +186,8 @@ function renderField(
           value={typeof value === "string" ? value : ""}
           onChange={(e) => setAnswer(q.id, e.target.value)}
           disabled={submitted}
-          containerClassName={inverseFieldContainer}
-          className={inverseFieldInput}
+          containerClassName={inverseOverrides.fieldContainer}
+          className={inverseOverrides.fieldInput}
         />
       );
     }
@@ -202,8 +200,8 @@ function renderField(
         value={typeof value === "string" ? value : ""}
         onChange={(e) => setAnswer(q.id, e.target.value)}
         disabled={submitted}
-        containerClassName={inverseFieldContainer}
-        className={inverseFieldInput}
+        containerClassName={inverseOverrides.fieldContainer}
+        className={inverseOverrides.fieldInput}
       />
     );
   }
@@ -214,7 +212,7 @@ function renderField(
         onChange={(checked) => setAnswer(q.id, checked)}
         aria-label={q.label}
         disabled={submitted}
-        className={inverseSwitchClass}
+        className={inverseOverrides.switch}
       />
     );
   }
@@ -247,7 +245,7 @@ function renderField(
           disabled={submitted}
           onChange={(v) => setAnswer(q.id, v === singleCurrent ? "" : v)}
           options={q.options.map((o) => ({ value: o.value, label: o.label }))}
-          className={inverseSegmentedClass}
+          className={inverseOverrides.segmented}
         />
       );
     }
