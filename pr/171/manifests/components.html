@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/40 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">40/40 infos</a><span class="filter-pill ok" aria-disabled="true">158 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/40 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">40/40 infos</a><span class="filter-pill ok" aria-disabled="true">157 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -5951,9 +5951,9 @@ tone?: | &quot;primary&quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SettingsSection</h2>
       <div class="badges">
-        <label for="c-31-ui-surfaces-settingssection-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-31-ui-surfaces-settingssection-props" class="badge ok as-toggle">4 prop types</label>
         <label for="c-31-ui-surfaces-settingssection-info" class="badge info as-toggle">1 info</label>
-        <label for="c-31-ui-surfaces-settingssection-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-31-ui-surfaces-settingssection-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -5985,7 +5985,7 @@ tone?: | &quot;primary&quot;
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">5 prop types</span>
+              <span class="badge ok">4 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/settings-section/SettingsSection.tsx::SettingsSection</code></pre>
             <pre><code>Props:</code></pre>
@@ -6007,18 +6007,7 @@ surfaceClassName?: string
 /**
  * Section heading text. Rendered via &lt;SectionLabel&gt;.
  */
-title: ReactNode
-
-/**
- * Theme color for the title (e.g. &quot;warning&quot; for advanced groupings).
- */
-tone?: | &quot;primary&quot;
-| &quot;secondary&quot;
-| &quot;tertiary&quot;
-| &quot;error&quot;
-| &quot;warning&quot;
-| &quot;success&quot;
-| &quot;info&quot;</code></pre>
+title: ReactNode</code></pre>
           </div>
         </div>
     
@@ -6048,56 +6037,47 @@ tone?: | &quot;primary&quot;
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Tones</span>
+                <span class="ex-name">Tone Coloured Groups Are Not Settings Section</span>
                 <span class="badge ok">story ok</span>
               </div>
               
-              
-              <pre><code>const Tones = () =&gt; (
-  &lt;div className=&quot;space-y-4 max-w-md&quot;&gt;
-    &lt;SettingsSection title=&quot;Info&quot;&gt;
-      &lt;ReadOnlyField label=&quot;Module ID&quot; value=&quot;m_abc&quot; mono /&gt;
-    &lt;/SettingsSection&gt;
-    &lt;SettingsSection title=&quot;Advanced&quot; tone=&quot;warning&quot;&gt;
-      &lt;SettingRow
-        tone=&quot;warning&quot;
-        title=&quot;Developer mode&quot;
-        description=&quot;Show the developer rail.&quot;
-        control={
-          &lt;Switch
-            checked
-            onChange={() =&gt; {}}
-            color=&quot;warning&quot;
-            aria-label=&quot;developer&quot;
-          /&gt;
-        }
-      /&gt;
-    &lt;/SettingsSection&gt;
-  &lt;/div&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Danger Zone Is Not Settings Section</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              <div class="hint">Danger zones intentionally do NOT use SettingsSection. They render the label as a tone-error SectionLabel followed by a naked stack of SettingRow tone=&quot;error&quot; rows (each row carries its own border). Shown here for contrast with the boxed sections above.</div>
-              <pre><code>const DangerZoneIsNotSettingsSection = () =&gt; (
-  &lt;div className=&quot;max-w-md&quot;&gt;
-    &lt;SectionLabel className=&quot;mb-2 text-error&quot;&gt;Danger zone&lt;/SectionLabel&gt;
-    &lt;div className=&quot;space-y-2&quot;&gt;
-      &lt;SettingRow
-        tone=&quot;error&quot;
-        title=&quot;Delete module&quot;
-        description=&quot;Permanently delete. Cannot be undone.&quot;
-        className=&quot;px-6 py-4&quot;
-        control={
-          &lt;Button color=&quot;error&quot; variant=&quot;filled&quot; size=&quot;sm&quot;&gt;
-            Delete
-          &lt;/Button&gt;
-        }
-      /&gt;
+              <div class="hint">Tone-coloured groups (Advanced=warning, Danger zone=error) do NOT use SettingsSection. They render SectionLabel above a naked stack of SettingRow rows (each row carries its own border) with no enclosing Surface. Shown here for contrast with the boxed sections above.</div>
+              <pre><code>const ToneColouredGroupsAreNotSettingsSection = () =&gt; (
+  &lt;div className=&quot;space-y-6 max-w-md&quot;&gt;
+    &lt;div&gt;
+      &lt;SectionLabel className=&quot;mb-2 text-warning&quot;&gt;Advanced&lt;/SectionLabel&gt;
+      &lt;div className=&quot;space-y-2&quot;&gt;
+        &lt;SettingRow
+          tone=&quot;warning&quot;
+          title=&quot;Developer mode&quot;
+          description=&quot;Show the developer rail.&quot;
+          className=&quot;px-6 py-4&quot;
+          control={
+            &lt;Switch
+              checked
+              onChange={() =&gt; {}}
+              color=&quot;warning&quot;
+              aria-label=&quot;developer&quot;
+            /&gt;
+          }
+        /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;SectionLabel className=&quot;mb-2 text-error&quot;&gt;Danger zone&lt;/SectionLabel&gt;
+      &lt;div className=&quot;space-y-2&quot;&gt;
+        &lt;SettingRow
+          tone=&quot;error&quot;
+          title=&quot;Delete module&quot;
+          description=&quot;Permanently delete. Cannot be undone.&quot;
+          className=&quot;px-6 py-4&quot;
+          control={
+            &lt;Button color=&quot;error&quot; variant=&quot;filled&quot; size=&quot;sm&quot;&gt;
+              Delete
+            &lt;/Button&gt;
+          }
+        /&gt;
+      &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
 );</code></pre>
