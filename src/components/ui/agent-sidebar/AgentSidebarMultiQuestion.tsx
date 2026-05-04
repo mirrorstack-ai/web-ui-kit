@@ -4,6 +4,7 @@ import { Icon } from "@/components/ui/media/icon/Icon";
 import { Button } from "@/components/ui/actions/button/Button";
 import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
 import { SegmentedButton } from "@/components/ui/inputs/segmented-button/SegmentedButton";
+import { Switch } from "@/components/ui/inputs/switch/Switch";
 
 interface QuestionBase {
   id: string;
@@ -102,7 +103,6 @@ function isAnswered(
   q: AgentSidebarQuestion,
   value: AgentSidebarMultiQuestionAnswer,
 ): boolean {
-  // A switch always has a valid answer (on or off); never flag it as missing.
   if (q.type === "toggle") return true;
   if (q.type === "choice" && q.multiple) {
     return Array.isArray(value) && value.length > 0;
@@ -161,6 +161,12 @@ const inverseSegmentedClass = cn(
   "[&>button[aria-pressed=false]]:hover:text-inverse-on-surface!",
 );
 
+const inverseSwitchClass = cn(
+  "aria-checked:bg-inverse-primary!",
+  "aria-[checked=false]:bg-inverse-on-surface/20!",
+  "[&>span]:bg-inverse-surface!",
+);
+
 function renderField(
   q: AgentSidebarQuestion,
   value: AgentSidebarMultiQuestionAnswer,
@@ -202,28 +208,16 @@ function renderField(
   }
   if (q.type === "toggle") {
     return (
-      <button
-        id={fieldId}
-        type="button"
-        role="switch"
-        aria-checked={!!value}
+      <Switch
+        checked={!!value}
+        onChange={(checked) => setAnswer(q.id, checked)}
+        aria-label={q.label}
         disabled={submitted}
-        onClick={() => setAnswer(q.id, !value)}
-        className={cn(
-          "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-50",
-          value ? "bg-inverse-primary" : "bg-inverse-on-surface/20",
-        )}
-      >
-        <span
-          className={cn(
-            "inline-block h-4 w-4 rounded-full bg-inverse-surface shadow transition-transform",
-            value ? "translate-x-[18px]" : "translate-x-0.5",
-          )}
-        />
-      </button>
+        className={inverseSwitchClass}
+      />
     );
   }
-  // choice
+  if (q.type === "choice") {
   const isMulti = q.multiple === true;
   const selectedValues = isMulti
     ? new Set(Array.isArray(value) ? value : [])
@@ -256,9 +250,6 @@ function renderField(
         />
       );
     }
-    // segmented + multiple → independent toggle chips, styled to match
-    // SegmentedButton's selected/unselected look so single and multi
-    // segmented questions read as the same control.
     return (
       <div
         role="group"
@@ -358,6 +349,9 @@ function renderField(
       })}
     </div>
   );
+  }
+  const _exhaustive: never = q;
+  return _exhaustive;
 }
 
 export function AgentSidebarMultiQuestion({
@@ -386,7 +380,6 @@ export function AgentSidebarMultiQuestion({
   const isReview = activeTabId === REVIEW_TAB_ID;
   const activeIdx = questions.findIndex((q) => q.id === activeTabId);
   const active = activeIdx >= 0 ? questions[activeIdx] : null;
-  const safeIdx = activeIdx >= 0 ? activeIdx : 0;
 
   const summaries = questions.map((q) => {
     const value = answers[q.id];
@@ -548,9 +541,9 @@ export function AgentSidebarMultiQuestion({
                 <Button
                   variant="text"
                   size="sm"
-                  disabled={safeIdx === 0}
+                  disabled={activeIdx === 0}
                   onClick={() => {
-                    const next = questions[Math.max(0, safeIdx - 1)];
+                    const next = questions[Math.max(0, activeIdx - 1)];
                     if (next) setActiveTabId(next.id);
                   }}
                   leftIcon="arrow_back"
@@ -561,10 +554,10 @@ export function AgentSidebarMultiQuestion({
                 <Button
                   variant="text"
                   size="sm"
-                  disabled={safeIdx === questions.length - 1}
+                  disabled={activeIdx === questions.length - 1}
                   onClick={() => {
                     const next =
-                      questions[Math.min(questions.length - 1, safeIdx + 1)];
+                      questions[Math.min(questions.length - 1, activeIdx + 1)];
                     if (next) setActiveTabId(next.id);
                   }}
                   rightIcon="arrow_forward"

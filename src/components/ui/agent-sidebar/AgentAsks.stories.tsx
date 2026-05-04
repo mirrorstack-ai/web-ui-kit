@@ -15,8 +15,6 @@ const meta: Meta = {
 
 export default meta;
 
-// Tabs layout — for weighted decisions where each option needs explanation.
-// Use `choice` with style="cards" so options show a description per option.
 export const MultiQuestionTabs: StoryObj = {
   render: () => {
     const [status, setStatus] = useState<"pending" | "submitted">("pending");
@@ -159,8 +157,6 @@ export const MultiQuestionTabs: StoryObj = {
   },
 };
 
-// List layout — for simple preferences with quick-pick options. Use `choice`
-// with style="segmented" so options are visible inline (no Combobox click).
 export const MultiQuestionList: StoryObj = {
   render: () => {
     const [status, setStatus] = useState<"pending" | "submitted">("pending");
