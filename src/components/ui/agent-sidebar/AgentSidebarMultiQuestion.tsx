@@ -148,6 +148,18 @@ const inverseFieldInput = cn(
   "focus:text-inverse-on-surface!",
 );
 
+// Override SegmentedButton's per-button bg/text on the inverse-themed sidebar
+// so single-select segmented matches the inverse-primary chip palette used
+// by multi-select segmented above.
+const inverseSegmentedClass = cn(
+  "[&>button[aria-pressed=true]]:bg-inverse-primary!",
+  "[&>button[aria-pressed=true]]:text-inverse-surface!",
+  "[&>button[aria-pressed=false]]:bg-inverse-on-surface/[0.06]!",
+  "[&>button[aria-pressed=false]]:text-inverse-on-surface/70!",
+  "[&>button[aria-pressed=false]]:hover:bg-inverse-on-surface/[0.12]!",
+  "[&>button[aria-pressed=false]]:hover:text-inverse-on-surface!",
+);
+
 function renderField(
   q: AgentSidebarQuestion,
   value: AgentSidebarMultiQuestionAnswer,
@@ -230,31 +242,38 @@ function renderField(
   };
 
   if (q.style === "segmented") {
+    if (!isMulti) {
+      return (
+        <SegmentedButton
+          size="sm"
+          aria-label={q.label}
+          value={singleCurrent}
+          disabled={submitted}
+          onChange={(v) => setAnswer(q.id, v === singleCurrent ? "" : v)}
+          options={q.options.map((o) => ({ value: o.value, label: o.label }))}
+          className={inverseSegmentedClass}
+        />
+      );
+    }
+    // segmented + multiple → independent toggle chips, styled to match
+    // SegmentedButton's selected/unselected look so single and multi
+    // segmented questions read as the same control.
     return (
       <div
-        role={isMulti ? "group" : "radiogroup"}
+        role="group"
         aria-label={q.label}
         className="flex flex-wrap gap-1.5"
       >
         {q.options.map((opt) => {
-          const selected = isMulti
-            ? selectedValues.has(opt.value)
-            : opt.value === singleCurrent;
-          const handleClick = () => {
-            if (isMulti) {
-              toggleMulti(opt.value);
-            } else {
-              setAnswer(q.id, selected ? "" : opt.value);
-            }
-          };
+          const selected = selectedValues.has(opt.value);
           return (
             <button
               key={opt.value}
               type="button"
-              role={isMulti ? "checkbox" : "radio"}
+              role="checkbox"
               aria-checked={selected}
               disabled={submitted}
-              onClick={handleClick}
+              onClick={() => toggleMulti(opt.value)}
               className={cn(
                 "rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50",
                 selected
