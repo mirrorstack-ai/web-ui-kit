@@ -18,6 +18,9 @@ export interface SwitchProps {
   readonly disabled?: boolean;
   readonly color?: SwitchColor;
   readonly className?: string;
+  /** Use inverse-themed tokens (for placement on inverse surfaces such as
+   *  the agent sidebar where the surrounding bg is `on-background`). */
+  readonly inverse?: boolean;
 }
 
 const trackColors: Record<SwitchColor, string> = {
@@ -40,6 +43,7 @@ export function Switch({
   disabled = false,
   color = "primary",
   className,
+  inverse = false,
 }: SwitchProps) {
   if (isDev) {
     if (!ariaLabel && !ariaLabelledBy) {
@@ -48,6 +52,15 @@ export function Switch({
       );
     }
   }
+
+  const trackOn = inverse && color === "primary"
+    ? "bg-inverse-primary"
+    : trackColors[color];
+  const trackOff = inverse ? "bg-inverse-on-surface/20" : "bg-outline-variant";
+  const thumbOn = inverse && color === "primary"
+    ? "bg-inverse-surface"
+    : thumbColors[color];
+  const thumbOff = inverse ? "bg-inverse-surface" : "bg-surface";
 
   return (
     <button
@@ -60,7 +73,7 @@ export function Switch({
       onClick={() => onChange(!checked)}
       className={cn(
         "relative w-11 h-6 rounded-full transition-colors shrink-0",
-        checked ? trackColors[color] : "bg-outline-variant",
+        checked ? trackOn : trackOff,
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
         className,
       )}
@@ -68,7 +81,7 @@ export function Switch({
       <span
         className={cn(
           "absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform",
-          checked ? `translate-x-5 ${thumbColors[color]}` : "bg-surface",
+          checked ? `translate-x-5 ${thumbOn}` : thumbOff,
         )}
       />
     </button>
