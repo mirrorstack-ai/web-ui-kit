@@ -153,6 +153,7 @@ const inverseFieldInput = cn(
 // so single-select segmented matches the inverse-primary chip palette used
 // by multi-select segmented above.
 const inverseSegmentedClass = cn(
+  "flex-wrap",
   "[&>button[aria-pressed=true]]:bg-inverse-primary!",
   "[&>button[aria-pressed=true]]:text-inverse-surface!",
   "[&>button[aria-pressed=false]]:bg-inverse-on-surface/[0.06]!",
