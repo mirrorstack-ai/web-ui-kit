@@ -267,12 +267,16 @@ function renderField(
               disabled={submitted}
               onClick={() => toggleMulti(opt.value)}
               className={cn(
-                "rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50",
+                "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50",
                 selected
                   ? "bg-inverse-primary text-inverse-surface"
                   : "bg-inverse-on-surface/[0.06] text-inverse-on-surface/70 hover:bg-inverse-on-surface/[0.12] hover:text-inverse-on-surface",
               )}
             >
+              <Icon
+                name={selected ? "check_box" : "check_box_outline_blank"}
+                size={14}
+              />
               {opt.label}
             </button>
           );
@@ -314,26 +318,24 @@ function renderField(
                 : "border-outline-variant/25 bg-inverse-on-surface/[0.03] hover:border-outline-variant/50 hover:bg-inverse-on-surface/[0.06]",
             )}
           >
-            <span
+            <Icon
+              name={
+                isMulti
+                  ? selected
+                    ? "check_box"
+                    : "check_box_outline_blank"
+                  : selected
+                    ? "radio_button_checked"
+                    : "radio_button_unchecked"
+              }
+              size={20}
               className={cn(
-                "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center border-2 transition-colors",
-                isMulti ? "rounded-sm" : "rounded-full",
+                "shrink-0 mt-0.5 transition-colors",
                 selected
-                  ? "border-inverse-primary bg-inverse-primary"
-                  : "border-inverse-on-surface/30 group-hover:border-inverse-on-surface/50",
+                  ? "text-inverse-primary"
+                  : "text-inverse-on-surface/45 group-hover:text-inverse-on-surface/65",
               )}
-            >
-              {selected &&
-                (isMulti ? (
-                  <Icon
-                    name="check"
-                    size={12}
-                    className="text-inverse-surface"
-                  />
-                ) : (
-                  <span className="block h-1.5 w-1.5 rounded-full bg-inverse-surface" />
-                ))}
-            </span>
+            />
             <span className="flex-1 min-w-0">
               <span className="block text-sm font-medium text-inverse-on-surface">
                 {opt.label}
