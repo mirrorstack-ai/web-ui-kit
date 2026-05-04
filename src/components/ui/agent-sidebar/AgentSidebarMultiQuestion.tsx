@@ -3,6 +3,7 @@ import { cn } from "@/utils/cn";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Button } from "@/components/ui/actions/button/Button";
 import { Combobox } from "@/components/ui/inputs/combobox/Combobox";
+import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
 import { SegmentedButton } from "@/components/ui/inputs/segmented-button/SegmentedButton";
 
 interface QuestionBase {
@@ -121,8 +122,22 @@ function formatAnswer(
   return value;
 }
 
-const fieldCls =
-  "w-full rounded-md bg-inverse-on-surface/[0.06] border border-transparent px-2.5 py-1.5 text-sm text-inverse-on-surface placeholder:text-inverse-on-surface/30 focus:outline-none focus:border-inverse-primary/60 focus:bg-inverse-on-surface/[0.08] disabled:opacity-50";
+// Override FloatingLabelInput / Combobox internals for the inverse-themed
+// agent sidebar. Targets the components' bordered wrapper (`bg-surface-container-low`
+// → inverse fill) and the input/textarea element text/placeholder colors.
+const inverseFieldContainer = cn(
+  "[&>div]:!bg-inverse-on-surface/[0.06]",
+  "[&>div]:!border-outline-variant/30",
+  "[&>div]:hover:!border-outline-variant/50",
+  "[&>div]:focus-within:!border-inverse-primary/60",
+  "[&>div]:focus-within:!ring-inverse-primary/30",
+);
+
+const inverseFieldInput = cn(
+  "!text-inverse-on-surface",
+  "placeholder:!text-inverse-on-surface/40",
+  "focus:!text-inverse-on-surface",
+);
 
 function renderField(
   q: AgentSidebarQuestion,
@@ -133,27 +148,33 @@ function renderField(
   const fieldId = `mq-${q.id}`;
   if (q.type === "text") {
     return (
-      <input
+      <FloatingLabelInput
         id={fieldId}
-        type="text"
-        className={fieldCls}
-        placeholder={q.placeholder}
+        label={q.placeholder ?? q.label}
+        hideLabel
+        size="sm"
         value={typeof value === "string" ? value : ""}
         onChange={(e) => setAnswer(q.id, e.target.value)}
         disabled={submitted}
+        containerClassName={inverseFieldContainer}
+        className={inverseFieldInput}
       />
     );
   }
   if (q.type === "textarea") {
     return (
-      <textarea
+      <FloatingLabelInput
         id={fieldId}
-        className={cn(fieldCls, "resize-none min-h-[60px]")}
-        placeholder={q.placeholder}
+        label={q.placeholder ?? q.label}
+        hideLabel
+        multiline
+        size="sm"
         rows={3}
         value={typeof value === "string" ? value : ""}
         onChange={(e) => setAnswer(q.id, e.target.value)}
         disabled={submitted}
+        containerClassName={inverseFieldContainer}
+        className={inverseFieldInput}
       />
     );
   }
@@ -168,6 +189,7 @@ function renderField(
         value={typeof value === "string" ? value : ""}
         onChange={(v) => setAnswer(q.id, v)}
         options={q.options}
+        className={inverseFieldContainer}
       />
     );
   }
