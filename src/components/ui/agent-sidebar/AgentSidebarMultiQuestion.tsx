@@ -369,10 +369,10 @@ export function AgentSidebarMultiQuestion({
               </div>
             ) : null}
           </>
-        ) : layout === "tabs" && submitted ? (
+        ) : submitted ? (
           renderSummary()
         ) : (
-          <div className="mt-2.5 flex flex-col gap-2.5">
+          <div className="mt-2.5 flex flex-col gap-2">
             {questions.map((q) => {
               const value = answers[q.id];
               const fieldId = `mq-${q.id}`;
@@ -380,17 +380,17 @@ export function AgentSidebarMultiQuestion({
                 return (
                   <div
                     key={q.id}
-                    className="flex items-center justify-between gap-3 rounded-md bg-inverse-on-surface/[0.06] px-2.5 py-2"
+                    className="rounded-md border border-outline-variant/20 px-3 py-2.5 flex items-center justify-between gap-3"
                   >
                     <div className="flex-1 min-w-0">
                       <label
                         htmlFor={fieldId}
-                        className="text-sm text-inverse-on-surface block"
+                        className="text-sm font-medium text-inverse-on-surface block leading-snug"
                       >
                         {q.label}
                       </label>
                       {q.description && (
-                        <span className="text-xs text-inverse-on-surface/55 block mt-0.5">
+                        <span className="text-xs text-inverse-on-surface/55 block mt-0.5 leading-relaxed">
                           {q.description}
                         </span>
                       )}
@@ -400,18 +400,23 @@ export function AgentSidebarMultiQuestion({
                 );
               }
               return (
-                <div key={q.id} className="flex flex-col gap-1">
-                  <label
-                    htmlFor={fieldId}
-                    className="text-[10px] font-medium uppercase tracking-[0.08em] text-inverse-on-surface/55"
-                  >
-                    {q.label}
-                  </label>
-                  {q.description && (
-                    <span className="text-xs text-inverse-on-surface/55 -mt-0.5">
-                      {q.description}
-                    </span>
-                  )}
+                <div
+                  key={q.id}
+                  className="rounded-md border border-outline-variant/20 px-3 py-2.5 flex flex-col gap-2"
+                >
+                  <div>
+                    <label
+                      htmlFor={fieldId}
+                      className="text-sm font-medium text-inverse-on-surface block leading-snug"
+                    >
+                      {q.label}
+                    </label>
+                    {q.description && (
+                      <span className="text-xs text-inverse-on-surface/55 block mt-0.5 leading-relaxed">
+                        {q.description}
+                      </span>
+                    )}
+                  </div>
                   {renderField(q, value, setAnswer, submitted)}
                 </div>
               );
