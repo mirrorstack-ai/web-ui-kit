@@ -94,7 +94,8 @@ function isAnswered(
   q: AgentSidebarQuestion,
   value: AgentSidebarMultiQuestionAnswer,
 ): boolean {
-  if (q.type === "toggle") return value !== (q.defaultValue ?? false);
+  // A switch always has a valid answer (on or off); never flag it as missing.
+  if (q.type === "toggle") return true;
   if (typeof value !== "string") return false;
   if (q.type === "choice") return value.length > 0;
   return value.trim().length > 0;
@@ -104,7 +105,7 @@ function formatAnswer(
   q: AgentSidebarQuestion,
   value: AgentSidebarMultiQuestionAnswer,
 ): string {
-  if (q.type === "toggle") return value ? "On" : "Off";
+  if (q.type === "toggle") return value ? "Enabled" : "Not enabled";
   if (typeof value !== "string" || value.length === 0) return "";
   if (q.type === "choice") {
     const opt = q.options.find((o) => o.value === value);
