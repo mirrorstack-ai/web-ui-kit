@@ -15,9 +15,8 @@ const meta: Meta = {
 
 export default meta;
 
-// Tabs layout is for *decisions* — multiple sections, each with weighted
-// trade-offs. Example: scaffolding a new service. Each tab is one decision,
-// each option is a multi-choice card with an explanation to help pick.
+// Tabs layout — for weighted decisions where each option needs explanation.
+// Use `choice` with style="cards" so options show a description per option.
 export const MultiQuestionTabs: StoryObj = {
   render: () => {
     const [status, setStatus] = useState<"pending" | "submitted">("pending");
@@ -34,6 +33,7 @@ export const MultiQuestionTabs: StoryObj = {
           {
             id: "database",
             type: "choice",
+            style: "cards",
             label: "Primary database",
             tabLabel: "Database",
             description:
@@ -62,6 +62,7 @@ export const MultiQuestionTabs: StoryObj = {
           {
             id: "auth",
             type: "choice",
+            style: "cards",
             label: "Authentication strategy",
             tabLabel: "Auth",
             description:
@@ -90,6 +91,7 @@ export const MultiQuestionTabs: StoryObj = {
           {
             id: "hosting",
             type: "choice",
+            style: "cards",
             label: "Deploy target",
             tabLabel: "Hosting",
             description:
@@ -121,8 +123,8 @@ export const MultiQuestionTabs: StoryObj = {
   },
 };
 
-// List layout is for simple, low-stakes preference forms — short labels, no
-// per-question explanation needed.
+// List layout — for simple preferences with quick-pick options. Use `choice`
+// with style="segmented" so options are visible inline (no Combobox click).
 export const MultiQuestionList: StoryObj = {
   render: () => {
     const [status, setStatus] = useState<"pending" | "submitted">("pending");
@@ -139,14 +141,14 @@ export const MultiQuestionList: StoryObj = {
         questions={[
           {
             id: "theme",
-            type: "select",
+            type: "choice",
+            style: "segmented",
             label: "Theme",
             options: [
-              { value: "system", label: "Match system" },
+              { value: "system", label: "System" },
               { value: "light", label: "Light" },
               { value: "dark", label: "Dark" },
             ],
-            defaultValue: "system",
           },
           {
             id: "marketing",

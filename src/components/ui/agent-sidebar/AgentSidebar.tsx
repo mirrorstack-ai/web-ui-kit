@@ -21,6 +21,7 @@ export {
   type AgentSidebarMultiQuestionStatus,
   type AgentSidebarMultiQuestionAnswer,
   type AgentSidebarMultiQuestionLayout,
+  type AgentSidebarChoiceStyle,
 } from "./AgentSidebarMultiQuestion";
 export {
   AgentSidebarMessages,

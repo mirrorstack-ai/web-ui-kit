@@ -2,7 +2,6 @@ import { useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Button } from "@/components/ui/actions/button/Button";
-import { Combobox } from "@/components/ui/inputs/combobox/Combobox";
 import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
 import { SegmentedButton } from "@/components/ui/inputs/segmented-button/SegmentedButton";
 
@@ -15,20 +14,14 @@ interface QuestionBase {
   tabLabel?: string;
 }
 
+export type AgentSidebarChoiceStyle = "segmented" | "cards";
+
 export type AgentSidebarQuestion =
   | (QuestionBase & {
       type: "text";
+      /** When true, renders as a textarea. */
+      multiline?: boolean;
       placeholder?: string;
-      defaultValue?: string;
-    })
-  | (QuestionBase & {
-      type: "textarea";
-      placeholder?: string;
-      defaultValue?: string;
-    })
-  | (QuestionBase & {
-      type: "select";
-      options: { value: string; label: string }[];
       defaultValue?: string;
     })
   | (QuestionBase & {
@@ -37,6 +30,9 @@ export type AgentSidebarQuestion =
     })
   | (QuestionBase & {
       type: "choice";
+      /** "segmented" — all options visible inline as a pill row (use for short labels, no descriptions).
+       *  "cards" — radio-card list with title + description per option (use for weighted decisions). */
+      style: AgentSidebarChoiceStyle;
       options: {
         value: string;
         label: string;
@@ -89,9 +85,6 @@ function initialAnswers(
   const out: Record<string, AgentSidebarMultiQuestionAnswer> = {};
   for (const q of questions) {
     if (q.type === "toggle") out[q.id] = q.defaultValue ?? false;
-    else if (q.type === "select")
-      out[q.id] = q.defaultValue ?? q.options[0]?.value ?? "";
-    else if (q.type === "choice") out[q.id] = q.defaultValue ?? "";
     else out[q.id] = q.defaultValue ?? "";
   }
   return out;
@@ -103,8 +96,6 @@ function isAnswered(
 ): boolean {
   if (q.type === "toggle") return value !== (q.defaultValue ?? false);
   if (typeof value !== "string") return false;
-  if (q.type === "select")
-    return value !== (q.defaultValue ?? q.options[0]?.value ?? "");
   if (q.type === "choice") return value.length > 0;
   return value.trim().length > 0;
 }
@@ -115,7 +106,7 @@ function formatAnswer(
 ): string {
   if (q.type === "toggle") return value ? "On" : "Off";
   if (typeof value !== "string" || value.length === 0) return "";
-  if (q.type === "choice" || q.type === "select") {
+  if (q.type === "choice") {
     const opt = q.options.find((o) => o.value === value);
     return opt?.label ?? value;
   }
@@ -147,6 +138,23 @@ function renderField(
 ): ReactNode {
   const fieldId = `mq-${q.id}`;
   if (q.type === "text") {
+    if (q.multiline) {
+      return (
+        <FloatingLabelInput
+          id={fieldId}
+          label={q.placeholder ?? q.label}
+          hideLabel
+          multiline
+          size="sm"
+          rows={3}
+          value={typeof value === "string" ? value : ""}
+          onChange={(e) => setAnswer(q.id, e.target.value)}
+          disabled={submitted}
+          containerClassName={inverseFieldContainer}
+          className={inverseFieldInput}
+        />
+      );
+    }
     return (
       <FloatingLabelInput
         id={fieldId}
@@ -161,107 +169,88 @@ function renderField(
       />
     );
   }
-  if (q.type === "textarea") {
+  if (q.type === "toggle") {
     return (
-      <FloatingLabelInput
+      <button
         id={fieldId}
-        label={q.placeholder ?? q.label}
-        hideLabel
-        multiline
-        size="sm"
-        rows={3}
-        value={typeof value === "string" ? value : ""}
-        onChange={(e) => setAnswer(q.id, e.target.value)}
+        type="button"
+        role="switch"
+        aria-checked={!!value}
         disabled={submitted}
-        containerClassName={inverseFieldContainer}
-        className={inverseFieldInput}
-      />
+        onClick={() => setAnswer(q.id, !value)}
+        className={cn(
+          "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-50",
+          value ? "bg-inverse-primary" : "bg-inverse-on-surface/20",
+        )}
+      >
+        <span
+          className={cn(
+            "inline-block h-4 w-4 rounded-full bg-inverse-surface shadow transition-transform",
+            value ? "translate-x-[18px]" : "translate-x-0.5",
+          )}
+        />
+      </button>
     );
   }
-  if (q.type === "select") {
+  // choice
+  const current = typeof value === "string" ? value : "";
+  if (q.style === "segmented") {
     return (
-      <Combobox
-        id={fieldId}
-        label={q.label}
-        hideLabel
+      <SegmentedButton
         size="sm"
+        aria-label={q.label}
+        value={current}
         disabled={submitted}
-        value={typeof value === "string" ? value : ""}
-        onChange={(v) => setAnswer(q.id, v)}
-        options={q.options}
-        className={inverseFieldContainer}
+        onChange={(v) => setAnswer(q.id, v === current ? "" : v)}
+        options={q.options.map((o) => ({ value: o.value, label: o.label }))}
       />
-    );
-  }
-  if (q.type === "choice") {
-    const current = typeof value === "string" ? value : "";
-    return (
-      <div role="radiogroup" aria-labelledby={fieldId} className="flex flex-col gap-1.5">
-        {q.options.map((opt) => {
-          const selected = opt.value === current;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              disabled={submitted}
-              onClick={() => setAnswer(q.id, selected ? "" : opt.value)}
-              className={cn(
-                "group flex items-start gap-2.5 rounded-md border px-3 py-2.5 text-left transition-colors disabled:opacity-50",
-                selected
-                  ? "border-inverse-primary/60 bg-inverse-primary/[0.08]"
-                  : "border-outline-variant/25 bg-inverse-on-surface/[0.03] hover:border-outline-variant/50 hover:bg-inverse-on-surface/[0.06]",
-              )}
-            >
-              <span
-                className={cn(
-                  "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                  selected
-                    ? "border-inverse-primary"
-                    : "border-inverse-on-surface/30 group-hover:border-inverse-on-surface/50",
-                )}
-              >
-                {selected && (
-                  <span className="block h-1.5 w-1.5 rounded-full bg-inverse-primary" />
-                )}
-              </span>
-              <span className="flex-1 min-w-0">
-                <span className="block text-sm font-medium text-inverse-on-surface">
-                  {opt.label}
-                </span>
-                {opt.description && (
-                  <span className="block text-xs text-inverse-on-surface/60 mt-0.5 leading-relaxed">
-                    {opt.description}
-                  </span>
-                )}
-              </span>
-            </button>
-          );
-        })}
-      </div>
     );
   }
   return (
-    <button
-      id={fieldId}
-      type="button"
-      role="switch"
-      aria-checked={!!value}
-      disabled={submitted}
-      onClick={() => setAnswer(q.id, !value)}
-      className={cn(
-        "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-50",
-        value ? "bg-inverse-primary" : "bg-inverse-on-surface/20",
-      )}
-    >
-      <span
-        className={cn(
-          "inline-block h-4 w-4 rounded-full bg-inverse-surface shadow transition-transform",
-          value ? "translate-x-[18px]" : "translate-x-0.5",
-        )}
-      />
-    </button>
+    <div role="radiogroup" aria-labelledby={fieldId} className="flex flex-col gap-1.5">
+      {q.options.map((opt) => {
+        const selected = opt.value === current;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            disabled={submitted}
+            onClick={() => setAnswer(q.id, selected ? "" : opt.value)}
+            className={cn(
+              "group flex items-start gap-2.5 rounded-md border px-3 py-2.5 text-left transition-colors disabled:opacity-50",
+              selected
+                ? "border-inverse-primary/60 bg-inverse-primary/[0.08]"
+                : "border-outline-variant/25 bg-inverse-on-surface/[0.03] hover:border-outline-variant/50 hover:bg-inverse-on-surface/[0.06]",
+            )}
+          >
+            <span
+              className={cn(
+                "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                selected
+                  ? "border-inverse-primary"
+                  : "border-inverse-on-surface/30 group-hover:border-inverse-on-surface/50",
+              )}
+            >
+              {selected && (
+                <span className="block h-1.5 w-1.5 rounded-full bg-inverse-primary" />
+              )}
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-sm font-medium text-inverse-on-surface">
+                {opt.label}
+              </span>
+              {opt.description && (
+                <span className="block text-xs text-inverse-on-surface/60 mt-0.5 leading-relaxed">
+                  {opt.description}
+                </span>
+              )}
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

@@ -220,6 +220,7 @@ export {
   type AgentSidebarMultiQuestionStatus,
   type AgentSidebarMultiQuestionAnswer,
   type AgentSidebarMultiQuestionLayout,
+  type AgentSidebarChoiceStyle,
   AgentSidebarMessages,
   type AgentSidebarMessage,
   type AgentSidebarMessagesProps,
