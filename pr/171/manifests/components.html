@@ -6000,7 +6000,7 @@ children: ReactNode
 className?: string
 
 /**
- * Optional class on the inner Surface. Use to override padding for special cases.
+ * Optional class on the inner Surface (e.g. override padding).
  */
 surfaceClassName?: string
 
@@ -6010,7 +6010,7 @@ surfaceClassName?: string
 title: ReactNode
 
 /**
- * Theme color for the title (e.g. &quot;error&quot; for danger zones).
+ * Theme color for the title (e.g. &quot;warning&quot; for advanced groupings).
  */
 tone?: | &quot;primary&quot;
 | &quot;secondary&quot;
@@ -6030,7 +6030,7 @@ tone?: | &quot;primary&quot;
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { Button, ReadOnlyField, SettingRow, SettingsSection } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { Button, ReadOnlyField, SectionLabel, SettingRow, SettingsSection, Switch } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -6059,17 +6059,17 @@ tone?: | &quot;primary&quot;
       &lt;ReadOnlyField label=&quot;Module ID&quot; value=&quot;m_abc&quot; mono /&gt;
     &lt;/SettingsSection&gt;
     &lt;SettingsSection title=&quot;Advanced&quot; tone=&quot;warning&quot;&gt;
-      &lt;ReadOnlyField label=&quot;Beta program&quot; value=&quot;Enabled&quot; /&gt;
-    &lt;/SettingsSection&gt;
-    &lt;SettingsSection title=&quot;Danger zone&quot; tone=&quot;error&quot;&gt;
       &lt;SettingRow
-        tone=&quot;error&quot;
-        title=&quot;Delete module&quot;
-        description=&quot;Permanently delete. Cannot be undone.&quot;
+        tone=&quot;warning&quot;
+        title=&quot;Developer mode&quot;
+        description=&quot;Show the developer rail.&quot;
         control={
-          &lt;Button color=&quot;error&quot; variant=&quot;filled&quot; size=&quot;sm&quot;&gt;
-            Delete
-          &lt;/Button&gt;
+          &lt;Switch
+            checked
+            onChange={() =&gt; {}}
+            color=&quot;warning&quot;
+            aria-label=&quot;developer&quot;
+          /&gt;
         }
       /&gt;
     &lt;/SettingsSection&gt;
@@ -6078,21 +6078,29 @@ tone?: | &quot;primary&quot;
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Surface Class Name Override</span>
+                <span class="ex-name">Danger Zone Is Not Settings Section</span>
                 <span class="badge ok">story ok</span>
               </div>
               
-              
-              <pre><code>const SurfaceClassNameOverride = () =&gt; &lt;SettingsSection title=&quot;Danger zone&quot; tone=&quot;error&quot; surfaceClassName=&quot;px-6 py-4&quot;&gt;(&lt;SettingRow
-      tone=&quot;error&quot;
-      title=&quot;Delete account&quot;
-      description=&quot;Sign out and put your account in a suspended state.&quot;
-      control={
-        &lt;Button color=&quot;error&quot; variant=&quot;filled&quot; size=&quot;sm&quot;&gt;
-          Disable
-        &lt;/Button&gt;
-      }
-    /&gt;)&lt;/SettingsSection&gt;;</code></pre>
+              <div class="hint">Danger zones intentionally do NOT use SettingsSection. They render the label as a tone-error SectionLabel followed by a naked stack of SettingRow tone=&quot;error&quot; rows (each row carries its own border). Shown here for contrast with the boxed sections above.</div>
+              <pre><code>const DangerZoneIsNotSettingsSection = () =&gt; (
+  &lt;div className=&quot;max-w-md&quot;&gt;
+    &lt;SectionLabel className=&quot;mb-2 text-error&quot;&gt;Danger zone&lt;/SectionLabel&gt;
+    &lt;div className=&quot;space-y-2&quot;&gt;
+      &lt;SettingRow
+        tone=&quot;error&quot;
+        title=&quot;Delete module&quot;
+        description=&quot;Permanently delete. Cannot be undone.&quot;
+        className=&quot;px-6 py-4&quot;
+        control={
+          &lt;Button color=&quot;error&quot; variant=&quot;filled&quot; size=&quot;sm&quot;&gt;
+            Delete
+          &lt;/Button&gt;
+        }
+      /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+);</code></pre>
             </div>
         </div>
     
