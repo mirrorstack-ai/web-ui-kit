@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">1/41 prop type error</a><a class="filter-pill info" data-k="infos" href="#filter-infos">41/41 infos</a><span class="filter-pill ok" aria-disabled="true">162 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/42 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">42/42 infos</a><span class="filter-pill ok" aria-disabled="true">165 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -732,212 +732,6 @@ onLoadMore?: () =&gt; void</code></pre>
 </article>
 <article
   class="card 
-  has-error 
-  has-info 
-  no-story-error
-  no-doc-error"
-  role="listitem"
-  aria-label="AgentSidebar">
-  <div class="head">
-    <div class="title">
-      <h2><span class="status-dot dot-err"></span> AgentSidebar</h2>
-      <div class="badges">
-        <label for="c-1-ui-surfaces-agentsidebar-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-1-ui-surfaces-agentsidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-1-ui-surfaces-agentsidebar-stories" class="badge ok as-toggle">3 stories</label>
-        
-      </div>
-    </div>
-    <div class="meta" title="./src/components/ui/surfaces/agent-sidebar/AgentSidebar.stories.tsx">ui-surfaces-agentsidebar · ./src/components/ui/surfaces/agent-sidebar/AgentSidebar.stories.tsx</div>
-    
-    
-    
-  </div>
-
-  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-1-ui-surfaces-agentsidebar-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-1-ui-surfaces-agentsidebar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-1-ui-surfaces-agentsidebar-stories" class="tg tg-stories" type="checkbox" hidden />
-  
-  
-
-  <div class="panels">
-    
-        <div class="panel panel-err">
-          
-    <div class="note err">
-      <div class="note-title">Prop type error</div>
-      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
-  4 | import { AgentSidebarInput } from &quot;./AgentSidebarInput&quot;;
-  5 |
-&gt; 6 | const meta: Meta = {
-    | ^
-  7 |   title: &quot;UI/Surfaces/AgentSidebar&quot;,
-  8 |   decorators: [
-  9 |     (Story) =&gt; (
-
-./src/components/ui/surfaces/agent-sidebar/AgentSidebar.stories.tsx:
-import { useState } from &quot;react&quot;;
-import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
-import { AgentSidebarHeader } from &quot;./AgentSidebarHeader&quot;;
-import { AgentSidebarInput } from &quot;./AgentSidebarInput&quot;;
-
-const meta: Meta = {
-  title: &quot;UI/Surfaces/AgentSidebar&quot;,
-  decorators: [
-    (Story) =&gt; (
-      &lt;div className=&quot;h-[500px] w-[400px] rounded-2xl overflow-hidden flex flex-col&quot;&gt;
-        &lt;Story /&gt;
-      &lt;/div&gt;
-    ),
-  ],
-};
-
-export default meta;
-
-export const Header: StoryObj = {
-  render: () =&gt; {
-    const [width, setWidth] = useState(400);
-    return (
-      &lt;div className=&quot;bg-surface-container&quot;&gt;
-        &lt;AgentSidebarHeader
-          sidebarWidth={width}
-          onToggleCollapse={() =&gt; setWidth(width &lt;= 350 ? 600 : 350)}
-          onClose={() =&gt; console.log(&quot;close&quot;)}
-        /&gt;
-      &lt;/div&gt;
-    );
-  },
-};
-
-export const Input: StoryObj = {
-  render: () =&gt; (
-    &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-        onMic={() =&gt; console.log(&quot;mic&quot;)}
-      /&gt;
-    &lt;/div&gt;
-  ),
-};
-
-export const Playground: StoryObj = {
-  render: () =&gt; (
-    &lt;&gt;
-      &lt;AgentSidebarHeader
-        sidebarWidth={400}
-        onToggleCollapse={() =&gt; {}}
-        onClose={() =&gt; {}}
-      /&gt;
-      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col&quot;&gt;
-        &lt;div className=&quot;flex-1 p-4 text-inverse-on-surface text-sm&quot;&gt;
-          Chat messages would appear here...
-        &lt;/div&gt;
-        &lt;AgentSidebarInput
-          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-          onMic={() =&gt; console.log(&quot;mic&quot;)}
-        /&gt;
-      &lt;/div&gt;
-    &lt;/&gt;
-  ),
-};
-</code></pre></div>
-    </div>
-        </div>
-    
-        <div class="panel panel-info">
-          
-    <div class="note info">
-      <div class="note-title">Info</div>
-      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
-    </div>
-        </div>
-    
-    
-        <div class="panel panel-stories">
-          
-          
-          
-          <div class="note ok">
-                <div class="row">
-                  <span class="ex-name">Imports</span>
-                </div>
-                <pre><code>import { AgentSidebarHeader, AgentSidebarInput } from "@mirrorstack-ai/web-ui-kit";</code></pre>
-              </div>
-          
-          
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Header</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Header = () =&gt; {
-  const [width, setWidth] = useState(400);
-  return (
-    &lt;div className=&quot;bg-surface-container&quot;&gt;
-      &lt;AgentSidebarHeader
-        sidebarWidth={width}
-        onToggleCollapse={() =&gt; setWidth(width &lt;= 350 ? 600 : 350)}
-        onClose={() =&gt; console.log(&quot;close&quot;)}
-      /&gt;
-    &lt;/div&gt;
-  );
-};</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Input</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Input = () =&gt; (
-  &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
-    &lt;AgentSidebarInput
-      onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-      onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-      onMic={() =&gt; console.log(&quot;mic&quot;)}
-    /&gt;
-  &lt;/div&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Playground</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Playground = () =&gt; (
-  &lt;&gt;
-    &lt;AgentSidebarHeader
-      sidebarWidth={400}
-      onToggleCollapse={() =&gt; {}}
-      onClose={() =&gt; {}}
-    /&gt;
-    &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col&quot;&gt;
-      &lt;div className=&quot;flex-1 p-4 text-inverse-on-surface text-sm&quot;&gt;
-        Chat messages would appear here...
-      &lt;/div&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-        onMic={() =&gt; console.log(&quot;mic&quot;)}
-      /&gt;
-    &lt;/div&gt;
-  &lt;/&gt;
-);</code></pre>
-            </div>
-        </div>
-    
-  </div>
-</article>
-<article
-  class="card 
   no-error 
   has-info 
   no-story-error
@@ -948,9 +742,9 @@ export const Playground: StoryObj = {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Alert</h2>
       <div class="badges">
-        <label for="c-2-ui-feedback-alert-props" class="badge ok as-toggle">8 prop types</label>
-        <label for="c-2-ui-feedback-alert-info" class="badge info as-toggle">1 info</label>
-        <label for="c-2-ui-feedback-alert-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-1-ui-feedback-alert-props" class="badge ok as-toggle">8 prop types</label>
+        <label for="c-1-ui-feedback-alert-info" class="badge info as-toggle">1 info</label>
+        <label for="c-1-ui-feedback-alert-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -962,10 +756,10 @@ export const Playground: StoryObj = {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-2-ui-feedback-alert-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-2-ui-feedback-alert-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-1-ui-feedback-alert-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-1-ui-feedback-alert-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-2-ui-feedback-alert-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-1-ui-feedback-alert-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1104,9 +898,9 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppShell</h2>
       <div class="badges">
-        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">12 prop types</label>
-        <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-2-layout-appshell-props" class="badge ok as-toggle">14 prop types</label>
+        <label for="c-2-layout-appshell-info" class="badge info as-toggle">1 info</label>
+        <label for="c-2-layout-appshell-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -1118,10 +912,10 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-3-layout-appshell-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-3-layout-appshell-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-2-layout-appshell-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-2-layout-appshell-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-3-layout-appshell-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-2-layout-appshell-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1138,11 +932,16 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">12 prop types</span>
+              <span class="badge ok">14 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/app-shell/app-shell/AppShell.tsx::AppShell</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>/**
+ * Past conversations grouped by date — shown in the agent header history dropdown.
+ */
+agentHistory?: AgentSidebarHistoryGroup[]
+
+/**
  * Agent sidebar chat content
  */
 agentSidebarContent?: ReactNode
@@ -1184,6 +983,8 @@ onAgentAttachFile?: () =&gt; void
 onAgentMic?: () =&gt; void
 
 onAgentSend?: (message: string) =&gt; void
+
+onSelectAgentHistoryItem?: (id: string) =&gt; void
 
 /**
  * Class for the snackbar container (e.g. max-w-2xl mx-auto)
@@ -1542,9 +1343,9 @@ snackbarClassName?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppSwitcher</h2>
       <div class="badges">
-        <label for="c-4-ui-navigation-appswitcher-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-4-ui-navigation-appswitcher-info" class="badge info as-toggle">1 info</label>
-        <label for="c-4-ui-navigation-appswitcher-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-3-ui-navigation-appswitcher-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-3-ui-navigation-appswitcher-info" class="badge info as-toggle">1 info</label>
+        <label for="c-3-ui-navigation-appswitcher-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -1556,10 +1357,10 @@ snackbarClassName?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-4-ui-navigation-appswitcher-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-4-ui-navigation-appswitcher-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-3-ui-navigation-appswitcher-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-3-ui-navigation-appswitcher-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-4-ui-navigation-appswitcher-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-3-ui-navigation-appswitcher-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1635,9 +1436,9 @@ logo: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Avatar</h2>
       <div class="badges">
-        <label for="c-5-ui-media-avatar-props" class="badge ok as-toggle">9 prop types</label>
-        <label for="c-5-ui-media-avatar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-5-ui-media-avatar-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-4-ui-media-avatar-props" class="badge ok as-toggle">9 prop types</label>
+        <label for="c-4-ui-media-avatar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-4-ui-media-avatar-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -1649,10 +1450,10 @@ logo: ReactNode</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-5-ui-media-avatar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-5-ui-media-avatar-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-4-ui-media-avatar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-4-ui-media-avatar-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-5-ui-media-avatar-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-4-ui-media-avatar-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1789,9 +1590,9 @@ src?: string | null</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AvatarCropper</h2>
       <div class="badges">
-        <label for="c-6-ui-media-avatarcropper-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-6-ui-media-avatarcropper-info" class="badge info as-toggle">1 info</label>
-        <label for="c-6-ui-media-avatarcropper-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-5-ui-media-avatarcropper-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-5-ui-media-avatarcropper-info" class="badge info as-toggle">1 info</label>
+        <label for="c-5-ui-media-avatarcropper-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -1803,10 +1604,10 @@ src?: string | null</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-6-ui-media-avatarcropper-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-6-ui-media-avatarcropper-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-5-ui-media-avatarcropper-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-5-ui-media-avatarcropper-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-6-ui-media-avatarcropper-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-5-ui-media-avatarcropper-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -1983,9 +1784,9 @@ title?: string = &quot;Adjust avatar&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Badge</h2>
       <div class="badges">
-        <label for="c-7-ui-feedback-badge-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-7-ui-feedback-badge-info" class="badge info as-toggle">1 info</label>
-        <label for="c-7-ui-feedback-badge-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-6-ui-feedback-badge-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-6-ui-feedback-badge-info" class="badge info as-toggle">1 info</label>
+        <label for="c-6-ui-feedback-badge-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -1997,10 +1798,10 @@ title?: string = &quot;Adjust avatar&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-7-ui-feedback-badge-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-7-ui-feedback-badge-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-6-ui-feedback-badge-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-6-ui-feedback-badge-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-7-ui-feedback-badge-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-6-ui-feedback-badge-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2141,9 +1942,9 @@ variant?: | &quot;default&quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Button</h2>
       <div class="badges">
-        <label for="c-8-ui-actions-button-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-8-ui-actions-button-info" class="badge info as-toggle">1 info</label>
-        <label for="c-8-ui-actions-button-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-7-ui-actions-button-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-7-ui-actions-button-info" class="badge info as-toggle">1 info</label>
+        <label for="c-7-ui-actions-button-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -2155,10 +1956,10 @@ variant?: | &quot;default&quot;
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-8-ui-actions-button-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-8-ui-actions-button-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-7-ui-actions-button-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-7-ui-actions-button-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-8-ui-actions-button-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-7-ui-actions-button-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2300,9 +2101,9 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Card</h2>
       <div class="badges">
-        <label for="c-9-ui-surfaces-card-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-9-ui-surfaces-card-info" class="badge info as-toggle">1 info</label>
-        <label for="c-9-ui-surfaces-card-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-8-ui-surfaces-card-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-8-ui-surfaces-card-info" class="badge info as-toggle">1 info</label>
+        <label for="c-8-ui-surfaces-card-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -2314,10 +2115,10 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-9-ui-surfaces-card-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-9-ui-surfaces-card-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-8-ui-surfaces-card-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-8-ui-surfaces-card-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-9-ui-surfaces-card-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-8-ui-surfaces-card-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2504,9 +2305,9 @@ media?: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Combobox</h2>
       <div class="badges">
-        <label for="c-10-ui-inputs-combobox-props" class="badge ok as-toggle">12 prop types</label>
-        <label for="c-10-ui-inputs-combobox-info" class="badge info as-toggle">1 info</label>
-        <label for="c-10-ui-inputs-combobox-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-9-ui-inputs-combobox-props" class="badge ok as-toggle">12 prop types</label>
+        <label for="c-9-ui-inputs-combobox-info" class="badge info as-toggle">1 info</label>
+        <label for="c-9-ui-inputs-combobox-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -2518,10 +2319,10 @@ media?: ReactNode</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-10-ui-inputs-combobox-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-10-ui-inputs-combobox-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-9-ui-inputs-combobox-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-9-ui-inputs-combobox-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-10-ui-inputs-combobox-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-9-ui-inputs-combobox-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2760,9 +2561,9 @@ value: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ConsequencesNotice</h2>
       <div class="badges">
-        <label for="c-11-ui-feedback-consequencesnotice-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-11-ui-feedback-consequencesnotice-info" class="badge info as-toggle">1 info</label>
-        <label for="c-11-ui-feedback-consequencesnotice-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-10-ui-feedback-consequencesnotice-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-10-ui-feedback-consequencesnotice-info" class="badge info as-toggle">1 info</label>
+        <label for="c-10-ui-feedback-consequencesnotice-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -2774,10 +2575,10 @@ value: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-11-ui-feedback-consequencesnotice-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-11-ui-feedback-consequencesnotice-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-10-ui-feedback-consequencesnotice-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-10-ui-feedback-consequencesnotice-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-11-ui-feedback-consequencesnotice-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-10-ui-feedback-consequencesnotice-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2901,9 +2702,9 @@ variant?: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DevToolbar</h2>
       <div class="badges">
-        <label for="c-12-ui-state-devtoolbar-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-12-ui-state-devtoolbar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-12-ui-state-devtoolbar-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-11-ui-state-devtoolbar-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-11-ui-state-devtoolbar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-11-ui-state-devtoolbar-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -2915,10 +2716,10 @@ variant?: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-12-ui-state-devtoolbar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-12-ui-state-devtoolbar-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-11-ui-state-devtoolbar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-11-ui-state-devtoolbar-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-12-ui-state-devtoolbar-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-11-ui-state-devtoolbar-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -3018,9 +2819,9 @@ value: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Dialog</h2>
       <div class="badges">
-        <label for="c-13-ui-surfaces-dialog-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-13-ui-surfaces-dialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-13-ui-surfaces-dialog-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-12-ui-surfaces-dialog-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-12-ui-surfaces-dialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-12-ui-surfaces-dialog-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -3032,10 +2833,10 @@ value: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-13-ui-surfaces-dialog-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-13-ui-surfaces-dialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-12-ui-surfaces-dialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-12-ui-surfaces-dialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-13-ui-surfaces-dialog-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-12-ui-surfaces-dialog-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -3174,9 +2975,9 @@ title?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DropdownMenu</h2>
       <div class="badges">
-        <label for="c-14-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-14-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-14-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-13-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-13-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
+        <label for="c-13-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -3188,10 +2989,10 @@ title?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-14-ui-navigation-dropdownmenu-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-14-ui-navigation-dropdownmenu-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-13-ui-navigation-dropdownmenu-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-13-ui-navigation-dropdownmenu-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-14-ui-navigation-dropdownmenu-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-13-ui-navigation-dropdownmenu-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -3272,9 +3073,9 @@ trigger: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DropZone</h2>
       <div class="badges">
-        <label for="c-15-ui-files-dropzone-props" class="badge ok as-toggle">10 prop types</label>
-        <label for="c-15-ui-files-dropzone-info" class="badge info as-toggle">1 info</label>
-        <label for="c-15-ui-files-dropzone-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-14-ui-files-dropzone-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-14-ui-files-dropzone-info" class="badge info as-toggle">1 info</label>
+        <label for="c-14-ui-files-dropzone-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -3286,10 +3087,10 @@ trigger: ReactNode</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-15-ui-files-dropzone-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-15-ui-files-dropzone-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-14-ui-files-dropzone-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-14-ui-files-dropzone-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-15-ui-files-dropzone-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-14-ui-files-dropzone-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -3420,9 +3221,9 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> EditableField</h2>
       <div class="badges">
-        <label for="c-16-ui-inputs-editablefield-props" class="badge ok as-toggle">9 prop types</label>
-        <label for="c-16-ui-inputs-editablefield-info" class="badge info as-toggle">1 info</label>
-        <label for="c-16-ui-inputs-editablefield-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-15-ui-inputs-editablefield-props" class="badge ok as-toggle">9 prop types</label>
+        <label for="c-15-ui-inputs-editablefield-info" class="badge info as-toggle">1 info</label>
+        <label for="c-15-ui-inputs-editablefield-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -3434,10 +3235,10 @@ title?: string = &quot;Drag and drop files here&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-16-ui-inputs-editablefield-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-16-ui-inputs-editablefield-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-15-ui-inputs-editablefield-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-15-ui-inputs-editablefield-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-16-ui-inputs-editablefield-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-15-ui-inputs-editablefield-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -3619,9 +3420,9 @@ value: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> EmptyState</h2>
       <div class="badges">
-        <label for="c-17-ui-feedback-emptystate-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-17-ui-feedback-emptystate-info" class="badge info as-toggle">1 info</label>
-        <label for="c-17-ui-feedback-emptystate-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-16-ui-feedback-emptystate-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-16-ui-feedback-emptystate-info" class="badge info as-toggle">1 info</label>
+        <label for="c-16-ui-feedback-emptystate-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -3633,10 +3434,10 @@ value: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-17-ui-feedback-emptystate-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-17-ui-feedback-emptystate-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-16-ui-feedback-emptystate-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-16-ui-feedback-emptystate-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-17-ui-feedback-emptystate-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-16-ui-feedback-emptystate-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -3753,8 +3554,8 @@ title: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> FloatingLabelInput</h2>
       <div class="badges">
         
-        <label for="c-18-ui-inputs-floatinglabelinput-info" class="badge info as-toggle">1 info</label>
-        <label for="c-18-ui-inputs-floatinglabelinput-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-17-ui-inputs-floatinglabelinput-info" class="badge info as-toggle">1 info</label>
+        <label for="c-17-ui-inputs-floatinglabelinput-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -3766,8 +3567,8 @@ title: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-18-ui-inputs-floatinglabelinput-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-18-ui-inputs-floatinglabelinput-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-17-ui-inputs-floatinglabelinput-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-17-ui-inputs-floatinglabelinput-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -3993,9 +3794,9 @@ title: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Icon</h2>
       <div class="badges">
-        <label for="c-19-ui-media-icon-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-19-ui-media-icon-info" class="badge info as-toggle">1 info</label>
-        <label for="c-19-ui-media-icon-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-18-ui-media-icon-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-18-ui-media-icon-info" class="badge info as-toggle">1 info</label>
+        <label for="c-18-ui-media-icon-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -4007,10 +3808,10 @@ title: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-19-ui-media-icon-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-19-ui-media-icon-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-18-ui-media-icon-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-18-ui-media-icon-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-19-ui-media-icon-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-18-ui-media-icon-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4156,9 +3957,9 @@ size?: number = 24</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> IconButton</h2>
       <div class="badges">
-        <label for="c-20-ui-actions-iconbutton-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-20-ui-actions-iconbutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-20-ui-actions-iconbutton-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-19-ui-actions-iconbutton-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-19-ui-actions-iconbutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-19-ui-actions-iconbutton-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -4170,10 +3971,10 @@ size?: number = 24</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-20-ui-actions-iconbutton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-20-ui-actions-iconbutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-19-ui-actions-iconbutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-19-ui-actions-iconbutton-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-20-ui-actions-iconbutton-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-19-ui-actions-iconbutton-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4380,9 +4181,9 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ImageCarousel</h2>
       <div class="badges">
-        <label for="c-21-ui-media-imagecarousel-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-21-ui-media-imagecarousel-info" class="badge info as-toggle">1 info</label>
-        <label for="c-21-ui-media-imagecarousel-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-20-ui-media-imagecarousel-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-20-ui-media-imagecarousel-info" class="badge info as-toggle">1 info</label>
+        <label for="c-20-ui-media-imagecarousel-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -4394,10 +4195,10 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-21-ui-media-imagecarousel-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-21-ui-media-imagecarousel-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-20-ui-media-imagecarousel-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-20-ui-media-imagecarousel-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-21-ui-media-imagecarousel-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-20-ui-media-imagecarousel-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4459,9 +4260,9 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Logo</h2>
       <div class="badges">
-        <label for="c-22-ui-media-logo-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-22-ui-media-logo-info" class="badge info as-toggle">1 info</label>
-        <label for="c-22-ui-media-logo-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-21-ui-media-logo-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-21-ui-media-logo-info" class="badge info as-toggle">1 info</label>
+        <label for="c-21-ui-media-logo-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -4473,10 +4274,10 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-22-ui-media-logo-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-22-ui-media-logo-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-21-ui-media-logo-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-21-ui-media-logo-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-22-ui-media-logo-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-21-ui-media-logo-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4568,6 +4369,163 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
     &lt;div className=&quot;w-16 h-16&quot;&gt;
       &lt;Logo className=&quot;bg-error&quot; /&gt;
     &lt;/div&gt;
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Messages">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Messages</h2>
+      <div class="badges">
+        <label for="c-22-agent-messages-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-22-agent-messages-info" class="badge info as-toggle">1 info</label>
+        <label for="c-22-agent-messages-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/agent-sidebar/AgentMessages.stories.tsx">agent-messages · ./src/components/ui/agent-sidebar/AgentMessages.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-22-agent-messages-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-22-agent-messages-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-22-agent-messages-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
+   5 | } from &quot;./AgentSidebarMessage&quot;;
+   6 |
+&gt;  7 | const meta: Meta = {
+     | ^
+   8 |   title: &quot;Agent/Messages&quot;,
+   9 |   decorators: [
+  10 |     (Story) =&gt; (
+
+./src/components/ui/agent-sidebar/AgentMessages.stories.tsx:
+import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
+import {
+  AgentSidebarUserMessage,
+  AgentSidebarAgentMessage,
+} from &quot;./AgentSidebarMessage&quot;;
+
+const meta: Meta = {
+  title: &quot;Agent/Messages&quot;,
+  decorators: [
+    (Story) =&gt; (
+      &lt;div className=&quot;h-[420px] w-[420px] rounded-2xl overflow-hidden flex flex-col bg-on-background p-4&quot;&gt;
+        &lt;Story /&gt;
+      &lt;/div&gt;
+    ),
+  ],
+};
+
+export default meta;
+
+export const User: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarUserMessage content=&quot;Update my username to alice2 and turn on dark mode.&quot; /&gt;
+  ),
+};
+
+export const Agent: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarAgentMessage content=&quot;Sure — I&#39;ll update your username and your appearance preference. Please confirm the changes below.&quot; /&gt;
+  ),
+};
+
+export const AgentStreaming: StoryObj = {
+  render: () =&gt; (
+    &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+      &lt;AgentSidebarAgentMessage content=&quot;&quot; streaming /&gt;
+      &lt;AgentSidebarAgentMessage
+        content=&quot;Updating your profile now&quot;
+        streaming
+      /&gt;
+    &lt;/div&gt;
+  ),
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { AgentSidebarAgentMessage, AgentSidebarUserMessage } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">User</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const User = () =&gt; (
+  &lt;AgentSidebarUserMessage content=&quot;Update my username to alice2 and turn on dark mode.&quot; /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Agent = () =&gt; (
+  &lt;AgentSidebarAgentMessage content=&quot;Sure — I&#39;ll update your username and your appearance preference. Please confirm the changes below.&quot; /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Streaming</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const AgentStreaming = () =&gt; (
+  &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+    &lt;AgentSidebarAgentMessage content=&quot;&quot; streaming /&gt;
+    &lt;AgentSidebarAgentMessage
+      content=&quot;Updating your profile now&quot;
+      streaming
+    /&gt;
   &lt;/div&gt;
 );</code></pre>
             </div>
@@ -6287,6 +6245,285 @@ title: ReactNode</code></pre>
 </article>
 <article
   class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Sidebar">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Sidebar</h2>
+      <div class="badges">
+        <label for="c-33-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-33-agent-sidebar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-33-agent-sidebar-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/agent-sidebar/AgentSidebar.stories.tsx">agent-sidebar · ./src/components/ui/agent-sidebar/AgentSidebar.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-33-agent-sidebar-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-33-agent-sidebar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-33-agent-sidebar-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
+   9 | import { mockAgentHistory, mockAgentMessages } from &quot;./mock-data&quot;;
+  10 |
+&gt; 11 | const meta: Meta = {
+     | ^
+  12 |   title: &quot;Agent/Sidebar&quot;,
+  13 |   decorators: [
+  14 |     (Story) =&gt; (
+
+./src/components/ui/agent-sidebar/AgentSidebar.stories.tsx:
+import { useState } from &quot;react&quot;;
+import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
+import { AgentSidebarHeader } from &quot;./AgentSidebarHeader&quot;;
+import { AgentSidebarInput } from &quot;./AgentSidebarInput&quot;;
+import {
+  AgentSidebarMessages,
+  type AgentSidebarMessage,
+} from &quot;./AgentSidebarMessages&quot;;
+import { mockAgentHistory, mockAgentMessages } from &quot;./mock-data&quot;;
+
+const meta: Meta = {
+  title: &quot;Agent/Sidebar&quot;,
+  decorators: [
+    (Story) =&gt; (
+      &lt;div className=&quot;h-[640px] w-[420px] rounded-2xl overflow-hidden flex flex-col&quot;&gt;
+        &lt;Story /&gt;
+      &lt;/div&gt;
+    ),
+  ],
+};
+
+export default meta;
+
+export const Header: StoryObj = {
+  render: () =&gt; {
+    const [width, setWidth] = useState(420);
+    return (
+      &lt;div className=&quot;bg-surface-container&quot;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={width}
+          onToggleCollapse={() =&gt; setWidth(width &lt;= 350 ? 600 : 350)}
+          onClose={() =&gt; console.log(&quot;close&quot;)}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
+};
+
+export const Input: StoryObj = {
+  render: () =&gt; (
+    &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+        onMic={() =&gt; console.log(&quot;mic&quot;)}
+      /&gt;
+    &lt;/div&gt;
+  ),
+};
+
+export const Playground: StoryObj = {
+  render: () =&gt; {
+    const [messages, setMessages] = useState&lt;AgentSidebarMessage[]&gt;(
+      mockAgentMessages,
+    );
+
+    const patchMessage = (id: string, patch: Record&lt;string, unknown&gt;) =&gt; {
+      setMessages((prev) =&gt;
+        prev.map((m) =&gt;
+          m.id === id ? ({ ...m, ...patch } as AgentSidebarMessage) : m,
+        ),
+      );
+    };
+
+    const handleSend = (content: string) =&gt; {
+      const userId = `u-${Date.now()}`;
+      const agentId = `a-${Date.now()}`;
+      setMessages((prev) =&gt; [
+        ...prev,
+        { id: userId, role: &quot;user&quot;, content },
+        { id: agentId, role: &quot;agent&quot;, content: &quot;&quot;, streaming: true },
+      ]);
+      setTimeout(() =&gt; {
+        patchMessage(agentId, {
+          content: &quot;Got it — let me look into that.&quot;,
+          streaming: false,
+        });
+      }, 1500);
+    };
+
+    return (
+      &lt;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+        /&gt;
+        &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
+          &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+            &lt;AgentSidebarMessages messages={messages} /&gt;
+          &lt;/div&gt;
+          &lt;AgentSidebarInput
+            onSend={handleSend}
+            onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+            onMic={() =&gt; console.log(&quot;mic&quot;)}
+          /&gt;
+        &lt;/div&gt;
+      &lt;/&gt;
+    );
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { AgentSidebarHeader, AgentSidebarInput, AgentSidebarMessages } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Header</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Header = () =&gt; {
+  const [width, setWidth] = useState(420);
+  return (
+    &lt;div className=&quot;bg-surface-container&quot;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={width}
+        onToggleCollapse={() =&gt; setWidth(width &lt;= 350 ? 600 : 350)}
+        onClose={() =&gt; console.log(&quot;close&quot;)}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Input</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Input = () =&gt; (
+  &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
+    &lt;AgentSidebarInput
+      onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+      onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+      onMic={() =&gt; console.log(&quot;mic&quot;)}
+    /&gt;
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = () =&gt; {
+  const [messages, setMessages] = useState&lt;AgentSidebarMessage[]&gt;(
+    mockAgentMessages,
+  );
+
+  const patchMessage = (id: string, patch: Record&lt;string, unknown&gt;) =&gt; {
+    setMessages((prev) =&gt;
+      prev.map((m) =&gt;
+        m.id === id ? ({ ...m, ...patch } as AgentSidebarMessage) : m,
+      ),
+    );
+  };
+
+  const handleSend = (content: string) =&gt; {
+    const userId = `u-${Date.now()}`;
+    const agentId = `a-${Date.now()}`;
+    setMessages((prev) =&gt; [
+      ...prev,
+      { id: userId, role: &quot;user&quot;, content },
+      { id: agentId, role: &quot;agent&quot;, content: &quot;&quot;, streaming: true },
+    ]);
+    setTimeout(() =&gt; {
+      patchMessage(agentId, {
+        content: &quot;Got it — let me look into that.&quot;,
+        streaming: false,
+      });
+    }, 1500);
+  };
+
+  return (
+    &lt;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+      /&gt;
+      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
+        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+          &lt;AgentSidebarMessages messages={messages} /&gt;
+        &lt;/div&gt;
+        &lt;AgentSidebarInput
+          onSend={handleSend}
+          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+          onMic={() =&gt; console.log(&quot;mic&quot;)}
+        /&gt;
+      &lt;/div&gt;
+    &lt;/&gt;
+  );
+};</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
   no-error 
   has-info 
   no-story-error
@@ -6297,9 +6534,9 @@ title: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Skeleton</h2>
       <div class="badges">
-        <label for="c-33-ui-feedback-skeleton-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-33-ui-feedback-skeleton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-33-ui-feedback-skeleton-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-34-ui-feedback-skeleton-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-34-ui-feedback-skeleton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-34-ui-feedback-skeleton-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -6311,10 +6548,10 @@ title: ReactNode</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-33-ui-feedback-skeleton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-33-ui-feedback-skeleton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-34-ui-feedback-skeleton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-34-ui-feedback-skeleton-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-33-ui-feedback-skeleton-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-34-ui-feedback-skeleton-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6434,9 +6671,9 @@ width?: string = &quot;w-full&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Snackbar</h2>
       <div class="badges">
-        <label for="c-34-ui-feedback-snackbar-props" class="badge ok as-toggle">10 prop types</label>
-        <label for="c-34-ui-feedback-snackbar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-34-ui-feedback-snackbar-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-35-ui-feedback-snackbar-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-35-ui-feedback-snackbar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-35-ui-feedback-snackbar-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -6448,10 +6685,10 @@ width?: string = &quot;w-full&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-34-ui-feedback-snackbar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-34-ui-feedback-snackbar-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-35-ui-feedback-snackbar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-35-ui-feedback-snackbar-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-34-ui-feedback-snackbar-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-35-ui-feedback-snackbar-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6679,9 +6916,9 @@ variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SocialButton</h2>
       <div class="badges">
-        <label for="c-35-ui-actions-socialbutton-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-35-ui-actions-socialbutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-35-ui-actions-socialbutton-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-36-ui-actions-socialbutton-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-36-ui-actions-socialbutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-36-ui-actions-socialbutton-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -6693,10 +6930,10 @@ variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-35-ui-actions-socialbutton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-35-ui-actions-socialbutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-36-ui-actions-socialbutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-36-ui-actions-socialbutton-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-35-ui-actions-socialbutton-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-36-ui-actions-socialbutton-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6805,9 +7042,9 @@ provider?: &quot;google&quot; | &quot;discord&quot; | &quot;openid&quot; | &quot
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Surface</h2>
       <div class="badges">
-        <label for="c-36-ui-surfaces-surface-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-36-ui-surfaces-surface-info" class="badge info as-toggle">1 info</label>
-        <label for="c-36-ui-surfaces-surface-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-37-ui-surfaces-surface-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-37-ui-surfaces-surface-info" class="badge info as-toggle">1 info</label>
+        <label for="c-37-ui-surfaces-surface-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -6819,10 +7056,10 @@ provider?: &quot;google&quot; | &quot;discord&quot; | &quot;openid&quot; | &quot
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-36-ui-surfaces-surface-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-36-ui-surfaces-surface-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-37-ui-surfaces-surface-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-37-ui-surfaces-surface-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-36-ui-surfaces-surface-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-37-ui-surfaces-surface-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6918,9 +7155,9 @@ interactive?: boolean</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Switch</h2>
       <div class="badges">
-        <label for="c-37-ui-inputs-switch-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-37-ui-inputs-switch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-37-ui-inputs-switch-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-38-ui-inputs-switch-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-38-ui-inputs-switch-info" class="badge info as-toggle">1 info</label>
+        <label for="c-38-ui-inputs-switch-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -6932,10 +7169,10 @@ interactive?: boolean</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-37-ui-inputs-switch-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-37-ui-inputs-switch-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-38-ui-inputs-switch-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-38-ui-inputs-switch-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-37-ui-inputs-switch-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-38-ui-inputs-switch-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7083,9 +7320,9 @@ onChange: (checked: boolean) =&gt; void</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ThemeToggle</h2>
       <div class="badges">
-        <label for="c-38-ui-actions-themetoggle-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-38-ui-actions-themetoggle-info" class="badge info as-toggle">1 info</label>
-        <label for="c-38-ui-actions-themetoggle-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-39-ui-actions-themetoggle-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-39-ui-actions-themetoggle-info" class="badge info as-toggle">1 info</label>
+        <label for="c-39-ui-actions-themetoggle-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -7097,10 +7334,10 @@ onChange: (checked: boolean) =&gt; void</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-38-ui-actions-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-38-ui-actions-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-39-ui-actions-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-39-ui-actions-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-38-ui-actions-themetoggle-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-39-ui-actions-themetoggle-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7197,9 +7434,9 @@ variant?: any = &quot;tonal&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> TypeToConfirmDialog</h2>
       <div class="badges">
-        <label for="c-39-ui-surfaces-typetoconfirmdialog-props" class="badge ok as-toggle">11 prop types</label>
-        <label for="c-39-ui-surfaces-typetoconfirmdialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-39-ui-surfaces-typetoconfirmdialog-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-40-ui-surfaces-typetoconfirmdialog-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-40-ui-surfaces-typetoconfirmdialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-40-ui-surfaces-typetoconfirmdialog-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -7211,10 +7448,10 @@ variant?: any = &quot;tonal&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-39-ui-surfaces-typetoconfirmdialog-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-39-ui-surfaces-typetoconfirmdialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-40-ui-surfaces-typetoconfirmdialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-40-ui-surfaces-typetoconfirmdialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-39-ui-surfaces-typetoconfirmdialog-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-40-ui-surfaces-typetoconfirmdialog-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7440,9 +7677,9 @@ warnTitle: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> VerificationCodeInput</h2>
       <div class="badges">
-        <label for="c-40-ui-inputs-verificationcodeinput-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-40-ui-inputs-verificationcodeinput-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-ui-inputs-verificationcodeinput-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-41-ui-inputs-verificationcodeinput-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-41-ui-inputs-verificationcodeinput-info" class="badge info as-toggle">1 info</label>
+        <label for="c-41-ui-inputs-verificationcodeinput-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -7454,10 +7691,10 @@ warnTitle: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-40-ui-inputs-verificationcodeinput-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-40-ui-inputs-verificationcodeinput-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-41-ui-inputs-verificationcodeinput-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-41-ui-inputs-verificationcodeinput-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-40-ui-inputs-verificationcodeinput-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-41-ui-inputs-verificationcodeinput-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7582,7 +7819,7 @@ value: string</code></pre>
           <label for="no-component-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component found</span>
-            <span class="group-count">1</span>
+            <span class="group-count">2</span>
           </label>
           <div class="group-cards">
 <article
@@ -7592,27 +7829,27 @@ value: string</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="AgentSidebar">
+  aria-label="Messages">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-err"></span> AgentSidebar</h2>
+      <h2><span class="status-dot dot-err"></span> Messages</h2>
       <div class="badges">
-        <label for="c-error-0-ui-surfaces-agentsidebar-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-0-ui-surfaces-agentsidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-ui-surfaces-agentsidebar-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-0-agent-messages-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-0-agent-messages-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-0-agent-messages-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/surfaces/agent-sidebar/AgentSidebar.stories.tsx">ui-surfaces-agentsidebar · ./src/components/ui/surfaces/agent-sidebar/AgentSidebar.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/agent-sidebar/AgentMessages.stories.tsx">agent-messages · ./src/components/ui/agent-sidebar/AgentMessages.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-0-ui-surfaces-agentsidebar-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-0-ui-surfaces-agentsidebar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-0-ui-surfaces-agentsidebar-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-0-agent-messages-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-0-agent-messages-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-0-agent-messages-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -7623,25 +7860,26 @@ value: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
-  4 | import { AgentSidebarInput } from &quot;./AgentSidebarInput&quot;;
-  5 |
-&gt; 6 | const meta: Meta = {
-    | ^
-  7 |   title: &quot;UI/Surfaces/AgentSidebar&quot;,
-  8 |   decorators: [
-  9 |     (Story) =&gt; (
+   5 | } from &quot;./AgentSidebarMessage&quot;;
+   6 |
+&gt;  7 | const meta: Meta = {
+     | ^
+   8 |   title: &quot;Agent/Messages&quot;,
+   9 |   decorators: [
+  10 |     (Story) =&gt; (
 
-./src/components/ui/surfaces/agent-sidebar/AgentSidebar.stories.tsx:
-import { useState } from &quot;react&quot;;
+./src/components/ui/agent-sidebar/AgentMessages.stories.tsx:
 import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
-import { AgentSidebarHeader } from &quot;./AgentSidebarHeader&quot;;
-import { AgentSidebarInput } from &quot;./AgentSidebarInput&quot;;
+import {
+  AgentSidebarUserMessage,
+  AgentSidebarAgentMessage,
+} from &quot;./AgentSidebarMessage&quot;;
 
 const meta: Meta = {
-  title: &quot;UI/Surfaces/AgentSidebar&quot;,
+  title: &quot;Agent/Messages&quot;,
   decorators: [
     (Story) =&gt; (
-      &lt;div className=&quot;h-[500px] w-[400px] rounded-2xl overflow-hidden flex flex-col&quot;&gt;
+      &lt;div className=&quot;h-[420px] w-[420px] rounded-2xl overflow-hidden flex flex-col bg-on-background p-4&quot;&gt;
         &lt;Story /&gt;
       &lt;/div&gt;
     ),
@@ -7650,52 +7888,27 @@ const meta: Meta = {
 
 export default meta;
 
-export const Header: StoryObj = {
-  render: () =&gt; {
-    const [width, setWidth] = useState(400);
-    return (
-      &lt;div className=&quot;bg-surface-container&quot;&gt;
-        &lt;AgentSidebarHeader
-          sidebarWidth={width}
-          onToggleCollapse={() =&gt; setWidth(width &lt;= 350 ? 600 : 350)}
-          onClose={() =&gt; console.log(&quot;close&quot;)}
-        /&gt;
-      &lt;/div&gt;
-    );
-  },
-};
-
-export const Input: StoryObj = {
+export const User: StoryObj = {
   render: () =&gt; (
-    &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-        onMic={() =&gt; console.log(&quot;mic&quot;)}
-      /&gt;
-    &lt;/div&gt;
+    &lt;AgentSidebarUserMessage content=&quot;Update my username to alice2 and turn on dark mode.&quot; /&gt;
   ),
 };
 
-export const Playground: StoryObj = {
+export const Agent: StoryObj = {
   render: () =&gt; (
-    &lt;&gt;
-      &lt;AgentSidebarHeader
-        sidebarWidth={400}
-        onToggleCollapse={() =&gt; {}}
-        onClose={() =&gt; {}}
+    &lt;AgentSidebarAgentMessage content=&quot;Sure — I&#39;ll update your username and your appearance preference. Please confirm the changes below.&quot; /&gt;
+  ),
+};
+
+export const AgentStreaming: StoryObj = {
+  render: () =&gt; (
+    &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+      &lt;AgentSidebarAgentMessage content=&quot;&quot; streaming /&gt;
+      &lt;AgentSidebarAgentMessage
+        content=&quot;Updating your profile now&quot;
+        streaming
       /&gt;
-      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col&quot;&gt;
-        &lt;div className=&quot;flex-1 p-4 text-inverse-on-surface text-sm&quot;&gt;
-          Chat messages would appear here...
-        &lt;/div&gt;
-        &lt;AgentSidebarInput
-          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-          onMic={() =&gt; console.log(&quot;mic&quot;)}
-        /&gt;
-      &lt;/div&gt;
-    &lt;/&gt;
+    &lt;/div&gt;
   ),
 };
 </code></pre></div>
@@ -7719,7 +7932,227 @@ export const Playground: StoryObj = {
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { AgentSidebarHeader, AgentSidebarInput } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { AgentSidebarAgentMessage, AgentSidebarUserMessage } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">User</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const User = () =&gt; (
+  &lt;AgentSidebarUserMessage content=&quot;Update my username to alice2 and turn on dark mode.&quot; /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Agent = () =&gt; (
+  &lt;AgentSidebarAgentMessage content=&quot;Sure — I&#39;ll update your username and your appearance preference. Please confirm the changes below.&quot; /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Streaming</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const AgentStreaming = () =&gt; (
+  &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+    &lt;AgentSidebarAgentMessage content=&quot;&quot; streaming /&gt;
+    &lt;AgentSidebarAgentMessage
+      content=&quot;Updating your profile now&quot;
+      streaming
+    /&gt;
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Sidebar">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Sidebar</h2>
+      <div class="badges">
+        <label for="c-error-1-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-1-agent-sidebar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-1-agent-sidebar-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/agent-sidebar/AgentSidebar.stories.tsx">agent-sidebar · ./src/components/ui/agent-sidebar/AgentSidebar.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-1-agent-sidebar-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-1-agent-sidebar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-1-agent-sidebar-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
+   9 | import { mockAgentHistory, mockAgentMessages } from &quot;./mock-data&quot;;
+  10 |
+&gt; 11 | const meta: Meta = {
+     | ^
+  12 |   title: &quot;Agent/Sidebar&quot;,
+  13 |   decorators: [
+  14 |     (Story) =&gt; (
+
+./src/components/ui/agent-sidebar/AgentSidebar.stories.tsx:
+import { useState } from &quot;react&quot;;
+import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
+import { AgentSidebarHeader } from &quot;./AgentSidebarHeader&quot;;
+import { AgentSidebarInput } from &quot;./AgentSidebarInput&quot;;
+import {
+  AgentSidebarMessages,
+  type AgentSidebarMessage,
+} from &quot;./AgentSidebarMessages&quot;;
+import { mockAgentHistory, mockAgentMessages } from &quot;./mock-data&quot;;
+
+const meta: Meta = {
+  title: &quot;Agent/Sidebar&quot;,
+  decorators: [
+    (Story) =&gt; (
+      &lt;div className=&quot;h-[640px] w-[420px] rounded-2xl overflow-hidden flex flex-col&quot;&gt;
+        &lt;Story /&gt;
+      &lt;/div&gt;
+    ),
+  ],
+};
+
+export default meta;
+
+export const Header: StoryObj = {
+  render: () =&gt; {
+    const [width, setWidth] = useState(420);
+    return (
+      &lt;div className=&quot;bg-surface-container&quot;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={width}
+          onToggleCollapse={() =&gt; setWidth(width &lt;= 350 ? 600 : 350)}
+          onClose={() =&gt; console.log(&quot;close&quot;)}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
+};
+
+export const Input: StoryObj = {
+  render: () =&gt; (
+    &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+        onMic={() =&gt; console.log(&quot;mic&quot;)}
+      /&gt;
+    &lt;/div&gt;
+  ),
+};
+
+export const Playground: StoryObj = {
+  render: () =&gt; {
+    const [messages, setMessages] = useState&lt;AgentSidebarMessage[]&gt;(
+      mockAgentMessages,
+    );
+
+    const patchMessage = (id: string, patch: Record&lt;string, unknown&gt;) =&gt; {
+      setMessages((prev) =&gt;
+        prev.map((m) =&gt;
+          m.id === id ? ({ ...m, ...patch } as AgentSidebarMessage) : m,
+        ),
+      );
+    };
+
+    const handleSend = (content: string) =&gt; {
+      const userId = `u-${Date.now()}`;
+      const agentId = `a-${Date.now()}`;
+      setMessages((prev) =&gt; [
+        ...prev,
+        { id: userId, role: &quot;user&quot;, content },
+        { id: agentId, role: &quot;agent&quot;, content: &quot;&quot;, streaming: true },
+      ]);
+      setTimeout(() =&gt; {
+        patchMessage(agentId, {
+          content: &quot;Got it — let me look into that.&quot;,
+          streaming: false,
+        });
+      }, 1500);
+    };
+
+    return (
+      &lt;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+        /&gt;
+        &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
+          &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+            &lt;AgentSidebarMessages messages={messages} /&gt;
+          &lt;/div&gt;
+          &lt;AgentSidebarInput
+            onSend={handleSend}
+            onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+            onMic={() =&gt; console.log(&quot;mic&quot;)}
+          /&gt;
+        &lt;/div&gt;
+      &lt;/&gt;
+    );
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { AgentSidebarHeader, AgentSidebarInput, AgentSidebarMessages } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -7731,13 +8164,15 @@ export const Playground: StoryObj = {
               
               
               <pre><code>const Header = () =&gt; {
-  const [width, setWidth] = useState(400);
+  const [width, setWidth] = useState(420);
   return (
     &lt;div className=&quot;bg-surface-container&quot;&gt;
       &lt;AgentSidebarHeader
         sidebarWidth={width}
         onToggleCollapse={() =&gt; setWidth(width &lt;= 350 ? 600 : 350)}
         onClose={() =&gt; console.log(&quot;close&quot;)}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
       /&gt;
     &lt;/div&gt;
   );
@@ -7767,25 +8202,57 @@ export const Playground: StoryObj = {
               </div>
               
               
-              <pre><code>const Playground = () =&gt; (
-  &lt;&gt;
-    &lt;AgentSidebarHeader
-      sidebarWidth={400}
-      onToggleCollapse={() =&gt; {}}
-      onClose={() =&gt; {}}
-    /&gt;
-    &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col&quot;&gt;
-      &lt;div className=&quot;flex-1 p-4 text-inverse-on-surface text-sm&quot;&gt;
-        Chat messages would appear here...
-      &lt;/div&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-        onMic={() =&gt; console.log(&quot;mic&quot;)}
+              <pre><code>const Playground = () =&gt; {
+  const [messages, setMessages] = useState&lt;AgentSidebarMessage[]&gt;(
+    mockAgentMessages,
+  );
+
+  const patchMessage = (id: string, patch: Record&lt;string, unknown&gt;) =&gt; {
+    setMessages((prev) =&gt;
+      prev.map((m) =&gt;
+        m.id === id ? ({ ...m, ...patch } as AgentSidebarMessage) : m,
+      ),
+    );
+  };
+
+  const handleSend = (content: string) =&gt; {
+    const userId = `u-${Date.now()}`;
+    const agentId = `a-${Date.now()}`;
+    setMessages((prev) =&gt; [
+      ...prev,
+      { id: userId, role: &quot;user&quot;, content },
+      { id: agentId, role: &quot;agent&quot;, content: &quot;&quot;, streaming: true },
+    ]);
+    setTimeout(() =&gt; {
+      patchMessage(agentId, {
+        content: &quot;Got it — let me look into that.&quot;,
+        streaming: false,
+      });
+    }, 1500);
+  };
+
+  return (
+    &lt;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
       /&gt;
-    &lt;/div&gt;
-  &lt;/&gt;
-);</code></pre>
+      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
+        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+          &lt;AgentSidebarMessages messages={messages} /&gt;
+        &lt;/div&gt;
+        &lt;AgentSidebarInput
+          onSend={handleSend}
+          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+          onMic={() =&gt; console.log(&quot;mic&quot;)}
+        /&gt;
+      &lt;/div&gt;
+    &lt;/&gt;
+  );
+};</code></pre>
             </div>
         </div>
     
