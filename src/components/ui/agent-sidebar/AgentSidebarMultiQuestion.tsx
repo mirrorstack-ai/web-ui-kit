@@ -542,7 +542,6 @@ export function AgentSidebarMultiQuestion({
               size="sm"
               onClick={handleSubmit}
               rightIcon="check"
-              className="bg-inverse-primary/15! text-inverse-primary! hover:bg-inverse-primary! hover:text-inverse-surface!"
             >
               {submitLabel}
             </Button>
