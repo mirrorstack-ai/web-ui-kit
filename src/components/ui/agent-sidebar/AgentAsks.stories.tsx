@@ -117,6 +117,42 @@ export const MultiQuestionTabs: StoryObj = {
               },
             ],
           },
+          {
+            id: "addons",
+            type: "choice",
+            style: "cards",
+            multiple: true,
+            label: "Add-on services",
+            tabLabel: "Add-ons",
+            description:
+              "Pick any infrastructure you also want scaffolded. Multiple selections allowed.",
+            options: [
+              {
+                value: "redis",
+                label: "Redis cache",
+                description:
+                  "In-memory cache + queue. Recommended for sessions, rate-limit, and pub-sub.",
+              },
+              {
+                value: "s3",
+                label: "Object storage (S3)",
+                description:
+                  "For user uploads, exports, backups. Bucket + signed-URL helpers ship with it.",
+              },
+              {
+                value: "ses",
+                label: "Transactional email",
+                description:
+                  "AWS SES wired up with verified-domain check and a default template package.",
+              },
+              {
+                value: "otel",
+                label: "OpenTelemetry",
+                description:
+                  "Traces + metrics exporter. Adds the OTEL SDK and a default collector config.",
+              },
+            ],
+          },
         ]}
       />
     );
@@ -148,6 +184,20 @@ export const MultiQuestionList: StoryObj = {
               { value: "system", label: "System" },
               { value: "light", label: "Light" },
               { value: "dark", label: "Dark" },
+            ],
+          },
+          {
+            id: "channels",
+            type: "choice",
+            style: "segmented",
+            multiple: true,
+            label: "Notify me via",
+            description: "Pick any channels you want product updates on.",
+            options: [
+              { value: "email", label: "Email" },
+              { value: "push", label: "Push" },
+              { value: "sms", label: "SMS" },
+              { value: "slack", label: "Slack" },
             ],
           },
           {

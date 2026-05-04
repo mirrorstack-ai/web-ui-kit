@@ -33,17 +33,20 @@ export type AgentSidebarQuestion =
       /** "segmented" — all options visible inline as a pill row (use for short labels, no descriptions).
        *  "cards" — radio-card list with title + description per option (use for weighted decisions). */
       style: AgentSidebarChoiceStyle;
+      /** When true the user can pick more than one option; the answer is an array of values.
+       *  Renders square check indicators (cards) or independently-toggling chips (segmented). */
+      multiple?: boolean;
       options: {
         value: string;
         label: string;
         description?: string;
       }[];
-      defaultValue?: string;
+      defaultValue?: string | string[];
     });
 
 export type AgentSidebarMultiQuestionStatus = "pending" | "submitted";
 
-export type AgentSidebarMultiQuestionAnswer = string | boolean;
+export type AgentSidebarMultiQuestionAnswer = string | boolean | string[];
 
 export type AgentSidebarMultiQuestionLayout = "list" | "tabs";
 
@@ -84,8 +87,13 @@ function initialAnswers(
 ): Record<string, AgentSidebarMultiQuestionAnswer> {
   const out: Record<string, AgentSidebarMultiQuestionAnswer> = {};
   for (const q of questions) {
-    if (q.type === "toggle") out[q.id] = q.defaultValue ?? false;
-    else out[q.id] = q.defaultValue ?? "";
+    if (q.type === "toggle") {
+      out[q.id] = q.defaultValue ?? false;
+    } else if (q.type === "choice" && q.multiple) {
+      out[q.id] = Array.isArray(q.defaultValue) ? q.defaultValue : [];
+    } else {
+      out[q.id] = typeof q.defaultValue === "string" ? q.defaultValue : "";
+    }
   }
   return out;
 }
@@ -96,6 +104,9 @@ function isAnswered(
 ): boolean {
   // A switch always has a valid answer (on or off); never flag it as missing.
   if (q.type === "toggle") return true;
+  if (q.type === "choice" && q.multiple) {
+    return Array.isArray(value) && value.length > 0;
+  }
   if (typeof value !== "string") return false;
   if (q.type === "choice") return value.length > 0;
   return value.trim().length > 0;
@@ -106,6 +117,12 @@ function formatAnswer(
   value: AgentSidebarMultiQuestionAnswer,
 ): string {
   if (q.type === "toggle") return value ? "Enabled" : "Not enabled";
+  if (q.type === "choice" && q.multiple) {
+    if (!Array.isArray(value) || value.length === 0) return "";
+    return value
+      .map((v) => q.options.find((o) => o.value === v)?.label ?? v)
+      .join(", ");
+  }
   if (typeof value !== "string" || value.length === 0) return "";
   if (q.type === "choice") {
     const opt = q.options.find((o) => o.value === value);
@@ -194,31 +211,95 @@ function renderField(
     );
   }
   // choice
-  const current = typeof value === "string" ? value : "";
+  const isMulti = q.multiple === true;
+  const selectedValues = isMulti
+    ? new Set(Array.isArray(value) ? value : [])
+    : new Set<string>();
+  const singleCurrent = !isMulti && typeof value === "string" ? value : "";
+
+  const toggleMulti = (optValue: string) => {
+    const arr = Array.isArray(value) ? [...value] : [];
+    if (selectedValues.has(optValue)) {
+      setAnswer(
+        q.id,
+        arr.filter((v) => v !== optValue),
+      );
+    } else {
+      setAnswer(q.id, [...arr, optValue]);
+    }
+  };
+
   if (q.style === "segmented") {
+    if (!isMulti) {
+      return (
+        <SegmentedButton
+          size="sm"
+          aria-label={q.label}
+          value={singleCurrent}
+          disabled={submitted}
+          onChange={(v) => setAnswer(q.id, v === singleCurrent ? "" : v)}
+          options={q.options.map((o) => ({ value: o.value, label: o.label }))}
+        />
+      );
+    }
+    // segmented + multiple → independent toggle chips
     return (
-      <SegmentedButton
-        size="sm"
+      <div
+        role="group"
         aria-label={q.label}
-        value={current}
-        disabled={submitted}
-        onChange={(v) => setAnswer(q.id, v === current ? "" : v)}
-        options={q.options.map((o) => ({ value: o.value, label: o.label }))}
-      />
+        className="flex flex-wrap gap-1.5"
+      >
+        {q.options.map((opt) => {
+          const selected = selectedValues.has(opt.value);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              role="checkbox"
+              aria-checked={selected}
+              disabled={submitted}
+              onClick={() => toggleMulti(opt.value)}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50",
+                selected
+                  ? "bg-inverse-primary text-inverse-surface"
+                  : "bg-inverse-on-surface/[0.06] text-inverse-on-surface/70 hover:bg-inverse-on-surface/[0.12] hover:text-inverse-on-surface",
+              )}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
     );
   }
+
+  // cards
   return (
-    <div role="radiogroup" aria-labelledby={fieldId} className="flex flex-col gap-1.5">
+    <div
+      role={isMulti ? "group" : "radiogroup"}
+      aria-labelledby={fieldId}
+      className="flex flex-col gap-1.5"
+    >
       {q.options.map((opt) => {
-        const selected = opt.value === current;
+        const selected = isMulti
+          ? selectedValues.has(opt.value)
+          : opt.value === singleCurrent;
+        const handleClick = () => {
+          if (isMulti) {
+            toggleMulti(opt.value);
+          } else {
+            setAnswer(q.id, selected ? "" : opt.value);
+          }
+        };
         return (
           <button
             key={opt.value}
             type="button"
-            role="radio"
+            role={isMulti ? "checkbox" : "radio"}
             aria-checked={selected}
             disabled={submitted}
-            onClick={() => setAnswer(q.id, selected ? "" : opt.value)}
+            onClick={handleClick}
             className={cn(
               "group flex items-start gap-2.5 rounded-md border px-3 py-2.5 text-left transition-colors disabled:opacity-50",
               selected
@@ -228,15 +309,23 @@ function renderField(
           >
             <span
               className={cn(
-                "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center border-2 transition-colors",
+                isMulti ? "rounded-sm" : "rounded-full",
                 selected
-                  ? "border-inverse-primary"
+                  ? "border-inverse-primary bg-inverse-primary"
                   : "border-inverse-on-surface/30 group-hover:border-inverse-on-surface/50",
               )}
             >
-              {selected && (
-                <span className="block h-1.5 w-1.5 rounded-full bg-inverse-primary" />
-              )}
+              {selected &&
+                (isMulti ? (
+                  <Icon
+                    name="check"
+                    size={12}
+                    className="text-inverse-surface"
+                  />
+                ) : (
+                  <span className="block h-1.5 w-1.5 rounded-full bg-inverse-surface" />
+                ))}
             </span>
             <span className="flex-1 min-w-0">
               <span className="block text-sm font-medium text-inverse-on-surface">
