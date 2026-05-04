@@ -230,35 +230,31 @@ function renderField(
   };
 
   if (q.style === "segmented") {
-    if (!isMulti) {
-      return (
-        <SegmentedButton
-          size="sm"
-          aria-label={q.label}
-          value={singleCurrent}
-          disabled={submitted}
-          onChange={(v) => setAnswer(q.id, v === singleCurrent ? "" : v)}
-          options={q.options.map((o) => ({ value: o.value, label: o.label }))}
-        />
-      );
-    }
-    // segmented + multiple → independent toggle chips
     return (
       <div
-        role="group"
+        role={isMulti ? "group" : "radiogroup"}
         aria-label={q.label}
         className="flex flex-wrap gap-1.5"
       >
         {q.options.map((opt) => {
-          const selected = selectedValues.has(opt.value);
+          const selected = isMulti
+            ? selectedValues.has(opt.value)
+            : opt.value === singleCurrent;
+          const handleClick = () => {
+            if (isMulti) {
+              toggleMulti(opt.value);
+            } else {
+              setAnswer(q.id, selected ? "" : opt.value);
+            }
+          };
           return (
             <button
               key={opt.value}
               type="button"
-              role="checkbox"
+              role={isMulti ? "checkbox" : "radio"}
               aria-checked={selected}
               disabled={submitted}
-              onClick={() => toggleMulti(opt.value)}
+              onClick={handleClick}
               className={cn(
                 "rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50",
                 selected
