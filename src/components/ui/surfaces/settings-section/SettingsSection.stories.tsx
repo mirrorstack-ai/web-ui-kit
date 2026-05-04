@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ReadOnlyField } from "@/components/ui/data/read-only-field/ReadOnlyField";
+import { SectionLabel } from "@/components/ui/data/section-label/SectionLabel";
 import { SettingRow } from "@/components/ui/data/setting-row/SettingRow";
+import { Switch } from "@/components/ui/inputs/switch/Switch";
 import { Button } from "@/components/ui/actions/button/Button";
 import { SettingsSection } from "./SettingsSection";
 
@@ -33,17 +35,17 @@ export const Tones: Story = {
         <ReadOnlyField label="Module ID" value="m_abc" mono />
       </SettingsSection>
       <SettingsSection title="Advanced" tone="warning">
-        <ReadOnlyField label="Beta program" value="Enabled" />
-      </SettingsSection>
-      <SettingsSection title="Danger zone" tone="error">
         <SettingRow
-          tone="error"
-          title="Delete module"
-          description="Permanently delete. Cannot be undone."
+          tone="warning"
+          title="Developer mode"
+          description="Show the developer rail."
           control={
-            <Button color="error" variant="filled" size="sm">
-              Delete
-            </Button>
+            <Switch
+              checked
+              onChange={() => {}}
+              color="warning"
+              aria-label="developer"
+            />
           }
         />
       </SettingsSection>
@@ -51,22 +53,29 @@ export const Tones: Story = {
   ),
 };
 
-export const SurfaceClassNameOverride: Story = {
-  args: {
-    title: "Danger zone",
-    tone: "error",
-    surfaceClassName: "px-6 py-4",
-    children: (
-      <SettingRow
-        tone="error"
-        title="Delete account"
-        description="Sign out and put your account in a suspended state."
-        control={
-          <Button color="error" variant="filled" size="sm">
-            Disable
-          </Button>
-        }
-      />
-    ),
-  },
+/**
+ * Danger zones intentionally do NOT use SettingsSection. They render
+ * the label as a tone-error SectionLabel followed by a naked stack of
+ * SettingRow tone="error" rows (each row carries its own border).
+ * Shown here for contrast with the boxed sections above.
+ */
+export const DangerZoneIsNotSettingsSection: Story = {
+  render: () => (
+    <div className="max-w-md">
+      <SectionLabel className="mb-2 text-error">Danger zone</SectionLabel>
+      <div className="space-y-2">
+        <SettingRow
+          tone="error"
+          title="Delete module"
+          description="Permanently delete. Cannot be undone."
+          className="px-6 py-4"
+          control={
+            <Button color="error" variant="filled" size="sm">
+              Delete
+            </Button>
+          }
+        />
+      </div>
+    </div>
+  ),
 };

@@ -8,19 +8,19 @@ import type { ComponentMeta } from "@/types/component-meta";
 export const meta: ComponentMeta = {
   name: "SettingsSection",
   description:
-    "Titled, padded surface used for settings groupings — bundles a SectionLabel with a Surface(p-6). Replaces the SECTION_CLASS pattern duplicated across web-account /me, /me/security, and web-applications /dev/module.",
+    "Titled, boxed group of settings — a SectionLabel above a padded Surface. Use for Info / Settings / Profile groups where the rows visually belong together. Danger zones do NOT use this shape: they render SectionLabel above a naked stack of SettingRow tone=\"error\" rows (each row carries its own border) with no enclosing Surface.",
 };
 
 export interface SettingsSectionProps {
   /** Section heading text. Rendered via <SectionLabel>. */
   title: ReactNode;
-  /** Theme color for the title (e.g. "error" for danger zones). */
+  /** Theme color for the title (e.g. "warning" for advanced groupings). */
   tone?: Tone;
   /** Body of the section — usually a stack of fields. */
   children: ReactNode;
   /** Optional class on the outer wrapper. */
   className?: string;
-  /** Optional class on the inner Surface. Use to override padding for special cases. */
+  /** Optional class on the inner Surface (e.g. override padding). */
   surfaceClassName?: string;
 }
 
