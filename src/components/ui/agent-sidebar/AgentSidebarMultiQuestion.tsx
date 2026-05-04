@@ -450,7 +450,7 @@ export function AgentSidebarMultiQuestion({
                 size="sm"
                 value={activeTabId}
                 onChange={(id) => setActiveTabId(id)}
-                className="[&>button]:flex-1"
+                className="flex-wrap"
                 options={[
                   ...summaries.map(({ q, answered }) => ({
                     value: q.id,
