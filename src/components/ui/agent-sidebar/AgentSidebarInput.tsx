@@ -1,7 +1,7 @@
 import {
   useState,
   useRef,
-  useEffect,
+  useLayoutEffect,
   type KeyboardEvent,
   type ChangeEvent,
 } from "react";
@@ -24,7 +24,7 @@ export function AgentSidebarInput({
   const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
@@ -91,9 +91,10 @@ export function AgentSidebarInput({
           <div className="flex-1" />
           <IconButton
             icon="send"
-            variant="filled"
+            variant="tonal"
+            color="primary"
             size="sm"
-            className="bg-primary text-on-primary"
+            className="hover:bg-primary hover:text-on-primary"
             onClick={send}
             aria-label="Send message"
           />

@@ -4,8 +4,9 @@ import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { SidebarProvider, useSidebarWidth } from "@/context/sidebar/SidebarProvider";
 import { SnackbarProvider, SnackbarOutlet } from "@/context/snackbar/SnackbarProvider";
-import { AgentSidebarHeader } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarHeader";
-import { AgentSidebarInput } from "@/components/ui/surfaces/agent-sidebar/AgentSidebarInput";
+import { AgentSidebarHeader } from "@/components/ui/agent-sidebar/AgentSidebarHeader";
+import { AgentSidebarInput } from "@/components/ui/agent-sidebar/AgentSidebarInput";
+import type { AgentSidebarHistoryGroup } from "@/components/ui/agent-sidebar/types";
 
 export const meta: ComponentMeta = {
   name: "AppShell",
@@ -37,6 +38,9 @@ export interface AppShellProps {
   onAgentSend?: (message: string) => void;
   onAgentAttachFile?: () => void;
   onAgentMic?: () => void;
+  /** Past conversations grouped by date — shown in the agent header history dropdown. */
+  agentHistory?: AgentSidebarHistoryGroup[];
+  onSelectAgentHistoryItem?: (id: string) => void;
 }
 
 export function AppShell(props: AppShellProps) {
@@ -62,10 +66,14 @@ function AppShellInner({
   onAgentSend,
   onAgentAttachFile,
   onAgentMic,
+  agentHistory,
+  onSelectAgentHistoryItem,
 }: AppShellProps) {
   const { sidebarWidth, setSidebarWidth } = useSidebarWidth();
   const [isResizing, setIsResizing] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window === "undefined" ? 0 : window.innerWidth,
+  );
   const startX = useRef(0);
   const startWidth = useRef(0);
   const maxWidthRef = useRef(800);
@@ -210,6 +218,8 @@ function AppShellInner({
                 sidebarWidth={sidebarWidth}
                 onToggleCollapse={handleToggleCollapse}
                 onClose={handleClose}
+                history={agentHistory}
+                onSelectHistoryItem={onSelectAgentHistoryItem}
               />
 
               <div className="rounded-2xl bg-on-background h-full flex flex-col">

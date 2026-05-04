@@ -208,7 +208,18 @@ export {
   type AgentSidebarHeaderProps,
   AgentSidebarInput,
   type AgentSidebarInputProps,
-} from "./components/ui/surfaces/agent-sidebar/AgentSidebar";
+  AgentSidebarUserMessage,
+  type AgentSidebarUserMessageProps,
+  AgentSidebarAgentMessage,
+  type AgentSidebarAgentMessageProps,
+  AgentSidebarMessages,
+  type AgentSidebarMessage,
+  type AgentSidebarMessagesProps,
+  mockAgentHistory,
+  mockAgentMessages,
+  type AgentSidebarHistoryGroup,
+  type AgentSidebarHistoryItem,
+} from "./components/ui/agent-sidebar/AgentSidebar";
 export {
   DropZone,
   type DropZoneProps,
