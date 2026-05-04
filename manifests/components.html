@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -898,7 +898,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppShell</h2>
       <div class="badges">
-        <label for="c-2-layout-appshell-props" class="badge ok as-toggle">14 prop types</label>
+        <label for="c-2-layout-appshell-props" class="badge ok as-toggle">15 prop types</label>
         <label for="c-2-layout-appshell-info" class="badge info as-toggle">1 info</label>
         <label for="c-2-layout-appshell-stories" class="badge ok as-toggle">5 stories</label>
         
@@ -932,7 +932,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">14 prop types</span>
+              <span class="badge ok">15 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/app-shell/app-shell/AppShell.tsx::AppShell</code></pre>
             <pre><code>Props:</code></pre>
@@ -940,6 +940,13 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
  * Past conversations grouped by date — shown in the agent header history dropdown.
  */
 agentHistory?: AgentSidebarHistoryGroup[]
+
+/**
+ * Slot pinned directly above the agent input — used for messages the user
+ *  sent while the agent was still responding (queued input). Stays in view
+ *  with the input even when the messages list scrolls.
+ */
+agentPendingContent?: ReactNode
 
 /**
  * Agent sidebar chat content
