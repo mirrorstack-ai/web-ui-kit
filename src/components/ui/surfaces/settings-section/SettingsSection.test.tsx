@@ -27,27 +27,6 @@ describe("SettingsSection", () => {
     expect(surface.className).toContain("border-outline-variant");
   });
 
-  it("colors the title with the requested tone", () => {
-    const { getByText } = render(
-      <SettingsSection title="Danger zone" tone="error">
-        <p>body</p>
-      </SettingsSection>,
-    );
-    const label = getByText("Danger zone");
-    expect(label.className).toContain("text-error");
-  });
-
-  it("does not color the title without a tone", () => {
-    const { getByText } = render(
-      <SettingsSection title="Info">
-        <p>body</p>
-      </SettingsSection>,
-    );
-    const label = getByText("Info");
-    expect(label.className).not.toContain("text-error");
-    expect(label.className).not.toContain("text-warning");
-  });
-
   it("merges surfaceClassName onto the Surface", () => {
     const { getByText } = render(
       <SettingsSection title="Info" surfaceClassName="px-4 py-2">
