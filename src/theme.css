@@ -282,6 +282,10 @@ body {
   background: transparent;
 }
 
+main {
+  scrollbar-gutter: stable;
+}
+
 /* Material Symbols Rounded */
 .material-symbols-rounded {
   font-family: "Material Symbols Rounded";
