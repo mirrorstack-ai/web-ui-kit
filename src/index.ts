@@ -161,6 +161,12 @@ export {
   type ActivityItem,
 } from "./components/ui/data/activity-list/ActivityList";
 export {
+  Graph,
+  type GraphProps,
+  type GraphNode,
+  type GraphEdge,
+} from "./components/ui/data/graph/Graph";
+export {
   ReauthDialog,
   type ReauthDialogProps,
 } from "./components/ui/surfaces/reauth-dialog/ReauthDialog";
