@@ -340,12 +340,6 @@ export function NotchGrid({
     row: Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock)),
   });
 
-  // Live-preview snap: the cell the dragged sub-item would land in *right now*.
-  // Fed into the layout pipeline so the other sub-items re-flow as the user
-  // drags (instead of waiting for the drop), while the dragged sub-item's own
-  // CSS transform keeps it under the cursor smoothly.
-  const liveSnap = subDrag ? { parentKey: subDrag.parentKey, subKey: subDrag.subKey, ...snapDrag(subDrag) } : null;
-
   const handleSubPointerMove = useCallback((e: ReactPointerEvent) => {
     const s = subDragRef.current;
     if (!s || e.pointerId !== s.pointerId) return;
@@ -492,8 +486,8 @@ export function NotchGrid({
         );
         const targetAspect = props.subAspect ?? 1.6;
         const compactCols = Math.max(maxSubW, Math.ceil(Math.sqrt(totalSubCells * targetAspect)));
-        // Grow the column cap if a pin (drag drop / live preview) sits past
-        // the compact extent, so dragging a sub-item past the panel's current
+        // Grow the column cap if a sub-drag commit pinned a tile past the
+        // compact extent, so dropping a sub-item past the panel's current
         // right edge extends the panel instead of having the packer overflow
         // the pin and re-flow it back inside.
         const maxPinCol = subInputs.reduce((m, i) => {
@@ -504,21 +498,25 @@ export function NotchGrid({
         const subC = Math.max(props.subCols ?? compactCols, maxPinCol);
         const subPlaced = packItems(subInputs, subC, { flowOrder: "farthest-fit" }).placed;
         const matrix = placementToMask(subPlaced).map((row) => row.map((b) => (b ? 1 : 0)));
-        // Natural extent — same pack but ignoring `subOverrides` (within-panel
-        // drag positions). Sub-drags shrink the panel's matrix; the natural
-        // extent is what the chrome *would* be at rest, used as the stable
-        // hit-box for the in-panel vs. promote decision so a "drag up → drag
-        // back" cycle doesn't trip the promote branch on the way back.
-        const naturalInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = ordered.map(
-          (sub) => ({
-            item: { sub, key: sub.key ?? `s${sub._i}` },
-            mask: rectMask(sub.cost[0], sub.cost[1]),
-            col: sub.col,
-            row: sub.row,
-          }),
-        );
-        const naturalSubC = Math.max(props.subCols ?? compactCols, 1);
-        const naturalPlaced = packItems(naturalInputs, naturalSubC, { flowOrder: "farthest-fit" }).placed;
+        // Natural extent — what the chrome would be at rest with no sub-drag
+        // overrides applied. Used as the in-panel hit-box for promote
+        // decisions so a "drag-up → drag-back" cycle stays inside the panel
+        // even when the first drop shrunk the live matrix. Re-pack only when
+        // subOverrides actually pins something; otherwise it'd be identical
+        // to subPlaced.
+        const naturalPlaced =
+          subOver && subOver.size > 0
+            ? packItems(
+                ordered.map((sub) => ({
+                  item: { sub, key: sub.key ?? `s${sub._i}` },
+                  mask: rectMask(sub.cost[0], sub.cost[1]),
+                  col: sub.col,
+                  row: sub.row,
+                })),
+                Math.max(props.subCols ?? compactCols, 1),
+                { flowOrder: "farthest-fit" },
+              ).placed
+            : subPlaced;
         const naturalCols = naturalPlaced.reduce(
           (m, p) => Math.max(m, p.col + p.cols),
           maskCols(matrix),
