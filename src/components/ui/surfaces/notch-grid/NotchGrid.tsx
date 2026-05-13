@@ -906,13 +906,13 @@ export function NotchGrid({
                       width: blocks(sub.cost[0]) * mItemBlock - gap,
                       height: blocks(sub.cost[1]) * mItemBlock - gap,
                       padding: sub.pad ?? mProps.pad ?? pad ?? 16,
-                      // Drag-active visual: tighten the corner radius (0.5
+                      // Drag-active visual: tighten the corner radius (0.6
                       // vs 0.75 at rest) and force a solid background so the
                       // tile reads as a picked-up card lifted off the chrome
                       // when the whole linked component is being dragged.
                       borderRadius:
                         (sub.radius ?? mProps.radius ?? radius ?? 24) *
-                        (wrapperDragging ? 0.5 : 0.75),
+                        (wrapperDragging ? 0.6 : 0.75),
                       background: wrapperDragging
                         ? sub.fill ?? mProps.fill ?? fill
                         : sub.fill && sub.fill !== "none"
@@ -999,13 +999,13 @@ export function NotchGrid({
                     width: maskCols(mMatrix) * mItemBlock - gap,
                     height: mMatrix.length * mItemBlock - gap,
                     padding: mProps.pad ?? pad ?? 16,
-                    // Drag-active visual: tighter corner radius (0.5 vs
+                    // Drag-active visual: tighter corner radius (0.6 vs
                     // 0.75 at rest) so a picked-up tile reads as a lifted
                     // card. Applies whether this tile is the one being
                     // outer-dragged or the whole linked component is.
                     borderRadius:
                       (mProps.radius ?? radius ?? 24) *
-                      (draggingThis || wrapperDragging ? 0.5 : 0.75),
+                      (draggingThis || wrapperDragging ? 0.6 : 0.75),
                     // Same fill as the chrome behind it — invisible at rest
                     // (they overlap exactly), but the moment the member is
                     // outer-dragged its transform takes it past the chrome
@@ -1098,7 +1098,7 @@ export function NotchGrid({
               // Tighter radius than at-rest (`* 0.75`) matches the drag-
               // active visual the other tile paths use during a wrapper
               // drag, so the cursor-follow ghost reads consistently.
-              borderRadius: subDrag.ghostRadius * 0.5,
+              borderRadius: subDrag.ghostRadius * 0.6,
               background:
                 subDrag.ghostFill && subDrag.ghostFill !== "none"
                   ? subDrag.ghostFill
