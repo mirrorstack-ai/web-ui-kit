@@ -242,8 +242,13 @@ export function NotchGrid({
       } catch {
         /* pointer may already be released */
       }
-      const maxCol = Math.max(0, s.parentSubCols - s.cost[0]);
-      const maxRow = Math.max(0, s.parentSubRows - s.cost[1]);
+      // Clamp the drop to the panel's current edge — i.e. a sub-item may land
+      // *at* `parentSubX` (one cell past the existing extent) so it can grow /
+      // reshape the panel. Pinning inside the current footprint (the old
+      // `parentSubCols - cost[0]` bound) trapped reshapes like
+      // `xxx/.xx` → `x/xx/xx`, because `row = parentSubRows` was excluded.
+      const maxCol = Math.max(0, s.parentSubCols);
+      const maxRow = Math.max(0, s.parentSubRows);
       const nextCol = Math.min(maxCol, Math.max(0, s.originCol + Math.round(s.dx / s.itemBlock)));
       const nextRow = Math.min(maxRow, Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock)));
       setSubDrag(null);
