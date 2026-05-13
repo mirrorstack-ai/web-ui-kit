@@ -16,6 +16,7 @@ import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
 import { maskCols, maskFromShape, maxTier } from "@/utils/grid-outline";
+import { Icon } from "@/components/ui/media/icon/Icon";
 import { BlockShape, BLOCK_SIZE } from "./BlockShape";
 import {
   NOTCH_BREAKPOINTS,
@@ -75,6 +76,10 @@ export interface NotchGridProps {
   draggable?: boolean;
   /** Called after a drag drops an item, with its new block position. */
   onItemMove?: (key: Key, col: number, row: number) => void;
+  /** Called after a sub-item drag drops on a new sub-grid cell. The panel
+   *  re-packs around the new position; if the move would change the panel's
+   *  notched footprint, neighbouring items in the outer grid re-flow too. */
+  onSubItemMove?: (parentKey: Key, subKey: Key, col: number, row: number) => void;
   children?: ReactNode;
   className?: string;
   style?: CSSProperties;
@@ -92,6 +97,25 @@ interface DragState {
   originRow: number;
   /** The dragged item's footprint width in blocks (to clamp the drop column). */
   originCols: number;
+  dx: number;
+  dy: number;
+}
+
+interface SubDragState {
+  parentKey: Key;
+  subKey: Key;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  originCol: number;
+  originRow: number;
+  /** The sub-item's footprint in sub-grid cells. */
+  cost: readonly [number, number];
+  /** The parent panel's sub-grid extent (cols × rows), captured at drag start. */
+  parentSubCols: number;
+  parentSubRows: number;
+  /** Sub-grid block size in px (so we can convert pointer-px to cells). */
+  itemBlock: number;
   dx: number;
   dy: number;
 }
@@ -150,6 +174,7 @@ export function NotchGrid({
   items,
   draggable = false,
   onItemMove,
+  onSubItemMove,
   children,
   className,
   style,
@@ -196,6 +221,45 @@ export function NotchGrid({
     [block, colCount, onItemMove],
   );
 
+  // Sub-item drag — same shape as panel drag, but inside one panel's sub-grid.
+  const [subOverrides, setSubOverrides] = useState<Map<Key, Map<Key, { col: number; row: number }>>>(new Map());
+  const [subDrag, setSubDrag] = useState<SubDragState | null>(null);
+  const subDragRef = useRef<SubDragState | null>(null);
+  subDragRef.current = subDrag;
+  const [hoveredSub, setHoveredSub] = useState<{ parentKey: Key; subKey: Key } | null>(null);
+
+  const handleSubPointerMove = useCallback((e: ReactPointerEvent) => {
+    const s = subDragRef.current;
+    if (!s || e.pointerId !== s.pointerId) return;
+    setSubDrag({ ...s, dx: e.clientX - s.startX, dy: e.clientY - s.startY });
+  }, []);
+
+  const endSubDrag = useCallback(
+    (e: ReactPointerEvent) => {
+      const s = subDragRef.current;
+      if (!s || e.pointerId !== s.pointerId) return;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        /* pointer may already be released */
+      }
+      const maxCol = Math.max(0, s.parentSubCols - s.cost[0]);
+      const maxRow = Math.max(0, s.parentSubRows - s.cost[1]);
+      const nextCol = Math.min(maxCol, Math.max(0, s.originCol + Math.round(s.dx / s.itemBlock)));
+      const nextRow = Math.min(maxRow, Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock)));
+      setSubDrag(null);
+      setSubOverrides((prev) => {
+        const next = new Map(prev);
+        const inner = new Map(next.get(s.parentKey) ?? new Map());
+        inner.set(s.subKey, { col: nextCol, row: nextRow });
+        next.set(s.parentKey, inner);
+        return next;
+      });
+      onSubItemMove?.(s.parentKey, s.subKey, nextCol, nextRow);
+    },
+    [onSubItemMove],
+  );
+
   const { placed, gridCols, gridRows } = useMemo(() => {
     // Gather item configs: `<NotchGridItem>` children, then the `items` prop.
     const configs: { props: NotchGridItemProps; key: Key }[] = [];
@@ -213,12 +277,17 @@ export function NotchGrid({
         const subs = props.subItems.map((s, i) => ({ ...asSubItem(s), _i: i }));
         const cw = (s: { cost: readonly [number, number] }) => Math.max(1, Math.floor(s.cost[0]));
         const maxSubW = Math.max(1, ...subs.map(cw));
-        const subInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = subs.map((sub) => ({
-          item: { sub, key: sub.key ?? `s${sub._i}` },
-          mask: rectMask(sub.cost[0], sub.cost[1]),
-          col: sub.col,
-          row: sub.row,
-        }));
+        const subOver = subOverrides.get(key);
+        const subInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = subs.map((sub) => {
+          const subKey = sub.key ?? `s${sub._i}`;
+          const pinned = subOver?.get(subKey);
+          return {
+            item: { sub, key: subKey },
+            mask: rectMask(sub.cost[0], sub.cost[1]),
+            col: pinned?.col ?? sub.col,
+            row: pinned?.row ?? sub.row,
+          };
+        });
         // When `subCols` is pinned, pack at exactly that width; otherwise search
         // column counts × orderings for the most compact arrangement.
         const subPlaced = (
@@ -273,7 +342,7 @@ export function NotchGrid({
       );
     }
     return { placed: packed.placed, gridCols: packed.cols, gridRows: packed.rows };
-  }, [children, items, width, colCount, bps, nest, overrides]);
+  }, [children, items, width, colCount, bps, nest, overrides, subOverrides]);
 
   return (
     <div ref={ref} className={cn("w-full", className)} style={style}>
@@ -285,65 +354,154 @@ export function NotchGrid({
           const { props, key, matrix, tier, subPlaced } = item;
           const itemBlock = props.block ?? block;
           const dragging = drag?.key === key;
+          const isPanel = !!subPlaced;
+          // Panel sub-grid extent — used to clamp sub-item drops.
+          const parentSubCols = isPanel
+            ? Math.max(1, ...subPlaced.map((p) => p.col + Math.max(1, p.sub.cost[0])))
+            : 0;
+          const parentSubRows = isPanel
+            ? Math.max(1, ...subPlaced.map((p) => p.row + Math.max(1, p.sub.cost[1])))
+            : 0;
 
           // A panel's content is its sub-item regions positioned at their cells
           // (the panel's BlockShape outline is the union of those footprints);
           // a plain item just renders its own children.
           const content = subPlaced
-            ? subPlaced.map(({ sub, key: subKey, col: sc, row: sr }) => (
-                <div
-                  key={subKey}
-                  className={cn("absolute overflow-hidden", sub.className)}
-                  style={{
-                    left: sc * itemBlock,
-                    top: sr * itemBlock,
-                    width: blocks(sub.cost[0]) * itemBlock,
-                    height: blocks(sub.cost[1]) * itemBlock,
-                    padding: sub.pad ?? props.pad ?? pad ?? 16,
-                    borderRadius: (sub.radius ?? props.radius ?? radius ?? 24) * 0.75,
-                    background: sub.fill && sub.fill !== "none" ? sub.fill : undefined,
-                    ...sub.style,
-                  }}
-                >
-                  {sub.content}
-                </div>
-              ))
+            ? subPlaced.map(({ sub, key: subKey, col: sc, row: sr }) => {
+                const subBeingDragged = subDrag?.parentKey === key && subDrag.subKey === subKey;
+                const subHovered = hoveredSub?.parentKey === key && hoveredSub.subKey === subKey;
+                const subHandlers = draggable
+                  ? {
+                      onPointerEnter: () => setHoveredSub({ parentKey: key, subKey }),
+                      onPointerLeave: () =>
+                        setHoveredSub((prev) =>
+                          prev?.parentKey === key && prev.subKey === subKey ? null : prev,
+                        ),
+                      onPointerDown: (e: ReactPointerEvent) => {
+                        if (e.button !== 0) return;
+                        e.stopPropagation();
+                        e.currentTarget.setPointerCapture(e.pointerId);
+                        setSubDrag({
+                          parentKey: key,
+                          subKey,
+                          pointerId: e.pointerId,
+                          startX: e.clientX,
+                          startY: e.clientY,
+                          originCol: sc,
+                          originRow: sr,
+                          cost: sub.cost,
+                          parentSubCols,
+                          parentSubRows,
+                          itemBlock,
+                          dx: 0,
+                          dy: 0,
+                        });
+                      },
+                      onPointerMove: handleSubPointerMove,
+                      onPointerUp: endSubDrag,
+                      onPointerCancel: endSubDrag,
+                    }
+                  : undefined;
+                return (
+                  <div
+                    key={subKey}
+                    {...subHandlers}
+                    className={cn(
+                      "absolute overflow-hidden transition-colors",
+                      draggable && "cursor-grab select-none touch-none",
+                      subBeingDragged && "cursor-grabbing",
+                      // Slight tonal lift on hover — sub-item reads as interactive.
+                      subHovered && !subBeingDragged && "bg-on-surface/10",
+                      sub.className,
+                    )}
+                    style={{
+                      left: sc * itemBlock,
+                      top: sr * itemBlock,
+                      width: blocks(sub.cost[0]) * itemBlock,
+                      height: blocks(sub.cost[1]) * itemBlock,
+                      padding: sub.pad ?? props.pad ?? pad ?? 16,
+                      borderRadius: (sub.radius ?? props.radius ?? radius ?? 24) * 0.75,
+                      background: sub.fill && sub.fill !== "none" ? sub.fill : undefined,
+                      transform: subBeingDragged ? `translate(${subDrag.dx}px, ${subDrag.dy}px)` : undefined,
+                      zIndex: subBeingDragged ? 30 : undefined,
+                      ...sub.style,
+                    }}
+                  >
+                    {sub.content}
+                  </div>
+                );
+              })
             : props.children;
 
-          const dragHandlers = draggable
-            ? {
-                onPointerDown: (e: ReactPointerEvent) => {
-                  if (e.button !== 0) return;
-                  e.currentTarget.setPointerCapture(e.pointerId);
-                  setDrag({
-                    key,
-                    pointerId: e.pointerId,
-                    startX: e.clientX,
-                    startY: e.clientY,
-                    originCol: col,
-                    originRow: row,
-                    originCols: itemCols,
-                    dx: 0,
-                    dy: 0,
-                  });
-                },
-                onPointerMove: handlePointerMove,
-                onPointerUp: endDrag,
-                onPointerCancel: endDrag,
-              }
-            : undefined;
+          // Whole-item drag handlers — applied to the outer div only when the
+          // item has no sub-items. Panel items get a dedicated handle (below)
+          // so that pointer-down on a sub-item moves the sub-item, not the
+          // panel.
+          const dragHandlers =
+            draggable && !isPanel
+              ? {
+                  onPointerDown: (e: ReactPointerEvent) => {
+                    if (e.button !== 0) return;
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                    setDrag({
+                      key,
+                      pointerId: e.pointerId,
+                      startX: e.clientX,
+                      startY: e.clientY,
+                      originCol: col,
+                      originRow: row,
+                      originCols: itemCols,
+                      dx: 0,
+                      dy: 0,
+                    });
+                  },
+                  onPointerMove: handlePointerMove,
+                  onPointerUp: endDrag,
+                  onPointerCancel: endDrag,
+                }
+              : undefined;
+
+          // Panel-only handle: dedicated drag target so the panel can be moved
+          // even when its sub-items fill it.
+          const panelHandleProps =
+            draggable && isPanel
+              ? {
+                  onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>) => {
+                    if (e.button !== 0) return;
+                    e.stopPropagation();
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                    setDrag({
+                      key,
+                      pointerId: e.pointerId,
+                      startX: e.clientX,
+                      startY: e.clientY,
+                      originCol: col,
+                      originRow: row,
+                      originCols: itemCols,
+                      dx: 0,
+                      dy: 0,
+                    });
+                  },
+                  onPointerMove: handlePointerMove,
+                  onPointerUp: endDrag,
+                  onPointerCancel: endDrag,
+                }
+              : null;
 
           return (
             <div
               key={key}
               {...dragHandlers}
-              className={cn("absolute", draggable && "select-none touch-none")}
+              className={cn(
+                "absolute",
+                draggable && !isPanel && "select-none touch-none",
+                draggable && !isPanel && (dragging ? "cursor-grabbing" : "cursor-grab"),
+              )}
               style={{
                 left: col * block,
                 top: row * block,
                 transform: dragging ? `translate(${drag.dx}px, ${drag.dy}px)` : undefined,
                 zIndex: dragging ? 20 : overrides.has(key) ? 10 : undefined,
-                cursor: draggable ? (dragging ? "grabbing" : "grab") : undefined,
               }}
             >
               <BlockShape
@@ -363,6 +521,19 @@ export function NotchGrid({
               >
                 {content}
               </BlockShape>
+              {panelHandleProps && (
+                <button
+                  type="button"
+                  aria-label="Drag panel"
+                  {...panelHandleProps}
+                  className={cn(
+                    "absolute top-1.5 right-1.5 z-10 flex size-6 cursor-grab touch-none items-center justify-center rounded-md bg-surface-container-low/70 text-on-surface-variant opacity-70 transition-opacity hover:bg-surface-container-high hover:opacity-100",
+                    dragging && "cursor-grabbing opacity-100",
+                  )}
+                >
+                  <Icon name="drag_indicator" size={16} />
+                </button>
+              )}
             </div>
           );
         })}
