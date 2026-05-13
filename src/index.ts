@@ -256,3 +256,9 @@ export {
   type BarChartProps,
   type BarChartDatum,
 } from "./components/ui/chart/bar-chart/BarChart";
+export {
+  DonutChart,
+  type DonutChartProps,
+  type DonutChartDatum,
+} from "./components/ui/chart/donut-chart/DonutChart";
+export { CHART_PALETTE, paletteColor } from "./utils/chart-arc";
