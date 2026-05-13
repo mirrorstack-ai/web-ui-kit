@@ -438,12 +438,18 @@ export function NotchGrid({
     for (const { props, key } of configs) {
       // Sub-items the user has dragged out of *this* panel — they're rendered
       // below as their own same-group outer-grid tiles, not inside the panel.
-      const raw = props.subItems?.filter((s, i) => {
-        const k = s.key ?? `s${i}`;
-        return !promotedSubs.has(promoteKey(key, k));
-      });
-      if (raw && raw.length > 0) {
-        const subs = raw.map((s, i) => ({ ...asSubItem(s), _i: i }));
+      // Preserve the *original* prop-order index as `_i` so the derived
+      // sub-keys (`s0`, `s1`, ...) stay stable across filters; otherwise a
+      // remaining sibling inherits a promoted tile's stale subOverrides pin
+      // and ends up at the wrong sub-cell.
+      const raw = (props.subItems ?? [])
+        .map((s, i) => ({ s, i }))
+        .filter(({ s, i }) => {
+          const k = s.key ?? `s${i}`;
+          return !promotedSubs.has(promoteKey(key, k));
+        });
+      if (raw.length > 0) {
+        const subs = raw.map(({ s, i }) => ({ ...asSubItem(s), _i: i }));
         const cw = (s: { cost: readonly [number, number] }) => Math.max(1, Math.floor(s.cost[0]));
         const maxSubW = Math.max(1, ...subs.map(cw));
         const subOver = subOverrides.get(key);
