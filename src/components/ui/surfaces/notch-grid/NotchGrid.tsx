@@ -395,6 +395,22 @@ export function NotchGrid({
                         if (e.button !== 0) return;
                         e.stopPropagation();
                         e.currentTarget.setPointerCapture(e.pointerId);
+                        // Pin every sibling at its current cell, so dragging
+                        // one sub-item doesn't shuffle the rest (the packer's
+                        // first-fit would otherwise re-flow them as the cell
+                        // under the cursor opens up). Idempotent — siblings
+                        // already in `subOverrides` keep their values.
+                        setSubOverrides((prev) => {
+                          const next = new Map(prev);
+                          const inner = new Map(next.get(key) ?? new Map());
+                          for (const sib of subPlaced!) {
+                            if (sib.key !== subKey && !inner.has(sib.key)) {
+                              inner.set(sib.key, { col: sib.col, row: sib.row });
+                            }
+                          }
+                          next.set(key, inner);
+                          return next;
+                        });
                         setSubDrag({
                           parentKey: key,
                           subKey,
