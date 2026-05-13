@@ -300,16 +300,33 @@ export function NotchGrid({
             row: pinned?.row ?? sub.row,
           };
         });
-        // When `subCols` is pinned, pack at exactly that width; otherwise search
-        // column counts × orderings for the most compact arrangement.
+        // When *any* sub-item has an explicit position (a drag drop, a live
+        // drag preview, or a user-supplied `col`/`row`), pack with
+        // `farthest-fit` flow so the un-anchored sub-items spread to the cells
+        // furthest from the anchors — i.e. a small tile dropped at one corner
+        // pushes the big tile to the diagonally opposite corner instead of
+        // collapsing into the anchor's column. The cols cap is **the compact
+        // square root of the total area** (with the panel's target aspect) —
+        // a wider cap would let the farthest-fit run away to the far right of
+        // the outer grid instead of landing at the diagonal corner.
+        const anyExplicit = subInputs.some((i) => i.col != null && i.row != null);
+        const totalSubCells = subs.reduce(
+          (n, s) => n + Math.max(1, Math.floor(s.cost[0])) * Math.max(1, Math.floor(s.cost[1])),
+          0,
+        );
+        const targetAspect = props.subAspect ?? 1.6;
+        const compactCols = Math.max(maxSubW, Math.ceil(Math.sqrt(totalSubCells * targetAspect)));
+        const subMaxCols = anyExplicit ? compactCols : Math.max(maxSubW, colCount);
         const subPlaced = (
           props.subCols != null
-            ? packItems(subInputs, props.subCols)
-            : optimalPlacement(subInputs, {
-                maxCols: Math.max(maxSubW, colCount),
-                minCols: maxSubW,
-                targetAspect: props.subAspect,
-              })
+            ? packItems(subInputs, props.subCols, anyExplicit ? { flowOrder: "farthest-fit" } : undefined)
+            : anyExplicit
+              ? packItems(subInputs, subMaxCols, { flowOrder: "farthest-fit" })
+              : optimalPlacement(subInputs, {
+                  maxCols: Math.max(maxSubW, colCount),
+                  minCols: maxSubW,
+                  targetAspect,
+                })
         ).placed;
         const matrix = placementToMask(subPlaced).map((row) => row.map((b) => (b ? 1 : 0)));
         return {
@@ -395,22 +412,6 @@ export function NotchGrid({
                         if (e.button !== 0) return;
                         e.stopPropagation();
                         e.currentTarget.setPointerCapture(e.pointerId);
-                        // Pin every sibling at its current cell, so dragging
-                        // one sub-item doesn't shuffle the rest (the packer's
-                        // first-fit would otherwise re-flow them as the cell
-                        // under the cursor opens up). Idempotent — siblings
-                        // already in `subOverrides` keep their values.
-                        setSubOverrides((prev) => {
-                          const next = new Map(prev);
-                          const inner = new Map(next.get(key) ?? new Map());
-                          for (const sib of subPlaced!) {
-                            if (sib.key !== subKey && !inner.has(sib.key)) {
-                              inner.set(sib.key, { col: sib.col, row: sib.row });
-                            }
-                          }
-                          next.set(key, inner);
-                          return next;
-                        });
                         setSubDrag({
                           parentKey: key,
                           subKey,

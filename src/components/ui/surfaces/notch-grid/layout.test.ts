@@ -162,3 +162,66 @@ describe("optimalPlacement", () => {
     expect(optimalPlacement([], { maxCols: 4 })).toMatchObject({ placed: [], cols: 4, rows: 0 });
   });
 });
+
+describe("packItems flowOrder='farthest-fit'", () => {
+  const ascii = (m: boolean[][]) => m.map((r) => r.map((c) => (c ? "x" : ".")).join("")).join("/");
+  const ff = { flowOrder: "farthest-fit" } as const;
+  // The compact cols cap NotchGrid uses for the sub-pack: max(widest, ceil(√(area·1.6))).
+  // For a 1×1 + a 2×2 → area 5, widest 2 → cols 3.
+  const COLS = 3;
+
+  it("places a flow item at the diagonally opposite cell of an explicit one", () => {
+    // Explicit 1×1 at the bottom-left → 2×2 lands at the top-right (1,0).
+    const r = packItems(
+      [
+        { item: { key: "a" }, mask: rectMask(1, 1), col: 0, row: 2 },
+        { item: { key: "b" }, mask: rectMask(2, 2) },
+      ],
+      COLS,
+      ff,
+    );
+    expect(ascii(placementToMask(r.placed))).toBe(".xx/.xx/x..");
+  });
+
+  it("mirrors for the opposite corner — bottom-right → top-left", () => {
+    const r = packItems(
+      [
+        { item: { key: "a" }, mask: rectMask(1, 1), col: 2, row: 2 },
+        { item: { key: "b" }, mask: rectMask(2, 2) },
+      ],
+      COLS,
+      ff,
+    );
+    expect(ascii(placementToMask(r.placed))).toBe("xx./xx./..x");
+  });
+
+  it("top-left → 2×2 at the diagonal centre (1,1)", () => {
+    const r = packItems(
+      [
+        { item: { key: "a" }, mask: rectMask(1, 1), col: 0, row: 0 },
+        { item: { key: "b" }, mask: rectMask(2, 2) },
+      ],
+      COLS,
+      ff,
+    );
+    expect(ascii(placementToMask(r.placed))).toBe("x../.xx/.xx");
+  });
+
+  it("treats each placed flow item as an anchor for the next, so a flow-only pack still spreads", () => {
+    // No initial anchors → `a` lands by first-fit at (0,0) and then becomes
+    // an anchor, so `b` falls to the diagonally opposite cell rather than
+    // packing right next to `a`.
+    const r = packItems(
+      [
+        { item: { key: "a" }, mask: rectMask(1, 1) },
+        { item: { key: "b" }, mask: rectMask(2, 2) },
+      ],
+      3,
+      ff,
+    );
+    expect(r.placed.map((p) => `${(p.item as { key: string }).key}@(${p.col},${p.row})`)).toEqual([
+      "a@(0,0)",
+      "b@(1,1)",
+    ]);
+  });
+});

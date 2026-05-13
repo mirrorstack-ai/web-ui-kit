@@ -71,10 +71,22 @@ export function placementToMask<T>(placed: ReadonlyArray<PlacedItem<T>>): boolea
   return mask;
 }
 
-/** First-fit packing into `cols` columns. Positions are in block units. */
+export interface PackOptions {
+  /** Flow placement strategy for non-explicit items. Default `"first-fit"` —
+   *  top-to-bottom / left-to-right scan. `"farthest-fit"` instead picks the
+   *  position that is **farthest** from any already-occupied (explicit) cell;
+   *  with no explicit items present this falls back to first-fit. Used by the
+   *  sub-item pack so the un-dragged sub-items arrange diagonally around the
+   *  dragged one instead of collapsing into its column. */
+  flowOrder?: "first-fit" | "farthest-fit";
+}
+
+/** First-fit packing into `cols` columns (or {@link PackOptions.flowOrder} for
+ *  alternative flow placement). Positions are in block units. */
 export function packItems<T>(
   inputs: ReadonlyArray<LayoutInput<T>>,
   cols: number,
+  options?: PackOptions,
 ): LayoutResult<T> {
   const C = Math.max(1, Math.floor(cols));
   const occ: boolean[][] = [];
@@ -137,6 +149,45 @@ export function packItems<T>(
     return row;
   };
 
+  /** Cells that are off-limits as "neighbours" for the farthest-fit scan —
+   *  i.e. the cells occupied by *anchor* items (explicit drops). Grown as flow
+   *  items land too so successive flow items also spread away from each other. */
+  const anchorCells: Array<readonly [number, number]> = [];
+  const recordAnchor = (mask: Mask, atCol: number, atRow: number) => {
+    for (let r = 0; r < mask.length; r++)
+      for (let c = 0; c < mask[r].length; c++)
+        if (mask[r][c]) anchorCells.push([atCol + c, atRow + r]);
+  };
+  if (options?.flowOrder === "farthest-fit") {
+    for (const p of placed) {
+      for (let r = 0; r < p.rows; r++)
+        for (let c = 0; c < p.cols; c++) anchorCells.push([p.col + c, p.row + r]);
+    }
+  }
+
+  /** Minimum Euclidean distance from any of `mask`'s cells (at the given
+   *  position) to any anchor cell. Euclidean (vs Chebyshev) breaks the tie
+   *  between an orthogonal neighbour and a diagonal one in favour of the
+   *  diagonal — which is what we want for a 1×1 in one corner and a 2×2 in
+   *  the diagonally opposite corner. */
+  const minDistTo = (mask: Mask, atCol: number, atRow: number): number => {
+    let best = Number.POSITIVE_INFINITY;
+    for (let r = 0; r < mask.length; r++) {
+      for (let c = 0; c < mask[r].length; c++) {
+        if (!mask[r][c]) continue;
+        const gx = atCol + c;
+        const gy = atRow + r;
+        for (const [ex, ey] of anchorCells) {
+          const dx = gx - ex;
+          const dy = gy - ey;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < best) best = d;
+        }
+      }
+    }
+    return best;
+  };
+
   for (const i of flowQueue) {
     const { w, h } = dims(i.mask);
     if (w > C) {
@@ -152,13 +203,46 @@ export function packItems<T>(
       continue;
     }
     let found = false;
-    for (let row = 0; row < MAX_ROWS && !found; row++) {
-      for (let col = 0; col + w <= C; col++) {
-        if (!collides(i.mask, col, row)) {
-          occupy(i.mask, col, row);
-          placed.push({ item: i.item, col, row, cols: w, rows: h });
-          found = true;
-          break;
+    // Farthest-fit: pick the position that maximises distance to any anchor
+    // cell. The scan is bounded to a roughly C × C box (anchor rows + the
+    // column count, whichever is taller) — otherwise the packer would happily
+    // place the item arbitrarily far below the anchor instead of at the
+    // diagonally opposite corner of a compact panel. Falls back to first-fit
+    // when no anchor cells exist.
+    if (options?.flowOrder === "farthest-fit" && anchorCells.length > 0) {
+      const maxAnchorRow = anchorCells.reduce((m, [, r]) => Math.max(m, r), 0);
+      const scanRows = Math.max(maxAnchorRow + 1, C);
+      let bestCol = -1;
+      let bestRow = -1;
+      let bestDist = -1;
+      for (let row = 0; row + h <= scanRows; row++) {
+        for (let col = 0; col + w <= C; col++) {
+          if (collides(i.mask, col, row)) continue;
+          const d = minDistTo(i.mask, col, row);
+          if (d > bestDist) {
+            bestDist = d;
+            bestCol = col;
+            bestRow = row;
+          }
+        }
+      }
+      if (bestCol >= 0) {
+        occupy(i.mask, bestCol, bestRow);
+        placed.push({ item: i.item, col: bestCol, row: bestRow, cols: w, rows: h });
+        recordAnchor(i.mask, bestCol, bestRow);
+        found = true;
+      }
+    }
+    if (!found) {
+      for (let row = 0; row < MAX_ROWS && !found; row++) {
+        for (let col = 0; col + w <= C; col++) {
+          if (!collides(i.mask, col, row)) {
+            occupy(i.mask, col, row);
+            placed.push({ item: i.item, col, row, cols: w, rows: h });
+            if (options?.flowOrder === "farthest-fit") recordAnchor(i.mask, col, row);
+            found = true;
+            break;
+          }
         }
       }
     }
