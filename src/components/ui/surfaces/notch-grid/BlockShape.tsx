@@ -117,7 +117,7 @@ export function BlockShape({
         />
       </svg>
       <div
-        className="absolute inset-0 overflow-hidden"
+        className={cn("absolute inset-0", !noClip && "overflow-hidden")}
         style={{
           padding: pad,
           clipPath: noClip ? undefined : `url(#${clipId})`,

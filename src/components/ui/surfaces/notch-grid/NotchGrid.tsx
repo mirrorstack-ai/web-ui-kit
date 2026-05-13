@@ -187,6 +187,14 @@ interface SubDragState {
   parentOuterRows: number;
   /** Sub-grid block size in px (so we can convert pointer-px to cells). */
   itemBlock: number;
+  /** Resolved styles for the cursor-following ghost (theme inherits from the
+   *  parent panel where the sub doesn't override). The ghost replaces the
+   *  in-chrome tile during the drag so the user sees a rounded filled
+   *  preview that follows their cursor instead of just the sub's contents
+   *  silhouetted through the panel. */
+  ghostFill?: string;
+  ghostRadius: number;
+  ghostPad: number;
   dx: number;
   dy: number;
 }
@@ -431,10 +439,11 @@ export function NotchGrid({
         );
         const subInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = ordered.map((sub) => {
           const subKey = sub.key ?? `s${sub._i}`;
-          // Live drag preview wins over the persistent pinned position so the
-          // pack reshapes around the dragged sub-item *as* it moves.
-          const isLive = liveSnap && liveSnap.parentKey === key && liveSnap.subKey === subKey;
-          const pinned = isLive ? { col: liveSnap.col, row: liveSnap.row } : subOver?.get(subKey);
+          // Panel layout stays frozen during a sub-drag — the dragged tile is
+          // replaced by a cursor-following ghost overlay (rendered at the
+          // outer-grid root below) so nothing in the chrome reshapes until the
+          // drop commits.
+          const pinned = subOver?.get(subKey);
           return {
             item: { sub, key: subKey },
             mask: rectMask(sub.cost[0], sub.cost[1]),
@@ -555,9 +564,10 @@ export function NotchGrid({
       );
     }
     return { placed: packed.placed, gridCols: packed.cols, gridRows: packed.rows };
-    // Primitive `liveSnap` deps — re-pack only when the dragged sub-item's
-    // snapped cell changes, not on every sub-pixel pointer-move.
-  }, [children, items, width, colCount, bps, nest, overrides, subOverrides, promotedSubs, liveSnap?.parentKey, liveSnap?.subKey, liveSnap?.col, liveSnap?.row]);
+    // Layout is frozen during the drag itself — only the commits in
+    // `subOverrides` / `promotedSubs` re-pack. The cursor-following ghost is
+    // a render-only overlay that doesn't touch the pack.
+  }, [children, items, width, colCount, bps, nest, overrides, subOverrides, promotedSubs]);
 
   // Bucket placed items by `groupKey` (singletons get a unique bucket so they
   // never accidentally merge with anything). Within each bucket, find 8-
@@ -632,6 +642,16 @@ export function NotchGrid({
             .map((p) => String(p.item.key))
             .sort()
             .join("|");
+          // Drop the chrome's clip while a sub-item in this component is being
+          // dragged so the cursor-following ghost can render through it
+          // without being chopped at the parent's outline.
+          const isDraggingInComp =
+            !!subDrag &&
+            comp.some(
+              (p) =>
+                p.item.key === subDrag.parentKey ||
+                p.item.subPlaced?.some((sp) => sp.key === subDrag.subKey && p.item.key === subDrag.parentKey),
+            );
           const isPlainSingleton = comp.length === 1 && !lead.item.subPlaced;
           // Drag handlers for a plain (no-sub-items) outer-grid singleton —
           // wraps the whole tile so pointer-down anywhere on it starts the
@@ -698,6 +718,12 @@ export function NotchGrid({
                         if (e.button !== 0) return;
                         e.stopPropagation();
                         e.currentTarget.setPointerCapture(e.pointerId);
+                        // Pointer capture sticks to this element for the rest
+                        // of the drag, so siblings never receive a leave event
+                        // — clear hover here so a sibling that the cursor *was*
+                        // on (e.g. Calls/Day while reaching for Cron) doesn't
+                        // stay highlighted for the whole drag.
+                        setHoveredSub(null);
                         setSubOverrides((prev) => {
                           const next = new Map(prev);
                           const inner = new Map(next.get(mKey) ?? new Map());
@@ -722,6 +748,9 @@ export function NotchGrid({
                           parentOuterCols: p.cols,
                           parentOuterRows: p.rows,
                           itemBlock: mItemBlock,
+                          ghostFill: sub.fill ?? mProps.fill ?? fill,
+                          ghostRadius: sub.radius ?? mProps.radius ?? radius ?? 24,
+                          ghostPad: sub.pad ?? mProps.pad ?? pad ?? 16,
                           dx: 0,
                           dy: 0,
                         });
@@ -753,9 +782,12 @@ export function NotchGrid({
                       padding: sub.pad ?? mProps.pad ?? pad ?? 16,
                       borderRadius: (sub.radius ?? mProps.radius ?? radius ?? 24) * 0.75,
                       background: sub.fill && sub.fill !== "none" ? sub.fill : undefined,
-                      transform: subBeingDragged
-                        ? `translate(${subDrag.dx - (sc - subDrag.originCol) * mItemBlock}px, ${subDrag.dy - (sr - subDrag.originRow) * mItemBlock}px)`
-                        : undefined,
+                      // Hide the in-chrome tile during the drag — the ghost
+                      // overlay (rendered as a sibling of the grid below)
+                      // tracks the cursor with the rounded filled preview.
+                      // We keep the element mounted so the captured pointer
+                      // still has its target.
+                      opacity: subBeingDragged ? 0 : undefined,
                       zIndex: subBeingDragged ? 30 : undefined,
                       ...sub.style,
                     }}
@@ -859,7 +891,7 @@ export function NotchGrid({
                 stroke={leadProps.stroke ?? stroke}
                 strokeWidth={leadProps.strokeWidth ?? strokeWidth}
                 pad={isPlainSingleton ? leadProps.pad ?? pad : 0}
-                noClip={isPlainSingleton ? leadProps.noClip : undefined}
+                noClip={isDraggingInComp || (isPlainSingleton ? leadProps.noClip : undefined)}
                 className={isPlainSingleton ? leadProps.className : undefined}
                 style={isPlainSingleton ? leadProps.style : undefined}
               >
@@ -868,6 +900,34 @@ export function NotchGrid({
             </div>
           );
         })}
+        {subDrag && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute"
+            style={{
+              left:
+                subDrag.parentOuterCol * block +
+                subDrag.originCol * subDrag.itemBlock +
+                gap / 2,
+              top:
+                subDrag.parentOuterRow * block +
+                subDrag.originRow * subDrag.itemBlock +
+                gap / 2,
+              width: blocks(subDrag.cost[0]) * subDrag.itemBlock - gap,
+              height: blocks(subDrag.cost[1]) * subDrag.itemBlock - gap,
+              borderRadius: subDrag.ghostRadius * 0.75,
+              background:
+                subDrag.ghostFill && subDrag.ghostFill !== "none"
+                  ? subDrag.ghostFill
+                  : undefined,
+              padding: subDrag.ghostPad,
+              transform: `translate(${subDrag.dx}px, ${subDrag.dy}px)`,
+              zIndex: 50,
+            }}
+          >
+            {subDrag.sub.content}
+          </div>
+        )}
       </div>
     </div>
   );
