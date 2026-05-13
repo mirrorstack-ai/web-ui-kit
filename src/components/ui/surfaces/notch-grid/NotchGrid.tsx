@@ -327,7 +327,13 @@ export function NotchGrid({
     Map<string, { parentKey: Key; subKey: Key; sub: NotchSubItem; col: number; row: number }>
   >(new Map());
   const promoteKey = (parentKey: Key, subKey: Key) => `${String(parentKey)} ${String(subKey)}`;
-  const [hoveredSub, setHoveredSub] = useState<{ parentKey: Key; subKey: Key } | null>(null);
+  // The hovered tile, identified by a composed key. For panel sub-items it's
+  // `${parentKey}::${subKey}`; for standalone outer tiles inside a unioned
+  // chrome it's the item's own key. The dim overlay (`bg-on-surface/10`) is
+  // applied on the matching tile so adjacent grouped items get the same
+  // hover affordance, not just sub-items.
+  const [hoveredTile, setHoveredTile] = useState<string | null>(null);
+  const subTileKey = (parentKey: Key, subKey: Key) => `${String(parentKey)}::${String(subKey)}`;
 
   /** Snap a drag offset to a sub-grid cell, clamped to `>= 0` on each axis.
    *  No upper clamp — letting the panel grow back is essential for cycles like
@@ -706,12 +712,18 @@ export function NotchGrid({
           // wraps the whole tile so pointer-down anywhere on it starts the
           // drag. Panels (with sub-items) leave the chrome plain and let each
           // sub-item carry its own drag handler below.
+          const singletonTileKey = String(lead.item.key);
+          const singletonHovered = isPlainSingleton && hoveredTile === singletonTileKey;
           const singletonDrag =
             isPlainSingleton && draggable
               ? {
+                  onPointerEnter: () => setHoveredTile(singletonTileKey),
+                  onPointerLeave: () =>
+                    setHoveredTile((prev) => (prev === singletonTileKey ? null : prev)),
                   onPointerDown: (e: ReactPointerEvent) => {
                     if (e.button !== 0) return;
                     e.currentTarget.setPointerCapture(e.pointerId);
+                    setHoveredTile(null);
                     setDrag({
                       key: lead.item.key,
                       pointerId: e.pointerId,
@@ -752,17 +764,13 @@ export function NotchGrid({
               for (const { sub, key: subKey, col: sc, row: sr } of subPlaced) {
                 const subBeingDragged =
                   subDrag?.parentKey === mKey && subDrag.subKey === subKey;
-                const subHovered =
-                  hoveredSub?.parentKey === mKey && hoveredSub.subKey === subKey;
+                const tileKey = subTileKey(mKey, subKey);
+                const subHovered = hoveredTile === tileKey;
                 const subHandlers = draggable
                   ? {
-                      onPointerEnter: () => setHoveredSub({ parentKey: mKey, subKey }),
+                      onPointerEnter: () => setHoveredTile(tileKey),
                       onPointerLeave: () =>
-                        setHoveredSub((prev) =>
-                          prev?.parentKey === mKey && prev.subKey === subKey
-                            ? null
-                            : prev,
-                        ),
+                        setHoveredTile((prev) => (prev === tileKey ? null : prev)),
                       onPointerDown: (e: ReactPointerEvent) => {
                         if (e.button !== 0) return;
                         e.stopPropagation();
@@ -772,7 +780,7 @@ export function NotchGrid({
                         // — clear hover here so a sibling that the cursor *was*
                         // on (e.g. Calls/Day while reaching for Cron) doesn't
                         // stay highlighted for the whole drag.
-                        setHoveredSub(null);
+                        setHoveredTile(null);
                         setSubOverrides((prev) => {
                           const next = new Map(prev);
                           const inner = new Map(next.get(mKey) ?? new Map());
@@ -851,12 +859,18 @@ export function NotchGrid({
               // when there's more than one member in the component (singletons
               // get drag on the outer wrapper instead).
               const draggingThis = drag?.key === mKey;
+              const memberTileKey = String(mKey);
+              const memberHovered = hoveredTile === memberTileKey;
               const memberDrag =
                 draggable && !isPlainSingleton
                   ? {
+                      onPointerEnter: () => setHoveredTile(memberTileKey),
+                      onPointerLeave: () =>
+                        setHoveredTile((prev) => (prev === memberTileKey ? null : prev)),
                       onPointerDown: (e: ReactPointerEvent) => {
                         if (e.button !== 0) return;
                         e.currentTarget.setPointerCapture(e.pointerId);
+                        setHoveredTile(null);
                         setDrag({
                           key: mKey,
                           pointerId: e.pointerId,
@@ -881,9 +895,10 @@ export function NotchGrid({
                   key={String(mKey)}
                   {...memberDrag}
                   className={cn(
-                    "absolute overflow-hidden",
+                    "absolute overflow-hidden transition-colors",
                     draggable && !isPlainSingleton && "cursor-grab select-none touch-none",
                     draggingThis && "cursor-grabbing",
+                    memberHovered && !draggingThis && "bg-on-surface/10",
                     mProps.className,
                   )}
                   style={{
@@ -916,11 +931,17 @@ export function NotchGrid({
               key={compKey}
               {...singletonDrag}
               className={cn(
-                "absolute",
+                "absolute transition-[filter] duration-150",
                 draggable && isPlainSingleton && "select-none touch-none",
                 draggable &&
                   isPlainSingleton &&
                   (singletonDragging ? "cursor-grabbing" : "cursor-grab"),
+                // Slight tonal dim on the whole tile when hovered — the same
+                // affordance the in-chrome members get via `bg-on-surface/10`,
+                // applied here via brightness since a singleton's tile is a
+                // BlockShape with its own SVG fill (a background overlay would
+                // sit *outside* the chrome outline instead of tinting the fill).
+                singletonHovered && !singletonDragging && "brightness-95",
               )}
               style={{
                 left: minCol * block,
