@@ -322,19 +322,15 @@ export function NotchGrid({
   const promoteKey = (parentKey: Key, subKey: Key) => `${String(parentKey)} ${String(subKey)}`;
   const [hoveredSub, setHoveredSub] = useState<{ parentKey: Key; subKey: Key } | null>(null);
 
-  /** Snap a drag offset to a sub-grid cell, clamped to the panel's pre-drag
-   *  bounds — the sub-item can't leave the panel. Going past an edge holds at
-   *  the edge instead of jumping the sub-item to a far-away cell that would
-   *  split the panel into two disjoint regions. */
+  /** Snap a drag offset to a sub-grid cell, clamped to `>= 0` on each axis.
+   *  No upper clamp — letting the panel grow back is essential for cycles like
+   *  "drag up 1 row → drag back": after the first drop the panel has shrunk,
+   *  and clamping to the shrunken extent would prevent the drag-back from
+   *  reaching its original sub-cell. The chrome can grow because the in-chrome
+   *  layout is rebuilt from the placed sub-cells each render. */
   const snapDrag = (s: SubDragState): { col: number; row: number } => ({
-    col: Math.max(
-      0,
-      Math.min(s.parentSubCols - s.cost[0], s.originCol + Math.round(s.dx / s.itemBlock)),
-    ),
-    row: Math.max(
-      0,
-      Math.min(s.parentSubRows - s.cost[1], s.originRow + Math.round(s.dy / s.itemBlock)),
-    ),
+    col: Math.max(0, s.originCol + Math.round(s.dx / s.itemBlock)),
+    row: Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock)),
   });
 
   // Live-preview snap: the cell the dragged sub-item would land in *right now*.
@@ -369,13 +365,18 @@ export function NotchGrid({
       const dropOuterRow = gridRect
         ? Math.max(0, Math.floor((e.clientY - gridRect.top) / block))
         : null;
+      // 1-cell halo on every side: a drop just past the panel's current edge
+      // still counts as sub-drag (so it can grow the panel back to a previous
+      // size), but a drop further away promotes. Otherwise a `drag-up → drag-
+      // back` cycle promotes on the second drop because the first shrunk the
+      // panel and the drag-back lands one row past the new edge.
       const droppedInsidePanel =
         dropOuterCol != null &&
         dropOuterRow != null &&
-        dropOuterCol >= s.parentOuterCol &&
-        dropOuterCol < s.parentOuterCol + s.parentOuterCols &&
-        dropOuterRow >= s.parentOuterRow &&
-        dropOuterRow < s.parentOuterRow + s.parentOuterRows;
+        dropOuterCol >= s.parentOuterCol - 1 &&
+        dropOuterCol < s.parentOuterCol + s.parentOuterCols + 1 &&
+        dropOuterRow >= s.parentOuterRow - 1 &&
+        dropOuterRow < s.parentOuterRow + s.parentOuterRows + 1;
       setSubDrag(null);
       if (!droppedInsidePanel && dropOuterCol != null && dropOuterRow != null) {
         setPromotedSubs((prev) => {
