@@ -228,9 +228,13 @@ export function NotchGrid({
 
   /** Snap a drag offset to a sub-grid cell, clamped to one cell past the
    *  panel's current edge so the drop can grow / reshape the panel. */
+  // The drop position snaps to the nearest sub-grid cell; only the *negative*
+  // side is clamped (a sub-item can't live above / left of the panel's origin).
+  // The drop is *not* capped at the panel's current right / bottom edge — the
+  // sub-pack happily grows to accept a sub-item dropped past it.
   const snapDrag = (s: SubDragState): { col: number; row: number } => ({
-    col: Math.min(Math.max(0, s.parentSubCols), Math.max(0, s.originCol + Math.round(s.dx / s.itemBlock))),
-    row: Math.min(Math.max(0, s.parentSubRows), Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock))),
+    col: Math.max(0, s.originCol + Math.round(s.dx / s.itemBlock)),
+    row: Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock)),
   });
 
   // Live-preview snap: the cell the dragged sub-item would land in *right now*.
@@ -324,11 +328,17 @@ export function NotchGrid({
         );
         const targetAspect = props.subAspect ?? 1.6;
         const compactCols = Math.max(maxSubW, Math.ceil(Math.sqrt(totalSubCells * targetAspect)));
-        const subPlaced = packItems(
-          subInputs,
-          props.subCols ?? compactCols,
-          { flowOrder: "farthest-fit" },
-        ).placed;
+        // Grow the column cap if a pin (drag drop / live preview) sits past
+        // the compact extent, so dragging a sub-item past the panel's current
+        // right edge extends the panel instead of having the packer overflow
+        // the pin and re-flow it back inside.
+        const maxPinCol = subInputs.reduce((m, i) => {
+          if (i.col == null) return m;
+          const w = i.mask[0]?.length ?? 1;
+          return Math.max(m, i.col + w);
+        }, 0);
+        const subC = Math.max(props.subCols ?? compactCols, maxPinCol);
+        const subPlaced = packItems(subInputs, subC, { flowOrder: "farthest-fit" }).placed;
         const matrix = placementToMask(subPlaced).map((row) => row.map((b) => (b ? 1 : 0)));
         return {
           props,
