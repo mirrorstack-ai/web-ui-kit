@@ -226,15 +226,19 @@ export function NotchGrid({
   subDragRef.current = subDrag;
   const [hoveredSub, setHoveredSub] = useState<{ parentKey: Key; subKey: Key } | null>(null);
 
-  /** Snap a drag offset to a sub-grid cell, clamped to one cell past the
-   *  panel's current edge so the drop can grow / reshape the panel. */
-  // The drop position snaps to the nearest sub-grid cell; only the *negative*
-  // side is clamped (a sub-item can't live above / left of the panel's origin).
-  // The drop is *not* capped at the panel's current right / bottom edge — the
-  // sub-pack happily grows to accept a sub-item dropped past it.
+  /** Snap a drag offset to a sub-grid cell, clamped to the panel's pre-drag
+   *  bounds — the sub-item can't leave the panel. Going past an edge holds at
+   *  the edge instead of jumping the sub-item to a far-away cell that would
+   *  split the panel into two disjoint regions. */
   const snapDrag = (s: SubDragState): { col: number; row: number } => ({
-    col: Math.max(0, s.originCol + Math.round(s.dx / s.itemBlock)),
-    row: Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock)),
+    col: Math.max(
+      0,
+      Math.min(s.parentSubCols - s.cost[0], s.originCol + Math.round(s.dx / s.itemBlock)),
+    ),
+    row: Math.max(
+      0,
+      Math.min(s.parentSubRows - s.cost[1], s.originRow + Math.round(s.dy / s.itemBlock)),
+    ),
   });
 
   // Live-preview snap: the cell the dragged sub-item would land in *right now*.
