@@ -24,7 +24,6 @@ import {
   type NotchBreakpoints,
 } from "./breakpoints";
 import {
-  optimalPlacement,
   packItems,
   placementToMask,
   rectMask,
@@ -75,6 +74,10 @@ export interface NotchGridProps {
   draggable?: boolean;
   /** Called after a drag drops an item, with its new block position. */
   onItemMove?: (key: Key, col: number, row: number) => void;
+  /** Called after a sub-item drag drops on a new sub-grid cell. The panel
+   *  re-packs around the new position; if the move would change the panel's
+   *  notched footprint, neighbouring items in the outer grid re-flow too. */
+  onSubItemMove?: (parentKey: Key, subKey: Key, col: number, row: number) => void;
   children?: ReactNode;
   className?: string;
   style?: CSSProperties;
@@ -82,6 +85,70 @@ export interface NotchGridProps {
 
 /** Clamp a value to a whole block count `>= 1`. */
 const blocks = (n: number) => Math.max(1, Math.floor(n));
+
+type Cell = readonly [number, number];
+
+/** Outer-grid cells filled by a placed item — used for adjacency-based grouping
+ *  at render time so two same-`groupKey` tiles that end up next to each other
+ *  (edge or corner) get their chromes unioned into one shape. */
+function itemFilledCells(p: {
+  item: { matrix: number[][]; tier: number };
+  col: number;
+  row: number;
+}): Cell[] {
+  const out: Cell[] = [];
+  const m = p.item.matrix;
+  const tier = p.item.tier;
+  for (let r = 0; r < m.length; r++) {
+    const row = m[r] ?? [];
+    for (let c = 0; c < row.length; c++) {
+      const v = row[c];
+      if (v >= 1 && v <= tier) out.push([p.col + c, p.row + r]);
+    }
+  }
+  return out;
+}
+
+/** Group same-bucket placed items into 8-connected components — two items
+ *  belong to the same component if any of one's filled cells is within 1 row /
+ *  column of any of the other's (so corner-touching counts, just like the
+ *  grid-outline tracer's diagonal-junction handling). */
+function findConnectedComponents<T extends { col: number; row: number; cols: number; rows: number; item: { matrix: number[][]; tier: number } }>(
+  items: T[],
+): T[][] {
+  if (items.length <= 1) return items.length ? [items] : [];
+  const cells = items.map(itemFilledCells);
+  const visited = new Array<boolean>(items.length).fill(false);
+  const out: T[][] = [];
+  for (let s = 0; s < items.length; s++) {
+    if (visited[s]) continue;
+    visited[s] = true;
+    const queue = [s];
+    const comp: T[] = [];
+    while (queue.length) {
+      const i = queue.shift()!;
+      comp.push(items[i]);
+      for (let j = 0; j < items.length; j++) {
+        if (visited[j]) continue;
+        let adj = false;
+        outer: for (const [ax, ay] of cells[i]) {
+          for (const [bx, by] of cells[j]) {
+            if (Math.abs(ax - bx) <= 1 && Math.abs(ay - by) <= 1) {
+              adj = true;
+              break outer;
+            }
+          }
+        }
+        if (adj) {
+          visited[j] = true;
+          queue.push(j);
+        }
+      }
+    }
+    out.push(comp);
+  }
+  return out;
+}
 
 interface DragState {
   key: Key;
@@ -92,6 +159,42 @@ interface DragState {
   originRow: number;
   /** The dragged item's footprint width in blocks (to clamp the drop column). */
   originCols: number;
+  dx: number;
+  dy: number;
+}
+
+interface SubDragState {
+  parentKey: Key;
+  subKey: Key;
+  /** Snapshot of the sub-item (cost, content, theme) so a drop outside the
+   *  parent panel can promote it to a standalone same-themed tile. */
+  sub: NotchSubItem;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  originCol: number;
+  originRow: number;
+  /** The sub-item's footprint in sub-grid cells. */
+  cost: readonly [number, number];
+  /** The parent panel's sub-grid extent (cols × rows), captured at drag start. */
+  parentSubCols: number;
+  parentSubRows: number;
+  /** The parent panel's outer-grid rect, captured at drag start — drops past
+   *  this rect promote the sub to a standalone same-group outer-grid tile. */
+  parentOuterCol: number;
+  parentOuterRow: number;
+  parentOuterCols: number;
+  parentOuterRows: number;
+  /** Sub-grid block size in px (so we can convert pointer-px to cells). */
+  itemBlock: number;
+  /** Resolved styles for the cursor-following ghost (theme inherits from the
+   *  parent panel where the sub doesn't override). The ghost replaces the
+   *  in-chrome tile during the drag so the user sees a rounded filled
+   *  preview that follows their cursor instead of just the sub's contents
+   *  silhouetted through the panel. */
+  ghostFill?: string;
+  ghostRadius: number;
+  ghostPad: number;
   dx: number;
   dy: number;
 }
@@ -133,6 +236,19 @@ interface ResolvedItem {
   tier: number;
   /** Packed sub-items when this item is a panel; otherwise undefined. */
   subPlaced?: PlacedSub[];
+  /** Adjacent same-`groupKey` placed items render unioned into one chrome.
+   *  Sub-items from a {@link NotchGridItemProps.subItems} panel automatically
+   *  share their parent's key as group; promoted (dragged-out) sub-items
+   *  keep the same group so they can re-link when dragged back beside the
+   *  rest. */
+  groupKey?: Key;
+  /** Natural panel extent — what the matrix would be if no sub-item drags
+   *  had moved anything. Used as the inside-panel hit-box for sub-drag promote
+   *  decisions: a drop within the natural rect is a sub-drag (the chrome
+   *  reshapes / regrows), a drop past it promotes the sub to a standalone
+   *  same-themed tile. Defaults to the current matrix size for plain items. */
+  naturalCols: number;
+  naturalRows: number;
 }
 
 export function NotchGrid({
@@ -150,6 +266,7 @@ export function NotchGrid({
   items,
   draggable = false,
   onItemMove,
+  onSubItemMove,
   children,
   className,
   style,
@@ -196,6 +313,109 @@ export function NotchGrid({
     [block, colCount, onItemMove],
   );
 
+  // Sub-item drag — same shape as panel drag, but inside one panel's sub-grid.
+  const [subOverrides, setSubOverrides] = useState<Map<Key, Map<Key, { col: number; row: number }>>>(new Map());
+  const [subDrag, setSubDrag] = useState<SubDragState | null>(null);
+  const subDragRef = useRef<SubDragState | null>(null);
+  subDragRef.current = subDrag;
+  // Sub-items the user dragged *out* of their parent panel. Each entry renders
+  // as a standalone same-themed top-level outer-grid tile at the dropped cell,
+  // and is removed from the parent's sub-pack. Linking back happens at render
+  // time — promoted tiles share `groupKey = parentKey`, and the grid unions
+  // adjacent same-group tiles into one chrome.
+  const [promotedSubs, setPromotedSubs] = useState<
+    Map<string, { parentKey: Key; subKey: Key; sub: NotchSubItem; col: number; row: number }>
+  >(new Map());
+  const promoteKey = (parentKey: Key, subKey: Key) => `${String(parentKey)} ${String(subKey)}`;
+  const [hoveredSub, setHoveredSub] = useState<{ parentKey: Key; subKey: Key } | null>(null);
+
+  /** Snap a drag offset to a sub-grid cell, clamped to `>= 0` on each axis.
+   *  No upper clamp — letting the panel grow back is essential for cycles like
+   *  "drag up 1 row → drag back": after the first drop the panel has shrunk,
+   *  and clamping to the shrunken extent would prevent the drag-back from
+   *  reaching its original sub-cell. The chrome can grow because the in-chrome
+   *  layout is rebuilt from the placed sub-cells each render. */
+  const snapDrag = (s: SubDragState): { col: number; row: number } => ({
+    col: Math.max(0, s.originCol + Math.round(s.dx / s.itemBlock)),
+    row: Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock)),
+  });
+
+  const handleSubPointerMove = useCallback((e: ReactPointerEvent) => {
+    const s = subDragRef.current;
+    if (!s || e.pointerId !== s.pointerId) return;
+    setSubDrag({ ...s, dx: e.clientX - s.startX, dy: e.clientY - s.startY });
+  }, []);
+
+  const endSubDrag = useCallback(
+    (e: ReactPointerEvent) => {
+      const s = subDragRef.current;
+      if (!s || e.pointerId !== s.pointerId) return;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        /* pointer may already be released */
+      }
+      // Translate the drop point to an outer-grid cell. If the cursor left the
+      // parent panel's rect, the user dragged the sub *out* — promote it to a
+      // standalone same-themed tile at that outer cell (adjacent tiles in the
+      // same group re-link at render time). Otherwise commit a normal sub-drag.
+      const gridRect = ref.current?.getBoundingClientRect();
+      const dropOuterCol = gridRect
+        ? Math.max(0, Math.floor((e.clientX - gridRect.left) / block))
+        : null;
+      const dropOuterRow = gridRect
+        ? Math.max(0, Math.floor((e.clientY - gridRect.top) / block))
+        : null;
+      // The panel's natural extent (captured at drag start) is the in-panel
+      // hit-box: drops inside it sub-drag (the chrome can reshape back to its
+      // natural shape), drops outside promote. Using natural rather than the
+      // current shrunken extent stops a "drag-up → drag-back" cycle from
+      // tripping the promote branch on the way back.
+      const droppedInsidePanel =
+        dropOuterCol != null &&
+        dropOuterRow != null &&
+        dropOuterCol >= s.parentOuterCol &&
+        dropOuterCol < s.parentOuterCol + s.parentOuterCols &&
+        dropOuterRow >= s.parentOuterRow &&
+        dropOuterRow < s.parentOuterRow + s.parentOuterRows;
+      setSubDrag(null);
+      if (!droppedInsidePanel && dropOuterCol != null && dropOuterRow != null) {
+        setPromotedSubs((prev) => {
+          const next = new Map(prev);
+          next.set(promoteKey(s.parentKey, s.subKey), {
+            parentKey: s.parentKey,
+            subKey: s.subKey,
+            sub: s.sub,
+            col: dropOuterCol,
+            row: dropOuterRow,
+          });
+          return next;
+        });
+        // Pin the parent panel at its current outer cell — promoting a sub
+        // shrinks the panel's mask, and without a pin the outer pack would
+        // reflow it (Calls/Day jumping to a new cell when Cron is dragged
+        // out). The user can still drag the panel itself later to re-pin.
+        setOverrides((prev) => {
+          if (prev.has(s.parentKey)) return prev;
+          const next = new Map(prev);
+          next.set(s.parentKey, { col: s.parentOuterCol, row: s.parentOuterRow });
+          return next;
+        });
+        return;
+      }
+      const { col: nextCol, row: nextRow } = snapDrag(s);
+      setSubOverrides((prev) => {
+        const next = new Map(prev);
+        const inner = new Map(next.get(s.parentKey) ?? new Map());
+        inner.set(s.subKey, { col: nextCol, row: nextRow });
+        next.set(s.parentKey, inner);
+        return next;
+      });
+      onSubItemMove?.(s.parentKey, s.subKey, nextCol, nextRow);
+    },
+    [block, onSubItemMove],
+  );
+
   const { placed, gridCols, gridRows } = useMemo(() => {
     // Gather item configs: `<NotchGridItem>` children, then the `items` prop.
     const configs: { props: NotchGridItemProps; key: Key }[] = [];
@@ -208,44 +428,168 @@ export function NotchGrid({
     });
     (items ?? []).forEach((p, i) => configs.push({ props: p, key: p.key ?? `i${i}` }));
 
-    const resolved: ResolvedItem[] = configs.map(({ props, key }) => {
-      if (props.subItems && props.subItems.length > 0) {
-        const subs = props.subItems.map((s, i) => ({ ...asSubItem(s), _i: i }));
+    const resolved: ResolvedItem[] = [];
+    for (const { props, key } of configs) {
+      // Sub-items the user has dragged out of *this* panel — they're rendered
+      // below as their own same-group outer-grid tiles, not inside the panel.
+      // Preserve the *original* prop-order index as `_i` so the derived
+      // sub-keys (`s0`, `s1`, ...) stay stable across filters; otherwise a
+      // remaining sibling inherits a promoted tile's stale subOverrides pin
+      // and ends up at the wrong sub-cell.
+      const raw = (props.subItems ?? [])
+        .map((s, i) => ({ s, i }))
+        .filter(({ s, i }) => {
+          // `s` may be the `[cols, rows]` tuple shorthand — normalize before
+          // reaching for `.key`, otherwise TS sees a number tuple.
+          const k = asSubItem(s).key ?? `s${i}`;
+          return !promotedSubs.has(promoteKey(key, k));
+        });
+      if (raw.length > 0) {
+        const subs = raw.map(({ s, i }) => ({ ...asSubItem(s), _i: i }));
         const cw = (s: { cost: readonly [number, number] }) => Math.max(1, Math.floor(s.cost[0]));
         const maxSubW = Math.max(1, ...subs.map(cw));
-        const subInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = subs.map((sub) => ({
-          item: { sub, key: sub.key ?? `s${sub._i}` },
-          mask: rectMask(sub.cost[0], sub.cost[1]),
-          col: sub.col,
-          row: sub.row,
-        }));
-        // When `subCols` is pinned, pack at exactly that width; otherwise search
-        // column counts × orderings for the most compact arrangement.
-        const subPlaced = (
-          props.subCols != null
-            ? packItems(subInputs, props.subCols)
-            : optimalPlacement(subInputs, {
-                maxCols: Math.max(maxSubW, colCount),
-                minCols: maxSubW,
-                targetAspect: props.subAspect,
-              })
-        ).placed;
+        const subOver = subOverrides.get(key);
+        // Pack the biggest sub-item first so it anchors the corner — combined
+        // with `farthest-fit` flow below this puts the small tile at the
+        // diagonally opposite cell instead of having the big tile collapse
+        // next to it. `_packIdx` preserves the original index for stable React
+        // keys (`subPlaced` may end up in pack order, not props order).
+        const ordered = [...subs].sort(
+          (a, b) => b.cost[0] * b.cost[1] - a.cost[0] * a.cost[1] || a._i - b._i,
+        );
+        const subInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = ordered.map((sub) => {
+          const subKey = sub.key ?? `s${sub._i}`;
+          // Panel layout stays frozen during a sub-drag — the dragged tile is
+          // replaced by a cursor-following ghost overlay (rendered at the
+          // outer-grid root below) so nothing in the chrome reshapes until the
+          // drop commits.
+          const pinned = subOver?.get(subKey);
+          return {
+            item: { sub, key: subKey },
+            mask: rectMask(sub.cost[0], sub.cost[1]),
+            col: pinned?.col ?? sub.col,
+            row: pinned?.row ?? sub.row,
+          };
+        });
+        // Pack into a compact square-ish box (capped at `√(area · aspect)` —
+        // wider would let `farthest-fit` run away to the far right of the
+        // outer grid instead of landing at the diagonal corner) with
+        // `farthest-fit` flow always on, so:
+        //  • the *first* (largest) tile anchors at `(0,0)`,
+        //  • each subsequent tile lands as far from the anchors as it fits,
+        //  • when a tile has an explicit drop position, the rest still arrange
+        //    around it diagonally,
+        //  • pressing a tile (drag-start with no movement) doesn't shift
+        //    anything — its origin = its current cell, so the diagonal
+        //    re-pack is identical to the previous frame.
+        const totalSubCells = subs.reduce(
+          (n, s) => n + Math.max(1, Math.floor(s.cost[0])) * Math.max(1, Math.floor(s.cost[1])),
+          0,
+        );
+        const targetAspect = props.subAspect ?? 1.6;
+        const compactCols = Math.max(maxSubW, Math.ceil(Math.sqrt(totalSubCells * targetAspect)));
+        // Grow the column cap if a sub-drag commit pinned a tile past the
+        // compact extent, so dropping a sub-item past the panel's current
+        // right edge extends the panel instead of having the packer overflow
+        // the pin and re-flow it back inside.
+        const maxPinCol = subInputs.reduce((m, i) => {
+          if (i.col == null) return m;
+          const w = i.mask[0]?.length ?? 1;
+          return Math.max(m, i.col + w);
+        }, 0);
+        const subC = Math.max(props.subCols ?? compactCols, maxPinCol);
+        const subPlaced = packItems(subInputs, subC, { flowOrder: "farthest-fit" }).placed;
         const matrix = placementToMask(subPlaced).map((row) => row.map((b) => (b ? 1 : 0)));
-        return {
+        // Natural extent — what the chrome would be at rest with no sub-drag
+        // overrides applied. Used as the in-panel hit-box for promote
+        // decisions so a "drag-up → drag-back" cycle stays inside the panel
+        // even when the first drop shrunk the live matrix. Re-pack only when
+        // subOverrides actually pins something; otherwise it'd be identical
+        // to subPlaced.
+        const naturalPlaced =
+          subOver && subOver.size > 0
+            ? packItems(
+                ordered.map((sub) => ({
+                  item: { sub, key: sub.key ?? `s${sub._i}` },
+                  mask: rectMask(sub.cost[0], sub.cost[1]),
+                  col: sub.col,
+                  row: sub.row,
+                })),
+                Math.max(props.subCols ?? compactCols, 1),
+                { flowOrder: "farthest-fit" },
+              ).placed
+            : subPlaced;
+        const naturalCols = naturalPlaced.reduce(
+          (m, p) => Math.max(m, p.col + p.cols),
+          maskCols(matrix),
+        );
+        const naturalRows = naturalPlaced.reduce(
+          (m, p) => Math.max(m, p.row + p.rows),
+          matrix.length,
+        );
+        resolved.push({
           props,
           key,
           matrix,
           tier: 1,
           subPlaced: subPlaced.map((p) => ({ sub: p.item.sub, key: p.item.key, col: p.col, row: p.row })),
-        };
+          groupKey: props.groupKey ?? key,
+          naturalCols,
+          naturalRows,
+        });
+        continue;
       }
+      // Plain item (or a panel whose every sub-item was dragged out — skip the
+      // empty husk, the promoted children below will represent the group).
+      if (props.subItems && props.subItems.length > 0) continue;
       const matrix = resolveShapeMatrix(props.shape ?? [[1]], {
         width,
         columns: colCount,
         breakpoints: bps,
       });
-      return { props, key, matrix, tier: props.tier ?? maxTier(matrix) };
-    });
+      resolved.push({
+        props,
+        key,
+        matrix,
+        tier: props.tier ?? maxTier(matrix),
+        groupKey: props.groupKey,
+        naturalCols: Math.max(1, maskCols(matrix)),
+        naturalRows: Math.max(1, matrix.length),
+      });
+    }
+    // Promoted sub-items become standalone outer-grid tiles at the dropped
+    // cell. They inherit the parent panel's theme so a Cron tile dragged out
+    // of a primary-container panel still reads as part of that family, and
+    // share `groupKey = parent-key` so adjacent ones re-link at render time.
+    for (const entry of promotedSubs.values()) {
+      const parentConfig = configs.find((c) => c.key === entry.parentKey);
+      const parentProps: NotchGridItemProps = parentConfig?.props ?? {};
+      const cost = entry.sub.cost;
+      const matrix = rectMatrix(cost[0], cost[1]);
+      resolved.push({
+        props: {
+          shape: matrix,
+          fill: entry.sub.fill ?? parentProps.fill,
+          stroke: entry.sub.stroke ?? parentProps.stroke,
+          strokeWidth: entry.sub.strokeWidth ?? parentProps.strokeWidth,
+          radius: entry.sub.radius ?? parentProps.radius,
+          inverseRadius: entry.sub.inverseRadius ?? parentProps.inverseRadius,
+          pad: entry.sub.pad ?? parentProps.pad,
+          noClip: entry.sub.noClip,
+          className: entry.sub.className,
+          style: entry.sub.style,
+          col: entry.col,
+          row: entry.row,
+          children: entry.sub.content,
+        },
+        key: promoteKey(entry.parentKey, entry.subKey),
+        matrix,
+        tier: 1,
+        groupKey: parentProps.groupKey ?? entry.parentKey,
+        naturalCols: Math.max(1, maskCols(matrix)),
+        naturalRows: Math.max(1, matrix.length),
+      });
+    }
 
     const toInput = (r: ResolvedItem): LayoutInput<ResolvedItem> => {
       const pinned = overrides.get(r.key);
@@ -273,7 +617,34 @@ export function NotchGrid({
       );
     }
     return { placed: packed.placed, gridCols: packed.cols, gridRows: packed.rows };
-  }, [children, items, width, colCount, bps, nest, overrides]);
+    // Layout is frozen during the drag itself — only the commits in
+    // `subOverrides` / `promotedSubs` re-pack. The cursor-following ghost is
+    // a render-only overlay that doesn't touch the pack.
+  }, [children, items, width, colCount, bps, nest, overrides, subOverrides, promotedSubs]);
+
+  // Bucket placed items by `groupKey` (singletons get a unique bucket so they
+  // never accidentally merge with anything). Within each bucket, find 8-
+  // connected components — a component is a set of placed items where every
+  // member is reachable via edge- or corner-adjacent cells — so two adjacent
+  // tiles in the same group render as one unioned chrome, while group members
+  // dragged far apart render as separate same-themed tiles.
+  const components = useMemo(() => {
+    const buckets = new Map<string, typeof placed>();
+    placed.forEach((p, i) => {
+      const gk =
+        p.item.groupKey != null
+          ? `g:${String(p.item.groupKey)}`
+          : `s:${i}:${String(p.item.key)}`;
+      const list = buckets.get(gk);
+      if (list) list.push(p);
+      else buckets.set(gk, [p]);
+    });
+    const out: typeof placed[] = [];
+    for (const members of buckets.values()) {
+      for (const comp of findConnectedComponents(members)) out.push(comp);
+    }
+    return out;
+  }, [placed]);
 
   return (
     <div ref={ref} className={cn("w-full", className)} style={style}>
@@ -281,92 +652,342 @@ export function NotchGrid({
         className="relative"
         style={{ width: gridCols * block, height: gridRows * block }}
       >
-        {placed.map(({ item, col, row, cols: itemCols }) => {
-          const { props, key, matrix, tier, subPlaced } = item;
-          const itemBlock = props.block ?? block;
-          const dragging = drag?.key === key;
-
-          // A panel's content is its sub-item regions positioned at their cells
-          // (the panel's BlockShape outline is the union of those footprints);
-          // a plain item just renders its own children.
-          const content = subPlaced
-            ? subPlaced.map(({ sub, key: subKey, col: sc, row: sr }) => (
+        {components.map((comp) => {
+          // Bounding box of the component in outer-grid cells — the wrapper
+          // sits here and the union mask is built relative to it.
+          let minCol = Infinity,
+            minRow = Infinity,
+            maxCol = 0,
+            maxRow = 0;
+          for (const p of comp) {
+            minCol = Math.min(minCol, p.col);
+            minRow = Math.min(minRow, p.row);
+            maxCol = Math.max(maxCol, p.col + p.cols);
+            maxRow = Math.max(maxRow, p.row + p.rows);
+          }
+          const groupCols = Math.max(1, maxCol - minCol);
+          const groupRows = Math.max(1, maxRow - minRow);
+          // Union mask: union of each member's filled cells at their bounding-
+          // box-relative position. Same `BlockShape` outline tracer as before;
+          // it already handles edge AND corner-touching with the inverse-
+          // radius bridge.
+          const unionMask: number[][] = Array.from({ length: groupRows }, () =>
+            new Array<number>(groupCols).fill(0),
+          );
+          for (const p of comp) {
+            const m = p.item.matrix;
+            for (let r = 0; r < m.length; r++) {
+              const mr = m[r] ?? [];
+              for (let c = 0; c < mr.length; c++) {
+                const v = mr[c];
+                if (v >= 1 && v <= p.item.tier) {
+                  unionMask[p.row - minRow + r][p.col - minCol + c] = 1;
+                }
+              }
+            }
+          }
+          // Theme is taken from the lead member (the first placed entry in the
+          // component) — same-group tiles share their parent's theme by
+          // construction so this just propagates it to the unioned chrome.
+          const lead = comp[0];
+          const leadProps = lead.item.props;
+          const compKey = comp
+            .map((p) => String(p.item.key))
+            .sort()
+            .join("|");
+          // Drop the chrome's clip while *any* member of this component is
+          // being dragged — sub-drag of a panel sub-item *or* outer-drag of a
+          // unioned standalone (e.g. a promoted Cron sitting beside Calls/Day
+          // in the same chrome). Without this the cursor-follow tile gets
+          // chopped at the parent outline.
+          const isDraggingInComp =
+            (!!subDrag && comp.some((p) => p.item.key === subDrag.parentKey)) ||
+            (!!drag && comp.some((p) => p.item.key === drag.key));
+          const isPlainSingleton = comp.length === 1 && !lead.item.subPlaced;
+          // Drag handlers for a plain (no-sub-items) outer-grid singleton —
+          // wraps the whole tile so pointer-down anywhere on it starts the
+          // drag. Panels (with sub-items) leave the chrome plain and let each
+          // sub-item carry its own drag handler below.
+          const singletonDrag =
+            isPlainSingleton && draggable
+              ? {
+                  onPointerDown: (e: ReactPointerEvent) => {
+                    if (e.button !== 0) return;
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                    setDrag({
+                      key: lead.item.key,
+                      pointerId: e.pointerId,
+                      startX: e.clientX,
+                      startY: e.clientY,
+                      originCol: lead.col,
+                      originRow: lead.row,
+                      originCols: lead.cols,
+                      dx: 0,
+                      dy: 0,
+                    });
+                  },
+                  onPointerMove: handlePointerMove,
+                  onPointerUp: endDrag,
+                  onPointerCancel: endDrag,
+                }
+              : undefined;
+          const singletonDragging = isPlainSingleton && drag?.key === lead.item.key;
+          // Each member of the component contributes its tile(s) — sub-items
+          // (with their own sub-drag handlers, which promote out of the panel
+          // when the drop leaves the parent rect) for a panel, or the whole
+          // content (with outer-drag handlers) for a standalone item.
+          const tiles: ReactNode[] = [];
+          for (const p of comp) {
+            const { props: mProps, key: mKey, matrix: mMatrix, subPlaced } = p.item;
+            const mItemBlock = mProps.block ?? block;
+            if (subPlaced) {
+              // Panel — render each kept sub-item as a positioned tile inside
+              // the unioned chrome.
+              const parentSubCols = Math.max(
+                1,
+                ...subPlaced.map((sp) => sp.col + Math.max(1, sp.sub.cost[0])),
+              );
+              const parentSubRows = Math.max(
+                1,
+                ...subPlaced.map((sp) => sp.row + Math.max(1, sp.sub.cost[1])),
+              );
+              for (const { sub, key: subKey, col: sc, row: sr } of subPlaced) {
+                const subBeingDragged =
+                  subDrag?.parentKey === mKey && subDrag.subKey === subKey;
+                const subHovered =
+                  hoveredSub?.parentKey === mKey && hoveredSub.subKey === subKey;
+                const subHandlers = draggable
+                  ? {
+                      onPointerEnter: () => setHoveredSub({ parentKey: mKey, subKey }),
+                      onPointerLeave: () =>
+                        setHoveredSub((prev) =>
+                          prev?.parentKey === mKey && prev.subKey === subKey
+                            ? null
+                            : prev,
+                        ),
+                      onPointerDown: (e: ReactPointerEvent) => {
+                        if (e.button !== 0) return;
+                        e.stopPropagation();
+                        e.currentTarget.setPointerCapture(e.pointerId);
+                        // Pointer capture sticks to this element for the rest
+                        // of the drag, so siblings never receive a leave event
+                        // — clear hover here so a sibling that the cursor *was*
+                        // on (e.g. Calls/Day while reaching for Cron) doesn't
+                        // stay highlighted for the whole drag.
+                        setHoveredSub(null);
+                        setSubOverrides((prev) => {
+                          const next = new Map(prev);
+                          const inner = new Map(next.get(mKey) ?? new Map());
+                          for (const sp of subPlaced) inner.set(sp.key, { col: sp.col, row: sp.row });
+                          next.set(mKey, inner);
+                          return next;
+                        });
+                        setSubDrag({
+                          parentKey: mKey,
+                          subKey,
+                          sub,
+                          pointerId: e.pointerId,
+                          startX: e.clientX,
+                          startY: e.clientY,
+                          originCol: sc,
+                          originRow: sr,
+                          cost: sub.cost,
+                          parentSubCols,
+                          parentSubRows,
+                          parentOuterCol: p.col,
+                          parentOuterRow: p.row,
+                          parentOuterCols: p.item.naturalCols,
+                          parentOuterRows: p.item.naturalRows,
+                          itemBlock: mItemBlock,
+                          ghostFill: sub.fill ?? mProps.fill ?? fill,
+                          ghostRadius: sub.radius ?? mProps.radius ?? radius ?? 24,
+                          ghostPad: sub.pad ?? mProps.pad ?? pad ?? 16,
+                          dx: 0,
+                          dy: 0,
+                        });
+                      },
+                      onPointerMove: handleSubPointerMove,
+                      onPointerUp: endSubDrag,
+                      onPointerCancel: endSubDrag,
+                    }
+                  : undefined;
+                // Position relative to the unioned chrome's top-left.
+                const tileLeft = (p.col - minCol + sc) * mItemBlock + gap / 2;
+                const tileTop = (p.row - minRow + sr) * mItemBlock + gap / 2;
+                tiles.push(
+                  <div
+                    key={`${String(mKey)}/${String(subKey)}`}
+                    {...subHandlers}
+                    className={cn(
+                      "absolute overflow-hidden transition-colors",
+                      draggable && "cursor-grab select-none touch-none",
+                      subBeingDragged && "cursor-grabbing",
+                      subHovered && !subBeingDragged && "bg-on-surface/10",
+                      sub.className,
+                    )}
+                    style={{
+                      left: tileLeft,
+                      top: tileTop,
+                      width: blocks(sub.cost[0]) * mItemBlock - gap,
+                      height: blocks(sub.cost[1]) * mItemBlock - gap,
+                      padding: sub.pad ?? mProps.pad ?? pad ?? 16,
+                      borderRadius: (sub.radius ?? mProps.radius ?? radius ?? 24) * 0.75,
+                      background: sub.fill && sub.fill !== "none" ? sub.fill : undefined,
+                      // Hide the in-chrome tile during the drag — the ghost
+                      // overlay (rendered as a sibling of the grid below)
+                      // tracks the cursor with the rounded filled preview.
+                      // We keep the element mounted so the captured pointer
+                      // still has its target.
+                      opacity: subBeingDragged ? 0 : undefined,
+                      zIndex: subBeingDragged ? 30 : undefined,
+                      ...sub.style,
+                    }}
+                  >
+                    {sub.content}
+                  </div>,
+                );
+              }
+            } else {
+              // Standalone tile inside a unioned chrome — render its children
+              // at its bounding-box-relative position, with outer-drag handlers
+              // when there's more than one member in the component (singletons
+              // get drag on the outer wrapper instead).
+              const draggingThis = drag?.key === mKey;
+              const memberDrag =
+                draggable && !isPlainSingleton
+                  ? {
+                      onPointerDown: (e: ReactPointerEvent) => {
+                        if (e.button !== 0) return;
+                        e.currentTarget.setPointerCapture(e.pointerId);
+                        setDrag({
+                          key: mKey,
+                          pointerId: e.pointerId,
+                          startX: e.clientX,
+                          startY: e.clientY,
+                          originCol: p.col,
+                          originRow: p.row,
+                          originCols: p.cols,
+                          dx: 0,
+                          dy: 0,
+                        });
+                      },
+                      onPointerMove: handlePointerMove,
+                      onPointerUp: endDrag,
+                      onPointerCancel: endDrag,
+                    }
+                  : undefined;
+              const tileLeft = (p.col - minCol) * mItemBlock + gap / 2;
+              const tileTop = (p.row - minRow) * mItemBlock + gap / 2;
+              tiles.push(
                 <div
-                  key={subKey}
-                  className={cn("absolute overflow-hidden", sub.className)}
+                  key={String(mKey)}
+                  {...memberDrag}
+                  className={cn(
+                    "absolute overflow-hidden",
+                    draggable && !isPlainSingleton && "cursor-grab select-none touch-none",
+                    draggingThis && "cursor-grabbing",
+                    mProps.className,
+                  )}
                   style={{
-                    left: sc * itemBlock,
-                    top: sr * itemBlock,
-                    width: blocks(sub.cost[0]) * itemBlock,
-                    height: blocks(sub.cost[1]) * itemBlock,
-                    padding: sub.pad ?? props.pad ?? pad ?? 16,
-                    borderRadius: (sub.radius ?? props.radius ?? radius ?? 24) * 0.75,
-                    background: sub.fill && sub.fill !== "none" ? sub.fill : undefined,
-                    ...sub.style,
+                    left: tileLeft,
+                    top: tileTop,
+                    width: maskCols(mMatrix) * mItemBlock - gap,
+                    height: mMatrix.length * mItemBlock - gap,
+                    padding: mProps.pad ?? pad ?? 16,
+                    borderRadius: (mProps.radius ?? radius ?? 24) * 0.75,
+                    // Same fill as the chrome behind it — invisible at rest
+                    // (they overlap exactly), but the moment the member is
+                    // outer-dragged its transform takes it past the chrome
+                    // and this background keeps the rounded teal preview.
+                    background:
+                      mProps.fill && mProps.fill !== "none" ? mProps.fill : undefined,
+                    transform: draggingThis && drag
+                      ? `translate(${drag.dx}px, ${drag.dy}px)`
+                      : undefined,
+                    zIndex: draggingThis ? 30 : undefined,
+                    ...mProps.style,
                   }}
                 >
-                  {sub.content}
-                </div>
-              ))
-            : props.children;
-
-          const dragHandlers = draggable
-            ? {
-                onPointerDown: (e: ReactPointerEvent) => {
-                  if (e.button !== 0) return;
-                  e.currentTarget.setPointerCapture(e.pointerId);
-                  setDrag({
-                    key,
-                    pointerId: e.pointerId,
-                    startX: e.clientX,
-                    startY: e.clientY,
-                    originCol: col,
-                    originRow: row,
-                    originCols: itemCols,
-                    dx: 0,
-                    dy: 0,
-                  });
-                },
-                onPointerMove: handlePointerMove,
-                onPointerUp: endDrag,
-                onPointerCancel: endDrag,
-              }
-            : undefined;
-
+                  {mProps.children}
+                </div>,
+              );
+            }
+          }
           return (
             <div
-              key={key}
-              {...dragHandlers}
-              className={cn("absolute", draggable && "select-none touch-none")}
+              key={compKey}
+              {...singletonDrag}
+              className={cn(
+                "absolute",
+                draggable && isPlainSingleton && "select-none touch-none",
+                draggable &&
+                  isPlainSingleton &&
+                  (singletonDragging ? "cursor-grabbing" : "cursor-grab"),
+              )}
               style={{
-                left: col * block,
-                top: row * block,
-                transform: dragging ? `translate(${drag.dx}px, ${drag.dy}px)` : undefined,
-                zIndex: dragging ? 20 : overrides.has(key) ? 10 : undefined,
-                cursor: draggable ? (dragging ? "grabbing" : "grab") : undefined,
+                left: minCol * block,
+                top: minRow * block,
+                transform: singletonDragging && drag
+                  ? `translate(${drag.dx}px, ${drag.dy}px)`
+                  : undefined,
+                zIndex: singletonDragging
+                  ? 20
+                  : overrides.has(lead.item.key)
+                  ? 10
+                  : undefined,
               }}
             >
               <BlockShape
-                shape={matrix}
-                tier={tier}
-                block={itemBlock}
+                shape={unionMask}
+                tier={1}
+                block={block}
                 gap={gap}
-                radius={props.radius ?? radius}
-                inverseRadius={props.inverseRadius ?? inverseRadius}
-                fill={props.fill ?? fill}
-                stroke={props.stroke ?? stroke}
-                strokeWidth={props.strokeWidth ?? strokeWidth}
-                pad={subPlaced ? 0 : props.pad ?? pad}
-                noClip={subPlaced ? undefined : props.noClip}
-                className={props.className}
-                style={props.style}
+                radius={leadProps.radius ?? radius}
+                inverseRadius={leadProps.inverseRadius ?? inverseRadius}
+                fill={leadProps.fill ?? fill}
+                stroke={leadProps.stroke ?? stroke}
+                strokeWidth={leadProps.strokeWidth ?? strokeWidth}
+                pad={isPlainSingleton ? leadProps.pad ?? pad : 0}
+                noClip={isDraggingInComp || (isPlainSingleton ? leadProps.noClip : undefined)}
+                className={isPlainSingleton ? leadProps.className : undefined}
+                style={isPlainSingleton ? leadProps.style : undefined}
               >
-                {content}
+                {isPlainSingleton ? leadProps.children : tiles}
               </BlockShape>
             </div>
           );
         })}
+        {subDrag && (
+          <div
+            key={`ghost:${String(subDrag.parentKey)}/${String(subDrag.subKey)}`}
+            aria-hidden
+            className="pointer-events-none absolute"
+            style={{
+              left:
+                subDrag.parentOuterCol * block +
+                subDrag.originCol * subDrag.itemBlock +
+                gap / 2,
+              top:
+                subDrag.parentOuterRow * block +
+                subDrag.originRow * subDrag.itemBlock +
+                gap / 2,
+              width: blocks(subDrag.cost[0]) * subDrag.itemBlock - gap,
+              height: blocks(subDrag.cost[1]) * subDrag.itemBlock - gap,
+              borderRadius: subDrag.ghostRadius * 0.75,
+              background:
+                subDrag.ghostFill && subDrag.ghostFill !== "none"
+                  ? subDrag.ghostFill
+                  : undefined,
+              padding: subDrag.ghostPad,
+              transform: `translate(${subDrag.dx}px, ${subDrag.dy}px)`,
+              zIndex: 50,
+            }}
+          >
+            {subDrag.sub.content}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
