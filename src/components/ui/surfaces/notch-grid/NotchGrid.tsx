@@ -423,6 +423,19 @@ export function NotchGrid({
                         if (e.button !== 0) return;
                         e.stopPropagation();
                         e.currentTarget.setPointerCapture(e.pointerId);
+                        // Pin every sibling at its current rendered cell so the
+                        // farthest-fit pack treats them as anchors during this
+                        // drag — without this, moving one sub-item makes the
+                        // others slide to the diagonally-opposite cell on every
+                        // re-pack. Only the dragged tile moves; siblings stay
+                        // put until the user drags them next.
+                        setSubOverrides((prev) => {
+                          const next = new Map(prev);
+                          const inner = new Map(next.get(key) ?? new Map());
+                          for (const p of subPlaced) inner.set(p.key, { col: p.col, row: p.row });
+                          next.set(key, inner);
+                          return next;
+                        });
                         setSubDrag({
                           parentKey: key,
                           subKey,
