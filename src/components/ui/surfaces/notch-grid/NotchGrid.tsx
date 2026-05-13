@@ -397,6 +397,16 @@ export function NotchGrid({
           });
           return next;
         });
+        // Pin the parent panel at its current outer cell — promoting a sub
+        // shrinks the panel's mask, and without a pin the outer pack would
+        // reflow it (Calls/Day jumping to a new cell when Cron is dragged
+        // out). The user can still drag the panel itself later to re-pin.
+        setOverrides((prev) => {
+          if (prev.has(s.parentKey)) return prev;
+          const next = new Map(prev);
+          next.set(s.parentKey, { col: s.parentOuterCol, row: s.parentOuterRow });
+          return next;
+        });
         return;
       }
       const { col: nextCol, row: nextRow } = snapDrag(s);
@@ -679,12 +689,14 @@ export function NotchGrid({
             .map((p) => String(p.item.key))
             .sort()
             .join("|");
-          // Drop the chrome's clip while a sub-item in this component is being
-          // dragged so the cursor-follow visual isn't chopped at the parent's
-          // outline. The in-chrome tile is opacity:0 during the drag so no
-          // visible artifact appears at the cell that was clipping it before.
+          // Drop the chrome's clip while *any* member of this component is
+          // being dragged — sub-drag of a panel sub-item *or* outer-drag of a
+          // unioned standalone (e.g. a promoted Cron sitting beside Calls/Day
+          // in the same chrome). Without this the cursor-follow tile gets
+          // chopped at the parent outline.
           const isDraggingInComp =
-            !!subDrag && comp.some((p) => p.item.key === subDrag.parentKey);
+            (!!subDrag && comp.some((p) => p.item.key === subDrag.parentKey)) ||
+            (!!drag && comp.some((p) => p.item.key === drag.key));
           const isPlainSingleton = comp.length === 1 && !lead.item.subPlaced;
           // Drag handlers for a plain (no-sub-items) outer-grid singleton —
           // wraps the whole tile so pointer-down anywhere on it starts the
@@ -877,6 +889,12 @@ export function NotchGrid({
                     height: mMatrix.length * mItemBlock - gap,
                     padding: mProps.pad ?? pad ?? 16,
                     borderRadius: (mProps.radius ?? radius ?? 24) * 0.75,
+                    // Same fill as the chrome behind it — invisible at rest
+                    // (they overlap exactly), but the moment the member is
+                    // outer-dragged its transform takes it past the chrome
+                    // and this background keeps the rounded teal preview.
+                    background:
+                      mProps.fill && mProps.fill !== "none" ? mProps.fill : undefined,
                     transform: draggingThis && drag
                       ? `translate(${drag.dx}px, ${drag.dy}px)`
                       : undefined,
