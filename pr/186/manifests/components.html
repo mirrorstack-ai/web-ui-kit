@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -6219,7 +6219,7 @@ width: number</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NotchGrid</h2>
       <div class="badges">
-        <label for="c-29-ui-notch-notchgrid-props" class="badge ok as-toggle">17 prop types</label>
+        <label for="c-29-ui-notch-notchgrid-props" class="badge ok as-toggle">18 prop types</label>
         <label for="c-29-ui-notch-notchgrid-info" class="badge info as-toggle">1 info</label>
         <label for="c-29-ui-notch-notchgrid-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -6253,7 +6253,7 @@ width: number</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">17 prop types</span>
+              <span class="badge ok">18 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/notch-grid/NotchGrid.tsx::NotchGrid</code></pre>
             <pre><code>Props:</code></pre>
@@ -6314,6 +6314,13 @@ nest?: boolean = true
  * Called after a drag drops an item, with its new block position.
  */
 onItemMove?: (key: Key, col: number, row: number) =&gt; void
+
+/**
+ * Called after a sub-item drag drops on a new sub-grid cell. The panel
+ *  re-packs around the new position; if the move would change the panel&#39;s
+ *  notched footprint, neighbouring items in the outer grid re-flow too.
+ */
+onSubItemMove?: (parentKey: Key, subKey: Key, col: number, row: number) =&gt; void
 
 pad?: number
 
