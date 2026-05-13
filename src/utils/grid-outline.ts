@@ -70,64 +70,81 @@ export function gridOutlinePath(
   // Keep at least a sliver of shape even when gap is set absurdly high.
   const erosion = Math.max(0, Math.min(gap, cell - 2)) / 2;
 
-  // Trace each *edge-connected* component independently. Two cells that share
-  // only a corner (e.g. (1,1) and (2,2)) belong to different components, so
-  // their boundaries are written into separate edge maps and never get merged
-  // at the shared point — a single `Map<string, Pt>` keyed by edge-start would
-  // otherwise have the second cell's edge overwrite the first's, hooking the
-  // two loops into one and producing the "thin strip joining the squares" bug.
-  const cid: number[][] = mask.map((row) => row.map(() => -1));
-  let nComponents = 0;
+  // Directed boundary edges, oriented so the filled cell sits on the *right*
+  // of travel — every cell contributes its 4 boundary edges clockwise in
+  // y-down screen coords. Keyed by edge-start, with a *list* of out-points
+  // so a single junction (two diagonally-touching cells meeting at a corner)
+  // doesn't have one cell's edge silently overwrite the other's. The walker
+  // then naturally turns *into* the other cell's edge at the junction, so the
+  // two regions read as one shape with two concave inverse-radius arcs facing
+  // each other at the shared corner — the same path style `<Notch>` uses for
+  // its body↔tab transition.
+  const edges = new Map<string, Pt[]>();
+  const pushEdge = (from: Pt, to: Pt) => {
+    const k = ptKey(from[0], from[1]);
+    const list = edges.get(k);
+    if (list) list.push(to);
+    else edges.set(k, [to]);
+  };
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < mask[r].length; c++) {
-      if (!mask[r][c] || cid[r][c] !== -1) continue;
-      const id = nComponents++;
-      const stack: Pt[] = [[c, r]];
-      while (stack.length > 0) {
-        const [cc, rr] = stack.pop()!;
-        if (!filled(rr, cc) || cid[rr][cc] !== -1) continue;
-        cid[rr][cc] = id;
-        stack.push([cc + 1, rr], [cc - 1, rr], [cc, rr + 1], [cc, rr - 1]);
-      }
+      if (!mask[r][c]) continue;
+      const tl: Pt = [c, r];
+      const tr: Pt = [c + 1, r];
+      const br: Pt = [c + 1, r + 1];
+      const bl: Pt = [c, r + 1];
+      if (!filled(r - 1, c)) pushEdge(tl, tr); // top
+      if (!filled(r, c + 1)) pushEdge(tr, br); // right
+      if (!filled(r + 1, c)) pushEdge(br, bl); // bottom
+      if (!filled(r, c - 1)) pushEdge(bl, tl); // left
     }
   }
 
+  // Walk each loop. At a junction (multiple out-edges share a start point) we
+  // pick the *most-CCW* turn from the incoming direction — i.e. we turn *into*
+  // the other cell's boundary. That keeps the merged loop closed with two
+  // concave corners at the shared point (the "double-back" the renderer wants),
+  // instead of arbitrarily picking one cell's edge and orphaning the other.
+  const visitedEdges = new Set<string>();
   const subpaths: string[] = [];
-  for (let component = 0; component < nComponents; component++) {
-    // Directed boundary edges *for this component only*, oriented so the
-    // filled cell sits on the right of travel (clockwise in y-down screen
-    // coords). Keyed by start point so walking a loop is `next = edges.get(end)`.
-    const edges = new Map<string, Pt>();
-    const inComponent = (r: number, c: number) =>
-      filled(r, c) && cid[r][c] === component;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < mask[r].length; c++) {
-        if (cid[r][c] !== component) continue;
-        const tl: Pt = [c, r];
-        const tr: Pt = [c + 1, r];
-        const br: Pt = [c + 1, r + 1];
-        const bl: Pt = [c, r + 1];
-        if (!inComponent(r - 1, c)) edges.set(ptKey(tl[0], tl[1]), tr); // top
-        if (!inComponent(r, c + 1)) edges.set(ptKey(tr[0], tr[1]), br); // right
-        if (!inComponent(r + 1, c)) edges.set(ptKey(br[0], br[1]), bl); // bottom
-        if (!inComponent(r, c - 1)) edges.set(ptKey(bl[0], bl[1]), tl); // left
-      }
-    }
-
-    // Walk each loop in this component, then drop collinear midpoints so only
-    // true corners remain. A component with holes (e.g. a frame around a notch)
-    // contributes one outer loop + one inner loop per hole.
-    const visited = new Set<string>();
-    for (const startKey of edges.keys()) {
-      if (visited.has(startKey)) continue;
+  const edgeKey = (from: string, to: Pt) => `${from}>${to[0]},${to[1]}`;
+  for (const [startKey, outs] of edges) {
+    for (const startTo of outs) {
+      if (visitedEdges.has(edgeKey(startKey, startTo))) continue;
       const loop: Pt[] = [];
-      let cur: string | undefined = startKey;
-      while (cur && !visited.has(cur)) {
-        visited.add(cur);
-        const [x, y] = cur.split(",").map(Number);
-        loop.push([x, y]);
-        const next = edges.get(cur);
-        cur = next ? ptKey(next[0], next[1]) : undefined;
+      let cur = startKey;
+      let to: Pt | null = startTo;
+      let inDir: [number, number] = [
+        startTo[0] - Number(startKey.split(",")[0]),
+        startTo[1] - Number(startKey.split(",")[1]),
+      ];
+      while (to) {
+        const k = edgeKey(cur, to);
+        if (visitedEdges.has(k)) break;
+        visitedEdges.add(k);
+        const [cx, cy] = cur.split(",").map(Number);
+        loop.push([cx, cy]);
+        const next = ptKey(to[0], to[1]);
+        const ndx = to[0] - cx;
+        const ndy = to[1] - cy;
+        inDir = [ndx, ndy];
+        cur = next;
+        // Pick the most-CCW unvisited out-edge from `cur`. y-down: cross > 0
+        // is CW, cross < 0 is CCW; we want the smallest (most-negative) cross.
+        const candidates = edges.get(cur) ?? [];
+        let best: Pt | null = null;
+        let bestCross = Number.POSITIVE_INFINITY;
+        for (const cand of candidates) {
+          if (visitedEdges.has(edgeKey(cur, cand))) continue;
+          const odx = cand[0] - to[0];
+          const ody = cand[1] - to[1];
+          const cross = inDir[0] * ody - inDir[1] * odx;
+          if (cross < bestCross) {
+            bestCross = cross;
+            best = cand;
+          }
+        }
+        to = best;
       }
       const corners = collinearStripped(loop).map(
         ([x, y]) => [x * cell, y * cell] as Pt,
