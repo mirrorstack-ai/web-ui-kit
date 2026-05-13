@@ -251,3 +251,8 @@ export {
   type LineChartProps,
   type LineChartOverlay,
 } from "./components/ui/chart/line-chart/LineChart";
+export {
+  BarChart,
+  type BarChartProps,
+  type BarChartDatum,
+} from "./components/ui/chart/bar-chart/BarChart";
