@@ -16,7 +16,6 @@ import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
 import { maskCols, maskFromShape, maxTier } from "@/utils/grid-outline";
-import { Icon } from "@/components/ui/media/icon/Icon";
 import { BlockShape, BLOCK_SIZE } from "./BlockShape";
 import {
   NOTCH_BREAKPOINTS,
@@ -415,10 +414,14 @@ export function NotchGrid({
                       sub.className,
                     )}
                     style={{
-                      left: sc * itemBlock,
-                      top: sr * itemBlock,
-                      width: blocks(sub.cost[0]) * itemBlock,
-                      height: blocks(sub.cost[1]) * itemBlock,
+                      // Inset by `gap / 2` on all sides so each sub-item is a
+                      // bounded rounded rect — adjacent ones sit `gap` apart and
+                      // the panel's chrome-background shows through, giving the
+                      // user something to grab to drag the whole panel.
+                      left: sc * itemBlock + gap / 2,
+                      top: sr * itemBlock + gap / 2,
+                      width: blocks(sub.cost[0]) * itemBlock - gap,
+                      height: blocks(sub.cost[1]) * itemBlock - gap,
                       padding: sub.pad ?? props.pad ?? pad ?? 16,
                       borderRadius: (sub.radius ?? props.radius ?? radius ?? 24) * 0.75,
                       background: sub.fill && sub.fill !== "none" ? sub.fill : undefined,
@@ -433,60 +436,33 @@ export function NotchGrid({
               })
             : props.children;
 
-          // Whole-item drag handlers — applied to the outer div only when the
-          // item has no sub-items. Panel items get a dedicated handle (below)
-          // so that pointer-down on a sub-item moves the sub-item, not the
-          // panel.
-          const dragHandlers =
-            draggable && !isPanel
-              ? {
-                  onPointerDown: (e: ReactPointerEvent) => {
-                    if (e.button !== 0) return;
-                    e.currentTarget.setPointerCapture(e.pointerId);
-                    setDrag({
-                      key,
-                      pointerId: e.pointerId,
-                      startX: e.clientX,
-                      startY: e.clientY,
-                      originCol: col,
-                      originRow: row,
-                      originCols: itemCols,
-                      dx: 0,
-                      dy: 0,
-                    });
-                  },
-                  onPointerMove: handlePointerMove,
-                  onPointerUp: endDrag,
-                  onPointerCancel: endDrag,
-                }
-              : undefined;
-
-          // Panel-only handle: dedicated drag target so the panel can be moved
-          // even when its sub-items fill it.
-          const panelHandleProps =
-            draggable && isPanel
-              ? {
-                  onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>) => {
-                    if (e.button !== 0) return;
-                    e.stopPropagation();
-                    e.currentTarget.setPointerCapture(e.pointerId);
-                    setDrag({
-                      key,
-                      pointerId: e.pointerId,
-                      startX: e.clientX,
-                      startY: e.clientY,
-                      originCol: col,
-                      originRow: row,
-                      originCols: itemCols,
-                      dx: 0,
-                      dy: 0,
-                    });
-                  },
-                  onPointerMove: handlePointerMove,
-                  onPointerUp: endDrag,
-                  onPointerCancel: endDrag,
-                }
-              : null;
+          // Whole-item drag — for plain items, pointer-down anywhere on the tile
+          // drags it; for panels, pointer-down on the panel's chrome (the gap
+          // regions between sub-items, or any spot not covered by a sub-item)
+          // drags the panel, while pointer-down on a sub-item stops propagation
+          // and starts a sub-item drag instead.
+          const dragHandlers = draggable
+            ? {
+                onPointerDown: (e: ReactPointerEvent) => {
+                  if (e.button !== 0) return;
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  setDrag({
+                    key,
+                    pointerId: e.pointerId,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    originCol: col,
+                    originRow: row,
+                    originCols: itemCols,
+                    dx: 0,
+                    dy: 0,
+                  });
+                },
+                onPointerMove: handlePointerMove,
+                onPointerUp: endDrag,
+                onPointerCancel: endDrag,
+              }
+            : undefined;
 
           return (
             <div
@@ -494,8 +470,8 @@ export function NotchGrid({
               {...dragHandlers}
               className={cn(
                 "absolute",
-                draggable && !isPanel && "select-none touch-none",
-                draggable && !isPanel && (dragging ? "cursor-grabbing" : "cursor-grab"),
+                draggable && "select-none touch-none",
+                draggable && (dragging ? "cursor-grabbing" : "cursor-grab"),
               )}
               style={{
                 left: col * block,
@@ -521,19 +497,6 @@ export function NotchGrid({
               >
                 {content}
               </BlockShape>
-              {panelHandleProps && (
-                <button
-                  type="button"
-                  aria-label="Drag panel"
-                  {...panelHandleProps}
-                  className={cn(
-                    "absolute top-1.5 right-1.5 z-10 flex size-6 cursor-grab touch-none items-center justify-center rounded-md bg-surface-container-low/70 text-on-surface-variant opacity-70 transition-opacity hover:bg-surface-container-high hover:opacity-100",
-                    dragging && "cursor-grabbing opacity-100",
-                  )}
-                >
-                  <Icon name="drag_indicator" size={16} />
-                </button>
-              )}
             </div>
           );
         })}

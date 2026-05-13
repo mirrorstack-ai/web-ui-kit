@@ -108,10 +108,11 @@ describe("NotchGrid", () => {
     expect(getByText("big")).toBeInTheDocument();
     expect(getByText("small")).toBeInTheDocument();
     // Aims for a square-ish panel: subCols = max(2, ceil(√5)) = 3 ⇒
-    // 2×2 at (0,0), 1×1 at (col 2, row 0). Sub-wrappers are at panel-relative px.
+    // 2×2 at (0,0), 1×1 at (col 2, row 0). Each sub is inset by `gap/2 = 4px`
+    // so adjacent ones sit `gap` apart and read as bounded rounded rects.
     const subPositions = positioned(container).map((p) => `${p.left},${p.top}`);
-    expect(subPositions).toContain("0px,0px"); // 2×2 sub
-    expect(subPositions).toContain("80px,0px"); // 1×1 sub beside it (col 2 × 40)
+    expect(subPositions).toContain("4px,4px"); // 2×2 sub
+    expect(subPositions).toContain("84px,4px"); // 1×1 sub beside it (col 2 × 40 + 4px inset)
   });
 
   it("resolves a responsive shape to its base variant when width is unmeasured", () => {
