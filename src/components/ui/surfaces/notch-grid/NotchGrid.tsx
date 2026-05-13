@@ -642,16 +642,6 @@ export function NotchGrid({
             .map((p) => String(p.item.key))
             .sort()
             .join("|");
-          // Drop the chrome's clip while a sub-item in this component is being
-          // dragged so the cursor-following ghost can render through it
-          // without being chopped at the parent's outline.
-          const isDraggingInComp =
-            !!subDrag &&
-            comp.some(
-              (p) =>
-                p.item.key === subDrag.parentKey ||
-                p.item.subPlaced?.some((sp) => sp.key === subDrag.subKey && p.item.key === subDrag.parentKey),
-            );
           const isPlainSingleton = comp.length === 1 && !lead.item.subPlaced;
           // Drag handlers for a plain (no-sub-items) outer-grid singleton —
           // wraps the whole tile so pointer-down anywhere on it starts the
@@ -891,7 +881,7 @@ export function NotchGrid({
                 stroke={leadProps.stroke ?? stroke}
                 strokeWidth={leadProps.strokeWidth ?? strokeWidth}
                 pad={isPlainSingleton ? leadProps.pad ?? pad : 0}
-                noClip={isDraggingInComp || (isPlainSingleton ? leadProps.noClip : undefined)}
+                noClip={isPlainSingleton ? leadProps.noClip : undefined}
                 className={isPlainSingleton ? leadProps.className : undefined}
                 style={isPlainSingleton ? leadProps.style : undefined}
               >
