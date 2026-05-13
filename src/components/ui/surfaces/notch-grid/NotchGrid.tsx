@@ -892,8 +892,12 @@ export function NotchGrid({
                     className={cn(
                       "absolute overflow-hidden transition-colors",
                       draggable && "cursor-grab select-none touch-none",
-                      subBeingDragged && "cursor-grabbing",
-                      subHovered && !subBeingDragged && "bg-on-surface/10",
+                      // Show grabbing on this tile when it's the one being
+                      // dragged *or* when the whole linked component is being
+                      // dragged from its chrome bridge (every member shifts
+                      // together — they should all read as 'in drag').
+                      (subBeingDragged || wrapperDragging) && "cursor-grabbing",
+                      subHovered && !subBeingDragged && !wrapperDragging && "bg-on-surface/10",
                       sub.className,
                     )}
                     style={{
@@ -966,7 +970,9 @@ export function NotchGrid({
                   className={cn(
                     "absolute overflow-hidden transition-[filter] duration-150",
                     draggable && !isPlainSingleton && "cursor-grab select-none touch-none",
-                    draggingThis && "cursor-grabbing",
+                    // Match the sub-item rule: this tile, or the whole
+                    // component (wrapper drag), in active drag → grabbing.
+                    (draggingThis || wrapperDragging) && "cursor-grabbing",
                     // Standalone member tiles have an inline background
                     // (inherited from the parent's `fill` so the cursor-
                     // follow visual stays themed when dragged past the
@@ -974,7 +980,7 @@ export function NotchGrid({
                     // overridden by that inline background, so use a filter
                     // here — same affordance as sub-items, just applied
                     // through brightness instead of an overlay.
-                    memberHovered && !draggingThis && "brightness-95",
+                    memberHovered && !draggingThis && !wrapperDragging && "brightness-95",
                     mProps.className,
                   )}
                   style={{
