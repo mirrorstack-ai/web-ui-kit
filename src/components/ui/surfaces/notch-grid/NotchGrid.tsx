@@ -312,12 +312,13 @@ export function NotchGrid({
       const deltaCol = Math.round(d.dx / block);
       const deltaRow = Math.round(d.dy / block);
       setDrag(null);
-      if (d.members) {
+      const dragMembers = d.members;
+      if (dragMembers) {
         // Multi-member drag (linked chrome) — shift every member by the same
         // outer-cell delta so they keep their relative arrangement.
         setOverrides((prev) => {
           const next = new Map(prev);
-          for (const m of d.members) {
+          for (const m of dragMembers) {
             next.set(m.key, {
               col: Math.max(0, m.col + deltaCol),
               row: Math.max(0, m.row + deltaRow),
@@ -325,7 +326,7 @@ export function NotchGrid({
           }
           return next;
         });
-        for (const m of d.members) {
+        for (const m of dragMembers) {
           onItemMove?.(
             m.key,
             Math.max(0, m.col + deltaCol),
@@ -475,7 +476,9 @@ export function NotchGrid({
       const raw = (props.subItems ?? [])
         .map((s, i) => ({ s, i }))
         .filter(({ s, i }) => {
-          const k = s.key ?? `s${i}`;
+          // `s` may be the `[cols, rows]` tuple shorthand — normalize before
+          // reaching for `.key`, otherwise TS sees a number tuple.
+          const k = asSubItem(s).key ?? `s${i}`;
           return !promotedSubs.has(promoteKey(key, k));
         });
       if (raw.length > 0) {
