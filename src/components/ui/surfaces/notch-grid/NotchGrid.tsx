@@ -964,10 +964,17 @@ export function NotchGrid({
                   key={String(mKey)}
                   {...memberDrag}
                   className={cn(
-                    "absolute overflow-hidden transition-colors",
+                    "absolute overflow-hidden transition-[filter] duration-150",
                     draggable && !isPlainSingleton && "cursor-grab select-none touch-none",
                     draggingThis && "cursor-grabbing",
-                    memberHovered && !draggingThis && "bg-on-surface/10",
+                    // Standalone member tiles have an inline background
+                    // (inherited from the parent's `fill` so the cursor-
+                    // follow visual stays themed when dragged past the
+                    // chrome). A Tailwind `bg-on-surface/10` class would be
+                    // overridden by that inline background, so use a filter
+                    // here — same affordance as sub-items, just applied
+                    // through brightness instead of an overlay.
+                    memberHovered && !draggingThis && "brightness-95",
                     mProps.className,
                   )}
                   style={{
