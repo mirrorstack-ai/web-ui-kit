@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">3/45 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">45/45 infos</a><span class="filter-pill ok" aria-disabled="true">176 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/47 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">47/47 infos</a><span class="filter-pill ok" aria-disabled="true">181 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -5300,6 +5300,414 @@ export const AgentStreaming: StoryObj = {
 </article>
 <article
   class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="MetricBlock">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> MetricBlock</h2>
+      <div class="badges">
+        <label for="c-25-ui-notch-blocks-metric-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-25-ui-notch-blocks-metric-info" class="badge info as-toggle">1 info</label>
+        <label for="c-25-ui-notch-blocks-metric-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/data/metric-block/MetricBlock.stories.tsx">ui-notch-blocks-metric · ./src/components/ui/data/metric-block/MetricBlock.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-25-ui-notch-blocks-metric-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-25-ui-notch-blocks-metric-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-25-ui-notch-blocks-metric-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/runner/work/web-ui-kit/web-ui-kit/src/components/ui/data/metric-block/MetricBlock.tsx
+Error:
+No suitable component definition found.
+You can debug your component file in this playground: https://react-docgen.dev/playground
+Code:
+import type { ReactNode } from &quot;react&quot;;
+import { cn } from &quot;@/utils/cn&quot;;
+import { isDev } from &quot;@/utils/env&quot;;
+import type { ComponentMeta } from &quot;@/types/component-meta&quot;;
+import { Icon } from &quot;@/components/ui/media/icon/Icon&quot;;
+import { Sparkline, type SparklinePoint } from &quot;@/components/ui/chart/sparkline/Sparkline&quot;;
+
+export const meta: ComponentMeta = {
+  name: &quot;MetricBlock&quot;,
+  description:
+    &quot;A metric tile sized for a NotchGrid cell — icon, trend chip, label, value, optional sparkline + sub-stats. Pick a `layout` for the cell shape: stacked (1×1/1×2), wide (2×1/3×1), card (2×2), bigcard (3×2), chart (3×3+ — chart-led, no big value).&quot;,
+};
+
+/** Text-colour tone — must match the surface the block sits on. */
+export type MetricBlockTone = &quot;surface&quot; | &quot;primary&quot;;
+
+/** Direction of the trend chip — `up` reads green, `down` reads as an error. */
+export type MetricTrend = &quot;up&quot; | &quot;down&quot;;
+
+/** `stacked` = 1×1 / 1×2; `wide` = 2×1 / 3×1; `card` = 2×2; `bigcard` = 3×2;
+ *  `chart` = 3×3 and up (chart-led — full-width sparkline, no big value). */
+export type MetricBlockLayout = &quot;stacked&quot; | &quot;wide&quot; | &quot;card&quot; | &quot;bigcard&quot; | &quot;chart&quot;;
+
+const TONE: Record&lt;
+  MetricBlockTone,
+  { icon: string; label: string; value: string; bar: string; barActive: string; divider: string }
+&gt; = {
+  surface: {
+    icon: &quot;text-primary&quot;,
+    label: &quot;text-on-surface-variant&quot;,
+    value: &quot;text-on-surface&quot;,
+    bar: &quot;bg-primary/30 hover:bg-primary/60&quot;,
+    barActive: &quot;bg-primary/60&quot;,
+    divider: &quot;border-outline-variant&quot;,
+  },
+  primary: {
+    icon: &quot;text-on-primary-container&quot;,
+    label: &quot;text-on-primary-container/70&quot;,
+    value: &quot;text-on-primary-container&quot;,
+    bar: &quot;bg-on-primary-container/25 hover:bg-on-primary-container/55&quot;,
+    barActive: &quot;bg-on-primary-container/55&quot;,
+    divider: &quot;border-on-primary-container/20&quot;,
+  },
+};
+
+// Semantic accent tokens — they flip with the theme, so the chip stays legible
+// in light and dark mode on any tone.
+const TREND_TEXT: Record&lt;MetricTrend, string&gt; = {
+  up: &quot;text-success&quot;,
+  down: &quot;text-error&quot;,
+};
+
+const inferTrend = (delta: ReactNode, explicit?: MetricTrend): MetricTrend =&gt;
+  explicit ?? (typeof delta === &quot;string&quot; &amp;&amp; /^[-−]/.test(delta.trim()) ? &quot;down&quot; : &quot;up&quot;);
+
+export interface MetricStat {
+  label: ReactNode;
+  value: ReactNode;
+  delta?: ReactNode;
+  deltaTrend?: MetricTrend;
+}
+
+export interface MetricBlockProps {
+  /** Material Symbols Rounded icon name (e.g. `&quot;apps&quot;`). Omit for no icon. */
+  icon?: string;
+  label: ReactNode;
+  /** The headline value. Not shown in `layout=&quot;chart&quot;` (the chart + stats carry it). */
+  value?: ReactNode;
+  /** A trend / delta chip (e.g. `&quot;+18%&quot;`). Top-right when stacked, in the header
+   *  when card, beside the label when wide. Coloured by {@link deltaTrend}. */
+  delta?: ReactNode;
+  /** `up` ⇒ green, `down` ⇒ error red. When omitted and `delta` is a string,
+   *  inferred from a leading `-` / `−`. */
+  deltaTrend?: MetricTrend;
+  /** Optional neutral line under the value — a unit, count, timestamp, etc.
+   *  Hidden when {@link stats} is shown (bigcard). */
+  hint?: ReactNode;
+  /** Sparkline points (heights 0–100, optional per-bar `label` for the hover
+   *  chip — see {@link SparklinePoint}). Fills the spare height (stacked / card
+   *  / bigcard / chart) or sits on the right (wide). A 2×1 hasn&#39;t the room. */
+  chart?: ReadonlyArray&lt;SparklinePoint&gt;;
+  /** A row of mini sub-stats below the chart — rendered in `layout=&quot;bigcard&quot;`
+   *  and `layout=&quot;chart&quot;`. */
+  stats?: ReadonlyArray&lt;MetricStat&gt;;
+  /** Pick a layout for the cell shape (see {@link MetricBlockLayout}). Default `&quot;stacked&quot;`. */
+  layout?: MetricBlockLayout;
+  /** Pick the tone that contrasts with the block&#39;s background. Default `&quot;surface&quot;`. */
+  tone?: MetricBlockTone;
+  className?: string;
+}
+
+export function MetricBlock({
+  icon,
+  label,
+  value,
+  delta,
+  deltaTrend,
+  hint,
+  chart,
+  stats,
+  layout = &quot;stacked&quot;,
+  tone = &quot;surface&quot;,
+  className,
+}: MetricBlockProps) {
+  if (isDev &amp;&amp; label == null &amp;&amp; value == null) {
+    console.warn(&quot;[MetricBlock] both `label` and `value` are empty — nothing to show&quot;);
+  }
+  const c = TONE[tone];
+  const trend = inferTrend(delta, deltaTrend);
+  const hasChart = !!chart &amp;&amp; chart.length &gt; 0;
+  const deltaChip = delta != null &amp;&amp; (
+    &lt;span className={cn(&quot;shrink-0 text-xs font-medium&quot;, TREND_TEXT[trend])}&gt;{delta}&lt;/span&gt;
+  );
+  const sparkline = (cls: string) =&gt;
+    hasChart ? (
+      &lt;Sparkline data={chart!} barClassName={c.bar} barActiveClassName={c.barActive} className={cls} /&gt;
+    ) : null;
+  const hintLine = (extra?: string) =&gt;
+    hint != null ? &lt;p className={cn(&quot;truncate text-xs&quot;, c.label, extra)}&gt;{hint}&lt;/p&gt; : null;
+  const hasStats = !!stats &amp;&amp; stats.length &gt; 0;
+  const statsRow = hasStats ? (
+    &lt;div className={cn(&quot;flex gap-3 border-t pt-2&quot;, c.divider)}&gt;
+      {stats!.map((s, i) =&gt; {
+        const t = inferTrend(s.delta, s.deltaTrend);
+        return (
+          &lt;div key={i} className=&quot;min-w-0 flex-1&quot;&gt;
+            &lt;p className={cn(&quot;truncate text-[10px]&quot;, c.label)}&gt;{s.label}&lt;/p&gt;
+            &lt;p className={cn(&quot;truncate text-sm font-medium&quot;, c.value)}&gt;
+              {s.value}
+              {s.delta != null &amp;&amp; (
+                &lt;span className={cn(&quot;ml-1 text-[10px] font-medium&quot;, TREND_TEXT[t])}&gt;{s.delta}&lt;/span&gt;
+              )}
+            &lt;/p&gt;
+          &lt;/div&gt;
+        );
+      })}
+    &lt;/div&gt;
+  ) : null;
+
+  const valueLine = (cls: string) =&gt;
+    value != null ? &lt;p className={cn(cls, c.value)}&gt;{value}&lt;/p&gt; : null;
+
+  let body: ReactNode;
+  if (layout === &quot;wide&quot;) {
+    body = (
+      &lt;div className={cn(&quot;flex h-full items-center gap-3&quot;, className)}&gt;
+        {icon ? &lt;Icon name={icon} size={24} className={c.icon} /&gt; : null}
+        &lt;div className=&quot;min-w-0&quot;&gt;
+          &lt;div className=&quot;flex items-baseline gap-2&quot;&gt;
+            &lt;p className={cn(&quot;truncate text-xs&quot;, c.label)}&gt;{label}&lt;/p&gt;
+            {!hasChart &amp;&amp; deltaChip}
+          &lt;/div&gt;
+          {valueLine(&quot;text-2xl font-semibold leading-tight&quot;)}
+          {hintLine()}
+        &lt;/div&gt;
+        {sparkline(&quot;ml-auto h-2/3 w-[42%] self-center&quot;)}
+      &lt;/div&gt;
+    );
+  } else if (layout === &quot;chart&quot;) {
+    body = (
+      &lt;div className={cn(&quot;flex h-full flex-col gap-2&quot;, className)}&gt;
+        &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+          {icon ? &lt;Icon name={icon} size={20} className={c.icon} /&gt; : null}
+          &lt;p className={cn(&quot;min-w-0 flex-1 truncate text-sm font-medium&quot;, c.label)}&gt;{label}&lt;/p&gt;
+          {deltaChip}
+        &lt;/div&gt;
+        {sparkline(&quot;flex-1&quot;)}
+        {hasStats ? statsRow : hintLine(&quot;mt-auto&quot;)}
+      &lt;/div&gt;
+    );
+  } else if (layout === &quot;bigcard&quot;) {
+    body = (
+      &lt;div className={cn(&quot;flex h-full flex-col gap-2&quot;, className)}&gt;
+        &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+          {icon ? &lt;Icon name={icon} size={20} className={c.icon} /&gt; : null}
+          &lt;p className={cn(&quot;min-w-0 flex-1 truncate text-sm font-medium&quot;, c.label)}&gt;{label}&lt;/p&gt;
+          {deltaChip}
+        &lt;/div&gt;
+        {/* big value beside the sparkline — uses the horizontal room a 3×2+ has */}
+        &lt;div className=&quot;flex flex-1 items-end gap-3&quot;&gt;
+          {valueLine(&quot;shrink-0 text-3xl font-semibold leading-none&quot;)}
+          {sparkline(&quot;h-full flex-1&quot;)}
+        &lt;/div&gt;
+        {hasStats ? statsRow : hintLine(&quot;mt-auto&quot;)}
+      &lt;/div&gt;
+    );
+  } else if (layout === &quot;card&quot;) {
+    body = (
+      &lt;div className={cn(&quot;flex h-full flex-col gap-2&quot;, className)}&gt;
+        &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+          {icon ? &lt;Icon name={icon} size={20} className={c.icon} /&gt; : null}
+          &lt;p className={cn(&quot;min-w-0 flex-1 truncate text-sm font-medium&quot;, c.label)}&gt;{label}&lt;/p&gt;
+          {deltaChip}
+        &lt;/div&gt;
+        {valueLine(&quot;text-3xl font-semibold leading-none&quot;)}
+        {sparkline(&quot;mt-1 flex-1&quot;)}
+        {hintLine(hasChart ? undefined : &quot;mt-auto&quot;)}
+      &lt;/div&gt;
+    );
+  } else {
+    body = (
+      &lt;div className={cn(&quot;flex h-full flex-col gap-2&quot;, className)}&gt;
+        &lt;div className=&quot;flex items-center justify-between gap-2&quot;&gt;
+          {icon ? &lt;Icon name={icon} size={18} className={c.icon} /&gt; : &lt;span aria-hidden=&quot;true&quot; /&gt;}
+          {deltaChip}
+        &lt;/div&gt;
+        {sparkline(&quot;flex-1&quot;)}
+        &lt;div className={hasChart ? undefined : &quot;mt-auto&quot;}&gt;
+          &lt;p className={cn(&quot;text-xs&quot;, c.label)}&gt;{label}&lt;/p&gt;
+          {valueLine(&quot;text-lg font-medium leading-tight&quot;)}
+          {hintLine(&quot;mt-0.5&quot;)}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+
+  return body;
+}
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { MetricBlock } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Standalone, in a 96px (`size-24`) box — the natural 1×1 footprint.</div>
+              <pre><code>const Playground = () =&gt; &lt;div className=&quot;bg-background p-6&quot;&gt;
+    &lt;div className=&quot;size-24 rounded-2xl bg-surface-container-low p-4&quot;&gt;
+        &lt;MetricBlock icon=&quot;apps&quot; label=&quot;Installs&quot; value=&quot;1,240&quot; delta=&quot;+18%&quot; tone=&quot;surface&quot; /&gt;
+    &lt;/div&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Sizes</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Every footprint side by side: 1×1 tiles, a 1×2 (`chart` fills the extra height), a 2×1 (`layout=&quot;wide&quot;`, no room for a chart), a 3×1 (`wide` + sparkline on the right), a 2×2 (`layout=&quot;card&quot;`), and a 3×2 (`bigcard` — header, big value beside the sparkline, sub-stats row).</div>
+              <pre><code>const Sizes = () =&gt; (
+  &lt;div className=&quot;bg-background p-6&quot;&gt;
+    &lt;div className=&quot;grid auto-rows-[96px] grid-cols-[repeat(6,96px)] gap-2&quot;&gt;
+      {/* 3×2 — bigcard: header · big number · chart · sub-stats */}
+      &lt;Cell cols={3} rows={2} pad={6} tone=&quot;primary&quot;&gt;
+        &lt;MetricBlock
+          layout=&quot;bigcard&quot;
+          icon=&quot;apps&quot;
+          label=&quot;Installs&quot;
+          value=&quot;1,240&quot;
+          delta=&quot;+18%&quot;
+          chart={INSTALLS}
+          stats={[
+            { label: &quot;This week&quot;, value: &quot;1,240&quot;, delta: &quot;+18%&quot; },
+            { label: &quot;MTD&quot;, value: &quot;4,180&quot;, delta: &quot;+11%&quot; },
+            { label: &quot;Conversion&quot;, value: &quot;3.2%&quot;, delta: &quot;-0.4%&quot; },
+          ]}
+          tone=&quot;primary&quot;
+        /&gt;
+      &lt;/Cell&gt;
+      {/* 2×2 — card: header + big value + chart filling the rest */}
+      &lt;Cell cols={2} rows={2} pad={6}&gt;
+        &lt;MetricBlock layout=&quot;card&quot; icon=&quot;payments&quot; label=&quot;Revenue&quot; value=&quot;$12.4k&quot; delta=&quot;+22%&quot; hint=&quot;vs $10.2k / 30d ago&quot; chart={REVENUE} /&gt;
+      &lt;/Cell&gt;
+      {/* 3×1 — wide with the sparkline on the right */}
+      &lt;Cell cols={3}&gt;
+        &lt;MetricBlock layout=&quot;wide&quot; icon=&quot;speed&quot; label=&quot;Throughput&quot; value=&quot;2.1k/s&quot; delta=&quot;+9%&quot; chart={REQ_MIN} /&gt;
+      &lt;/Cell&gt;
+      {/* 1×1 */}
+      &lt;Cell&gt;
+        &lt;MetricBlock icon=&quot;error&quot; label=&quot;Churn&quot; value=&quot;3&quot; delta=&quot;-12%&quot; /&gt;
+      &lt;/Cell&gt;
+      {/* 2×1 — wide, no chart: delta sits next to the label */}
+      &lt;Cell cols={2}&gt;
+        &lt;MetricBlock layout=&quot;wide&quot; icon=&quot;schedule&quot; label=&quot;Avg latency&quot; value=&quot;142ms&quot; delta=&quot;-8%&quot; hint=&quot;p99 312ms&quot; /&gt;
+      &lt;/Cell&gt;
+      {/* 1×2 — sparkline fills the second row */}
+      &lt;Cell rows={2}&gt;
+        &lt;MetricBlock icon=&quot;trending_up&quot; label=&quot;Req / min&quot; value=&quot;2.1k&quot; delta=&quot;+9%&quot; chart={REQ_MIN} /&gt;
+      &lt;/Cell&gt;
+      &lt;Cell&gt;
+        &lt;MetricBlock icon=&quot;groups&quot; label=&quot;Tenants&quot; value=&quot;37&quot; delta=&quot;+2&quot; /&gt;
+      &lt;/Cell&gt;
+      &lt;Cell&gt;
+        &lt;MetricBlock icon=&quot;bolt&quot; label=&quot;Cold starts&quot; value=&quot;3&quot; delta=&quot;-1&quot; /&gt;
+      &lt;/Cell&gt;
+      &lt;Cell&gt;
+        &lt;MetricBlock icon=&quot;new_releases&quot; label=&quot;Version&quot; value=&quot;v0.3.1&quot; /&gt;
+      &lt;/Cell&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Big Card</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`layout=&quot;chart&quot;` for 3×3 and larger — chart-led: header (label · trend), a full-width sparkline filling the middle, and a stats row underneath. No big value — the chart and stats carry it. Hover a bar for its labelled value.</div>
+              <pre><code>const BigCard = () =&gt; (
+  &lt;div className=&quot;bg-background p-6&quot;&gt;
+    &lt;div className=&quot;grid auto-rows-[96px] grid-cols-[repeat(7,96px)] gap-2&quot;&gt;
+      {/* 3×3 */}
+      &lt;Cell cols={3} rows={3} pad={6}&gt;
+        &lt;MetricBlock
+          layout=&quot;chart&quot;
+          icon=&quot;payments&quot;
+          label=&quot;Revenue&quot;
+          delta=&quot;+22%&quot;
+          chart={REVENUE}
+          stats={[
+            { label: &quot;This week&quot;, value: &quot;$12.4k&quot;, delta: &quot;+22%&quot; },
+            { label: &quot;MTD&quot;, value: &quot;$41.8k&quot;, delta: &quot;+9%&quot; },
+            { label: &quot;ARPU&quot;, value: &quot;$8.40&quot;, delta: &quot;+3%&quot; },
+          ]}
+        /&gt;
+      &lt;/Cell&gt;
+      {/* 4×3 */}
+      &lt;Cell cols={4} rows={3} pad={6} tone=&quot;primary&quot;&gt;
+        &lt;MetricBlock
+          layout=&quot;chart&quot;
+          icon=&quot;apps&quot;
+          label=&quot;Installs&quot;
+          delta=&quot;+18%&quot;
+          chart={INSTALLS}
+          stats={[
+            { label: &quot;This week&quot;, value: &quot;1,240&quot;, delta: &quot;+18%&quot; },
+            { label: &quot;Month-to-date&quot;, value: &quot;4,180&quot;, delta: &quot;+11%&quot; },
+            { label: &quot;Conversion&quot;, value: &quot;3.2%&quot;, delta: &quot;-0.4%&quot; },
+            { label: &quot;Per tenant&quot;, value: &quot;33.5&quot;, delta: &quot;+2%&quot; },
+          ]}
+          tone=&quot;primary&quot;
+        /&gt;
+      &lt;/Cell&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
   no-error 
   has-info 
   no-story-error
@@ -5310,9 +5718,9 @@ export const AgentStreaming: StoryObj = {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NavDrawer</h2>
       <div class="badges">
-        <label for="c-25-ui-navigation-navdrawer-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-25-ui-navigation-navdrawer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-25-ui-navigation-navdrawer-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-26-ui-navigation-navdrawer-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-26-ui-navigation-navdrawer-info" class="badge info as-toggle">1 info</label>
+        <label for="c-26-ui-navigation-navdrawer-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -5324,10 +5732,10 @@ export const AgentStreaming: StoryObj = {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-25-ui-navigation-navdrawer-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-25-ui-navigation-navdrawer-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-26-ui-navigation-navdrawer-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-26-ui-navigation-navdrawer-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-25-ui-navigation-navdrawer-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-26-ui-navigation-navdrawer-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5419,9 +5827,9 @@ sections: NavDrawerSection[]</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NavigationRail</h2>
       <div class="badges">
-        <label for="c-26-ui-navigation-navigationrail-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-26-ui-navigation-navigationrail-info" class="badge info as-toggle">1 info</label>
-        <label for="c-26-ui-navigation-navigationrail-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-27-ui-navigation-navigationrail-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-27-ui-navigation-navigationrail-info" class="badge info as-toggle">1 info</label>
+        <label for="c-27-ui-navigation-navigationrail-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -5433,10 +5841,10 @@ sections: NavDrawerSection[]</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-26-ui-navigation-navigationrail-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-26-ui-navigation-navigationrail-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-27-ui-navigation-navigationrail-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-27-ui-navigation-navigationrail-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-26-ui-navigation-navigationrail-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-27-ui-navigation-navigationrail-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5564,9 +5972,9 @@ logo?: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Notch</h2>
       <div class="badges">
-        <label for="c-27-ui-notch-notch-props" class="badge ok as-toggle">14 prop types</label>
-        <label for="c-27-ui-notch-notch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-27-ui-notch-notch-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-28-ui-notch-notch-props" class="badge ok as-toggle">14 prop types</label>
+        <label for="c-28-ui-notch-notch-info" class="badge info as-toggle">1 info</label>
+        <label for="c-28-ui-notch-notch-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -5578,10 +5986,10 @@ logo?: ReactNode</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-27-ui-notch-notch-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-27-ui-notch-notch-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-28-ui-notch-notch-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-28-ui-notch-notch-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-27-ui-notch-notch-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-28-ui-notch-notch-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -5811,9 +6219,9 @@ width: number</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NotchGrid</h2>
       <div class="badges">
-        <label for="c-28-ui-notch-notchgrid-props" class="badge ok as-toggle">17 prop types</label>
-        <label for="c-28-ui-notch-notchgrid-info" class="badge info as-toggle">1 info</label>
-        <label for="c-28-ui-notch-notchgrid-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-29-ui-notch-notchgrid-props" class="badge ok as-toggle">17 prop types</label>
+        <label for="c-29-ui-notch-notchgrid-info" class="badge info as-toggle">1 info</label>
+        <label for="c-29-ui-notch-notchgrid-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -5825,10 +6233,10 @@ width: number</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-28-ui-notch-notchgrid-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-28-ui-notch-notchgrid-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-29-ui-notch-notchgrid-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-29-ui-notch-notchgrid-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-28-ui-notch-notchgrid-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-29-ui-notch-notchgrid-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6196,9 +6604,9 @@ style?: CSSProperties</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Progress</h2>
       <div class="badges">
-        <label for="c-29-ui-feedback-progress-props" class="badge ok as-toggle">12 prop types</label>
-        <label for="c-29-ui-feedback-progress-info" class="badge info as-toggle">1 info</label>
-        <label for="c-29-ui-feedback-progress-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-30-ui-feedback-progress-props" class="badge ok as-toggle">12 prop types</label>
+        <label for="c-30-ui-feedback-progress-info" class="badge info as-toggle">1 info</label>
+        <label for="c-30-ui-feedback-progress-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -6210,10 +6618,10 @@ style?: CSSProperties</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-29-ui-feedback-progress-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-29-ui-feedback-progress-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-30-ui-feedback-progress-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-30-ui-feedback-progress-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-29-ui-feedback-progress-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-30-ui-feedback-progress-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6440,9 +6848,9 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ReadOnlyField</h2>
       <div class="badges">
-        <label for="c-30-ui-data-readonlyfield-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-30-ui-data-readonlyfield-info" class="badge info as-toggle">1 info</label>
-        <label for="c-30-ui-data-readonlyfield-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-31-ui-data-readonlyfield-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-31-ui-data-readonlyfield-info" class="badge info as-toggle">1 info</label>
+        <label for="c-31-ui-data-readonlyfield-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -6454,10 +6862,10 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-30-ui-data-readonlyfield-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-30-ui-data-readonlyfield-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-31-ui-data-readonlyfield-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-31-ui-data-readonlyfield-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-30-ui-data-readonlyfield-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-31-ui-data-readonlyfield-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6561,9 +6969,9 @@ value: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ReauthDialog</h2>
       <div class="badges">
-        <label for="c-31-ui-surfaces-reauthdialog-props" class="badge ok as-toggle">11 prop types</label>
-        <label for="c-31-ui-surfaces-reauthdialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-31-ui-surfaces-reauthdialog-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-32-ui-surfaces-reauthdialog-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-32-ui-surfaces-reauthdialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-32-ui-surfaces-reauthdialog-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -6575,10 +6983,10 @@ value: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-31-ui-surfaces-reauthdialog-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-31-ui-surfaces-reauthdialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-32-ui-surfaces-reauthdialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-32-ui-surfaces-reauthdialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-31-ui-surfaces-reauthdialog-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-32-ui-surfaces-reauthdialog-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6792,9 +7200,9 @@ title?: string = &quot;Verify your identity&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SectionLabel</h2>
       <div class="badges">
-        <label for="c-32-ui-data-sectionlabel-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-32-ui-data-sectionlabel-info" class="badge info as-toggle">1 info</label>
-        <label for="c-32-ui-data-sectionlabel-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-33-ui-data-sectionlabel-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-33-ui-data-sectionlabel-info" class="badge info as-toggle">1 info</label>
+        <label for="c-33-ui-data-sectionlabel-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -6806,10 +7214,10 @@ title?: string = &quot;Verify your identity&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-32-ui-data-sectionlabel-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-32-ui-data-sectionlabel-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-33-ui-data-sectionlabel-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-33-ui-data-sectionlabel-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-32-ui-data-sectionlabel-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-33-ui-data-sectionlabel-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6936,9 +7344,9 @@ title?: string = &quot;Verify your identity&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SegmentedButton</h2>
       <div class="badges">
-        <label for="c-33-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-33-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-33-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-34-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-34-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-34-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -6950,10 +7358,10 @@ title?: string = &quot;Verify your identity&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-33-ui-inputs-segmentedbutton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-33-ui-inputs-segmentedbutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-34-ui-inputs-segmentedbutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-34-ui-inputs-segmentedbutton-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-33-ui-inputs-segmentedbutton-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-34-ui-inputs-segmentedbutton-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7099,9 +7507,9 @@ value: T</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SettingRow</h2>
       <div class="badges">
-        <label for="c-34-ui-data-settingrow-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-34-ui-data-settingrow-info" class="badge info as-toggle">1 info</label>
-        <label for="c-34-ui-data-settingrow-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-35-ui-data-settingrow-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-35-ui-data-settingrow-info" class="badge info as-toggle">1 info</label>
+        <label for="c-35-ui-data-settingrow-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -7113,10 +7521,10 @@ value: T</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-34-ui-data-settingrow-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-34-ui-data-settingrow-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-35-ui-data-settingrow-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-35-ui-data-settingrow-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-34-ui-data-settingrow-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-35-ui-data-settingrow-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7260,9 +7668,9 @@ tone?: | &quot;primary&quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SettingsSection</h2>
       <div class="badges">
-        <label for="c-35-ui-surfaces-settingssection-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-35-ui-surfaces-settingssection-info" class="badge info as-toggle">1 info</label>
-        <label for="c-35-ui-surfaces-settingssection-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-36-ui-surfaces-settingssection-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-36-ui-surfaces-settingssection-info" class="badge info as-toggle">1 info</label>
+        <label for="c-36-ui-surfaces-settingssection-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -7274,10 +7682,10 @@ tone?: | &quot;primary&quot;
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-35-ui-surfaces-settingssection-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-35-ui-surfaces-settingssection-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-36-ui-surfaces-settingssection-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-36-ui-surfaces-settingssection-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-35-ui-surfaces-settingssection-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-36-ui-surfaces-settingssection-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7407,9 +7815,9 @@ title: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Sidebar</h2>
       <div class="badges">
-        <label for="c-36-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-36-agent-sidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-36-agent-sidebar-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-37-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-37-agent-sidebar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-37-agent-sidebar-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -7420,9 +7828,9 @@ title: ReactNode</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-36-agent-sidebar-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-36-agent-sidebar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-36-agent-sidebar-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-37-agent-sidebar-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-37-agent-sidebar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-37-agent-sidebar-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -7686,9 +8094,9 @@ export const Playground: StoryObj = {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Skeleton</h2>
       <div class="badges">
-        <label for="c-37-ui-feedback-skeleton-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-37-ui-feedback-skeleton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-37-ui-feedback-skeleton-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-38-ui-feedback-skeleton-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-38-ui-feedback-skeleton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-38-ui-feedback-skeleton-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -7700,10 +8108,10 @@ export const Playground: StoryObj = {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-37-ui-feedback-skeleton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-37-ui-feedback-skeleton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-38-ui-feedback-skeleton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-38-ui-feedback-skeleton-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-37-ui-feedback-skeleton-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-38-ui-feedback-skeleton-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7823,9 +8231,9 @@ width?: string = &quot;w-full&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Snackbar</h2>
       <div class="badges">
-        <label for="c-38-ui-feedback-snackbar-props" class="badge ok as-toggle">10 prop types</label>
-        <label for="c-38-ui-feedback-snackbar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-38-ui-feedback-snackbar-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-39-ui-feedback-snackbar-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-39-ui-feedback-snackbar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-39-ui-feedback-snackbar-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -7837,10 +8245,10 @@ width?: string = &quot;w-full&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-38-ui-feedback-snackbar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-38-ui-feedback-snackbar-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-39-ui-feedback-snackbar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-39-ui-feedback-snackbar-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-38-ui-feedback-snackbar-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-39-ui-feedback-snackbar-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8068,9 +8476,9 @@ variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SocialButton</h2>
       <div class="badges">
-        <label for="c-39-ui-actions-socialbutton-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-39-ui-actions-socialbutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-39-ui-actions-socialbutton-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-40-ui-actions-socialbutton-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-40-ui-actions-socialbutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-40-ui-actions-socialbutton-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -8082,10 +8490,10 @@ variant?: &quot;default&quot; | &quot;success&quot; | &quot;error&quot; | &quot;
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-39-ui-actions-socialbutton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-39-ui-actions-socialbutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-40-ui-actions-socialbutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-40-ui-actions-socialbutton-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-39-ui-actions-socialbutton-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-40-ui-actions-socialbutton-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8189,14 +8597,145 @@ provider?: &quot;google&quot; | &quot;discord&quot; | &quot;openid&quot; | &quot
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="Sparkline">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Sparkline</h2>
+      <div class="badges">
+        <label for="c-41-ui-chart-sparkline-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-41-ui-chart-sparkline-info" class="badge info as-toggle">1 info</label>
+        <label for="c-41-ui-chart-sparkline-stories" class="badge ok as-toggle">2 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/chart/sparkline/Sparkline.stories.tsx">ui-chart-sparkline · ./src/components/ui/chart/sparkline/Sparkline.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-41-ui-chart-sparkline-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-41-ui-chart-sparkline-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-41-ui-chart-sparkline-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">5 prop types</span>
+            </div>
+            <pre><code>Component: src/components/ui/chart/sparkline/Sparkline.tsx::Sparkline</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>/**
+ * Classes for the bar under the pointer. Defaults to {@link barClassName}.
+ */
+barActiveClassName?: string
+
+/**
+ * Tailwind classes for the bars. Default `&quot;bg-primary/30&quot;`.
+ */
+barClassName?: string = &quot;bg-primary/30&quot;
+
+/**
+ * Classes for the floating hover chip. Default `&quot;bg-on-surface text-surface&quot;`.
+ */
+chipClassName?: string
+
+className?: string
+
+/**
+ * Bars, as heights `0–100` (or `{ value, label }` for a labelled hover chip).
+ */
+data: ReadonlyArray&lt;SparklinePoint&gt;</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Sparkline } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A `Sparkline` fills its container — drop it in any sized box. Hover a bar.</div>
+              <pre><code>const Playground = () =&gt; &lt;div className=&quot;bg-background p-6&quot;&gt;
+    &lt;div className=&quot;h-28 w-64 rounded-2xl border border-outline-variant p-3&quot;&gt;
+        &lt;Sparkline
+            data={[38, 62, 50, 78, 55, 70, 90, 60, 75, 95, 85, 100]}
+            className=&quot;h-full&quot; /&gt;
+    &lt;/div&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Tones</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Bar / hover colours are passed via `barClassName` / `barActiveClassName`, so a sparkline reads well on whatever surface it sits on. (Give it a height — it fills its container; here via `className=&quot;h-full&quot;`.)</div>
+              <pre><code>const Tones = () =&gt; (
+  &lt;div className=&quot;flex flex-wrap items-start gap-6 bg-background p-6&quot;&gt;
+    &lt;div className=&quot;h-24 w-64 rounded-2xl bg-surface-container-low p-3&quot;&gt;
+      &lt;Sparkline data={LABELLED} className=&quot;h-full&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div className=&quot;h-24 w-64 rounded-2xl bg-primary-container p-3&quot;&gt;
+      &lt;Sparkline
+        data={LABELLED}
+        className=&quot;h-full&quot;
+        barClassName=&quot;bg-on-primary-container/25&quot;
+        barActiveClassName=&quot;bg-on-primary-container/55&quot;
+      /&gt;
+    &lt;/div&gt;
+    &lt;div className=&quot;h-40 w-80 rounded-2xl bg-surface-container p-4&quot;&gt;
+      &lt;Sparkline data={LABELLED} className=&quot;h-full&quot; barClassName=&quot;bg-primary/40&quot; barActiveClassName=&quot;bg-primary/70&quot; /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="Surface">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Surface</h2>
       <div class="badges">
-        <label for="c-40-ui-surfaces-surface-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-40-ui-surfaces-surface-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-ui-surfaces-surface-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-42-ui-surfaces-surface-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-42-ui-surfaces-surface-info" class="badge info as-toggle">1 info</label>
+        <label for="c-42-ui-surfaces-surface-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -8208,10 +8747,10 @@ provider?: &quot;google&quot; | &quot;discord&quot; | &quot;openid&quot; | &quot
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-40-ui-surfaces-surface-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-40-ui-surfaces-surface-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-42-ui-surfaces-surface-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-42-ui-surfaces-surface-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-40-ui-surfaces-surface-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-42-ui-surfaces-surface-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8307,9 +8846,9 @@ interactive?: boolean</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Switch</h2>
       <div class="badges">
-        <label for="c-41-ui-inputs-switch-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-41-ui-inputs-switch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-ui-inputs-switch-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-43-ui-inputs-switch-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-43-ui-inputs-switch-info" class="badge info as-toggle">1 info</label>
+        <label for="c-43-ui-inputs-switch-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -8321,10 +8860,10 @@ interactive?: boolean</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-41-ui-inputs-switch-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-41-ui-inputs-switch-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-43-ui-inputs-switch-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-43-ui-inputs-switch-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-41-ui-inputs-switch-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-43-ui-inputs-switch-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8472,9 +9011,9 @@ onChange: (checked: boolean) =&gt; void</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ThemeToggle</h2>
       <div class="badges">
-        <label for="c-42-ui-actions-themetoggle-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-42-ui-actions-themetoggle-info" class="badge info as-toggle">1 info</label>
-        <label for="c-42-ui-actions-themetoggle-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-44-ui-actions-themetoggle-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-44-ui-actions-themetoggle-info" class="badge info as-toggle">1 info</label>
+        <label for="c-44-ui-actions-themetoggle-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -8486,10 +9025,10 @@ onChange: (checked: boolean) =&gt; void</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-42-ui-actions-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-42-ui-actions-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-44-ui-actions-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-44-ui-actions-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-42-ui-actions-themetoggle-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-44-ui-actions-themetoggle-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8586,9 +9125,9 @@ variant?: any = &quot;tonal&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> TypeToConfirmDialog</h2>
       <div class="badges">
-        <label for="c-43-ui-surfaces-typetoconfirmdialog-props" class="badge ok as-toggle">11 prop types</label>
-        <label for="c-43-ui-surfaces-typetoconfirmdialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-43-ui-surfaces-typetoconfirmdialog-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-45-ui-surfaces-typetoconfirmdialog-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-45-ui-surfaces-typetoconfirmdialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-45-ui-surfaces-typetoconfirmdialog-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -8600,10 +9139,10 @@ variant?: any = &quot;tonal&quot;</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-43-ui-surfaces-typetoconfirmdialog-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-43-ui-surfaces-typetoconfirmdialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-45-ui-surfaces-typetoconfirmdialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-45-ui-surfaces-typetoconfirmdialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-43-ui-surfaces-typetoconfirmdialog-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-45-ui-surfaces-typetoconfirmdialog-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8829,9 +9368,9 @@ warnTitle: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> VerificationCodeInput</h2>
       <div class="badges">
-        <label for="c-44-ui-inputs-verificationcodeinput-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-44-ui-inputs-verificationcodeinput-info" class="badge info as-toggle">1 info</label>
-        <label for="c-44-ui-inputs-verificationcodeinput-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-46-ui-inputs-verificationcodeinput-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-46-ui-inputs-verificationcodeinput-info" class="badge info as-toggle">1 info</label>
+        <label for="c-46-ui-inputs-verificationcodeinput-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -8843,10 +9382,10 @@ warnTitle: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-44-ui-inputs-verificationcodeinput-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-44-ui-inputs-verificationcodeinput-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-46-ui-inputs-verificationcodeinput-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-46-ui-inputs-verificationcodeinput-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-44-ui-inputs-verificationcodeinput-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-46-ui-inputs-verificationcodeinput-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -9907,6 +10446,424 @@ export const Playground: StoryObj = {
     &lt;/&gt;
   );
 };</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article></div>
+        </section>
+      
+        <section class="group">
+          <input id="no-component-definition-found-toggle" class="group-tg" type="checkbox" hidden />
+          <label for="no-component-definition-found-toggle" class="group-header">
+            <span class="caret">▸</span>
+            <span class="group-title">No component definition found</span>
+            <span class="group-count">1</span>
+          </label>
+          <div class="group-cards">
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="MetricBlock">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> MetricBlock</h2>
+      <div class="badges">
+        <label for="c-error-0-ui-notch-blocks-metric-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-0-ui-notch-blocks-metric-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-0-ui-notch-blocks-metric-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/data/metric-block/MetricBlock.stories.tsx">ui-notch-blocks-metric · ./src/components/ui/data/metric-block/MetricBlock.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-0-ui-notch-blocks-metric-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-0-ui-notch-blocks-metric-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-0-ui-notch-blocks-metric-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/runner/work/web-ui-kit/web-ui-kit/src/components/ui/data/metric-block/MetricBlock.tsx
+Error:
+No suitable component definition found.
+You can debug your component file in this playground: https://react-docgen.dev/playground
+Code:
+import type { ReactNode } from &quot;react&quot;;
+import { cn } from &quot;@/utils/cn&quot;;
+import { isDev } from &quot;@/utils/env&quot;;
+import type { ComponentMeta } from &quot;@/types/component-meta&quot;;
+import { Icon } from &quot;@/components/ui/media/icon/Icon&quot;;
+import { Sparkline, type SparklinePoint } from &quot;@/components/ui/chart/sparkline/Sparkline&quot;;
+
+export const meta: ComponentMeta = {
+  name: &quot;MetricBlock&quot;,
+  description:
+    &quot;A metric tile sized for a NotchGrid cell — icon, trend chip, label, value, optional sparkline + sub-stats. Pick a `layout` for the cell shape: stacked (1×1/1×2), wide (2×1/3×1), card (2×2), bigcard (3×2), chart (3×3+ — chart-led, no big value).&quot;,
+};
+
+/** Text-colour tone — must match the surface the block sits on. */
+export type MetricBlockTone = &quot;surface&quot; | &quot;primary&quot;;
+
+/** Direction of the trend chip — `up` reads green, `down` reads as an error. */
+export type MetricTrend = &quot;up&quot; | &quot;down&quot;;
+
+/** `stacked` = 1×1 / 1×2; `wide` = 2×1 / 3×1; `card` = 2×2; `bigcard` = 3×2;
+ *  `chart` = 3×3 and up (chart-led — full-width sparkline, no big value). */
+export type MetricBlockLayout = &quot;stacked&quot; | &quot;wide&quot; | &quot;card&quot; | &quot;bigcard&quot; | &quot;chart&quot;;
+
+const TONE: Record&lt;
+  MetricBlockTone,
+  { icon: string; label: string; value: string; bar: string; barActive: string; divider: string }
+&gt; = {
+  surface: {
+    icon: &quot;text-primary&quot;,
+    label: &quot;text-on-surface-variant&quot;,
+    value: &quot;text-on-surface&quot;,
+    bar: &quot;bg-primary/30 hover:bg-primary/60&quot;,
+    barActive: &quot;bg-primary/60&quot;,
+    divider: &quot;border-outline-variant&quot;,
+  },
+  primary: {
+    icon: &quot;text-on-primary-container&quot;,
+    label: &quot;text-on-primary-container/70&quot;,
+    value: &quot;text-on-primary-container&quot;,
+    bar: &quot;bg-on-primary-container/25 hover:bg-on-primary-container/55&quot;,
+    barActive: &quot;bg-on-primary-container/55&quot;,
+    divider: &quot;border-on-primary-container/20&quot;,
+  },
+};
+
+// Semantic accent tokens — they flip with the theme, so the chip stays legible
+// in light and dark mode on any tone.
+const TREND_TEXT: Record&lt;MetricTrend, string&gt; = {
+  up: &quot;text-success&quot;,
+  down: &quot;text-error&quot;,
+};
+
+const inferTrend = (delta: ReactNode, explicit?: MetricTrend): MetricTrend =&gt;
+  explicit ?? (typeof delta === &quot;string&quot; &amp;&amp; /^[-−]/.test(delta.trim()) ? &quot;down&quot; : &quot;up&quot;);
+
+export interface MetricStat {
+  label: ReactNode;
+  value: ReactNode;
+  delta?: ReactNode;
+  deltaTrend?: MetricTrend;
+}
+
+export interface MetricBlockProps {
+  /** Material Symbols Rounded icon name (e.g. `&quot;apps&quot;`). Omit for no icon. */
+  icon?: string;
+  label: ReactNode;
+  /** The headline value. Not shown in `layout=&quot;chart&quot;` (the chart + stats carry it). */
+  value?: ReactNode;
+  /** A trend / delta chip (e.g. `&quot;+18%&quot;`). Top-right when stacked, in the header
+   *  when card, beside the label when wide. Coloured by {@link deltaTrend}. */
+  delta?: ReactNode;
+  /** `up` ⇒ green, `down` ⇒ error red. When omitted and `delta` is a string,
+   *  inferred from a leading `-` / `−`. */
+  deltaTrend?: MetricTrend;
+  /** Optional neutral line under the value — a unit, count, timestamp, etc.
+   *  Hidden when {@link stats} is shown (bigcard). */
+  hint?: ReactNode;
+  /** Sparkline points (heights 0–100, optional per-bar `label` for the hover
+   *  chip — see {@link SparklinePoint}). Fills the spare height (stacked / card
+   *  / bigcard / chart) or sits on the right (wide). A 2×1 hasn&#39;t the room. */
+  chart?: ReadonlyArray&lt;SparklinePoint&gt;;
+  /** A row of mini sub-stats below the chart — rendered in `layout=&quot;bigcard&quot;`
+   *  and `layout=&quot;chart&quot;`. */
+  stats?: ReadonlyArray&lt;MetricStat&gt;;
+  /** Pick a layout for the cell shape (see {@link MetricBlockLayout}). Default `&quot;stacked&quot;`. */
+  layout?: MetricBlockLayout;
+  /** Pick the tone that contrasts with the block&#39;s background. Default `&quot;surface&quot;`. */
+  tone?: MetricBlockTone;
+  className?: string;
+}
+
+export function MetricBlock({
+  icon,
+  label,
+  value,
+  delta,
+  deltaTrend,
+  hint,
+  chart,
+  stats,
+  layout = &quot;stacked&quot;,
+  tone = &quot;surface&quot;,
+  className,
+}: MetricBlockProps) {
+  if (isDev &amp;&amp; label == null &amp;&amp; value == null) {
+    console.warn(&quot;[MetricBlock] both `label` and `value` are empty — nothing to show&quot;);
+  }
+  const c = TONE[tone];
+  const trend = inferTrend(delta, deltaTrend);
+  const hasChart = !!chart &amp;&amp; chart.length &gt; 0;
+  const deltaChip = delta != null &amp;&amp; (
+    &lt;span className={cn(&quot;shrink-0 text-xs font-medium&quot;, TREND_TEXT[trend])}&gt;{delta}&lt;/span&gt;
+  );
+  const sparkline = (cls: string) =&gt;
+    hasChart ? (
+      &lt;Sparkline data={chart!} barClassName={c.bar} barActiveClassName={c.barActive} className={cls} /&gt;
+    ) : null;
+  const hintLine = (extra?: string) =&gt;
+    hint != null ? &lt;p className={cn(&quot;truncate text-xs&quot;, c.label, extra)}&gt;{hint}&lt;/p&gt; : null;
+  const hasStats = !!stats &amp;&amp; stats.length &gt; 0;
+  const statsRow = hasStats ? (
+    &lt;div className={cn(&quot;flex gap-3 border-t pt-2&quot;, c.divider)}&gt;
+      {stats!.map((s, i) =&gt; {
+        const t = inferTrend(s.delta, s.deltaTrend);
+        return (
+          &lt;div key={i} className=&quot;min-w-0 flex-1&quot;&gt;
+            &lt;p className={cn(&quot;truncate text-[10px]&quot;, c.label)}&gt;{s.label}&lt;/p&gt;
+            &lt;p className={cn(&quot;truncate text-sm font-medium&quot;, c.value)}&gt;
+              {s.value}
+              {s.delta != null &amp;&amp; (
+                &lt;span className={cn(&quot;ml-1 text-[10px] font-medium&quot;, TREND_TEXT[t])}&gt;{s.delta}&lt;/span&gt;
+              )}
+            &lt;/p&gt;
+          &lt;/div&gt;
+        );
+      })}
+    &lt;/div&gt;
+  ) : null;
+
+  const valueLine = (cls: string) =&gt;
+    value != null ? &lt;p className={cn(cls, c.value)}&gt;{value}&lt;/p&gt; : null;
+
+  let body: ReactNode;
+  if (layout === &quot;wide&quot;) {
+    body = (
+      &lt;div className={cn(&quot;flex h-full items-center gap-3&quot;, className)}&gt;
+        {icon ? &lt;Icon name={icon} size={24} className={c.icon} /&gt; : null}
+        &lt;div className=&quot;min-w-0&quot;&gt;
+          &lt;div className=&quot;flex items-baseline gap-2&quot;&gt;
+            &lt;p className={cn(&quot;truncate text-xs&quot;, c.label)}&gt;{label}&lt;/p&gt;
+            {!hasChart &amp;&amp; deltaChip}
+          &lt;/div&gt;
+          {valueLine(&quot;text-2xl font-semibold leading-tight&quot;)}
+          {hintLine()}
+        &lt;/div&gt;
+        {sparkline(&quot;ml-auto h-2/3 w-[42%] self-center&quot;)}
+      &lt;/div&gt;
+    );
+  } else if (layout === &quot;chart&quot;) {
+    body = (
+      &lt;div className={cn(&quot;flex h-full flex-col gap-2&quot;, className)}&gt;
+        &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+          {icon ? &lt;Icon name={icon} size={20} className={c.icon} /&gt; : null}
+          &lt;p className={cn(&quot;min-w-0 flex-1 truncate text-sm font-medium&quot;, c.label)}&gt;{label}&lt;/p&gt;
+          {deltaChip}
+        &lt;/div&gt;
+        {sparkline(&quot;flex-1&quot;)}
+        {hasStats ? statsRow : hintLine(&quot;mt-auto&quot;)}
+      &lt;/div&gt;
+    );
+  } else if (layout === &quot;bigcard&quot;) {
+    body = (
+      &lt;div className={cn(&quot;flex h-full flex-col gap-2&quot;, className)}&gt;
+        &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+          {icon ? &lt;Icon name={icon} size={20} className={c.icon} /&gt; : null}
+          &lt;p className={cn(&quot;min-w-0 flex-1 truncate text-sm font-medium&quot;, c.label)}&gt;{label}&lt;/p&gt;
+          {deltaChip}
+        &lt;/div&gt;
+        {/* big value beside the sparkline — uses the horizontal room a 3×2+ has */}
+        &lt;div className=&quot;flex flex-1 items-end gap-3&quot;&gt;
+          {valueLine(&quot;shrink-0 text-3xl font-semibold leading-none&quot;)}
+          {sparkline(&quot;h-full flex-1&quot;)}
+        &lt;/div&gt;
+        {hasStats ? statsRow : hintLine(&quot;mt-auto&quot;)}
+      &lt;/div&gt;
+    );
+  } else if (layout === &quot;card&quot;) {
+    body = (
+      &lt;div className={cn(&quot;flex h-full flex-col gap-2&quot;, className)}&gt;
+        &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+          {icon ? &lt;Icon name={icon} size={20} className={c.icon} /&gt; : null}
+          &lt;p className={cn(&quot;min-w-0 flex-1 truncate text-sm font-medium&quot;, c.label)}&gt;{label}&lt;/p&gt;
+          {deltaChip}
+        &lt;/div&gt;
+        {valueLine(&quot;text-3xl font-semibold leading-none&quot;)}
+        {sparkline(&quot;mt-1 flex-1&quot;)}
+        {hintLine(hasChart ? undefined : &quot;mt-auto&quot;)}
+      &lt;/div&gt;
+    );
+  } else {
+    body = (
+      &lt;div className={cn(&quot;flex h-full flex-col gap-2&quot;, className)}&gt;
+        &lt;div className=&quot;flex items-center justify-between gap-2&quot;&gt;
+          {icon ? &lt;Icon name={icon} size={18} className={c.icon} /&gt; : &lt;span aria-hidden=&quot;true&quot; /&gt;}
+          {deltaChip}
+        &lt;/div&gt;
+        {sparkline(&quot;flex-1&quot;)}
+        &lt;div className={hasChart ? undefined : &quot;mt-auto&quot;}&gt;
+          &lt;p className={cn(&quot;text-xs&quot;, c.label)}&gt;{label}&lt;/p&gt;
+          {valueLine(&quot;text-lg font-medium leading-tight&quot;)}
+          {hintLine(&quot;mt-0.5&quot;)}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+
+  return body;
+}
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { MetricBlock } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Standalone, in a 96px (`size-24`) box — the natural 1×1 footprint.</div>
+              <pre><code>const Playground = () =&gt; &lt;div className=&quot;bg-background p-6&quot;&gt;
+    &lt;div className=&quot;size-24 rounded-2xl bg-surface-container-low p-4&quot;&gt;
+        &lt;MetricBlock icon=&quot;apps&quot; label=&quot;Installs&quot; value=&quot;1,240&quot; delta=&quot;+18%&quot; tone=&quot;surface&quot; /&gt;
+    &lt;/div&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Sizes</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Every footprint side by side: 1×1 tiles, a 1×2 (`chart` fills the extra height), a 2×1 (`layout=&quot;wide&quot;`, no room for a chart), a 3×1 (`wide` + sparkline on the right), a 2×2 (`layout=&quot;card&quot;`), and a 3×2 (`bigcard` — header, big value beside the sparkline, sub-stats row).</div>
+              <pre><code>const Sizes = () =&gt; (
+  &lt;div className=&quot;bg-background p-6&quot;&gt;
+    &lt;div className=&quot;grid auto-rows-[96px] grid-cols-[repeat(6,96px)] gap-2&quot;&gt;
+      {/* 3×2 — bigcard: header · big number · chart · sub-stats */}
+      &lt;Cell cols={3} rows={2} pad={6} tone=&quot;primary&quot;&gt;
+        &lt;MetricBlock
+          layout=&quot;bigcard&quot;
+          icon=&quot;apps&quot;
+          label=&quot;Installs&quot;
+          value=&quot;1,240&quot;
+          delta=&quot;+18%&quot;
+          chart={INSTALLS}
+          stats={[
+            { label: &quot;This week&quot;, value: &quot;1,240&quot;, delta: &quot;+18%&quot; },
+            { label: &quot;MTD&quot;, value: &quot;4,180&quot;, delta: &quot;+11%&quot; },
+            { label: &quot;Conversion&quot;, value: &quot;3.2%&quot;, delta: &quot;-0.4%&quot; },
+          ]}
+          tone=&quot;primary&quot;
+        /&gt;
+      &lt;/Cell&gt;
+      {/* 2×2 — card: header + big value + chart filling the rest */}
+      &lt;Cell cols={2} rows={2} pad={6}&gt;
+        &lt;MetricBlock layout=&quot;card&quot; icon=&quot;payments&quot; label=&quot;Revenue&quot; value=&quot;$12.4k&quot; delta=&quot;+22%&quot; hint=&quot;vs $10.2k / 30d ago&quot; chart={REVENUE} /&gt;
+      &lt;/Cell&gt;
+      {/* 3×1 — wide with the sparkline on the right */}
+      &lt;Cell cols={3}&gt;
+        &lt;MetricBlock layout=&quot;wide&quot; icon=&quot;speed&quot; label=&quot;Throughput&quot; value=&quot;2.1k/s&quot; delta=&quot;+9%&quot; chart={REQ_MIN} /&gt;
+      &lt;/Cell&gt;
+      {/* 1×1 */}
+      &lt;Cell&gt;
+        &lt;MetricBlock icon=&quot;error&quot; label=&quot;Churn&quot; value=&quot;3&quot; delta=&quot;-12%&quot; /&gt;
+      &lt;/Cell&gt;
+      {/* 2×1 — wide, no chart: delta sits next to the label */}
+      &lt;Cell cols={2}&gt;
+        &lt;MetricBlock layout=&quot;wide&quot; icon=&quot;schedule&quot; label=&quot;Avg latency&quot; value=&quot;142ms&quot; delta=&quot;-8%&quot; hint=&quot;p99 312ms&quot; /&gt;
+      &lt;/Cell&gt;
+      {/* 1×2 — sparkline fills the second row */}
+      &lt;Cell rows={2}&gt;
+        &lt;MetricBlock icon=&quot;trending_up&quot; label=&quot;Req / min&quot; value=&quot;2.1k&quot; delta=&quot;+9%&quot; chart={REQ_MIN} /&gt;
+      &lt;/Cell&gt;
+      &lt;Cell&gt;
+        &lt;MetricBlock icon=&quot;groups&quot; label=&quot;Tenants&quot; value=&quot;37&quot; delta=&quot;+2&quot; /&gt;
+      &lt;/Cell&gt;
+      &lt;Cell&gt;
+        &lt;MetricBlock icon=&quot;bolt&quot; label=&quot;Cold starts&quot; value=&quot;3&quot; delta=&quot;-1&quot; /&gt;
+      &lt;/Cell&gt;
+      &lt;Cell&gt;
+        &lt;MetricBlock icon=&quot;new_releases&quot; label=&quot;Version&quot; value=&quot;v0.3.1&quot; /&gt;
+      &lt;/Cell&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Big Card</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`layout=&quot;chart&quot;` for 3×3 and larger — chart-led: header (label · trend), a full-width sparkline filling the middle, and a stats row underneath. No big value — the chart and stats carry it. Hover a bar for its labelled value.</div>
+              <pre><code>const BigCard = () =&gt; (
+  &lt;div className=&quot;bg-background p-6&quot;&gt;
+    &lt;div className=&quot;grid auto-rows-[96px] grid-cols-[repeat(7,96px)] gap-2&quot;&gt;
+      {/* 3×3 */}
+      &lt;Cell cols={3} rows={3} pad={6}&gt;
+        &lt;MetricBlock
+          layout=&quot;chart&quot;
+          icon=&quot;payments&quot;
+          label=&quot;Revenue&quot;
+          delta=&quot;+22%&quot;
+          chart={REVENUE}
+          stats={[
+            { label: &quot;This week&quot;, value: &quot;$12.4k&quot;, delta: &quot;+22%&quot; },
+            { label: &quot;MTD&quot;, value: &quot;$41.8k&quot;, delta: &quot;+9%&quot; },
+            { label: &quot;ARPU&quot;, value: &quot;$8.40&quot;, delta: &quot;+3%&quot; },
+          ]}
+        /&gt;
+      &lt;/Cell&gt;
+      {/* 4×3 */}
+      &lt;Cell cols={4} rows={3} pad={6} tone=&quot;primary&quot;&gt;
+        &lt;MetricBlock
+          layout=&quot;chart&quot;
+          icon=&quot;apps&quot;
+          label=&quot;Installs&quot;
+          delta=&quot;+18%&quot;
+          chart={INSTALLS}
+          stats={[
+            { label: &quot;This week&quot;, value: &quot;1,240&quot;, delta: &quot;+18%&quot; },
+            { label: &quot;Month-to-date&quot;, value: &quot;4,180&quot;, delta: &quot;+11%&quot; },
+            { label: &quot;Conversion&quot;, value: &quot;3.2%&quot;, delta: &quot;-0.4%&quot; },
+            { label: &quot;Per tenant&quot;, value: &quot;33.5&quot;, delta: &quot;+2%&quot; },
+          ]}
+          tone=&quot;primary&quot;
+        /&gt;
+      &lt;/Cell&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+);</code></pre>
             </div>
         </div>
     
