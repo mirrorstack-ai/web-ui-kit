@@ -906,18 +906,24 @@ export function NotchGrid({
                       width: blocks(sub.cost[0]) * mItemBlock - gap,
                       height: blocks(sub.cost[1]) * mItemBlock - gap,
                       padding: sub.pad ?? mProps.pad ?? pad ?? 16,
-                      // Drag-active visual: tighten the corner radius (0.6
-                      // vs 0.75 at rest) and force a solid background so the
-                      // tile reads as a picked-up card lifted off the chrome
-                      // when the whole linked component is being dragged.
-                      borderRadius:
-                        (sub.radius ?? mProps.radius ?? radius ?? 24) *
-                        (wrapperDragging ? 0.6 : 0.75),
+                      // Drag-active visual: force a solid background and a
+                      // natural 1px outline (matches the default chrome
+                      // stroke color) so the tile reads as a picked-up
+                      // card lifted off the chrome when the whole linked
+                      // component is being dragged.
+                      borderRadius: (sub.radius ?? mProps.radius ?? radius ?? 24) * 0.75,
                       background: wrapperDragging
                         ? sub.fill ?? mProps.fill ?? fill
                         : sub.fill && sub.fill !== "none"
                         ? sub.fill
                         : undefined,
+                      // `outline` (not `border`) so the ring doesn't change
+                      // the tile's intrinsic width / height — nothing
+                      // reflows when the state toggles.
+                      outline: wrapperDragging
+                        ? "1px solid var(--color-outline-variant)"
+                        : undefined,
+                      outlineOffset: wrapperDragging ? "-1px" : undefined,
                       // Hide the in-chrome tile during the drag — the ghost
                       // overlay (rendered as a sibling of the grid below)
                       // tracks the cursor with the rounded filled preview.
@@ -999,19 +1005,21 @@ export function NotchGrid({
                     width: maskCols(mMatrix) * mItemBlock - gap,
                     height: mMatrix.length * mItemBlock - gap,
                     padding: mProps.pad ?? pad ?? 16,
-                    // Drag-active visual: tighter corner radius (0.6 vs
-                    // 0.75 at rest) so a picked-up tile reads as a lifted
-                    // card. Applies whether this tile is the one being
-                    // outer-dragged or the whole linked component is.
-                    borderRadius:
-                      (mProps.radius ?? radius ?? 24) *
-                      (draggingThis || wrapperDragging ? 0.6 : 0.75),
+                    borderRadius: (mProps.radius ?? radius ?? 24) * 0.75,
                     // Same fill as the chrome behind it — invisible at rest
                     // (they overlap exactly), but the moment the member is
                     // outer-dragged its transform takes it past the chrome
                     // and this background keeps the rounded teal preview.
                     background:
                       mProps.fill && mProps.fill !== "none" ? mProps.fill : undefined,
+                    // Drag-active visual: a natural 1px outline (matches the
+                    // chrome's default stroke color) so a picked-up tile
+                    // reads as a lifted card.
+                    outline:
+                      draggingThis || wrapperDragging
+                        ? "1px solid var(--color-outline-variant)"
+                        : undefined,
+                    outlineOffset: draggingThis || wrapperDragging ? "-1px" : undefined,
                     transform: draggingThis && drag
                       ? `translate(${drag.dx}px, ${drag.dy}px)`
                       : undefined,
@@ -1095,10 +1103,12 @@ export function NotchGrid({
                 gap / 2,
               width: blocks(subDrag.cost[0]) * subDrag.itemBlock - gap,
               height: blocks(subDrag.cost[1]) * subDrag.itemBlock - gap,
-              // Tighter radius than at-rest (`* 0.75`) matches the drag-
-              // active visual the other tile paths use during a wrapper
-              // drag, so the cursor-follow ghost reads consistently.
-              borderRadius: subDrag.ghostRadius * 0.6,
+              // Same rest radius and a natural 1px outline as the other
+              // drag-active paths so the cursor-follow ghost reads as the
+              // same picked-up card visual.
+              borderRadius: subDrag.ghostRadius * 0.75,
+              outline: "1px solid var(--color-outline-variant)",
+              outlineOffset: "-1px",
               background:
                 subDrag.ghostFill && subDrag.ghostFill !== "none"
                   ? subDrag.ghostFill
