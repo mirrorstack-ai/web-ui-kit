@@ -227,6 +227,19 @@ export function NotchGrid({
   subDragRef.current = subDrag;
   const [hoveredSub, setHoveredSub] = useState<{ parentKey: Key; subKey: Key } | null>(null);
 
+  /** Snap a drag offset to a sub-grid cell, clamped to one cell past the
+   *  panel's current edge so the drop can grow / reshape the panel. */
+  const snapDrag = (s: SubDragState): { col: number; row: number } => ({
+    col: Math.min(Math.max(0, s.parentSubCols), Math.max(0, s.originCol + Math.round(s.dx / s.itemBlock))),
+    row: Math.min(Math.max(0, s.parentSubRows), Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock))),
+  });
+
+  // Live-preview snap: the cell the dragged sub-item would land in *right now*.
+  // Fed into the layout pipeline so the other sub-items re-flow as the user
+  // drags (instead of waiting for the drop), while the dragged sub-item's own
+  // CSS transform keeps it under the cursor smoothly.
+  const liveSnap = subDrag ? { parentKey: subDrag.parentKey, subKey: subDrag.subKey, ...snapDrag(subDrag) } : null;
+
   const handleSubPointerMove = useCallback((e: ReactPointerEvent) => {
     const s = subDragRef.current;
     if (!s || e.pointerId !== s.pointerId) return;
@@ -242,15 +255,7 @@ export function NotchGrid({
       } catch {
         /* pointer may already be released */
       }
-      // Clamp the drop to the panel's current edge — i.e. a sub-item may land
-      // *at* `parentSubX` (one cell past the existing extent) so it can grow /
-      // reshape the panel. Pinning inside the current footprint (the old
-      // `parentSubCols - cost[0]` bound) trapped reshapes like
-      // `xxx/.xx` → `x/xx/xx`, because `row = parentSubRows` was excluded.
-      const maxCol = Math.max(0, s.parentSubCols);
-      const maxRow = Math.max(0, s.parentSubRows);
-      const nextCol = Math.min(maxCol, Math.max(0, s.originCol + Math.round(s.dx / s.itemBlock)));
-      const nextRow = Math.min(maxRow, Math.max(0, s.originRow + Math.round(s.dy / s.itemBlock)));
+      const { col: nextCol, row: nextRow } = snapDrag(s);
       setSubDrag(null);
       setSubOverrides((prev) => {
         const next = new Map(prev);
@@ -284,7 +289,10 @@ export function NotchGrid({
         const subOver = subOverrides.get(key);
         const subInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = subs.map((sub) => {
           const subKey = sub.key ?? `s${sub._i}`;
-          const pinned = subOver?.get(subKey);
+          // Live drag preview wins over the persistent pinned position so the
+          // pack reshapes around the dragged sub-item *as* it moves.
+          const isLive = liveSnap && liveSnap.parentKey === key && liveSnap.subKey === subKey;
+          const pinned = isLive ? { col: liveSnap.col, row: liveSnap.row } : subOver?.get(subKey);
           return {
             item: { sub, key: subKey },
             mask: rectMask(sub.cost[0], sub.cost[1]),
@@ -346,7 +354,9 @@ export function NotchGrid({
       );
     }
     return { placed: packed.placed, gridCols: packed.cols, gridRows: packed.rows };
-  }, [children, items, width, colCount, bps, nest, overrides, subOverrides]);
+    // Primitive `liveSnap` deps — re-pack only when the dragged sub-item's
+    // snapped cell changes, not on every sub-pixel pointer-move.
+  }, [children, items, width, colCount, bps, nest, overrides, subOverrides, liveSnap?.parentKey, liveSnap?.subKey, liveSnap?.col, liveSnap?.row]);
 
   return (
     <div ref={ref} className={cn("w-full", className)} style={style}>
@@ -430,7 +440,13 @@ export function NotchGrid({
                       padding: sub.pad ?? props.pad ?? pad ?? 16,
                       borderRadius: (sub.radius ?? props.radius ?? radius ?? 24) * 0.75,
                       background: sub.fill && sub.fill !== "none" ? sub.fill : undefined,
-                      transform: subBeingDragged ? `translate(${subDrag.dx}px, ${subDrag.dy}px)` : undefined,
+                      // Compensate for the dragged sub-item's packed cell
+                      // having moved under it during live re-pack: the visual
+                      // position follows the cursor's offset from the drag
+                      // start regardless of which cell the pack put it in.
+                      transform: subBeingDragged
+                        ? `translate(${subDrag.dx - (sc - subDrag.originCol) * itemBlock}px, ${subDrag.dy - (sr - subDrag.originRow) * itemBlock}px)`
+                        : undefined,
                       zIndex: subBeingDragged ? 30 : undefined,
                       ...sub.style,
                     }}
