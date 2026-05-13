@@ -56,11 +56,18 @@ export function SparklineLine({
     n === 1 ? 50 : (i / (n - 1)) * 100,
     (1 - (v - min) / range) * 100,
   ]);
-  const linePath = pts
-    .map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`)
-    .join(" ");
+  // Smooth Catmull-Rom → cubic-bezier, matching LineChart's curve.
+  const f = (x: number) => x.toFixed(2);
+  let linePath = `M${f(pts[0][0])},${f(pts[0][1])}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    linePath += ` C${f(p1[0] + (p2[0] - p0[0]) / 6)},${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)},${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])},${f(p2[1])}`;
+  }
   const areaPath = areaClassName
-    ? `${linePath} L${pts.at(-1)![0].toFixed(2)},100 L${pts[0][0].toFixed(2)},100 Z`
+    ? `${linePath} L${f(pts.at(-1)![0])},100 L${f(pts[0][0])},100 Z`
     : null;
 
   const onMove = (e: ReactMouseEvent<SVGSVGElement>) => {
