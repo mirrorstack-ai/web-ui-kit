@@ -241,3 +241,8 @@ export {
   AppShell,
   type AppShellProps,
 } from "./components/layout/app-shell/app-shell/AppShell";
+export {
+  Sparkline,
+  type SparklineProps,
+  type SparklinePoint,
+} from "./components/ui/chart/sparkline/Sparkline";
