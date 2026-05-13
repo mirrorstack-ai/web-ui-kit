@@ -246,3 +246,11 @@ export {
   type SparklineProps,
   type SparklinePoint,
 } from "./components/ui/chart/sparkline/Sparkline";
+export {
+  MetricBlock,
+  type MetricBlockProps,
+  type MetricBlockTone,
+  type MetricBlockLayout,
+  type MetricTrend,
+  type MetricStat,
+} from "./components/ui/data/metric-block/MetricBlock";
