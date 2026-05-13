@@ -642,6 +642,12 @@ export function NotchGrid({
             .map((p) => String(p.item.key))
             .sort()
             .join("|");
+          // Drop the chrome's clip while a sub-item in this component is being
+          // dragged so the cursor-follow visual isn't chopped at the parent's
+          // outline. The in-chrome tile is opacity:0 during the drag so no
+          // visible artifact appears at the cell that was clipping it before.
+          const isDraggingInComp =
+            !!subDrag && comp.some((p) => p.item.key === subDrag.parentKey);
           const isPlainSingleton = comp.length === 1 && !lead.item.subPlaced;
           // Drag handlers for a plain (no-sub-items) outer-grid singleton —
           // wraps the whole tile so pointer-down anywhere on it starts the
@@ -881,7 +887,7 @@ export function NotchGrid({
                 stroke={leadProps.stroke ?? stroke}
                 strokeWidth={leadProps.strokeWidth ?? strokeWidth}
                 pad={isPlainSingleton ? leadProps.pad ?? pad : 0}
-                noClip={isPlainSingleton ? leadProps.noClip : undefined}
+                noClip={isDraggingInComp || (isPlainSingleton ? leadProps.noClip : undefined)}
                 className={isPlainSingleton ? leadProps.className : undefined}
                 style={isPlainSingleton ? leadProps.style : undefined}
               >
@@ -892,6 +898,7 @@ export function NotchGrid({
         })}
         {subDrag && (
           <div
+            key={`ghost:${String(subDrag.parentKey)}/${String(subDrag.subKey)}`}
             aria-hidden
             className="pointer-events-none absolute"
             style={{
