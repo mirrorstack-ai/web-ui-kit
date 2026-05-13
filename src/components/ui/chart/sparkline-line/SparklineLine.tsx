@@ -52,9 +52,12 @@ export function SparklineLine({
   const max = Math.max(...values);
   const range = max - min || 1;
   const n = values.length;
+  // Inset the y range so Catmull-Rom overshoot at sharp peaks / troughs doesn't
+  // clip at the viewBox edges (the smooth curve can bulge past the data points).
+  const PAD_Y = 8;
   const pts = values.map((v, i): readonly [number, number] => [
     n === 1 ? 50 : (i / (n - 1)) * 100,
-    (1 - (v - min) / range) * 100,
+    PAD_Y + (1 - (v - min) / range) * (100 - 2 * PAD_Y),
   ]);
   // Smooth Catmull-Rom → cubic-bezier, matching LineChart's curve.
   const f = (x: number) => x.toFixed(2);
@@ -108,6 +111,7 @@ export function SparklineLine({
         ref={svgRef}
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
+        overflow="visible"
         className="block h-full w-full cursor-default"
         aria-hidden="true"
         onMouseMove={onMove}
