@@ -1,12 +1,14 @@
 import {
   Children,
   isValidElement,
+  useCallback,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type CSSProperties,
   type Key,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
   type RefObject,
 } from "react";
@@ -17,6 +19,7 @@ import { maskCols, maskFromShape, maxTier } from "@/utils/grid-outline";
 import { BlockShape, BLOCK_SIZE } from "./BlockShape";
 import {
   NOTCH_BREAKPOINTS,
+  rectMatrix,
   resolveShapeMatrix,
   type NotchBreakpoints,
 } from "./breakpoints";
@@ -67,6 +70,11 @@ export interface NotchGridProps {
   nest?: boolean;
   /** Items as data (in addition to / instead of `<NotchGridItem>` children). */
   items?: NotchGridItemProps[];
+  /** Let the user drag items onto a different block cell. Dropped items become
+   *  pinned and the rest re-flow around them. */
+  draggable?: boolean;
+  /** Called after a drag drops an item, with its new block position. */
+  onItemMove?: (key: Key, col: number, row: number) => void;
   children?: ReactNode;
   className?: string;
   style?: CSSProperties;
@@ -74,6 +82,19 @@ export interface NotchGridProps {
 
 /** Clamp a value to a whole block count `>= 1`. */
 const blocks = (n: number) => Math.max(1, Math.floor(n));
+
+interface DragState {
+  key: Key;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  originCol: number;
+  originRow: number;
+  /** The dragged item's footprint width in blocks (to clamp the drop column). */
+  originCols: number;
+  dx: number;
+  dy: number;
+}
 
 /** Measure an element's content-box width (whole px), re-measuring on resize.
  *  Returns 0 until first layout (and stays 0 where `ResizeObserver` is
@@ -127,6 +148,8 @@ export function NotchGrid({
   pad,
   nest = true,
   items,
+  draggable = false,
+  onItemMove,
   children,
   className,
   style,
@@ -140,6 +163,38 @@ export function NotchGrid({
   // Items sit on a plain `block` lattice; `gap` is applied by eroding each
   // item's outline, so the column count is just `floor(width / block)`.
   const colCount = cols ?? Math.max(1, Math.floor(width / block));
+
+  // Drag-to-place: positions the user has dropped items at (pinned), plus the
+  // live drag offset for visual feedback.
+  const [overrides, setOverrides] = useState<Map<Key, { col: number; row: number }>>(new Map());
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const dragRef = useRef<DragState | null>(null);
+  dragRef.current = drag;
+
+  const handlePointerMove = useCallback((e: ReactPointerEvent) => {
+    const d = dragRef.current;
+    if (!d || e.pointerId !== d.pointerId) return;
+    setDrag({ ...d, dx: e.clientX - d.startX, dy: e.clientY - d.startY });
+  }, []);
+
+  const endDrag = useCallback(
+    (e: ReactPointerEvent) => {
+      const d = dragRef.current;
+      if (!d || e.pointerId !== d.pointerId) return;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        /* pointer may already be released */
+      }
+      const maxCol = Math.max(0, colCount - d.originCols);
+      const nextCol = Math.min(maxCol, Math.max(0, d.originCol + Math.round(d.dx / block)));
+      const nextRow = Math.max(0, d.originRow + Math.round(d.dy / block));
+      setDrag(null);
+      setOverrides((prev) => new Map(prev).set(d.key, { col: nextCol, row: nextRow }));
+      onItemMove?.(d.key, nextCol, nextRow);
+    },
+    [block, colCount, onItemMove],
+  );
 
   const { placed, gridCols, gridRows } = useMemo(() => {
     // Gather item configs: `<NotchGridItem>` children, then the `items` prop.
@@ -192,24 +247,33 @@ export function NotchGrid({
       return { props, key, matrix, tier: props.tier ?? maxTier(matrix) };
     });
 
-    const toInput = (r: ResolvedItem): LayoutInput<ResolvedItem> => ({
-      item: r,
-      // `nest`: reserve only the shape's filled cells (lets others sit in the
-      // notches); otherwise reserve the whole bounding box (no overlaps).
-      mask: nest
-        ? maskFromShape(r.matrix, r.tier)
-        : rectMask(Math.max(1, maskCols(r.matrix)), Math.max(1, r.matrix.length)),
-      col: r.props.col,
-      row: r.props.row,
-    });
-    const packed = packItems(resolved.map(toInput), colCount);
+    const toInput = (r: ResolvedItem): LayoutInput<ResolvedItem> => {
+      const pinned = overrides.get(r.key);
+      return {
+        item: r,
+        // `nest`: reserve only the shape's filled cells (lets others sit in the
+        // notches); otherwise reserve the whole bounding box (no overlaps).
+        mask: nest
+          ? maskFromShape(r.matrix, r.tier)
+          : rectMask(Math.max(1, maskCols(r.matrix)), Math.max(1, r.matrix.length)),
+        col: pinned?.col ?? r.props.col,
+        row: pinned?.row ?? r.props.row,
+      };
+    };
+    // Drag-dropped (overridden) items are packed first so they win their cell;
+    // anything they'd overlap re-flows around them.
+    const inputs: LayoutInput<ResolvedItem>[] = [
+      ...resolved.filter((r) => overrides.has(r.key)).map(toInput),
+      ...resolved.filter((r) => !overrides.has(r.key)).map(toInput),
+    ];
+    const packed = packItems(inputs, colCount);
     if (isDev && packed.overflowed.length > 0) {
       console.warn(
         `[NotchGrid] ${packed.overflowed.length} item(s) have a footprint wider than ${colCount} column(s) — overflowing`,
       );
     }
     return { placed: packed.placed, gridCols: packed.cols, gridRows: packed.rows };
-  }, [children, items, width, colCount, bps, nest]);
+  }, [children, items, width, colCount, bps, nest, overrides]);
 
   return (
     <div ref={ref} className={cn("w-full", className)} style={style}>
@@ -217,9 +281,10 @@ export function NotchGrid({
         className="relative"
         style={{ width: gridCols * block, height: gridRows * block }}
       >
-        {placed.map(({ item, col, row }) => {
+        {placed.map(({ item, col, row, cols: itemCols }) => {
           const { props, key, matrix, tier, subPlaced } = item;
           const itemBlock = props.block ?? block;
+          const dragging = drag?.key === key;
 
           // A panel's content is its sub-item regions positioned at their cells
           // (the panel's BlockShape outline is the union of those footprints);
@@ -245,11 +310,41 @@ export function NotchGrid({
               ))
             : props.children;
 
+          const dragHandlers = draggable
+            ? {
+                onPointerDown: (e: ReactPointerEvent) => {
+                  if (e.button !== 0) return;
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  setDrag({
+                    key,
+                    pointerId: e.pointerId,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    originCol: col,
+                    originRow: row,
+                    originCols: itemCols,
+                    dx: 0,
+                    dy: 0,
+                  });
+                },
+                onPointerMove: handlePointerMove,
+                onPointerUp: endDrag,
+                onPointerCancel: endDrag,
+              }
+            : undefined;
+
           return (
             <div
               key={key}
-              className="absolute"
-              style={{ left: col * block, top: row * block }}
+              {...dragHandlers}
+              className={cn("absolute", draggable && "select-none touch-none")}
+              style={{
+                left: col * block,
+                top: row * block,
+                transform: dragging ? `translate(${drag.dx}px, ${drag.dy}px)` : undefined,
+                zIndex: dragging ? 20 : overrides.has(key) ? 10 : undefined,
+                cursor: draggable ? (dragging ? "grabbing" : "grab") : undefined,
+              }}
             >
               <BlockShape
                 shape={matrix}

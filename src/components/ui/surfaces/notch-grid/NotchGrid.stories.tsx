@@ -45,13 +45,13 @@ function PrimaryTile({ icon, label, value }: { icon: string; label: string; valu
  * An overview page laid out by hand (explicit `col`/`row`) so the notched
  * pieces interlock cleanly: 1×1 tiles drop into the L-hero's notch and into all
  * four of the plus's corners and the chart's notch; the `subItems={[[1,1],[2,2]]}`
- * panel is an L of its own. `nest` (default) keeps notches fillable so nothing
- * reserves empty corners.
+ * panel is an L of its own. `nest` (default) keeps notches fillable — nothing
+ * reserves empty corners — and `draggable` lets you re-arrange it.
  */
 export const OverviewPage: Story = {
   render: () => (
     <div className="bg-background p-6">
-      <NotchGrid cols={7}>
+      <NotchGrid cols={7} draggable>
         {/* L-shaped ("knife") hero: 3×3 with the bottom-right block notched out. */}
         <NotchGridItem
           col={0}
@@ -213,6 +213,44 @@ export const SubItemPanels: Story = {
           ]}
           subCols={2}
         />
+      </NotchGrid>
+    </div>
+  ),
+};
+
+/** `draggable` — grab any tile and drop it onto a different block cell; it
+ *  becomes pinned there and the rest re-flow around it (and into its notches). */
+export const Draggable: Story = {
+  args: { cols: 6, draggable: true },
+  render: (args) => (
+    <div className="bg-background p-6">
+      <NotchGrid {...args}>
+        <NotchGridItem
+          shape={[
+            [1, 1, 1],
+            [1, 1, 0],
+          ]}
+          fill="var(--color-primary-container)"
+          stroke="none"
+        >
+          <Tile icon="drag_indicator" label="Drag me" value="hero" />
+        </NotchGridItem>
+        <NotchGridItem shape={[[1]]}><Tile icon="apps" label="Installs" value="1,240" /></NotchGridItem>
+        <NotchGridItem shape={[[1]]}><Tile icon="payments" label="Earned" value="$84" /></NotchGridItem>
+        <NotchGridItem shape={[[1, 1]]}>
+          <div className="flex h-full items-center gap-2">
+            <Icon name="bolt" size={16} className="text-primary" />
+            <span className="text-xs text-on-surface-variant">live · 2.1k req/min</span>
+          </div>
+        </NotchGridItem>
+        <NotchGridItem shape={[[1], [1]]}>
+          <div className="flex h-full flex-col gap-1">
+            <p className="text-sm font-medium text-on-surface">Recent</p>
+            <p className="text-xs text-on-surface-variant">v0.3.1 published</p>
+            <p className="text-xs text-on-surface-variant">installed by @anna</p>
+          </div>
+        </NotchGridItem>
+        <NotchGridItem shape={[[1]]}><Tile icon="calendar_today" label="Created" value="May" /></NotchGridItem>
       </NotchGrid>
     </div>
   ),
