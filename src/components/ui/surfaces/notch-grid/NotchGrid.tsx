@@ -102,6 +102,10 @@ interface DragState {
 interface SubDragState {
   parentKey: Key;
   subKey: Key;
+  /** The sub-item being dragged (cost, content, etc.) — kept so a drop outside
+   *  the parent panel can promote it to a standalone outer-grid item without
+   *  losing its config. */
+  sub: NotchSubItem;
   pointerId: number;
   startX: number;
   startY: number;
@@ -112,6 +116,13 @@ interface SubDragState {
   /** The parent panel's sub-grid extent (cols × rows), captured at drag start. */
   parentSubCols: number;
   parentSubRows: number;
+  /** The parent panel's outer-grid rect (col, row, cols, rows) captured at
+   *  drag start — used to tell "drop is still inside this panel" from "drop
+   *  went out of the panel ⇒ promote to its own outer-grid item". */
+  parentOuterCol: number;
+  parentOuterRow: number;
+  parentOuterCols: number;
+  parentOuterRows: number;
   /** Sub-grid block size in px (so we can convert pointer-px to cells). */
   itemBlock: number;
   dx: number;
@@ -224,6 +235,13 @@ export function NotchGrid({
   const [subDrag, setSubDrag] = useState<SubDragState | null>(null);
   const subDragRef = useRef<SubDragState | null>(null);
   subDragRef.current = subDrag;
+  // Sub-items the user has dragged *out* of their parent panel. Each entry
+  // turns into a standalone top-level outer-grid item at the given cell, and
+  // is filtered out of its parent's sub-pack.
+  const [promotedSubs, setPromotedSubs] = useState<
+    Map<string, { parentKey: Key; subKey: Key; sub: NotchSubItem; col: number; row: number }>
+  >(new Map());
+  const promoteKey = (parentKey: Key, subKey: Key) => `${String(parentKey)} ${String(subKey)}`;
   const [hoveredSub, setHoveredSub] = useState<{ parentKey: Key; subKey: Key } | null>(null);
 
   /** Snap a drag offset to a sub-grid cell, clamped to the panel's pre-drag
@@ -262,8 +280,40 @@ export function NotchGrid({
       } catch {
         /* pointer may already be released */
       }
-      const { col: nextCol, row: nextRow } = snapDrag(s);
+      // Translate the drop point to an outer-grid cell. If it lands outside
+      // the parent panel's rect, the user dragged the sub-item *out* — promote
+      // it to a standalone outer-grid item there. Otherwise commit a normal
+      // sub-drag (snap inside the panel, update subOverrides).
+      const gridRect = ref.current?.getBoundingClientRect();
+      const dropOuterCol = gridRect
+        ? Math.max(0, Math.floor((e.clientX - gridRect.left) / block))
+        : null;
+      const dropOuterRow = gridRect
+        ? Math.max(0, Math.floor((e.clientY - gridRect.top) / block))
+        : null;
+      const droppedInsidePanel =
+        dropOuterCol != null &&
+        dropOuterRow != null &&
+        dropOuterCol >= s.parentOuterCol &&
+        dropOuterCol < s.parentOuterCol + s.parentOuterCols &&
+        dropOuterRow >= s.parentOuterRow &&
+        dropOuterRow < s.parentOuterRow + s.parentOuterRows;
       setSubDrag(null);
+      if (!droppedInsidePanel && dropOuterCol != null && dropOuterRow != null) {
+        setPromotedSubs((prev) => {
+          const next = new Map(prev);
+          next.set(promoteKey(s.parentKey, s.subKey), {
+            parentKey: s.parentKey,
+            subKey: s.subKey,
+            sub: s.sub,
+            col: dropOuterCol,
+            row: dropOuterRow,
+          });
+          return next;
+        });
+        return;
+      }
+      const { col: nextCol, row: nextRow } = snapDrag(s);
       setSubOverrides((prev) => {
         const next = new Map(prev);
         const inner = new Map(next.get(s.parentKey) ?? new Map());
@@ -273,7 +323,7 @@ export function NotchGrid({
       });
       onSubItemMove?.(s.parentKey, s.subKey, nextCol, nextRow);
     },
-    [onSubItemMove],
+    [block, onSubItemMove],
   );
 
   const { placed, gridCols, gridRows } = useMemo(() => {
@@ -288,9 +338,16 @@ export function NotchGrid({
     });
     (items ?? []).forEach((p, i) => configs.push({ props: p, key: p.key ?? `i${i}` }));
 
-    const resolved: ResolvedItem[] = configs.map(({ props, key }) => {
-      if (props.subItems && props.subItems.length > 0) {
-        const subs = props.subItems.map((s, i) => ({ ...asSubItem(s), _i: i }));
+    const resolved: ResolvedItem[] = [];
+    for (const { props, key } of configs) {
+      // Hide sub-items the user dragged out of this panel — they're rendered
+      // as their own outer-grid items further below instead.
+      const raw = props.subItems?.filter((s, i) => {
+        const k = s.key ?? `s${i}`;
+        return !promotedSubs.has(promoteKey(key, k));
+      });
+      if (raw && raw.length > 0) {
+        const subs = raw.map((s, i) => ({ ...asSubItem(s), _i: i }));
         const cw = (s: { cost: readonly [number, number] }) => Math.max(1, Math.floor(s.cost[0]));
         const maxSubW = Math.max(1, ...subs.map(cw));
         const subOver = subOverrides.get(key);
@@ -344,21 +401,47 @@ export function NotchGrid({
         const subC = Math.max(props.subCols ?? compactCols, maxPinCol);
         const subPlaced = packItems(subInputs, subC, { flowOrder: "farthest-fit" }).placed;
         const matrix = placementToMask(subPlaced).map((row) => row.map((b) => (b ? 1 : 0)));
-        return {
+        resolved.push({
           props,
           key,
           matrix,
           tier: 1,
           subPlaced: subPlaced.map((p) => ({ sub: p.item.sub, key: p.item.key, col: p.col, row: p.row })),
-        };
+        });
+        continue;
       }
+      // Plain item (or panel whose every sub-item was dragged out — render the
+      // empty husk as a 1×1 so the panel still has a key for animations etc.).
+      if (props.subItems && props.subItems.length > 0) continue; // every sub was promoted away — drop the empty husk
       const matrix = resolveShapeMatrix(props.shape ?? [[1]], {
         width,
         columns: colCount,
         breakpoints: bps,
       });
-      return { props, key, matrix, tier: props.tier ?? maxTier(matrix) };
-    });
+      resolved.push({ props, key, matrix, tier: props.tier ?? maxTier(matrix) });
+    }
+    // Promoted sub-items show up as standalone outer-grid items at the cell
+    // the user dropped them on. Their pinned position lives in `promotedSubs`
+    // (not the regular `overrides` map) so they're independent of the parent
+    // panel's drag state.
+    for (const entry of promotedSubs.values()) {
+      const cost = entry.sub.cost;
+      const matrix = rectMatrix(cost[0], cost[1]);
+      resolved.push({
+        props: {
+          shape: matrix,
+          fill: entry.sub.fill,
+          radius: entry.sub.radius,
+          pad: entry.sub.pad,
+          col: entry.col,
+          row: entry.row,
+          children: entry.sub.content,
+        },
+        key: promoteKey(entry.parentKey, entry.subKey),
+        matrix,
+        tier: 1,
+      });
+    }
 
     const toInput = (r: ResolvedItem): LayoutInput<ResolvedItem> => {
       const pinned = overrides.get(r.key);
@@ -388,7 +471,7 @@ export function NotchGrid({
     return { placed: packed.placed, gridCols: packed.cols, gridRows: packed.rows };
     // Primitive `liveSnap` deps — re-pack only when the dragged sub-item's
     // snapped cell changes, not on every sub-pixel pointer-move.
-  }, [children, items, width, colCount, bps, nest, overrides, subOverrides, liveSnap?.parentKey, liveSnap?.subKey, liveSnap?.col, liveSnap?.row]);
+  }, [children, items, width, colCount, bps, nest, overrides, subOverrides, promotedSubs, liveSnap?.parentKey, liveSnap?.subKey, liveSnap?.col, liveSnap?.row]);
 
   return (
     <div ref={ref} className={cn("w-full", className)} style={style}>
@@ -443,6 +526,7 @@ export function NotchGrid({
                         setSubDrag({
                           parentKey: key,
                           subKey,
+                          sub,
                           pointerId: e.pointerId,
                           startX: e.clientX,
                           startY: e.clientY,
@@ -451,6 +535,10 @@ export function NotchGrid({
                           cost: sub.cost,
                           parentSubCols,
                           parentSubRows,
+                          parentOuterCol: col,
+                          parentOuterRow: row,
+                          parentOuterCols: itemCols,
+                          parentOuterRows: matrix.length,
                           itemBlock,
                           dx: 0,
                           dy: 0,
