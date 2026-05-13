@@ -241,3 +241,41 @@ export {
   AppShell,
   type AppShellProps,
 } from "./components/layout/app-shell/app-shell/AppShell";
+export {
+  BlockShape,
+  BLOCK_SIZE,
+  type BlockShapeProps,
+} from "./components/ui/surfaces/notch-grid/BlockShape";
+export {
+  NotchGrid,
+  type NotchGridProps,
+} from "./components/ui/surfaces/notch-grid/NotchGrid";
+export {
+  NotchGridItem,
+  asSubItem,
+  type NotchGridItemProps,
+  type NotchShape,
+  type NotchSubItem,
+  type NotchSubItemInput,
+} from "./components/ui/surfaces/notch-grid/NotchGridItem";
+export {
+  NOTCH_BREAKPOINTS,
+  resolveResponsive,
+  resolveShapeMatrix,
+  rectMatrix,
+  isShapeSizes,
+  isShapePreferences,
+  type Responsive,
+  type NotchBreakpoints,
+  type NotchBreakpointName,
+  type ShapeMatrix,
+  type ShapeSizes,
+  type ShapePreferences,
+} from "./components/ui/surfaces/notch-grid/breakpoints";
+export {
+  gridOutlinePath,
+  maskFromShape,
+  maskCols,
+  maxTier,
+  type GridOutlineOptions,
+} from "./utils/grid-outline";
