@@ -39,6 +39,13 @@ export type NotchSubItemInput = NotchSubItem | readonly [number, number];
 export interface NotchGridItemProps {
   /** React key when supplied via the `items` prop array. */
   key?: Key;
+  /** Group items so the grid renders adjacent same-`groupKey` tiles as one
+   *  unioned panel (their chromes merge into a single rounded outline with
+   *  the inverse-radius bridge where two cells meet at a corner). Items in
+   *  the same group dragged *away* from their group render as separate
+   *  same-themed tiles. Implicit for sub-items packed via {@link subItems} —
+   *  every sub gets `groupKey = panel-key` automatically. */
+  groupKey?: Key;
   /**
    * The block footprint — one of:
    *  - a matrix `[[0,1],[1,1]]` (`0` notch/empty, `1` filled, `2+` tier-encoded);
