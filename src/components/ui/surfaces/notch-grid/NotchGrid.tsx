@@ -15,7 +15,7 @@ import {
 import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
-import { maskCols, maskFromShape, maxTier } from "@/utils/grid-outline";
+import { gridOutlinePath, maskCols, maskFromShape, maxTier } from "@/utils/grid-outline";
 import { BlockShape, BLOCK_SIZE } from "./BlockShape";
 import {
   NOTCH_BREAKPOINTS,
@@ -159,6 +159,12 @@ interface DragState {
   originRow: number;
   /** The dragged item's footprint width in blocks (to clamp the drop column). */
   originCols: number;
+  /** When set, the drag moves a *whole linked component* — every member's
+   *  override shifts by the same outer-cell delta on drop, so two tiles that
+   *  share a unioned chrome (auto-linked at render time) move together when
+   *  the user drags the chrome bridge between them. Singleton-component drags
+   *  leave this undefined and just move the one tile. */
+  members?: Array<{ key: Key; col: number; row: number; cols: number }>;
   dx: number;
   dy: number;
 }
@@ -303,10 +309,35 @@ export function NotchGrid({
       } catch {
         /* pointer may already be released */
       }
-      const maxCol = Math.max(0, colCount - d.originCols);
-      const nextCol = Math.min(maxCol, Math.max(0, d.originCol + Math.round(d.dx / block)));
-      const nextRow = Math.max(0, d.originRow + Math.round(d.dy / block));
+      const deltaCol = Math.round(d.dx / block);
+      const deltaRow = Math.round(d.dy / block);
       setDrag(null);
+      const dragMembers = d.members;
+      if (dragMembers) {
+        // Multi-member drag (linked chrome) — shift every member by the same
+        // outer-cell delta so they keep their relative arrangement.
+        setOverrides((prev) => {
+          const next = new Map(prev);
+          for (const m of dragMembers) {
+            next.set(m.key, {
+              col: Math.max(0, m.col + deltaCol),
+              row: Math.max(0, m.row + deltaRow),
+            });
+          }
+          return next;
+        });
+        for (const m of dragMembers) {
+          onItemMove?.(
+            m.key,
+            Math.max(0, m.col + deltaCol),
+            Math.max(0, m.row + deltaRow),
+          );
+        }
+        return;
+      }
+      const maxCol = Math.max(0, colCount - d.originCols);
+      const nextCol = Math.min(maxCol, Math.max(0, d.originCol + deltaCol));
+      const nextRow = Math.max(0, d.originRow + deltaRow);
       setOverrides((prev) => new Map(prev).set(d.key, { col: nextCol, row: nextRow }));
       onItemMove?.(d.key, nextCol, nextRow);
     },
@@ -327,7 +358,13 @@ export function NotchGrid({
     Map<string, { parentKey: Key; subKey: Key; sub: NotchSubItem; col: number; row: number }>
   >(new Map());
   const promoteKey = (parentKey: Key, subKey: Key) => `${String(parentKey)} ${String(subKey)}`;
-  const [hoveredSub, setHoveredSub] = useState<{ parentKey: Key; subKey: Key } | null>(null);
+  // The hovered tile, identified by a composed key. For panel sub-items it's
+  // `${parentKey}::${subKey}`; for standalone outer tiles inside a unioned
+  // chrome it's the item's own key. The dim overlay (`bg-on-surface/10`) is
+  // applied on the matching tile so adjacent grouped items get the same
+  // hover affordance, not just sub-items.
+  const [hoveredTile, setHoveredTile] = useState<string | null>(null);
+  const subTileKey = (parentKey: Key, subKey: Key) => `${String(parentKey)}::${String(subKey)}`;
 
   /** Snap a drag offset to a sub-grid cell, clamped to `>= 0` on each axis.
    *  No upper clamp — letting the panel grow back is essential for cycles like
@@ -691,6 +728,20 @@ export function NotchGrid({
           // construction so this just propagates it to the unioned chrome.
           const lead = comp[0];
           const leadProps = lead.item.props;
+          // Chrome outline (CSS path) — clips the wrapper's hit area to the
+          // actual shape so a click on a *notch* (a cell inside the bounding
+          // box but outside the chrome) doesn't drag the panel; it passes
+          // through to the tile underneath. Dropped during a drag so the
+          // cursor-follow tile can extend past the chrome unclipped.
+          const wrapperChromePath = gridOutlinePath(
+            unionMask.map((row) => row.map((v) => v > 0)),
+            {
+              cell: block,
+              gap,
+              radius: leadProps.radius ?? radius ?? 24,
+              inverseRadius: leadProps.inverseRadius ?? inverseRadius ?? 32,
+            },
+          );
           const compKey = comp
             .map((p) => String(p.item.key))
             .sort()
@@ -703,17 +754,32 @@ export function NotchGrid({
           const isDraggingInComp =
             (!!subDrag && comp.some((p) => p.item.key === subDrag.parentKey)) ||
             (!!drag && comp.some((p) => p.item.key === drag.key));
-          const isPlainSingleton = comp.length === 1 && !lead.item.subPlaced;
-          // Drag handlers for a plain (no-sub-items) outer-grid singleton —
-          // wraps the whole tile so pointer-down anywhere on it starts the
-          // drag. Panels (with sub-items) leave the chrome plain and let each
-          // sub-item carry its own drag handler below.
-          const singletonDrag =
-            isPlainSingleton && draggable
+          const isSingletonComp = comp.length === 1;
+          const isPlainSingleton = isSingletonComp && !lead.item.subPlaced;
+          // Drag handlers on the component wrapper. For a singleton it moves
+          // the one tile (panel chrome or plain tile); for a multi-member
+          // linked component it carries `members` and moves every linked
+          // tile together. Sub-items / individual member tiles inside have
+          // their own handlers with `stopPropagation`, so a press on a tile
+          // starts the per-tile drag instead.
+          const singletonTileKey = String(lead.item.key);
+          const singletonHovered = isPlainSingleton && hoveredTile === singletonTileKey;
+          const wrapperDrag =
+            draggable
               ? {
+                  onPointerEnter: isPlainSingleton
+                    ? () => setHoveredTile(singletonTileKey)
+                    : undefined,
+                  onPointerLeave: isPlainSingleton
+                    ? () =>
+                        setHoveredTile((prev) =>
+                          prev === singletonTileKey ? null : prev,
+                        )
+                    : undefined,
                   onPointerDown: (e: ReactPointerEvent) => {
                     if (e.button !== 0) return;
                     e.currentTarget.setPointerCapture(e.pointerId);
+                    setHoveredTile(null);
                     setDrag({
                       key: lead.item.key,
                       pointerId: e.pointerId,
@@ -722,6 +788,14 @@ export function NotchGrid({
                       originCol: lead.col,
                       originRow: lead.row,
                       originCols: lead.cols,
+                      members: isSingletonComp
+                        ? undefined
+                        : comp.map((p) => ({
+                            key: p.item.key,
+                            col: p.col,
+                            row: p.row,
+                            cols: p.cols,
+                          })),
                       dx: 0,
                       dy: 0,
                     });
@@ -731,7 +805,11 @@ export function NotchGrid({
                   onPointerCancel: endDrag,
                 }
               : undefined;
-          const singletonDragging = isPlainSingleton && drag?.key === lead.item.key;
+          const wrapperDragging =
+            !!drag &&
+            (drag.members
+              ? drag.members.some((m) => comp.some((p) => p.item.key === m.key))
+              : isSingletonComp && drag.key === lead.item.key);
           // Each member of the component contributes its tile(s) — sub-items
           // (with their own sub-drag handlers, which promote out of the panel
           // when the drop leaves the parent rect) for a panel, or the whole
@@ -754,17 +832,13 @@ export function NotchGrid({
               for (const { sub, key: subKey, col: sc, row: sr } of subPlaced) {
                 const subBeingDragged =
                   subDrag?.parentKey === mKey && subDrag.subKey === subKey;
-                const subHovered =
-                  hoveredSub?.parentKey === mKey && hoveredSub.subKey === subKey;
+                const tileKey = subTileKey(mKey, subKey);
+                const subHovered = hoveredTile === tileKey;
                 const subHandlers = draggable
                   ? {
-                      onPointerEnter: () => setHoveredSub({ parentKey: mKey, subKey }),
+                      onPointerEnter: () => setHoveredTile(tileKey),
                       onPointerLeave: () =>
-                        setHoveredSub((prev) =>
-                          prev?.parentKey === mKey && prev.subKey === subKey
-                            ? null
-                            : prev,
-                        ),
+                        setHoveredTile((prev) => (prev === tileKey ? null : prev)),
                       onPointerDown: (e: ReactPointerEvent) => {
                         if (e.button !== 0) return;
                         e.stopPropagation();
@@ -774,7 +848,7 @@ export function NotchGrid({
                         // — clear hover here so a sibling that the cursor *was*
                         // on (e.g. Calls/Day while reaching for Cron) doesn't
                         // stay highlighted for the whole drag.
-                        setHoveredSub(null);
+                        setHoveredTile(null);
                         setSubOverrides((prev) => {
                           const next = new Map(prev);
                           const inner = new Map(next.get(mKey) ?? new Map());
@@ -821,8 +895,12 @@ export function NotchGrid({
                     className={cn(
                       "absolute overflow-hidden transition-colors",
                       draggable && "cursor-grab select-none touch-none",
-                      subBeingDragged && "cursor-grabbing",
-                      subHovered && !subBeingDragged && "bg-on-surface/10",
+                      // Show grabbing on this tile when it's the one being
+                      // dragged *or* when the whole linked component is being
+                      // dragged from its chrome bridge (every member shifts
+                      // together — they should all read as 'in drag').
+                      (subBeingDragged || wrapperDragging) && "cursor-grabbing",
+                      subHovered && !subBeingDragged && !wrapperDragging && "bg-on-surface/10",
                       sub.className,
                     )}
                     style={{
@@ -831,8 +909,18 @@ export function NotchGrid({
                       width: blocks(sub.cost[0]) * mItemBlock - gap,
                       height: blocks(sub.cost[1]) * mItemBlock - gap,
                       padding: sub.pad ?? mProps.pad ?? pad ?? 16,
-                      borderRadius: (sub.radius ?? mProps.radius ?? radius ?? 24) * 0.75,
-                      background: sub.fill && sub.fill !== "none" ? sub.fill : undefined,
+                      // Drag-active visual: tighten the corner radius (0.6
+                      // vs 0.75 at rest) and force a solid background so the
+                      // tile reads as a picked-up card lifted off the chrome
+                      // when the whole linked component is being dragged.
+                      borderRadius:
+                        (sub.radius ?? mProps.radius ?? radius ?? 24) *
+                        (wrapperDragging ? 0.6 : 0.75),
+                      background: wrapperDragging
+                        ? sub.fill ?? mProps.fill ?? fill
+                        : sub.fill && sub.fill !== "none"
+                        ? sub.fill
+                        : undefined,
                       // Hide the in-chrome tile during the drag — the ghost
                       // overlay (rendered as a sibling of the grid below)
                       // tracks the cursor with the rounded filled preview.
@@ -853,12 +941,22 @@ export function NotchGrid({
               // when there's more than one member in the component (singletons
               // get drag on the outer wrapper instead).
               const draggingThis = drag?.key === mKey;
+              const memberTileKey = String(mKey);
+              const memberHovered = hoveredTile === memberTileKey;
               const memberDrag =
                 draggable && !isPlainSingleton
                   ? {
+                      onPointerEnter: () => setHoveredTile(memberTileKey),
+                      onPointerLeave: () =>
+                        setHoveredTile((prev) => (prev === memberTileKey ? null : prev)),
                       onPointerDown: (e: ReactPointerEvent) => {
                         if (e.button !== 0) return;
+                        // Stop bubbling so a tile-level press doesn't also
+                        // fire the wrapper's whole-component drag — clicking
+                        // a tile moves only that tile.
+                        e.stopPropagation();
                         e.currentTarget.setPointerCapture(e.pointerId);
+                        setHoveredTile(null);
                         setDrag({
                           key: mKey,
                           pointerId: e.pointerId,
@@ -883,9 +981,19 @@ export function NotchGrid({
                   key={String(mKey)}
                   {...memberDrag}
                   className={cn(
-                    "absolute overflow-hidden",
+                    "absolute overflow-hidden transition-[filter] duration-150",
                     draggable && !isPlainSingleton && "cursor-grab select-none touch-none",
-                    draggingThis && "cursor-grabbing",
+                    // Match the sub-item rule: this tile, or the whole
+                    // component (wrapper drag), in active drag → grabbing.
+                    (draggingThis || wrapperDragging) && "cursor-grabbing",
+                    // Standalone member tiles have an inline background
+                    // (inherited from the parent's `fill` so the cursor-
+                    // follow visual stays themed when dragged past the
+                    // chrome). A Tailwind `bg-on-surface/10` class would be
+                    // overridden by that inline background, so use a filter
+                    // here — same affordance as sub-items, just applied
+                    // through brightness instead of an overlay.
+                    memberHovered && !draggingThis && !wrapperDragging && "brightness-95",
                     mProps.className,
                   )}
                   style={{
@@ -894,7 +1002,13 @@ export function NotchGrid({
                     width: maskCols(mMatrix) * mItemBlock - gap,
                     height: mMatrix.length * mItemBlock - gap,
                     padding: mProps.pad ?? pad ?? 16,
-                    borderRadius: (mProps.radius ?? radius ?? 24) * 0.75,
+                    // Drag-active visual: tighter corner radius (0.6 vs
+                    // 0.75 at rest) so a picked-up tile reads as a lifted
+                    // card. Applies whether this tile is the one being
+                    // outer-dragged or the whole linked component is.
+                    borderRadius:
+                      (mProps.radius ?? radius ?? 24) *
+                      (draggingThis || wrapperDragging ? 0.6 : 0.75),
                     // Same fill as the chrome behind it — invisible at rest
                     // (they overlap exactly), but the moment the member is
                     // outer-dragged its transform takes it past the chrome
@@ -916,25 +1030,36 @@ export function NotchGrid({
           return (
             <div
               key={compKey}
-              {...singletonDrag}
+              {...wrapperDrag}
               className={cn(
-                "absolute",
-                draggable && isPlainSingleton && "select-none touch-none",
-                draggable &&
-                  isPlainSingleton &&
-                  (singletonDragging ? "cursor-grabbing" : "cursor-grab"),
+                "absolute transition-[filter] duration-150",
+                draggable && "select-none touch-none",
+                draggable && (wrapperDragging ? "cursor-grabbing" : "cursor-grab"),
+                // Slight tonal dim on the whole tile when hovered — the same
+                // affordance the in-chrome members get via `bg-on-surface/10`,
+                // applied here via brightness since a singleton's tile is a
+                // BlockShape with its own SVG fill (a background overlay would
+                // sit *outside* the chrome outline instead of tinting the fill).
+                // Only for plain singletons; panels and linked components leave
+                // their chrome alone and let each tile carry its own hover.
+                singletonHovered && !wrapperDragging && "brightness-95",
               )}
               style={{
                 left: minCol * block,
                 top: minRow * block,
-                transform: singletonDragging && drag
+                transform: wrapperDragging && drag
                   ? `translate(${drag.dx}px, ${drag.dy}px)`
                   : undefined,
-                zIndex: singletonDragging
+                zIndex: wrapperDragging
                   ? 20
                   : overrides.has(lead.item.key)
                   ? 10
                   : undefined,
+                // Hit-clip the wrapper to the chrome outline so a click on a
+                // notch (e.g. Builds nestled into the Status panel's plus-
+                // shaped notch) reaches the underlying tile instead of being
+                // intercepted by this component's wrapper rectangle.
+                clipPath: isDraggingInComp ? undefined : `path('${wrapperChromePath}')`,
               }}
             >
               <BlockShape
@@ -973,7 +1098,10 @@ export function NotchGrid({
                 gap / 2,
               width: blocks(subDrag.cost[0]) * subDrag.itemBlock - gap,
               height: blocks(subDrag.cost[1]) * subDrag.itemBlock - gap,
-              borderRadius: subDrag.ghostRadius * 0.75,
+              // Tighter radius than at-rest (`* 0.75`) matches the drag-
+              // active visual the other tile paths use during a wrapper
+              // drag, so the cursor-follow ghost reads consistently.
+              borderRadius: subDrag.ghostRadius * 0.6,
               background:
                 subDrag.ghostFill && subDrag.ghostFill !== "none"
                   ? subDrag.ghostFill
