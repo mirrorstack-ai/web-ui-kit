@@ -242,6 +242,13 @@ interface ResolvedItem {
    *  keep the same group so they can re-link when dragged back beside the
    *  rest. */
   groupKey?: Key;
+  /** Natural panel extent — what the matrix would be if no sub-item drags
+   *  had moved anything. Used as the inside-panel hit-box for sub-drag promote
+   *  decisions: a drop within the natural rect is a sub-drag (the chrome
+   *  reshapes / regrows), a drop past it promotes the sub to a standalone
+   *  same-themed tile. Defaults to the current matrix size for plain items. */
+  naturalCols: number;
+  naturalRows: number;
 }
 
 export function NotchGrid({
@@ -365,18 +372,18 @@ export function NotchGrid({
       const dropOuterRow = gridRect
         ? Math.max(0, Math.floor((e.clientY - gridRect.top) / block))
         : null;
-      // 1-cell halo on every side: a drop just past the panel's current edge
-      // still counts as sub-drag (so it can grow the panel back to a previous
-      // size), but a drop further away promotes. Otherwise a `drag-up → drag-
-      // back` cycle promotes on the second drop because the first shrunk the
-      // panel and the drag-back lands one row past the new edge.
+      // The panel's natural extent (captured at drag start) is the in-panel
+      // hit-box: drops inside it sub-drag (the chrome can reshape back to its
+      // natural shape), drops outside promote. Using natural rather than the
+      // current shrunken extent stops a "drag-up → drag-back" cycle from
+      // tripping the promote branch on the way back.
       const droppedInsidePanel =
         dropOuterCol != null &&
         dropOuterRow != null &&
-        dropOuterCol >= s.parentOuterCol - 1 &&
-        dropOuterCol < s.parentOuterCol + s.parentOuterCols + 1 &&
-        dropOuterRow >= s.parentOuterRow - 1 &&
-        dropOuterRow < s.parentOuterRow + s.parentOuterRows + 1;
+        dropOuterCol >= s.parentOuterCol &&
+        dropOuterCol < s.parentOuterCol + s.parentOuterCols &&
+        dropOuterRow >= s.parentOuterRow &&
+        dropOuterRow < s.parentOuterRow + s.parentOuterRows;
       setSubDrag(null);
       if (!droppedInsidePanel && dropOuterCol != null && dropOuterRow != null) {
         setPromotedSubs((prev) => {
@@ -481,6 +488,29 @@ export function NotchGrid({
         const subC = Math.max(props.subCols ?? compactCols, maxPinCol);
         const subPlaced = packItems(subInputs, subC, { flowOrder: "farthest-fit" }).placed;
         const matrix = placementToMask(subPlaced).map((row) => row.map((b) => (b ? 1 : 0)));
+        // Natural extent — same pack but ignoring `subOverrides` (within-panel
+        // drag positions). Sub-drags shrink the panel's matrix; the natural
+        // extent is what the chrome *would* be at rest, used as the stable
+        // hit-box for the in-panel vs. promote decision so a "drag up → drag
+        // back" cycle doesn't trip the promote branch on the way back.
+        const naturalInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = ordered.map(
+          (sub) => ({
+            item: { sub, key: sub.key ?? `s${sub._i}` },
+            mask: rectMask(sub.cost[0], sub.cost[1]),
+            col: sub.col,
+            row: sub.row,
+          }),
+        );
+        const naturalSubC = Math.max(props.subCols ?? compactCols, 1);
+        const naturalPlaced = packItems(naturalInputs, naturalSubC, { flowOrder: "farthest-fit" }).placed;
+        const naturalCols = naturalPlaced.reduce(
+          (m, p) => Math.max(m, p.col + p.cols),
+          maskCols(matrix),
+        );
+        const naturalRows = naturalPlaced.reduce(
+          (m, p) => Math.max(m, p.row + p.rows),
+          matrix.length,
+        );
         resolved.push({
           props,
           key,
@@ -488,6 +518,8 @@ export function NotchGrid({
           tier: 1,
           subPlaced: subPlaced.map((p) => ({ sub: p.item.sub, key: p.item.key, col: p.col, row: p.row })),
           groupKey: props.groupKey ?? key,
+          naturalCols,
+          naturalRows,
         });
         continue;
       }
@@ -505,6 +537,8 @@ export function NotchGrid({
         matrix,
         tier: props.tier ?? maxTier(matrix),
         groupKey: props.groupKey,
+        naturalCols: Math.max(1, maskCols(matrix)),
+        naturalRows: Math.max(1, matrix.length),
       });
     }
     // Promoted sub-items become standalone outer-grid tiles at the dropped
@@ -536,6 +570,8 @@ export function NotchGrid({
         matrix,
         tier: 1,
         groupKey: parentProps.groupKey ?? entry.parentKey,
+        naturalCols: Math.max(1, maskCols(matrix)),
+        naturalRows: Math.max(1, matrix.length),
       });
     }
 
@@ -742,8 +778,8 @@ export function NotchGrid({
                           parentSubRows,
                           parentOuterCol: p.col,
                           parentOuterRow: p.row,
-                          parentOuterCols: p.cols,
-                          parentOuterRows: p.rows,
+                          parentOuterCols: p.item.naturalCols,
+                          parentOuterRows: p.item.naturalRows,
                           itemBlock: mItemBlock,
                           ghostFill: sub.fill ?? mProps.fill ?? fill,
                           ghostRadius: sub.radius ?? mProps.radius ?? radius ?? 24,
