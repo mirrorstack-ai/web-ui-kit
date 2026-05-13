@@ -246,3 +246,8 @@ export {
   type SparklineProps,
   type SparklinePoint,
 } from "./components/ui/chart/sparkline/Sparkline";
+export {
+  LineChart,
+  type LineChartProps,
+  type LineChartOverlay,
+} from "./components/ui/chart/line-chart/LineChart";
