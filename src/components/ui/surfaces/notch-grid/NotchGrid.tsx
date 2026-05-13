@@ -24,7 +24,6 @@ import {
   type NotchBreakpoints,
 } from "./breakpoints";
 import {
-  optimalPlacement,
   packItems,
   placementToMask,
   rectMask,
@@ -287,7 +286,15 @@ export function NotchGrid({
         const cw = (s: { cost: readonly [number, number] }) => Math.max(1, Math.floor(s.cost[0]));
         const maxSubW = Math.max(1, ...subs.map(cw));
         const subOver = subOverrides.get(key);
-        const subInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = subs.map((sub) => {
+        // Pack the biggest sub-item first so it anchors the corner — combined
+        // with `farthest-fit` flow below this puts the small tile at the
+        // diagonally opposite cell instead of having the big tile collapse
+        // next to it. `_packIdx` preserves the original index for stable React
+        // keys (`subPlaced` may end up in pack order, not props order).
+        const ordered = [...subs].sort(
+          (a, b) => b.cost[0] * b.cost[1] - a.cost[0] * a.cost[1] || a._i - b._i,
+        );
+        const subInputs: LayoutInput<{ sub: NotchSubItem; key: Key }>[] = ordered.map((sub) => {
           const subKey = sub.key ?? `s${sub._i}`;
           // Live drag preview wins over the persistent pinned position so the
           // pack reshapes around the dragged sub-item *as* it moves.
@@ -300,33 +307,27 @@ export function NotchGrid({
             row: pinned?.row ?? sub.row,
           };
         });
-        // When *any* sub-item has an explicit position (a drag drop, a live
-        // drag preview, or a user-supplied `col`/`row`), pack with
-        // `farthest-fit` flow so the un-anchored sub-items spread to the cells
-        // furthest from the anchors — i.e. a small tile dropped at one corner
-        // pushes the big tile to the diagonally opposite corner instead of
-        // collapsing into the anchor's column. The cols cap is **the compact
-        // square root of the total area** (with the panel's target aspect) —
-        // a wider cap would let the farthest-fit run away to the far right of
-        // the outer grid instead of landing at the diagonal corner.
-        const anyExplicit = subInputs.some((i) => i.col != null && i.row != null);
+        // Pack into a compact square-ish box (capped at `√(area · aspect)` —
+        // wider would let `farthest-fit` run away to the far right of the
+        // outer grid instead of landing at the diagonal corner) with
+        // `farthest-fit` flow always on, so:
+        //  • the *first* (largest) tile anchors at `(0,0)`,
+        //  • each subsequent tile lands as far from the anchors as it fits,
+        //  • when a tile has an explicit drop position, the rest still arrange
+        //    around it diagonally,
+        //  • pressing a tile (drag-start with no movement) doesn't shift
+        //    anything — its origin = its current cell, so the diagonal
+        //    re-pack is identical to the previous frame.
         const totalSubCells = subs.reduce(
           (n, s) => n + Math.max(1, Math.floor(s.cost[0])) * Math.max(1, Math.floor(s.cost[1])),
           0,
         );
         const targetAspect = props.subAspect ?? 1.6;
         const compactCols = Math.max(maxSubW, Math.ceil(Math.sqrt(totalSubCells * targetAspect)));
-        const subMaxCols = anyExplicit ? compactCols : Math.max(maxSubW, colCount);
-        const subPlaced = (
-          props.subCols != null
-            ? packItems(subInputs, props.subCols, anyExplicit ? { flowOrder: "farthest-fit" } : undefined)
-            : anyExplicit
-              ? packItems(subInputs, subMaxCols, { flowOrder: "farthest-fit" })
-              : optimalPlacement(subInputs, {
-                  maxCols: Math.max(maxSubW, colCount),
-                  minCols: maxSubW,
-                  targetAspect,
-                })
+        const subPlaced = packItems(
+          subInputs,
+          props.subCols ?? compactCols,
+          { flowOrder: "farthest-fit" },
         ).placed;
         const matrix = placementToMask(subPlaced).map((row) => row.map((b) => (b ? 1 : 0)));
         return {
