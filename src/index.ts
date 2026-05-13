@@ -262,3 +262,8 @@ export {
   type DonutChartDatum,
 } from "./components/ui/chart/donut-chart/DonutChart";
 export { CHART_PALETTE, paletteColor } from "./utils/chart-arc";
+export {
+  NightingaleChart,
+  type NightingaleChartProps,
+  type NightingaleChartDatum,
+} from "./components/ui/chart/nightingale-chart/NightingaleChart";
