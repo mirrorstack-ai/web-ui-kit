@@ -70,45 +70,72 @@ export function gridOutlinePath(
   // Keep at least a sliver of shape even when gap is set absurdly high.
   const erosion = Math.max(0, Math.min(gap, cell - 2)) / 2;
 
-  // Directed boundary edges, oriented so the filled cell sits on the *right*
-  // of the direction of travel — which makes every cell contribute its edges
-  // clockwise (y points down). Keyed by start point so a loop is just
-  // `next = edges.get(end)`.
-  const edges = new Map<string, Pt>();
+  // Trace each *edge-connected* component independently. Two cells that share
+  // only a corner (e.g. (1,1) and (2,2)) belong to different components, so
+  // their boundaries are written into separate edge maps and never get merged
+  // at the shared point — a single `Map<string, Pt>` keyed by edge-start would
+  // otherwise have the second cell's edge overwrite the first's, hooking the
+  // two loops into one and producing the "thin strip joining the squares" bug.
+  const cid: number[][] = mask.map((row) => row.map(() => -1));
+  let nComponents = 0;
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < mask[r].length; c++) {
-      if (!mask[r][c]) continue;
-      const tl: Pt = [c, r];
-      const tr: Pt = [c + 1, r];
-      const br: Pt = [c + 1, r + 1];
-      const bl: Pt = [c, r + 1];
-      if (!filled(r - 1, c)) edges.set(ptKey(tl[0], tl[1]), tr); // top
-      if (!filled(r, c + 1)) edges.set(ptKey(tr[0], tr[1]), br); // right
-      if (!filled(r + 1, c)) edges.set(ptKey(br[0], br[1]), bl); // bottom
-      if (!filled(r, c - 1)) edges.set(ptKey(bl[0], bl[1]), tl); // left
+      if (!mask[r][c] || cid[r][c] !== -1) continue;
+      const id = nComponents++;
+      const stack: Pt[] = [[c, r]];
+      while (stack.length > 0) {
+        const [cc, rr] = stack.pop()!;
+        if (!filled(rr, cc) || cid[rr][cc] !== -1) continue;
+        cid[rr][cc] = id;
+        stack.push([cc + 1, rr], [cc - 1, rr], [cc, rr + 1], [cc, rr - 1]);
+      }
     }
   }
 
-  // Walk each loop, then drop collinear midpoints so only true corners remain.
-  const visited = new Set<string>();
   const subpaths: string[] = [];
-  for (const startKey of edges.keys()) {
-    if (visited.has(startKey)) continue;
-    const loop: Pt[] = [];
-    let cur: string | undefined = startKey;
-    while (cur && !visited.has(cur)) {
-      visited.add(cur);
-      const [x, y] = cur.split(",").map(Number);
-      loop.push([x, y]);
-      const next = edges.get(cur);
-      cur = next ? ptKey(next[0], next[1]) : undefined;
+  for (let component = 0; component < nComponents; component++) {
+    // Directed boundary edges *for this component only*, oriented so the
+    // filled cell sits on the right of travel (clockwise in y-down screen
+    // coords). Keyed by start point so walking a loop is `next = edges.get(end)`.
+    const edges = new Map<string, Pt>();
+    const inComponent = (r: number, c: number) =>
+      filled(r, c) && cid[r][c] === component;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < mask[r].length; c++) {
+        if (cid[r][c] !== component) continue;
+        const tl: Pt = [c, r];
+        const tr: Pt = [c + 1, r];
+        const br: Pt = [c + 1, r + 1];
+        const bl: Pt = [c, r + 1];
+        if (!inComponent(r - 1, c)) edges.set(ptKey(tl[0], tl[1]), tr); // top
+        if (!inComponent(r, c + 1)) edges.set(ptKey(tr[0], tr[1]), br); // right
+        if (!inComponent(r + 1, c)) edges.set(ptKey(br[0], br[1]), bl); // bottom
+        if (!inComponent(r, c - 1)) edges.set(ptKey(bl[0], bl[1]), tl); // left
+      }
     }
-    const corners = collinearStripped(loop).map(
-      ([x, y]) => [x * cell, y * cell] as Pt,
-    );
-    if (corners.length >= 3) {
-      const offset = erosion > 0 ? erodeRectilinear(corners, erosion) : corners;
-      subpaths.push(roundedRectilinearPath(offset, radius, inverseRadius));
+
+    // Walk each loop in this component, then drop collinear midpoints so only
+    // true corners remain. A component with holes (e.g. a frame around a notch)
+    // contributes one outer loop + one inner loop per hole.
+    const visited = new Set<string>();
+    for (const startKey of edges.keys()) {
+      if (visited.has(startKey)) continue;
+      const loop: Pt[] = [];
+      let cur: string | undefined = startKey;
+      while (cur && !visited.has(cur)) {
+        visited.add(cur);
+        const [x, y] = cur.split(",").map(Number);
+        loop.push([x, y]);
+        const next = edges.get(cur);
+        cur = next ? ptKey(next[0], next[1]) : undefined;
+      }
+      const corners = collinearStripped(loop).map(
+        ([x, y]) => [x * cell, y * cell] as Pt,
+      );
+      if (corners.length >= 3) {
+        const offset = erosion > 0 ? erodeRectilinear(corners, erosion) : corners;
+        subpaths.push(roundedRectilinearPath(offset, radius, inverseRadius));
+      }
     }
   }
   return subpaths.join(" ");
