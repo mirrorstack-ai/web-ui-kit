@@ -84,7 +84,7 @@ export function GraphSideSetting({
         value={value.linkDistance}
         onChange={(v) => set("linkDistance", v)}
       />
-      <label className="flex items-center justify-between gap-2 text-sm text-on-surface">
+      <label className="flex items-center justify-between gap-2 py-1.5 text-sm text-on-surface">
         <span>Show labels</span>
         <Switch
           size="sm"
