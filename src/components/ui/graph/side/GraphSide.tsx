@@ -48,7 +48,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
   return (
     <div
       className={cn(
-        "absolute top-0 right-0 h-full bg-surface-container-low border-l border-outline-variant shadow-xl transition-transform duration-200 ease-out flex flex-col",
+        "absolute top-0 right-0 h-full bg-surface-container-low border-l border-outline-variant rounded-r-xl shadow-xl transition-transform duration-200 ease-out flex flex-col",
         isOpen ? "translate-x-0" : "translate-x-full",
         className,
       )}
