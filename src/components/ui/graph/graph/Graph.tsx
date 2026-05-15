@@ -106,6 +106,15 @@ function step(
   W: number,
   H: number,
 ) {
+  // Ratio-pinned nodes track the current viewBox each frame, so they
+  // stay at their fractional anchor when the container resizes (e.g.
+  // when GraphLayout shrinks the canvas for an open side panel).
+  for (const n of nodes) {
+    if (n.pin) {
+      n.x = n.pin.x * W;
+      n.y = n.pin.y * H;
+    }
+  }
   for (let i = 0; i < nodes.length; i++) {
     const a = nodes[i];
     for (let j = i + 1; j < nodes.length; j++) {
