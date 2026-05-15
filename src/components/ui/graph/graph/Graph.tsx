@@ -67,9 +67,6 @@ type Sim = GraphNode & {
   vx: number;
   vy: number;
   pinned: boolean;
-  /** True once the user has dragged a pin-ratio node — disables the
-      ResizeObserver re-snap so the drag position holds across resizes. */
-  pinDetached: boolean;
   degree: number;
 };
 
@@ -97,7 +94,6 @@ function seed(nodes: GraphNode[], W: number, H: number): Sim[] {
       vx: 0,
       vy: 0,
       pinned: Boolean(n.fixed || n.pin),
-      pinDetached: false,
       degree: 0,
     };
   });
@@ -179,10 +175,10 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
             ? height
             : Math.max(200, entry.contentRect.height || DEFAULT_H);
         // Re-snap pin-ratio nodes whenever the viewport changes so they
-        // stay anchored to their fractional position. Skip nodes the
-        // user has dragged — that intent should survive resizes.
+        // stay anchored to their fractional position. Drag-to-reposition
+        // is preserved because pointerup overwrites pin to the new ratio.
         for (const n of nodesRef.current) {
-          if (n.pin && !n.pinDetached) {
+          if (n.pin) {
             n.x = n.pin.x * w;
             n.y = n.pin.y * h;
           }
@@ -365,10 +361,12 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
       const node = byIdRef.current.get(id);
       if (node) {
         node.pinned = Boolean(node.fixed || node.pin);
-        // Once the user has actually moved a pin-ratio node, stop tracking
-        // its fractional anchor on resize — their drag position wins.
+        // When the user drags a pin-ratio node, rewrite the pin to the
+        // new ratio so future resizes track the dragged position
+        // proportionally instead of either drifting or being overlaid.
         if (node.pin && pointerMovedRef.current) {
-          node.pinDetached = true;
+          const s = sizeRef.current;
+          node.pin = { x: node.x / s.w, y: node.y / s.h };
         }
       }
       (e.target as Element).releasePointerCapture?.(e.pointerId);
