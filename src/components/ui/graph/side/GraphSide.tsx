@@ -1,6 +1,7 @@
 import { useRef, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
+import { Badge } from "@/components/ui/feedback/badge/Badge";
 import type { ComponentMeta } from "@/types/component-meta";
 
 export const meta: ComponentMeta = {
@@ -16,7 +17,10 @@ export const meta: ComponentMeta = {
 export interface GraphSideNode {
   id: string;
   label: string;
+  /** Single tag rendered as a Badge. Combined with `tags` if both are set. */
   tag?: string;
+  /** Multiple tags rendered as Badges in the header. */
+  tags?: string[];
 }
 
 export interface GraphSideProps<T extends GraphSideNode = GraphSideNode> {
@@ -39,11 +43,16 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
   className,
 }: GraphSideProps<T>) {
   // Remember the last non-null node so the close animation keeps showing
-  // its label/tag while sliding out, instead of snapping to an empty header.
+  // its label/tags while sliding out, instead of snapping to an empty header.
   const lastNodeRef = useRef<T | null>(node);
   if (node) lastNodeRef.current = node;
   const display = node ?? lastNodeRef.current;
   const isOpen = open ?? Boolean(node);
+
+  const tagList: string[] = [];
+  if (display?.tags) tagList.push(...display.tags);
+  if (display?.tag) tagList.push(display.tag);
+  const hasTags = tagList.length > 0;
 
   const cardCls =
     "bg-surface-container-low border border-outline-variant rounded-xl shadow-xl";
@@ -67,16 +76,27 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
           variant="outline"
           onClick={onClose}
         />
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-on-surface truncate">
-            {display?.label ?? ""}
-          </div>
-          {display?.tag && (
-            <div className="text-xs text-on-surface-variant mt-0.5 truncate">
-              {display.tag}
-            </div>
+        <span
+          className={cn(
+            "flex-1 min-w-0 text-sm font-medium text-on-surface truncate",
+            hasTags ? "text-left" : "text-center",
           )}
-        </div>
+        >
+          {display?.label ?? ""}
+        </span>
+        {hasTags ? (
+          <div className="flex items-center gap-1 shrink-0">
+            {tagList.map((t) => (
+              <Badge key={t} size="sm">
+                {t}
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          // Spacer matching the close button so the centered title is
+          // balanced relative to the panel, not just the area after close.
+          <div className="w-8 shrink-0" aria-hidden />
+        )}
       </div>
       <div className={cn(cardCls, "flex-1 min-h-0 overflow-y-auto p-3")}>
         {isOpen && display ? renderDetails(display) : null}
