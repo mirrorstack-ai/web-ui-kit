@@ -106,15 +106,6 @@ function step(
   W: number,
   H: number,
 ) {
-  // Ratio-pinned nodes track the current viewBox each frame, so they
-  // stay at their fractional anchor when the container resizes (e.g.
-  // when GraphLayout shrinks the canvas for an open side panel).
-  for (const n of nodes) {
-    if (n.pin) {
-      n.x = n.pin.x * W;
-      n.y = n.pin.y * H;
-    }
-  }
   for (let i = 0; i < nodes.length; i++) {
     const a = nodes[i];
     for (let j = i + 1; j < nodes.length; j++) {
@@ -183,6 +174,15 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
           typeof height === "number"
             ? height
             : Math.max(200, entry.contentRect.height || DEFAULT_H);
+        // Re-snap pin-ratio nodes whenever the viewport changes so they
+        // stay anchored to their fractional position. The sim's step()
+        // never touches pinned nodes, so drag-to-reposition still wins.
+        for (const n of nodesRef.current) {
+          if (n.pin) {
+            n.x = n.pin.x * w;
+            n.y = n.pin.y * h;
+          }
+        }
         setSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
       }
     });
