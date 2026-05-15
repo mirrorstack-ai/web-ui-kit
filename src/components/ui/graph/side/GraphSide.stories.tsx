@@ -51,6 +51,22 @@ export const WithoutTags: Story = {
 };
 
 /**
+ * Long titles truncate with an ellipsis while badges continue to wrap
+ * on the line below.
+ */
+export const WithLongTitleAndTags: Story = {
+  args: {
+    node: {
+      id: "report",
+      label: "Quarterly compliance and audit report",
+      tags: ["finance", "audit", "compliance"],
+    },
+    onClose: () => {},
+    renderDetails,
+  },
+};
+
+/**
  * Tags wrap to a second row beneath the title, indented to align under
  * the label. Long sets of tags wrap onto further rows.
  */
