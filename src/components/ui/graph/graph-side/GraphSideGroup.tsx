@@ -1,6 +1,6 @@
 import { cn } from "@/utils/cn";
 import { Button } from "@/components/ui/actions/button/Button";
-import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
+import { Icon } from "@/components/ui/media/icon/Icon";
 import type { ComponentMeta } from "@/types/component-meta";
 
 export const meta: ComponentMeta = {
@@ -67,14 +67,15 @@ export function GraphSideGroup({
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
             </label>
-            <IconButton
-              icon="close"
-              aria-label={`Delete ${g.name}`}
-              tooltip="Delete group"
-              size="sm"
-              variant="text"
+            <button
+              type="button"
               onClick={() => remove(g.id)}
-            />
+              aria-label={`Delete ${g.name}`}
+              title="Delete group"
+              className="flex items-center justify-center w-6 h-6 rounded-md text-on-surface-variant cursor-pointer hover:bg-on-surface/8 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <Icon name="close" size={16} />
+            </button>
           </div>
         </div>
       ))}
