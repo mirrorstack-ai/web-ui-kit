@@ -12,6 +12,15 @@ import {
   type GraphHandle,
   type GraphNode,
 } from "@/components/ui/graph/graph/Graph";
+import { GraphSideContent } from "@/components/ui/graph/graph-side/GraphSideContent";
+import {
+  GraphSideGroup,
+  type GraphSideGroupItem,
+} from "@/components/ui/graph/graph-side/GraphSideGroup";
+import {
+  GraphSideSetting,
+  type GraphSideSettingValue,
+} from "@/components/ui/graph/graph-side/GraphSideSetting";
 
 const meta: Meta<typeof GraphLayout> = {
   title: "Layout/Graph",
@@ -31,7 +40,6 @@ type Story = StoryObj<typeof GraphLayout>;
 const SETTINGS_NODE: GraphSideNode = {
   id: "settings",
   label: "Graph settings",
-  tag: "configuration",
 };
 
 const GRAPH_NODES: GraphNode[] = [
@@ -110,7 +118,7 @@ export const WithGraph: Story = {
             renderDetails={(n) => {
               const d = NODE_DETAILS[n.id];
               return d ? (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 p-3">
                   <p className="text-sm text-on-surface">{d.summary}</p>
                   {d.lastSeen && (
                     <div className="text-xs text-on-surface-variant">
@@ -119,7 +127,7 @@ export const WithGraph: Story = {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-on-surface-variant">
+                <p className="p-3 text-sm text-on-surface-variant">
                   No details for this node.
                 </p>
               );
@@ -181,7 +189,7 @@ export const WithGraphAndSettings: Story = {
             renderDetails={(n) => {
               if (n.id === SETTINGS_NODE.id) {
                 return (
-                  <div className="flex flex-col gap-3 text-sm text-on-surface">
+                  <div className="flex flex-col gap-3 p-3 text-sm text-on-surface">
                     <p>Graph-level settings live here.</p>
                     <p className="text-on-surface-variant text-xs">
                       Toggled via the settings toolbar button.
@@ -191,7 +199,7 @@ export const WithGraphAndSettings: Story = {
               }
               const d = NODE_DETAILS[n.id];
               return d ? (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 p-3">
                   <p className="text-sm text-on-surface">{d.summary}</p>
                   {d.lastSeen && (
                     <div className="text-xs text-on-surface-variant">
@@ -200,7 +208,7 @@ export const WithGraphAndSettings: Story = {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-on-surface-variant">
+                <p className="p-3 text-sm text-on-surface-variant">
                   No details for this node.
                 </p>
               );
@@ -214,10 +222,25 @@ export const WithGraphAndSettings: Story = {
 
 /**
  * Click the settings (last) icon button to toggle the side panel open.
+ * The panel body composes GraphSideContent → GraphSideGroup +
+ * GraphSideSetting so consumers see the real configuration UX.
  */
 export const SettingsTogglesSide: Story = {
   render: () => {
     const [open, setOpen] = useState(false);
+    const [groups, setGroups] = useState<GraphSideGroupItem[]>([
+      { id: "core", name: "openclaude", color: "#f4a8a8" },
+      { id: "memory", name: "memory system brain", color: "#a8d8a8" },
+      { id: "wss", name: "wss tunnel", color: "#cbb6e5" },
+      { id: "mcp", name: "mcp", color: "#f5c14a" },
+      { id: "stripe", name: "stripe", color: "#8db8e8" },
+    ]);
+    const [setting, setSetting] = useState<GraphSideSettingValue>({
+      nodeSize: 8,
+      lineSize: 1,
+      showTags: true,
+    });
+
     return (
       <GraphLayout
         sideOpen={open}
@@ -233,12 +256,24 @@ export const SettingsTogglesSide: Story = {
             node={open ? SETTINGS_NODE : null}
             onClose={() => setOpen(false)}
             renderDetails={() => (
-              <div className="flex flex-col gap-3 text-sm text-on-surface">
-                <p>This panel is opened by the settings toolbar button.</p>
-                <p className="text-on-surface-variant text-xs">
-                  Real consumers will plug their graph settings form in here.
-                </p>
-              </div>
+              <GraphSideContent
+                items={[
+                  {
+                    id: "groups",
+                    title: "Groups",
+                    body: (
+                      <GraphSideGroup groups={groups} onChange={setGroups} />
+                    ),
+                  },
+                  {
+                    id: "settings",
+                    title: "Settings",
+                    body: (
+                      <GraphSideSetting value={setting} onChange={setSetting} />
+                    ),
+                  },
+                ]}
+              />
             )}
           />
         }
