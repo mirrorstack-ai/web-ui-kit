@@ -1,5 +1,6 @@
 import { cn } from "@/utils/cn";
 import { Switch } from "@/components/ui/inputs/switch/Switch";
+import { Slider } from "@/components/ui/inputs/slider/Slider";
 import type { ComponentMeta } from "@/types/component-meta";
 
 export const meta: ComponentMeta = {
@@ -86,14 +87,13 @@ function SliderRow({
         <span>{label}</span>
         <span className="text-on-surface-variant tabular-nums">{value}</span>
       </span>
-      <input
-        type="range"
+      <Slider
         min={min}
         max={max}
         step={step}
         value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-primary"
+        onChange={onChange}
+        aria-label={label}
       />
     </label>
   );

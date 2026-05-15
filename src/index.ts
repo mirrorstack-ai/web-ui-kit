@@ -39,6 +39,10 @@ export {
   type SwitchColor,
 } from "./components/ui/inputs/switch/Switch";
 export {
+  Slider,
+  type SliderProps,
+} from "./components/ui/inputs/slider/Slider";
+export {
   SectionLabel,
   type SectionLabelProps,
 } from "./components/ui/data/section-label/SectionLabel";
