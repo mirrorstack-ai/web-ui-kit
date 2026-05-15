@@ -39,7 +39,7 @@ export function GraphSideContent({ items, className }: GraphSideContentProps) {
     <div
       className={cn(
         SIDE_CARD_CLS,
-        "h-full overflow-y-auto p-1.5 divide-y divide-outline-variant",
+        "h-full overflow-y-auto px-1.5 pb-1.5 divide-y divide-outline-variant",
         className,
       )}
     >
@@ -51,7 +51,7 @@ export function GraphSideContent({ items, className }: GraphSideContentProps) {
               type="button"
               onClick={() => toggle(item.id)}
               aria-expanded={isOpen}
-              className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-on-surface/8 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="w-full flex items-center mt-1.5 gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-on-surface/8 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <Icon
                 name="chevron_right"
