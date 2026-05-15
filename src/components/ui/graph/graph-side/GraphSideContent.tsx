@@ -18,10 +18,14 @@ export interface GraphSideContentItem {
 
 export interface GraphSideContentProps {
   items: GraphSideContentItem[];
+  /** Optional fixed content rendered above the collapsible items (no
+      chevron, not toggleable). Use for a search input or other always-on
+      controls. */
+  prepend?: ReactNode;
   className?: string;
 }
 
-export function GraphSideContent({ items, className }: GraphSideContentProps) {
+export function GraphSideContent({ items, prepend, className }: GraphSideContentProps) {
   const [openIds, setOpenIds] = useState<Set<string>>(
     () => new Set(items[0] ? [items[0].id] : []),
   );
@@ -43,6 +47,7 @@ export function GraphSideContent({ items, className }: GraphSideContentProps) {
         className,
       )}
     >
+      {prepend && <div className="px-1 pt-1.5 pb-1">{prepend}</div>}
       {items.map((item) => {
         const isOpen = openIds.has(item.id);
         return (

@@ -13,6 +13,7 @@ import {
   type GraphNode,
 } from "@/components/ui/graph/graph/Graph";
 import { GraphSideContent } from "@/components/ui/graph/graph-side/GraphSideContent";
+import { GraphSideSearch } from "@/components/ui/graph/graph-side/GraphSideSearch";
 import {
   GraphSideGroup,
   type GraphSideGroupItem,
@@ -168,6 +169,7 @@ export const WithGraphAndSettings: Story = {
       repulsion: 1500,
       linkDistance: 70,
     });
+    const [search, setSearch] = useState("");
 
     const sideNode: GraphSideNode | null =
       view?.type === "node"
@@ -211,6 +213,12 @@ export const WithGraphAndSettings: Story = {
               if (n.id === SETTINGS_NODE.id) {
                 return (
                   <GraphSideContent
+                    prepend={
+                      <GraphSideSearch
+                        value={search}
+                        onChange={setSearch}
+                      />
+                    }
                     items={[
                       {
                         id: "groups",
