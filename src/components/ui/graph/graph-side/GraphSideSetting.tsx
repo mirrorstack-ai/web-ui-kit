@@ -52,6 +52,15 @@ export function GraphSideSetting({
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
+      <label className="flex items-center justify-between gap-2 py-2 text-sm text-on-surface">
+        <span>Show labels</span>
+        <Switch
+          size="sm"
+          checked={value.showLabels}
+          onChange={(checked) => set("showLabels", checked)}
+          aria-label="Show labels"
+        />
+      </label>
       <SliderRow
         label="Node size"
         min={nodeSizeRange[0]}
@@ -84,15 +93,6 @@ export function GraphSideSetting({
         value={value.linkDistance}
         onChange={(v) => set("linkDistance", v)}
       />
-      <label className="flex items-center justify-between gap-2 py-1.5 text-sm text-on-surface">
-        <span>Show labels</span>
-        <Switch
-          size="sm"
-          checked={value.showLabels}
-          onChange={(checked) => set("showLabels", checked)}
-          aria-label="Show labels"
-        />
-      </label>
     </div>
   );
 }
