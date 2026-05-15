@@ -89,6 +89,8 @@ function seed(nodes: GraphNode[], W: number, H: number): Sim[] {
     }
     return {
       ...n,
+      // Clone pin so a future drag-rewrite can't reach the consumer's data.
+      pin: n.pin ? { ...n.pin } : undefined,
       x,
       y,
       vx: 0,
@@ -174,6 +176,8 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
           typeof height === "number"
             ? height
             : Math.max(200, entry.contentRect.height || DEFAULT_H);
+        const prev = sizeRef.current;
+        if (prev.w === w && prev.h === h) continue;
         // Re-snap pin-ratio nodes whenever the viewport changes so they
         // stay anchored to their fractional position. Drag-to-reposition
         // is preserved because pointerup overwrites pin to the new ratio.
@@ -183,7 +187,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
             n.y = n.pin.y * h;
           }
         }
-        setSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
+        setSize({ w, h });
       }
     });
     ro.observe(el);
@@ -366,7 +370,13 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
         // proportionally instead of either drifting or being overlaid.
         if (node.pin && pointerMovedRef.current) {
           const s = sizeRef.current;
-          node.pin = { x: node.x / s.w, y: node.y / s.h };
+          // The sim's soft walls keep node positions in [12, W-12], so the
+          // ratio is essentially always in (0,1) — clamp anyway against
+          // future bound changes.
+          node.pin = {
+            x: Math.min(1, Math.max(0, node.x / s.w)),
+            y: Math.min(1, Math.max(0, node.y / s.h)),
+          };
         }
       }
       (e.target as Element).releasePointerCapture?.(e.pointerId);
