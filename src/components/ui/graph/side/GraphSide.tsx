@@ -67,7 +67,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       style={{ width }}
       aria-hidden={!isOpen}
     >
-      <div className={cn(cardCls, "flex items-center gap-2 p-3")}>
+      <div className={cn(cardCls, "flex items-center gap-2.5 p-3")}>
         <IconButton
           icon="close"
           aria-label="Close details"
