@@ -25,7 +25,7 @@ export interface GraphSideProps<T extends GraphSideNode = GraphSideNode> {
   open?: boolean;
   onClose: () => void;
   renderDetails: (node: T) => ReactNode;
-  /** Panel width — number for pixels, string for any CSS value. Default 320. */
+  /** Panel width — number for pixels, string for any CSS value. Default 260. */
   width?: number | string;
   className?: string;
 }
@@ -35,7 +35,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
   open,
   onClose,
   renderDetails,
-  width = 320,
+  width = 260,
   className,
 }: GraphSideProps<T>) {
   // Remember the last non-null node so the close animation keeps showing
@@ -48,10 +48,8 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
   return (
     <div
       className={cn(
-        "absolute top-0 right-0 h-full bg-surface-container-low border-l border-outline-variant rounded-r-xl shadow-xl transition-all duration-500 ease-out flex flex-col",
-        isOpen
-          ? "translate-x-0 opacity-100"
-          : "translate-x-full opacity-0 pointer-events-none",
+        "absolute top-0 right-0 h-full bg-surface-container-low border-l border-outline-variant rounded-r-xl shadow-xl transition-transform duration-200 ease-out flex flex-col",
+        isOpen ? "translate-x-0" : "translate-x-full",
         className,
       )}
       style={{ width }}
