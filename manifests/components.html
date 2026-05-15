@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/49 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">49/49 infos</a><span class="filter-pill ok" aria-disabled="true">182 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/49 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">49/49 infos</a><span class="filter-pill ok" aria-disabled="true">184 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -4526,9 +4526,9 @@ playing?: boolean</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> GraphLayout</h2>
       <div class="badges">
-        <label for="c-21-layout-graph-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-21-layout-graph-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-21-layout-graph-info" class="badge info as-toggle">1 info</label>
-        <label for="c-21-layout-graph-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-21-layout-graph-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -4560,7 +4560,7 @@ playing?: boolean</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">4 prop types</span>
+              <span class="badge ok">6 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/graph/graph-layout/GraphLayout.tsx::GraphLayout</code></pre>
             <pre><code>Props:</code></pre>
@@ -4576,7 +4576,17 @@ className?: string
 /**
  * Rendered as a direct child — the side component owns its own positioning.
  */
-side?: ReactNode</code></pre>
+side?: ReactNode
+
+/**
+ * When true, the canvas wrapper shrinks horizontally to leave room for the side panel.
+ */
+sideOpen?: boolean
+
+/**
+ * Width reserved for the side panel when sideOpen is true. Default 260.
+ */
+sideWidth?: number = 260</code></pre>
           </div>
         </div>
     
@@ -4588,10 +4598,147 @@ side?: ReactNode</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { GraphAction, GraphLayout, GraphSide } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { Graph, GraphAction, GraphLayout, GraphSide } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Graph</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Full integration: Graph canvas wired through the toolbar&#39;s replay/fit and a side panel that opens on node click.</div>
+              <pre><code>const WithGraph = () =&gt; {
+  const graphRef = useRef&lt;GraphHandle&gt;(null);
+  const [selectedId, setSelectedId] = useState&lt;string | null&gt;(null);
+  const selected = selectedId
+    ? GRAPH_NODES.find((n) =&gt; n.id === selectedId) ?? null
+    : null;
+
+  return (
+    &lt;GraphLayout
+      sideOpen={Boolean(selected)}
+      canvas={
+        &lt;Graph
+          ref={graphRef}
+          nodes={GRAPH_NODES}
+          edges={GRAPH_EDGES}
+          selectedId={selectedId ?? undefined}
+          onNodeClick={(id) =&gt; setSelectedId(id)}
+          className=&quot;border-0 bg-transparent rounded-none&quot;
+        /&gt;
+      }
+      action={
+        &lt;GraphAction
+          onReplay={() =&gt; graphRef.current?.replay()}
+          onFit={() =&gt; graphRef.current?.fit()}
+        /&gt;
+      }
+      side={
+        &lt;GraphSide
+          node={selected}
+          onClose={() =&gt; setSelectedId(null)}
+          renderDetails={(n) =&gt; {
+            const d = NODE_DETAILS[n.id];
+            return d ? (
+              &lt;div className=&quot;flex flex-col gap-3&quot;&gt;
+                &lt;p className=&quot;text-sm text-on-surface&quot;&gt;{d.summary}&lt;/p&gt;
+                {d.lastSeen &amp;&amp; (
+                  &lt;div className=&quot;text-xs text-on-surface-variant&quot;&gt;
+                    Last activity: {d.lastSeen}
+                  &lt;/div&gt;
+                )}
+              &lt;/div&gt;
+            ) : (
+              &lt;p className=&quot;text-sm text-on-surface-variant&quot;&gt;
+                No details for this node.
+              &lt;/p&gt;
+            );
+          }}
+        /&gt;
+      }
+    /&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Graph And Settings</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Graph canvas where both node clicks and the settings toolbar button open the side panel. Latest interaction wins.</div>
+              <pre><code>const WithGraphAndSettings = () =&gt; {
+  const graphRef = useRef&lt;GraphHandle&gt;(null);
+  const [view, setView] = useState&lt;SideView&gt;(null);
+
+  const sideNode: GraphSideNode | null =
+    view?.type === &quot;node&quot;
+      ? GRAPH_NODES.find((n) =&gt; n.id === view.id) ?? null
+      : view?.type === &quot;settings&quot;
+        ? SETTINGS_NODE
+        : null;
+
+  return (
+    &lt;GraphLayout
+      sideOpen={Boolean(sideNode)}
+      canvas={
+        &lt;Graph
+          ref={graphRef}
+          nodes={GRAPH_NODES}
+          edges={GRAPH_EDGES}
+          selectedId={view?.type === &quot;node&quot; ? view.id : undefined}
+          onNodeClick={(id) =&gt; setView({ type: &quot;node&quot;, id })}
+          className=&quot;border-0 bg-transparent rounded-none&quot;
+        /&gt;
+      }
+      action={
+        &lt;GraphAction
+          onReplay={() =&gt; graphRef.current?.replay()}
+          onFit={() =&gt; graphRef.current?.fit()}
+          onSettings={() =&gt;
+            setView((v) =&gt; (v?.type === &quot;settings&quot; ? null : { type: &quot;settings&quot; }))
+          }
+        /&gt;
+      }
+      side={
+        &lt;GraphSide
+          node={sideNode}
+          onClose={() =&gt; setView(null)}
+          renderDetails={(n) =&gt; {
+            if (n.id === SETTINGS_NODE.id) {
+              return (
+                &lt;div className=&quot;flex flex-col gap-3 text-sm text-on-surface&quot;&gt;
+                  &lt;p&gt;Graph-level settings live here.&lt;/p&gt;
+                  &lt;p className=&quot;text-on-surface-variant text-xs&quot;&gt;
+                    Toggled via the settings toolbar button.
+                  &lt;/p&gt;
+                &lt;/div&gt;
+              );
+            }
+            const d = NODE_DETAILS[n.id];
+            return d ? (
+              &lt;div className=&quot;flex flex-col gap-3&quot;&gt;
+                &lt;p className=&quot;text-sm text-on-surface&quot;&gt;{d.summary}&lt;/p&gt;
+                {d.lastSeen &amp;&amp; (
+                  &lt;div className=&quot;text-xs text-on-surface-variant&quot;&gt;
+                    Last activity: {d.lastSeen}
+                  &lt;/div&gt;
+                )}
+              &lt;/div&gt;
+            ) : (
+              &lt;p className=&quot;text-sm text-on-surface-variant&quot;&gt;
+                No details for this node.
+              &lt;/p&gt;
+            );
+          }}
+        /&gt;
+      }
+    /&gt;
+  );
+};</code></pre>
+            </div>
             <div class="note ok">
               <div class="row">
                 <span class="ex-name">Settings Toggles Side</span>
@@ -4603,6 +4750,7 @@ side?: ReactNode</code></pre>
   const [open, setOpen] = useState(false);
   return (
     &lt;GraphLayout
+      sideOpen={open}
       action={
         &lt;GraphAction
           onReplay={() =&gt; {}}
