@@ -45,17 +45,20 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
   const display = node ?? lastNodeRef.current;
   const isOpen = open ?? Boolean(node);
 
+  const cardCls =
+    "bg-surface-container-low border border-outline-variant rounded-xl shadow-xl";
+
   return (
     <div
       className={cn(
-        "absolute inset-y-1.5 right-1.5 bg-surface-container-low border border-outline-variant rounded-xl shadow-xl transition-transform duration-200 ease-out flex flex-col",
+        "absolute inset-y-1.5 right-1.5 flex flex-col gap-1.5 transition-transform duration-200 ease-out",
         isOpen ? "translate-x-0" : "translate-x-[calc(100%+0.375rem)]",
         className,
       )}
       style={{ width }}
       aria-hidden={!isOpen}
     >
-      <div className="flex items-center justify-between gap-2 p-3 border-b border-outline-variant">
+      <div className={cn(cardCls, "flex items-center justify-between gap-2 p-3")}>
         <div className="min-w-0">
           <div className="text-sm font-medium text-on-surface truncate">
             {display?.label ?? ""}
@@ -75,7 +78,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
           onClick={onClose}
         />
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto p-3">
+      <div className={cn(cardCls, "flex-1 min-h-0 overflow-y-auto p-3")}>
         {isOpen && display ? renderDetails(display) : null}
       </div>
     </div>
