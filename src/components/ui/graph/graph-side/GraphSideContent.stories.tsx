@@ -34,9 +34,11 @@ const WithGroupAndSetting = () => {
     { id: "stripe", name: "stripe", color: "#8db8e8" },
   ]);
   const [setting, setSetting] = useState<GraphSideSettingValue>({
-    nodeSize: 8,
+    nodeSize: 1,
     lineSize: 1,
-    showTags: true,
+    showLabels: true,
+    repulsion: 1500,
+    linkDistance: 70,
   });
 
   return (

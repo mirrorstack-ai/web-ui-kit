@@ -48,12 +48,22 @@ export interface GraphProps {
   onNodeClick?: (id: string) => void;
   /** Controlled selection — highlighted with the same color as hover/drag. */
   selectedId?: string;
+  /** Multiplier applied to node radii. Default 1. */
+  nodeSize?: number;
+  /** Multiplier applied to edge stroke width. Default 1. */
+  lineSize?: number;
+  /** Whether to render the text label under each node. Default true. */
+  showLabels?: boolean;
+  /** Pairwise repulsion strength. Default 1500. */
+  repulsion?: number;
+  /** Spring rest length for edges. Default 70. */
+  linkDistance?: number;
   className?: string;
 }
 
-const REPULSION = 1500;
+const DEFAULT_REPULSION = 1500;
 const SPRING = 0.04;
-const SPRING_LENGTH = 70;
+const DEFAULT_LINK_DISTANCE = 70;
 const CENTER = 0.005;
 const DAMPING = 0.85;
 const CLICK_THRESHOLD = 4;
@@ -107,6 +117,8 @@ function step(
   edges: GraphEdge[],
   W: number,
   H: number,
+  repulsion: number,
+  linkDistance: number,
 ) {
   for (let i = 0; i < nodes.length; i++) {
     const a = nodes[i];
@@ -115,7 +127,7 @@ function step(
       const dx = b.x - a.x;
       const dy = b.y - a.y;
       const dist = Math.max(20, Math.sqrt(dx * dx + dy * dy));
-      const f = REPULSION / (dist * dist);
+      const f = repulsion / (dist * dist);
       const fx = (dx / dist) * f;
       const fy = (dy / dist) * f;
       if (!a.pinned) { a.vx -= fx; a.vy -= fy; }
@@ -129,7 +141,7 @@ function step(
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-    const diff = dist - SPRING_LENGTH;
+    const diff = dist - linkDistance;
     const fx = (dx / dist) * diff * SPRING;
     const fy = (dy / dist) * diff * SPRING;
     if (!a.pinned) { a.vx += fx; a.vy += fy; }
@@ -154,7 +166,19 @@ const DEFAULT_W = 600;
 const DEFAULT_H = 400;
 
 export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
-  { nodes, edges, height, onNodeClick, selectedId, className },
+  {
+    nodes,
+    edges,
+    height,
+    onNodeClick,
+    selectedId,
+    nodeSize = 1,
+    lineSize = 1,
+    showLabels = true,
+    repulsion = DEFAULT_REPULSION,
+    linkDistance = DEFAULT_LINK_DISTANCE,
+    className,
+  },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -260,12 +284,26 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   // consumer doesn't tear down and restart the simulation.
   const edgesRef = useRef(edges);
   edgesRef.current = edges;
+  // Physics tunables are read via refs so changing them never tears down
+  // the RAF loop or restarts the simulation.
+  const repulsionRef = useRef(repulsion);
+  repulsionRef.current = repulsion;
+  const linkDistanceRef = useRef(linkDistance);
+  linkDistanceRef.current = linkDistance;
 
   useEffect(() => {
     let raf = 0;
     const loop = () => {
       const s = sizeRef.current;
-      step(nodesRef.current, byIdRef.current, edgesRef.current, s.w, s.h);
+      step(
+        nodesRef.current,
+        byIdRef.current,
+        edgesRef.current,
+        s.w,
+        s.h,
+        repulsionRef.current,
+        linkDistanceRef.current,
+      );
       setFrame((f) => f + 1);
       raf = requestAnimationFrame(loop);
     };
@@ -479,7 +517,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                   y1={a.y}
                   x2={b.x}
                   y2={b.y}
-                  strokeWidth={(lit ? 1.5 : 1) / view.zoom}
+                  strokeWidth={((lit ? 1.5 : 1) * lineSize) / view.zoom}
                   strokeOpacity={lit ? 0.7 : 0.15}
                 />
               );
@@ -488,7 +526,9 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
           <g>
             {nodesRef.current.map((n) => {
               const lit = isLit(n.id);
-              const r = 4 + Math.min(n.degree, 6) + (n.id === focused ? 2 : 0);
+              const r =
+                (4 + Math.min(n.degree, 6) + (n.id === focused ? 2 : 0)) *
+                nodeSize;
               return (
                 <g
                   key={n.id}
@@ -511,15 +551,17 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                         : "fill-on-surface-variant"
                     }
                   />
-                  <text
-                    x={n.x}
-                    y={n.y + r + 12}
-                    textAnchor="middle"
-                    className="fill-on-surface-variant pointer-events-none"
-                    style={{ fontSize: 10 }}
-                  >
-                    {n.label}
-                  </text>
+                  {showLabels && (
+                    <text
+                      x={n.x}
+                      y={n.y + r + 12}
+                      textAnchor="middle"
+                      className="fill-on-surface-variant pointer-events-none"
+                      style={{ fontSize: 10 }}
+                    >
+                      {n.label}
+                    </text>
+                  )}
                 </g>
               );
             })}
