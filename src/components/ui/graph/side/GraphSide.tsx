@@ -67,35 +67,38 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       style={{ width }}
       aria-hidden={!isOpen}
     >
-      <div className={cn(cardCls, "flex items-center gap-3 p-3")}>
-        <IconButton
-          icon="close"
-          aria-label="Close details"
-          tooltip="Close"
-          size="sm"
-          variant="outline"
-          onClick={onClose}
-        />
-        <span
-          className={cn(
-            "flex-1 min-w-0 text-sm font-medium text-on-surface truncate",
-            hasTags ? "text-left" : "text-center",
-          )}
-        >
-          {display?.label ?? ""}
-        </span>
-        {hasTags ? (
-          <div className="flex items-center gap-1 shrink-0">
+      <div className={cn(cardCls, "flex flex-col gap-2 p-3")}>
+        <div className="flex items-center gap-3">
+          <IconButton
+            icon="close"
+            aria-label="Close details"
+            tooltip="Close"
+            size="sm"
+            variant="outline"
+            onClick={onClose}
+          />
+          <span
+            className={cn(
+              "flex-1 min-w-0 text-sm font-medium text-on-surface truncate",
+              hasTags ? "text-left" : "text-center",
+            )}
+          >
+            {display?.label ?? ""}
+          </span>
+          {/* Spacer matching the close button so a tag-less title is
+              balanced relative to the panel, not just the area after close. */}
+          {!hasTags && <div className="w-8 shrink-0" aria-hidden />}
+        </div>
+        {hasTags && (
+          // Indent matches close-button-width + row gap so the badges sit
+          // directly under the title.
+          <div className="flex items-center gap-1 flex-wrap pl-11">
             {tagList.map((t) => (
               <Badge key={t} size="sm">
                 {t}
               </Badge>
             ))}
           </div>
-        ) : (
-          // Spacer matching the close button so the centered title is
-          // balanced relative to the panel, not just the area after close.
-          <div className="w-8 shrink-0" aria-hidden />
         )}
       </div>
       <div className={cn(cardCls, "flex-1 min-h-0 overflow-y-auto p-3")}>

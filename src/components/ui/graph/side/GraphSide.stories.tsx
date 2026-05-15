@@ -49,3 +49,26 @@ export const TitleCenteredWhenNoTags: Story = {
     renderDetails,
   },
 };
+
+/**
+ * Tags wrap to a second row beneath the title, indented to align under
+ * the label. Long sets of tags wrap onto further rows.
+ */
+export const TagsWrapToSecondRow: Story = {
+  args: {
+    node: {
+      id: "balance",
+      label: "Balance",
+      tags: [
+        "finance",
+        "ledger",
+        "stripe",
+        "monthly",
+        "audit",
+        "tax",
+      ],
+    },
+    onClose: () => {},
+    renderDetails,
+  },
+};
