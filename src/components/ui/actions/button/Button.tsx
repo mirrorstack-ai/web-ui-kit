@@ -28,7 +28,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
-  xs: "h-7 px-2.5 text-xs",
+  xs: "h-8 px-2.5 text-xs",
   sm: "h-10 px-3 text-sm",
   md: "px-4 py-3",
   lg: "px-6 py-4 text-lg",

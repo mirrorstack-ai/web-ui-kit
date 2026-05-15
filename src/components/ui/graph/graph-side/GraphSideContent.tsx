@@ -37,7 +37,11 @@ export function GraphSideContent({ items, className }: GraphSideContentProps) {
 
   return (
     <div
-      className={cn(SIDE_CARD_CLS, "h-full overflow-y-auto p-1.5", className)}
+      className={cn(
+        SIDE_CARD_CLS,
+        "h-full overflow-y-auto p-1.5 divide-y divide-outline-variant",
+        className,
+      )}
     >
       {items.map((item) => {
         const isOpen = openIds.has(item.id);

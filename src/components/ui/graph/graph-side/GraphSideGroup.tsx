@@ -52,7 +52,7 @@ export function GraphSideGroup({
             type="text"
             value={g.name}
             onChange={(e) => update(g.id, { name: e.target.value })}
-            className="flex-1 min-w-0 px-2 py-1 text-sm bg-transparent text-on-surface border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex-1 min-w-0 h-8 px-2 text-sm bg-transparent text-on-surface border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <div className="flex items-center shrink-0 gap-0.5">
             <label
