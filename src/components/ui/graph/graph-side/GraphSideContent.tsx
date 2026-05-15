@@ -51,7 +51,10 @@ export function GraphSideContent({ items, className }: GraphSideContentProps) {
               type="button"
               onClick={() => toggle(item.id)}
               aria-expanded={isOpen}
-              className="w-full flex items-center mt-1.5 gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-on-surface/8 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className={cn(
+                "w-full flex items-center mt-1.5 gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-on-surface/8 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                !isOpen && "mb-1.5",
+              )}
             >
               <Icon
                 name="chevron_right"
