@@ -25,11 +25,16 @@ export function GraphLayout({
 }: GraphLayoutProps) {
   return (
     <div className={cn("relative w-full h-full", className)}>
-      {canvas}
+      {/* Inner clip — canvas and the slide-in side panel are confined here
+          so the panel doesn't leak past the container's right edge when
+          closed. Matches the kit's rounded-xl chrome. */}
+      <div className="absolute inset-0 overflow-hidden rounded-xl">
+        {canvas}
+        {side}
+      </div>
       {action && (
         <div className="absolute -top-1.5 -right-1.5 z-10">{action}</div>
       )}
-      {side}
     </div>
   );
 }
