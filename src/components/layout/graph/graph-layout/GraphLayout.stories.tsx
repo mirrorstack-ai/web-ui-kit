@@ -86,6 +86,7 @@ export const WithGraph: Story = {
 
     return (
       <GraphLayout
+        sideOpen={Boolean(selected)}
         canvas={
           <Graph
             ref={graphRef}
@@ -140,11 +141,13 @@ export const WithGraphAndSettings: Story = {
     const [settingsOpen, setSettingsOpen] = useState(false);
     return (
       <GraphLayout
+        sideOpen={settingsOpen}
         canvas={
           <Graph
             ref={graphRef}
             nodes={GRAPH_NODES}
             edges={GRAPH_EDGES}
+            className="border-0 bg-transparent rounded-none"
           />
         }
         action={
@@ -182,6 +185,7 @@ export const SettingsTogglesSide: Story = {
     const [open, setOpen] = useState(false);
     return (
       <GraphLayout
+        sideOpen={open}
         action={
           <GraphAction
             onReplay={() => {}}
