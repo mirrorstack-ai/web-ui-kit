@@ -67,6 +67,9 @@ type Sim = GraphNode & {
   vx: number;
   vy: number;
   pinned: boolean;
+  /** True once the user has dragged a pin-ratio node — disables the
+      ResizeObserver re-snap so the drag position holds across resizes. */
+  pinDetached: boolean;
   degree: number;
 };
 
@@ -94,6 +97,7 @@ function seed(nodes: GraphNode[], W: number, H: number): Sim[] {
       vx: 0,
       vy: 0,
       pinned: Boolean(n.fixed || n.pin),
+      pinDetached: false,
       degree: 0,
     };
   });
@@ -175,10 +179,10 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
             ? height
             : Math.max(200, entry.contentRect.height || DEFAULT_H);
         // Re-snap pin-ratio nodes whenever the viewport changes so they
-        // stay anchored to their fractional position. The sim's step()
-        // never touches pinned nodes, so drag-to-reposition still wins.
+        // stay anchored to their fractional position. Skip nodes the
+        // user has dragged — that intent should survive resizes.
         for (const n of nodesRef.current) {
-          if (n.pin) {
+          if (n.pin && !n.pinDetached) {
             n.x = n.pin.x * w;
             n.y = n.pin.y * h;
           }
@@ -361,6 +365,11 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
       const node = byIdRef.current.get(id);
       if (node) {
         node.pinned = Boolean(node.fixed || node.pin);
+        // Once the user has actually moved a pin-ratio node, stop tracking
+        // its fractional anchor on resize — their drag position wins.
+        if (node.pin && pointerMovedRef.current) {
+          node.pinDetached = true;
+        }
       }
       (e.target as Element).releasePointerCapture?.(e.pointerId);
       setDraggingId(null);
