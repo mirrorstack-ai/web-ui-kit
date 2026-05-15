@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/52 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">52/52 infos</a><span class="filter-pill ok" aria-disabled="true">187 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/52 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">52/52 infos</a><span class="filter-pill ok" aria-disabled="true">186 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -4646,7 +4646,7 @@ side?: ReactNode</code></pre>
       <div class="badges">
         <label for="c-22-ui-graph-graphside-graphsidecontent-props" class="badge ok as-toggle">2 prop types</label>
         <label for="c-22-ui-graph-graphside-graphsidecontent-info" class="badge info as-toggle">1 info</label>
-        <label for="c-22-ui-graph-graphside-graphsidecontent-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-22-ui-graph-graphside-graphsidecontent-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -4696,7 +4696,7 @@ items: GraphSideContentItem[]</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { GraphSideContent } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { GraphSideContent, GraphSideGroup, GraphSideSetting } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -4707,62 +4707,7 @@ items: GraphSideContentItem[]</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;GraphSideContent
-    items={[
-      {
-        id: &quot;summary&quot;,
-        title: &quot;Summary&quot;,
-        body: (
-          &lt;p&gt;
-            The root identity. Owns workspace settings, identity, and
-            security configuration for everything below.
-          &lt;/p&gt;
-        ),
-      },
-      {
-        id: &quot;activity&quot;,
-        title: &quot;Recent activity&quot;,
-        body: (
-          &lt;ul className=&quot;list-disc pl-4 flex flex-col gap-1&quot;&gt;
-            &lt;li&gt;Updated profile photo&lt;/li&gt;
-            &lt;li&gt;Connected Stripe account&lt;/li&gt;
-            &lt;li&gt;Joined Projectify&lt;/li&gt;
-          &lt;/ul&gt;
-        ),
-      },
-      {
-        id: &quot;metadata&quot;,
-        title: &quot;Metadata&quot;,
-        body: (
-          &lt;dl className=&quot;flex flex-col gap-1&quot;&gt;
-            &lt;div className=&quot;flex justify-between&quot;&gt;
-              &lt;dt&gt;Created&lt;/dt&gt;
-              &lt;dd&gt;2025-08-14&lt;/dd&gt;
-            &lt;/div&gt;
-            &lt;div className=&quot;flex justify-between&quot;&gt;
-              &lt;dt&gt;Owner&lt;/dt&gt;
-              &lt;dd&gt;you&lt;/dd&gt;
-            &lt;/div&gt;
-          &lt;/dl&gt;
-        ),
-      },
-    ]} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Single Item Always Open</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const SingleItemAlwaysOpen = () =&gt; &lt;GraphSideContent
-    items={[
-      {
-        id: &quot;only&quot;,
-        title: &quot;Summary&quot;,
-        body: &lt;p&gt;Only one section — always open, no toggle.&lt;/p&gt;,
-      },
-    ]} /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;WithGroupAndSetting /&gt;;</code></pre>
             </div>
         </div>
     
