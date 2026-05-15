@@ -4668,18 +4668,28 @@ sideWidth?: number = 260</code></pre>
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Graph canvas with the settings (last) toolbar button toggling a side panel for graph-level configuration — independent of node selection.</div>
+              <div class="hint">Graph canvas where both node clicks and the settings toolbar button open the side panel. Latest interaction wins.</div>
               <pre><code>const WithGraphAndSettings = () =&gt; {
   const graphRef = useRef&lt;GraphHandle&gt;(null);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [view, setView] = useState&lt;SideView&gt;(null);
+
+  const sideNode: GraphSideNode | null =
+    view?.type === &quot;node&quot;
+      ? GRAPH_NODES.find((n) =&gt; n.id === view.id) ?? null
+      : view?.type === &quot;settings&quot;
+        ? SETTINGS_NODE
+        : null;
+
   return (
     &lt;GraphLayout
-      sideOpen={settingsOpen}
+      sideOpen={Boolean(sideNode)}
       canvas={
         &lt;Graph
           ref={graphRef}
           nodes={GRAPH_NODES}
           edges={GRAPH_EDGES}
+          selectedId={view?.type === &quot;node&quot; ? view.id : undefined}
+          onNodeClick={(id) =&gt; setView({ type: &quot;node&quot;, id })}
           className=&quot;border-0 bg-transparent rounded-none&quot;
         /&gt;
       }
@@ -4687,22 +4697,42 @@ sideWidth?: number = 260</code></pre>
         &lt;GraphAction
           onReplay={() =&gt; graphRef.current?.replay()}
           onFit={() =&gt; graphRef.current?.fit()}
-          onSettings={() =&gt; setSettingsOpen((v) =&gt; !v)}
+          onSettings={() =&gt;
+            setView((v) =&gt; (v?.type === &quot;settings&quot; ? null : { type: &quot;settings&quot; }))
+          }
         /&gt;
       }
       side={
         &lt;GraphSide
-          node={settingsOpen ? SETTINGS_NODE : null}
-          onClose={() =&gt; setSettingsOpen(false)}
-          renderDetails={() =&gt; (
-            &lt;div className=&quot;flex flex-col gap-3 text-sm text-on-surface&quot;&gt;
-              &lt;p&gt;Graph-level settings live here.&lt;/p&gt;
-              &lt;p className=&quot;text-on-surface-variant text-xs&quot;&gt;
-                Toggled via the settings toolbar button — independent of
-                the node-click selection in the WithGraph story.
+          node={sideNode}
+          onClose={() =&gt; setView(null)}
+          renderDetails={(n) =&gt; {
+            if (n.id === SETTINGS_NODE.id) {
+              return (
+                &lt;div className=&quot;flex flex-col gap-3 text-sm text-on-surface&quot;&gt;
+                  &lt;p&gt;Graph-level settings live here.&lt;/p&gt;
+                  &lt;p className=&quot;text-on-surface-variant text-xs&quot;&gt;
+                    Toggled via the settings toolbar button.
+                  &lt;/p&gt;
+                &lt;/div&gt;
+              );
+            }
+            const d = NODE_DETAILS[n.id];
+            return d ? (
+              &lt;div className=&quot;flex flex-col gap-3&quot;&gt;
+                &lt;p className=&quot;text-sm text-on-surface&quot;&gt;{d.summary}&lt;/p&gt;
+                {d.lastSeen &amp;&amp; (
+                  &lt;div className=&quot;text-xs text-on-surface-variant&quot;&gt;
+                    Last activity: {d.lastSeen}
+                  &lt;/div&gt;
+                )}
+              &lt;/div&gt;
+            ) : (
+              &lt;p className=&quot;text-sm text-on-surface-variant&quot;&gt;
+                No details for this node.
               &lt;/p&gt;
-            &lt;/div&gt;
-          )}
+            );
+          }}
         /&gt;
       }
     /&gt;
