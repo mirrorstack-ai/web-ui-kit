@@ -241,3 +241,38 @@ export {
   AppShell,
   type AppShellProps,
 } from "./components/layout/app-shell/app-shell/AppShell";
+export {
+  Sparkline,
+  type SparklineProps,
+  type SparklinePoint,
+} from "./components/ui/chart/sparkline/Sparkline";
+export {
+  MetricBlock,
+  type MetricBlockProps,
+  type MetricBlockTone,
+  type MetricBlockLayout,
+  type MetricTrend,
+  type MetricStat,
+} from "./components/ui/data/metric-block/MetricBlock";
+export {
+  GraphAction,
+  type GraphActionProps,
+} from "./components/ui/graph/action/GraphAction";
+export {
+  GraphLayout,
+  type GraphLayoutProps,
+} from "./components/layout/graph/graph-layout/GraphLayout";
+export {
+  GraphSide,
+  GraphSideHeader,
+  type GraphSideProps,
+  type GraphSideHeaderProps,
+  type GraphSideNode,
+} from "./components/ui/graph/graph-side/GraphSide";
+export {
+  Graph,
+  type GraphProps,
+  type GraphNode,
+  type GraphEdge,
+  type GraphHandle,
+} from "./components/ui/graph/graph/Graph";
