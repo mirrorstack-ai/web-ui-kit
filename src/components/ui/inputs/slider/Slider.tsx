@@ -5,7 +5,7 @@ import type { ComponentMeta } from "@/types/component-meta";
 export const meta: ComponentMeta = {
   name: "Slider",
   description:
-    "Single-value range slider with a primary-tinted active track, neutral inactive track, and a thumb that visually separates from the filled track via a surface-colored ring.",
+    "Single-value range slider with a primary-tinted active track, neutral inactive track, and a thumb with a surface-container-low border ring so it visually separates from the filled track.",
 };
 
 export interface SliderProps {
