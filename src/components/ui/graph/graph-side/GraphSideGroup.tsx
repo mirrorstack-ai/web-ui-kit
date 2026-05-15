@@ -52,28 +52,30 @@ export function GraphSideGroup({
             type="text"
             value={g.name}
             onChange={(e) => update(g.id, { name: e.target.value })}
-            className="flex-1 min-w-0 px-2.5 py-1.5 text-sm bg-transparent text-on-surface border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex-1 min-w-0 px-2 py-1 text-sm bg-transparent text-on-surface border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          <label
-            className="relative w-5 h-5 rounded-full border border-outline-variant cursor-pointer shrink-0"
-            style={{ backgroundColor: g.color }}
-            aria-label={`${g.name} color`}
-          >
-            <input
-              type="color"
-              value={g.color}
-              onChange={(e) => update(g.id, { color: e.target.value })}
-              className="absolute inset-0 opacity-0 cursor-pointer"
+          <div className="flex items-center shrink-0">
+            <label
+              className="relative w-5 h-5 rounded-full border border-outline-variant cursor-pointer"
+              style={{ backgroundColor: g.color }}
+              aria-label={`${g.name} color`}
+            >
+              <input
+                type="color"
+                value={g.color}
+                onChange={(e) => update(g.id, { color: e.target.value })}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </label>
+            <IconButton
+              icon="close"
+              aria-label={`Delete ${g.name}`}
+              tooltip="Delete group"
+              size="sm"
+              variant="text"
+              onClick={() => remove(g.id)}
             />
-          </label>
-          <IconButton
-            icon="close"
-            aria-label={`Delete ${g.name}`}
-            tooltip="Delete group"
-            size="sm"
-            variant="text"
-            onClick={() => remove(g.id)}
-          />
+          </div>
         </div>
       ))}
       <Button
