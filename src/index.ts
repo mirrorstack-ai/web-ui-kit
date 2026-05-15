@@ -274,6 +274,9 @@ export {
   GraphSideSetting,
   GraphSideGroup,
   GraphSideSearch,
+  GraphSideNodeSummary,
+  GraphSideNodeDetail,
+  GraphSideNodeReferences,
   type GraphSideProps,
   type GraphSideHeaderProps,
   type GraphSideContentProps,
@@ -283,6 +286,10 @@ export {
   type GraphSideGroupProps,
   type GraphSideGroupItem,
   type GraphSideSearchProps,
+  type GraphSideNodeSummaryProps,
+  type GraphSideNodeDetailProps,
+  type GraphSideNodeReferencesProps,
+  type GraphSideNodeReference,
   type GraphSideNode,
 } from "./components/ui/graph/graph-side/GraphSide";
 export {

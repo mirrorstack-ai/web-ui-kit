@@ -23,6 +23,19 @@ export {
   GraphSideSearch,
   type GraphSideSearchProps,
 } from "./GraphSideSearch";
+export {
+  GraphSideNodeSummary,
+  type GraphSideNodeSummaryProps,
+} from "./GraphSideNodeSummary";
+export {
+  GraphSideNodeDetail,
+  type GraphSideNodeDetailProps,
+} from "./GraphSideNodeDetail";
+export {
+  GraphSideNodeReferences,
+  type GraphSideNodeReferencesProps,
+  type GraphSideNodeReference,
+} from "./GraphSideNodeReferences";
 
 export const meta: ComponentMeta = {
   name: "GraphSide",

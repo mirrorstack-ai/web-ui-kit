@@ -7,13 +7,15 @@ import { SIDE_CARD_CLS } from "./styles";
 export const meta: ComponentMeta = {
   name: "GraphSideContent",
   description:
-    "Body card for a GraphSide panel — a single scrollable card containing a list of collapsible sections. Each section header dims with rounded corners on hover. The first section starts open; all sections can be toggled.",
+    "Body card for a GraphSide panel — a single scrollable card containing a list of collapsible sections. Each section header dims with rounded corners on hover. All sections start open; each can be toggled.",
 };
 
 export interface GraphSideContentItem {
   id: string;
   title: string;
   body: ReactNode;
+  /** Element rendered on the right of the title bar, sibling of the toggle. */
+  trailing?: ReactNode;
 }
 
 export interface GraphSideContentProps {
@@ -27,7 +29,7 @@ export interface GraphSideContentProps {
 
 export function GraphSideContent({ items, prepend, className }: GraphSideContentProps) {
   const [openIds, setOpenIds] = useState<Set<string>>(
-    () => new Set(items[0] ? [items[0].id] : []),
+    () => new Set(items.map((i) => i.id)),
   );
 
   const toggle = (id: string) => {
@@ -43,7 +45,7 @@ export function GraphSideContent({ items, prepend, className }: GraphSideContent
     <div
       className={cn(
         SIDE_CARD_CLS,
-        "h-full overflow-y-auto px-1.5 pb-1.5 divide-y divide-outline-variant",
+        "h-full overflow-y-auto [scrollbar-gutter:stable] pl-1.5 pr-0.5 pb-3 divide-y divide-outline-variant",
         className,
       )}
     >
@@ -52,27 +54,34 @@ export function GraphSideContent({ items, prepend, className }: GraphSideContent
         const isOpen = openIds.has(item.id);
         return (
           <div key={item.id}>
-            <button
-              type="button"
-              onClick={() => toggle(item.id)}
-              aria-expanded={isOpen}
+            <div
               className={cn(
-                "w-full flex items-center mt-1.5 gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-on-surface/8 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                "flex items-center mt-1.5",
                 !isOpen && "mb-1.5",
               )}
             >
-              <Icon
-                name="chevron_right"
-                size={18}
-                className={cn(
-                  "text-on-surface-variant transition-transform",
-                  isOpen && "rotate-90",
-                )}
-              />
-              <span className="text-sm font-medium text-on-surface">
-                {item.title}
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => toggle(item.id)}
+                aria-expanded={isOpen}
+                className="flex-1 min-w-0 flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-on-surface/8 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <Icon
+                  name="chevron_right"
+                  size={18}
+                  className={cn(
+                    "text-on-surface-variant transition-transform",
+                    isOpen && "rotate-90",
+                  )}
+                />
+                <span className="text-sm font-medium text-on-surface">
+                  {item.title}
+                </span>
+              </button>
+              {item.trailing && (
+                <div className="shrink-0 pl-1">{item.trailing}</div>
+              )}
+            </div>
             {isOpen && <div className="px-2 pb-2 pt-1">{item.body}</div>}
           </div>
         );
