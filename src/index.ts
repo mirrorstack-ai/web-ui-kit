@@ -264,9 +264,11 @@ export {
 } from "./components/layout/graph/graph-layout/GraphLayout";
 export {
   GraphSide,
+  GraphSideHeader,
   type GraphSideProps,
+  type GraphSideHeaderProps,
   type GraphSideNode,
-} from "./components/ui/graph/side/GraphSide";
+} from "./components/ui/graph/graph-side/GraphSide";
 export {
   Graph,
   type GraphProps,

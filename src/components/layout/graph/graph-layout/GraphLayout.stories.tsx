@@ -5,7 +5,7 @@ import { GraphAction } from "@/components/ui/graph/action/GraphAction";
 import {
   GraphSide,
   type GraphSideNode,
-} from "@/components/ui/graph/side/GraphSide";
+} from "@/components/ui/graph/graph-side/GraphSide";
 
 const meta: Meta<typeof GraphLayout> = {
   title: "Layout/Graph",

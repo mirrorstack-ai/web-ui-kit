@@ -1,7 +1,10 @@
 import { useRef, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
-import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import type { ComponentMeta } from "@/types/component-meta";
+import { GraphSideHeader } from "./GraphSideHeader";
+import { SIDE_CARD_CLS } from "./styles";
+
+export { GraphSideHeader, type GraphSideHeaderProps } from "./GraphSideHeader";
 
 export const meta: ComponentMeta = {
   name: "GraphSide",
@@ -16,7 +19,10 @@ export const meta: ComponentMeta = {
 export interface GraphSideNode {
   id: string;
   label: string;
+  /** Single tag rendered as a Badge. Combined with `tags` if both are set. */
   tag?: string;
+  /** Multiple tags rendered as Badges in the header. */
+  tags?: string[];
 }
 
 export interface GraphSideProps<T extends GraphSideNode = GraphSideNode> {
@@ -39,14 +45,11 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
   className,
 }: GraphSideProps<T>) {
   // Remember the last non-null node so the close animation keeps showing
-  // its label/tag while sliding out, instead of snapping to an empty header.
+  // its label/tags while sliding out, instead of snapping to an empty header.
   const lastNodeRef = useRef<T | null>(node);
   if (node) lastNodeRef.current = node;
   const display = node ?? lastNodeRef.current;
   const isOpen = open ?? Boolean(node);
-
-  const cardCls =
-    "bg-surface-container-low border border-outline-variant rounded-xl shadow-xl";
 
   return (
     <div
@@ -58,27 +61,8 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       style={{ width }}
       aria-hidden={!isOpen}
     >
-      <div className={cn(cardCls, "flex items-center gap-3 p-3")}>
-        <IconButton
-          icon="close"
-          aria-label="Close details"
-          tooltip="Close"
-          size="sm"
-          variant="outline"
-          onClick={onClose}
-        />
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-on-surface truncate">
-            {display?.label ?? ""}
-          </div>
-          {display?.tag && (
-            <div className="text-xs text-on-surface-variant mt-0.5 truncate">
-              {display.tag}
-            </div>
-          )}
-        </div>
-      </div>
-      <div className={cn(cardCls, "flex-1 min-h-0 overflow-y-auto p-3")}>
+      <GraphSideHeader node={display} onClose={onClose} />
+      <div className={cn(SIDE_CARD_CLS, "flex-1 min-h-0 overflow-y-auto p-3")}>
         {isOpen && display ? renderDetails(display) : null}
       </div>
     </div>
