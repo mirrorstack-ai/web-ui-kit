@@ -9,6 +9,7 @@ import {
   GraphSideSetting,
   type GraphSideSettingValue,
 } from "./GraphSideSetting";
+import { GraphSideSearch } from "./GraphSideSearch";
 
 const meta: Meta<typeof GraphSideContent> = {
   title: "UI/Graph/GraphSide/GraphSideContent",
@@ -25,7 +26,8 @@ const meta: Meta<typeof GraphSideContent> = {
 export default meta;
 type Story = StoryObj<typeof GraphSideContent>;
 
-const WithGroupAndSetting = () => {
+const WithSearchGroupAndSetting = () => {
+  const [search, setSearch] = useState("");
   const [groups, setGroups] = useState<GraphSideGroupItem[]>([
     { id: "core", name: "openclaude", color: "#f4a8a8" },
     { id: "memory", name: "memory system brain", color: "#a8d8a8" },
@@ -43,6 +45,7 @@ const WithGroupAndSetting = () => {
 
   return (
     <GraphSideContent
+      prepend={<GraphSideSearch value={search} onChange={setSearch} />}
       items={[
         {
           id: "groups",
@@ -59,4 +62,4 @@ const WithGroupAndSetting = () => {
   );
 };
 
-export const Default: Story = { render: () => <WithGroupAndSetting /> };
+export const Default: Story = { render: () => <WithSearchGroupAndSetting /> };

@@ -273,6 +273,7 @@ export {
   GraphSideContent,
   GraphSideSetting,
   GraphSideGroup,
+  GraphSideSearch,
   type GraphSideProps,
   type GraphSideHeaderProps,
   type GraphSideContentProps,
@@ -281,6 +282,7 @@ export {
   type GraphSideSettingValue,
   type GraphSideGroupProps,
   type GraphSideGroupItem,
+  type GraphSideSearchProps,
   type GraphSideNode,
 } from "./components/ui/graph/graph-side/GraphSide";
 export {

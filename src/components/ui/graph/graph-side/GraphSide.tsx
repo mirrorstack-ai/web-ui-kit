@@ -19,6 +19,10 @@ export {
   type GraphSideGroupProps,
   type GraphSideGroupItem,
 } from "./GraphSideGroup";
+export {
+  GraphSideSearch,
+  type GraphSideSearchProps,
+} from "./GraphSideSearch";
 
 export const meta: ComponentMeta = {
   name: "GraphSide",
