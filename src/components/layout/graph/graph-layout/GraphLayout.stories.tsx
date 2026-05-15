@@ -22,14 +22,6 @@ const meta: Meta<typeof GraphLayout> = {
 export default meta;
 type Story = StoryObj<typeof GraphLayout>;
 
-export const ActionOnly: Story = {
-  args: {
-    action: (
-      <GraphAction onReplay={() => {}} onFit={() => {}} onSettings={() => {}} />
-    ),
-  },
-};
-
 const SETTINGS_NODE: GraphSideNode = {
   id: "settings",
   label: "Graph settings",
