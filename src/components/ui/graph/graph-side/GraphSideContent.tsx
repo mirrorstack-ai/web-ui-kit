@@ -7,7 +7,7 @@ import { SIDE_CARD_CLS } from "./styles";
 export const meta: ComponentMeta = {
   name: "GraphSideContent",
   description:
-    "Stack of collapsible sections for a GraphSide panel. The first item stays open and is not collapsible; subsequent items toggle with a chevron.",
+    "Body card for a GraphSide panel — a single scrollable card containing a list of collapsible sections. The first section starts open; all sections can be toggled.",
 };
 
 export interface GraphSideContentItem {
@@ -22,9 +22,9 @@ export interface GraphSideContentProps {
 }
 
 export function GraphSideContent({ items, className }: GraphSideContentProps) {
-  // Items after the first start collapsed; the first is always open and
-  // has no toggle, so its id never appears in this set.
-  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set());
+  const [openIds, setOpenIds] = useState<Set<string>>(
+    () => new Set(items[0] ? [items[0].id] : []),
+  );
 
   const toggle = (id: string) => {
     setOpenIds((prev) => {
@@ -36,41 +36,33 @@ export function GraphSideContent({ items, className }: GraphSideContentProps) {
   };
 
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
+    <div className={cn(SIDE_CARD_CLS, "overflow-hidden", className)}>
       {items.map((item, idx) => {
-        const isFirst = idx === 0;
-        const isOpen = isFirst || openIds.has(item.id);
+        const isOpen = openIds.has(item.id);
         return (
-          <div key={item.id} className={cn(SIDE_CARD_CLS, "overflow-hidden")}>
-            {isFirst ? (
-              <div className="px-3 pt-3 text-sm font-medium text-on-surface">
+          <div
+            key={item.id}
+            className={cn(idx > 0 && "border-t border-outline-variant")}
+          >
+            <button
+              type="button"
+              onClick={() => toggle(item.id)}
+              aria-expanded={isOpen}
+              className="w-full flex items-center gap-2 px-3 py-3 cursor-pointer hover:bg-on-surface/4 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <Icon
+                name="chevron_right"
+                size={20}
+                className={cn(
+                  "text-on-surface-variant transition-transform",
+                  isOpen && "rotate-90",
+                )}
+              />
+              <span className="text-sm font-medium text-on-surface">
                 {item.title}
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => toggle(item.id)}
-                aria-expanded={isOpen}
-                className="w-full flex items-center justify-between px-3 py-3 cursor-pointer hover:bg-on-surface/4 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
-              >
-                <span className="text-sm font-medium text-on-surface">
-                  {item.title}
-                </span>
-                <Icon
-                  name="chevron_right"
-                  size={20}
-                  className={cn(
-                    "text-on-surface-variant transition-transform",
-                    isOpen && "rotate-90",
-                  )}
-                />
-              </button>
-            )}
-            {isOpen && (
-              <div className="px-3 pb-3 pt-2 text-sm text-on-surface-variant">
-                {item.body}
-              </div>
-            )}
+              </span>
+            </button>
+            {isOpen && <div className="px-3 pb-3">{item.body}</div>}
           </div>
         );
       })}
