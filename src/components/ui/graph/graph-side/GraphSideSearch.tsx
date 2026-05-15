@@ -25,7 +25,7 @@ export function GraphSideSearch({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 border border-outline-variant rounded-lg bg-transparent focus-within:ring-2 focus-within:ring-primary",
+        "flex items-center gap-2 mx-2 mt-4 mb-2 border border-outline-variant rounded-lg bg-transparent focus-within:ring-2 focus-within:ring-primary",
         className,
       )}
     >
@@ -40,7 +40,7 @@ export function GraphSideSearch({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="flex-1 min-w-0 px-2 pt-4 pb-2 text-sm bg-transparent text-on-surface placeholder:text-on-surface-variant focus:outline-none"
+        className="flex-1 min-w-0 px-2 py-1.5 text-sm bg-transparent text-on-surface placeholder:text-on-surface-variant focus:outline-none"
       />
     </div>
   );
