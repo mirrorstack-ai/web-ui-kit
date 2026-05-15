@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/52 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">52/52 infos</a><span class="filter-pill ok" aria-disabled="true">188 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/52 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">52/52 infos</a><span class="filter-pill ok" aria-disabled="true">187 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4528,7 +4528,7 @@ playing?: boolean</code></pre>
       <div class="badges">
         <label for="c-21-layout-graph-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-21-layout-graph-info" class="badge info as-toggle">1 info</label>
-        <label for="c-21-layout-graph-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-21-layout-graph-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -4676,10 +4676,22 @@ sideWidth?: number = 260</code></pre>
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Graph canvas where both node clicks and the settings toolbar button open the side panel. Latest interaction wins.</div>
+              <div class="hint">Graph canvas where both node clicks and the settings toolbar button open the side panel. Node clicks show details; settings opens a GraphSideContent panel composing GraphSideGroup + GraphSideSetting. Latest interaction wins.</div>
               <pre><code>const WithGraphAndSettings = () =&gt; {
   const graphRef = useRef&lt;GraphHandle&gt;(null);
   const [view, setView] = useState&lt;SideView&gt;(null);
+  const [groups, setGroups] = useState&lt;GraphSideGroupItem[]&gt;([
+    { id: &quot;core&quot;, name: &quot;openclaude&quot;, color: &quot;#f4a8a8&quot; },
+    { id: &quot;memory&quot;, name: &quot;memory system brain&quot;, color: &quot;#a8d8a8&quot; },
+    { id: &quot;wss&quot;, name: &quot;wss tunnel&quot;, color: &quot;#cbb6e5&quot; },
+    { id: &quot;mcp&quot;, name: &quot;mcp&quot;, color: &quot;#f5c14a&quot; },
+    { id: &quot;stripe&quot;, name: &quot;stripe&quot;, color: &quot;#8db8e8&quot; },
+  ]);
+  const [setting, setSetting] = useState&lt;GraphSideSettingValue&gt;({
+    nodeSize: 8,
+    lineSize: 1,
+    showTags: true,
+  });
 
   const sideNode: GraphSideNode | null =
     view?.type === &quot;node&quot;
@@ -4717,12 +4729,30 @@ sideWidth?: number = 260</code></pre>
           renderDetails={(n) =&gt; {
             if (n.id === SETTINGS_NODE.id) {
               return (
-                &lt;div className=&quot;flex flex-col gap-3 p-3 text-sm text-on-surface&quot;&gt;
-                  &lt;p&gt;Graph-level settings live here.&lt;/p&gt;
-                  &lt;p className=&quot;text-on-surface-variant text-xs&quot;&gt;
-                    Toggled via the settings toolbar button.
-                  &lt;/p&gt;
-                &lt;/div&gt;
+                &lt;GraphSideContent
+                  items={[
+                    {
+                      id: &quot;groups&quot;,
+                      title: &quot;Groups&quot;,
+                      body: (
+                        &lt;GraphSideGroup
+                          groups={groups}
+                          onChange={setGroups}
+                        /&gt;
+                      ),
+                    },
+                    {
+                      id: &quot;settings&quot;,
+                      title: &quot;Settings&quot;,
+                      body: (
+                        &lt;GraphSideSetting
+                          value={setting}
+                          onChange={setSetting}
+                        /&gt;
+                      ),
+                    },
+                  ]}
+                /&gt;
               );
             }
             const d = NODE_DETAILS[n.id];
@@ -4741,68 +4771,6 @@ sideWidth?: number = 260</code></pre>
               &lt;/p&gt;
             );
           }}
-        /&gt;
-      }
-    /&gt;
-  );
-};</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Settings Toggles Side</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              <div class="hint">Click the settings (last) icon button to toggle the side panel open. The panel body composes GraphSideContent → GraphSideGroup + GraphSideSetting so consumers see the real configuration UX.</div>
-              <pre><code>const SettingsTogglesSide = () =&gt; {
-  const [open, setOpen] = useState(false);
-  const [groups, setGroups] = useState&lt;GraphSideGroupItem[]&gt;([
-    { id: &quot;core&quot;, name: &quot;openclaude&quot;, color: &quot;#f4a8a8&quot; },
-    { id: &quot;memory&quot;, name: &quot;memory system brain&quot;, color: &quot;#a8d8a8&quot; },
-    { id: &quot;wss&quot;, name: &quot;wss tunnel&quot;, color: &quot;#cbb6e5&quot; },
-    { id: &quot;mcp&quot;, name: &quot;mcp&quot;, color: &quot;#f5c14a&quot; },
-    { id: &quot;stripe&quot;, name: &quot;stripe&quot;, color: &quot;#8db8e8&quot; },
-  ]);
-  const [setting, setSetting] = useState&lt;GraphSideSettingValue&gt;({
-    nodeSize: 8,
-    lineSize: 1,
-    showTags: true,
-  });
-
-  return (
-    &lt;GraphLayout
-      sideOpen={open}
-      action={
-        &lt;GraphAction
-          onReplay={() =&gt; {}}
-          onFit={() =&gt; {}}
-          onSettings={() =&gt; setOpen((v) =&gt; !v)}
-        /&gt;
-      }
-      side={
-        &lt;GraphSide
-          node={open ? SETTINGS_NODE : null}
-          onClose={() =&gt; setOpen(false)}
-          renderDetails={() =&gt; (
-            &lt;GraphSideContent
-              items={[
-                {
-                  id: &quot;groups&quot;,
-                  title: &quot;Groups&quot;,
-                  body: (
-                    &lt;GraphSideGroup groups={groups} onChange={setGroups} /&gt;
-                  ),
-                },
-                {
-                  id: &quot;settings&quot;,
-                  title: &quot;Settings&quot;,
-                  body: (
-                    &lt;GraphSideSetting value={setting} onChange={setSetting} /&gt;
-                  ),
-                },
-              ]}
-            /&gt;
-          )}
         /&gt;
       }
     /&gt;
