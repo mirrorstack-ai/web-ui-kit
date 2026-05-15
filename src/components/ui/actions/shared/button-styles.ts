@@ -1,6 +1,6 @@
 export type ButtonVariant = "filled" | "tonal" | "outline" | "text";
 export type ButtonColor = "primary" | "secondary" | "tertiary" | "error" | "warning";
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
 const filledStyles: Record<ButtonColor, string> = {
   primary:
@@ -53,6 +53,7 @@ export const variantMap: Record<ButtonVariant, Record<ButtonColor, string>> = {
 };
 
 export const iconSizes: Record<ButtonSize, number> = {
+  xs: 16,
   sm: 20,
   md: 24,
   lg: 28,

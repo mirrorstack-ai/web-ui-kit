@@ -37,7 +37,12 @@ export {
   Switch,
   type SwitchProps,
   type SwitchColor,
+  type SwitchSize,
 } from "./components/ui/inputs/switch/Switch";
+export {
+  Slider,
+  type SliderProps,
+} from "./components/ui/inputs/slider/Slider";
 export {
   SectionLabel,
   type SectionLabelProps,
@@ -265,8 +270,17 @@ export {
 export {
   GraphSide,
   GraphSideHeader,
+  GraphSideContent,
+  GraphSideSetting,
+  GraphSideGroup,
   type GraphSideProps,
   type GraphSideHeaderProps,
+  type GraphSideContentProps,
+  type GraphSideContentItem,
+  type GraphSideSettingProps,
+  type GraphSideSettingValue,
+  type GraphSideGroupProps,
+  type GraphSideGroupItem,
   type GraphSideNode,
 } from "./components/ui/graph/graph-side/GraphSide";
 export {

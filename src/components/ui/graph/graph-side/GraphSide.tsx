@@ -2,9 +2,23 @@ import { useRef, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { GraphSideHeader } from "./GraphSideHeader";
-import { SIDE_CARD_CLS } from "./styles";
 
 export { GraphSideHeader, type GraphSideHeaderProps } from "./GraphSideHeader";
+export {
+  GraphSideContent,
+  type GraphSideContentProps,
+  type GraphSideContentItem,
+} from "./GraphSideContent";
+export {
+  GraphSideSetting,
+  type GraphSideSettingProps,
+  type GraphSideSettingValue,
+} from "./GraphSideSetting";
+export {
+  GraphSideGroup,
+  type GraphSideGroupProps,
+  type GraphSideGroupItem,
+} from "./GraphSideGroup";
 
 export const meta: ComponentMeta = {
   name: "GraphSide",
@@ -62,7 +76,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       aria-hidden={!isOpen}
     >
       <GraphSideHeader node={display} onClose={onClose} />
-      <div className={cn(SIDE_CARD_CLS, "flex-1 min-h-0 overflow-y-auto p-3")}>
+      <div className="flex-1 min-h-0 overflow-hidden">
         {isOpen && display ? renderDetails(display) : null}
       </div>
     </div>

@@ -28,18 +28,21 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
+  xs: "h-8 px-2.5 text-xs",
   sm: "h-10 px-3 text-sm",
   md: "px-4 py-3",
   lg: "px-6 py-4 text-lg",
 };
 
 const spinnerSizes: Record<ButtonSize, CSSProperties> = {
+  xs: { width: 12, height: 12 },
   sm: { width: 16, height: 16 },
   md: { width: 24, height: 24 },
   lg: { width: 32, height: 32 },
 };
 
 const gapStyles: Record<ButtonSize, string> = {
+  xs: "gap-1",
   sm: "gap-1",
   md: "gap-2",
   lg: "gap-3",
