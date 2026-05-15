@@ -4303,7 +4303,7 @@ title: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> GraphAction</h2>
       <div class="badges">
-        <label for="c-19-ui-graph-graphaction-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-19-ui-graph-graphaction-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-19-ui-graph-graphaction-info" class="badge info as-toggle">1 info</label>
         <label for="c-19-ui-graph-graphaction-stories" class="badge ok as-toggle">1 story</label>
         
@@ -4337,7 +4337,7 @@ title: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">5 prop types</span>
+              <span class="badge ok">6 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/graph/action/GraphAction.tsx::GraphAction</code></pre>
             <pre><code>Props:</code></pre>
@@ -4345,6 +4345,9 @@ title: string</code></pre>
 
 onFit: () =&gt; void
 
+/**
+ * Fires when the user clicks play (motion_play).
+ */
 onReplay: () =&gt; void
 
 /**
@@ -4353,7 +4356,12 @@ onReplay: () =&gt; void
 onSettings?: () =&gt; void
 
 /**
- * Controlled play/pause icon. When omitted, the button manages its own toggle state.
+ * Fires when the user clicks stop (stop_circle). Omit to fall back to onReplay.
+ */
+onStop?: () =&gt; void
+
+/**
+ * Controlled play/stop icon. When omitted, the button manages its own toggle state.
  */
 playing?: boolean</code></pre>
           </div>
