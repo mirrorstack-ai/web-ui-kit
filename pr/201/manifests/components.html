@@ -2499,7 +2499,7 @@ loading?: boolean = false
 
 rightIcon?: string
 
-size?: &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot; = &quot;md&quot;
+size?: &quot;xs&quot; | &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot; = &quot;md&quot;
 
 variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;text&quot; = &quot;filled&quot;</code></pre>
           </div>
@@ -5287,7 +5287,7 @@ icon: string
 
 loading?: boolean = false
 
-size?: &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot; = &quot;md&quot;
+size?: &quot;xs&quot; | &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot; = &quot;md&quot;
 
 tooltip?: string
 
@@ -7478,7 +7478,7 @@ title?: string = &quot;Verify your identity&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SegmentedButton</h2>
       <div class="badges">
-        <label for="c-39-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-39-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">8 prop types</label>
         <label for="c-39-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
         <label for="c-39-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">5 stories</label>
         
@@ -7512,7 +7512,7 @@ title?: string = &quot;Verify your identity&quot;</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">7 prop types</span>
+              <span class="badge ok">8 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/inputs/segmented-button/SegmentedButton.tsx::SegmentedButton</code></pre>
             <pre><code>Props:</code></pre>
@@ -7521,6 +7521,12 @@ title?: string = &quot;Verify your identity&quot;</code></pre>
 className?: string
 
 disabled?: boolean = false
+
+/**
+ * Use inverse-themed tokens (for placement on inverse surfaces such as
+ *  the agent sidebar where the surrounding bg is `on-background`).
+ */
+inverse?: boolean = false
 
 onChange: (value: T) =&gt; void
 
@@ -8980,7 +8986,7 @@ interactive?: boolean</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Switch</h2>
       <div class="badges">
-        <label for="c-48-ui-inputs-switch-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-48-ui-inputs-switch-props" class="badge ok as-toggle">8 prop types</label>
         <label for="c-48-ui-inputs-switch-info" class="badge info as-toggle">1 info</label>
         <label for="c-48-ui-inputs-switch-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -9014,7 +9020,7 @@ interactive?: boolean</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">7 prop types</span>
+              <span class="badge ok">8 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/inputs/switch/Switch.tsx::Switch</code></pre>
             <pre><code>Props:</code></pre>
@@ -9029,6 +9035,12 @@ className?: string
 color?: &quot;primary&quot; | &quot;error&quot; | &quot;warning&quot; = &quot;primary&quot;
 
 disabled?: boolean = false
+
+/**
+ * Use inverse-themed tokens (for placement on inverse surfaces such as
+ *  the agent sidebar where the surrounding bg is `on-background`).
+ */
+inverse?: boolean = false
 
 onChange: (checked: boolean) =&gt; void</code></pre>
           </div>
