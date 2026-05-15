@@ -58,7 +58,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       style={{ width }}
       aria-hidden={!isOpen}
     >
-      <div className={cn(cardCls, "flex items-center justify-between gap-2 pl-3 pr-10 py-3")}>
+      <div className={cn(cardCls, "flex items-center justify-between gap-2 pl-3 pr-6 py-3")}>
         <div className="min-w-0">
           <div className="text-sm font-medium text-on-surface truncate">
             {display?.label ?? ""}
@@ -74,7 +74,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
           aria-label="Close details"
           tooltip="Close"
           size="sm"
-          variant="text"
+          variant="outline"
           onClick={onClose}
         />
       </div>
