@@ -3,6 +3,7 @@ import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Badge } from "@/components/ui/feedback/badge/Badge";
 import type { ComponentMeta } from "@/types/component-meta";
 import type { GraphSideNode } from "./GraphSide";
+import { SIDE_CARD_CLS } from "./styles";
 
 export const meta: ComponentMeta = {
   name: "GraphSideHeader",
@@ -29,7 +30,8 @@ export function GraphSideHeader({
   return (
     <div
       className={cn(
-        "bg-surface-container-low border border-outline-variant rounded-xl shadow-xl flex items-center gap-3 p-3",
+        SIDE_CARD_CLS,
+        "flex items-center gap-3 p-3",
         className,
       )}
     >

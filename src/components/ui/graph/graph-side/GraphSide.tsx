@@ -2,6 +2,7 @@ import { useRef, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { GraphSideHeader } from "./GraphSideHeader";
+import { SIDE_CARD_CLS } from "./styles";
 
 export { GraphSideHeader, type GraphSideHeaderProps } from "./GraphSideHeader";
 
@@ -61,7 +62,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       aria-hidden={!isOpen}
     >
       <GraphSideHeader node={display} onClose={onClose} />
-      <div className="flex-1 min-h-0 overflow-y-auto p-3 bg-surface-container-low border border-outline-variant rounded-xl shadow-xl">
+      <div className={cn(SIDE_CARD_CLS, "flex-1 min-h-0 overflow-y-auto p-3")}>
         {isOpen && display ? renderDetails(display) : null}
       </div>
     </div>
