@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/49 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">49/49 infos</a><span class="filter-pill ok" aria-disabled="true">179 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/49 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">49/49 infos</a><span class="filter-pill ok" aria-disabled="true">182 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -4639,18 +4639,18 @@ side?: ReactNode</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="GraphSide">
+  aria-label="GraphSideHeader">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> GraphSide</h2>
+      <h2><span class="status-dot dot-ok"></span> GraphSideHeader</h2>
       <div class="badges">
-        <label for="c-22-ui-graph-graphside-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-22-ui-graph-graphside-info" class="badge info as-toggle">1 info</label>
-        <label for="c-22-ui-graph-graphside-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-22-ui-graph-graphside-graphsideheader-props" class="badge ok as-toggle">3 prop types</label>
+        <label for="c-22-ui-graph-graphside-graphsideheader-info" class="badge info as-toggle">1 info</label>
+        <label for="c-22-ui-graph-graphside-graphsideheader-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/graph/side/GraphSide.stories.tsx">ui-graph-graphside · ./src/components/ui/graph/side/GraphSide.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/graph/graph-side/GraphSideHeader.stories.tsx">ui-graph-graphside-graphsideheader · ./src/components/ui/graph/graph-side/GraphSideHeader.stories.tsx</div>
     
     
     
@@ -4658,10 +4658,10 @@ side?: ReactNode</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-22-ui-graph-graphside-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-22-ui-graph-graphside-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-22-ui-graph-graphside-graphsideheader-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-22-ui-graph-graphside-graphsideheader-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-22-ui-graph-graphside-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-22-ui-graph-graphside-graphsideheader-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -4678,27 +4678,15 @@ side?: ReactNode</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">6 prop types</span>
+              <span class="badge ok">3 prop types</span>
             </div>
-            <pre><code>Component: src/components/ui/graph/side/GraphSide.tsx::GraphSide</code></pre>
+            <pre><code>Component: src/components/ui/graph/graph-side/GraphSideHeader.tsx::GraphSideHeader</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>className?: string
 
-node: T | null
+node: Pick&lt;GraphSideNode, &quot;label&quot; | &quot;tag&quot; | &quot;tags&quot;&gt; | null
 
-onClose: () =&gt; void
-
-/**
- * Force-control open state. Defaults to `node != null`.
- */
-open?: boolean
-
-renderDetails: (node: T) =&gt; ReactNode
-
-/**
- * Panel width — number for pixels, string for any CSS value. Default 260.
- */
-width?: number | string = 260</code></pre>
+onClose: () =&gt; void</code></pre>
           </div>
         </div>
     
@@ -4710,25 +4698,55 @@ width?: number | string = 260</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { GraphSide } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { GraphSideHeader } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Standalone</span>
+                <span class="ex-name">With Single Tag</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const Standalone = () =&gt; &lt;GraphSide
-    node={SAMPLE}
-    onClose={() =&gt; {}}
-    renderDetails={(n) =&gt; (
-      &lt;p className=&quot;text-sm text-on-surface&quot;&gt;
-        Details for &lt;strong&gt;{n.label}&lt;/strong&gt;.
-      &lt;/p&gt;
-    )} /&gt;;</code></pre>
+              <pre><code>const WithSingleTag = () =&gt; &lt;GraphSideHeader node={{ label: &quot;Account&quot;, tag: &quot;core&quot; }} onClose={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Multiple Tags</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithMultipleTags = () =&gt; &lt;GraphSideHeader
+    node={{
+      label: &quot;Balance&quot;,
+      tags: [&quot;finance&quot;, &quot;ledger&quot;, &quot;stripe&quot;],
+    }}
+    onClose={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Tags Wrap To Second Row</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const TagsWrapToSecondRow = () =&gt; &lt;GraphSideHeader
+    node={{
+      label: &quot;Balance&quot;,
+      tags: [&quot;finance&quot;, &quot;ledger&quot;, &quot;stripe&quot;, &quot;monthly&quot;, &quot;audit&quot;, &quot;tax&quot;],
+    }}
+    onClose={() =&gt; {}} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Without Tags</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithoutTags = () =&gt; &lt;GraphSideHeader node={{ label: &quot;Graph settings&quot; }} onClose={() =&gt; {}} /&gt;;</code></pre>
             </div>
         </div>
     
