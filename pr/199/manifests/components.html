@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/49 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">49/49 infos</a><span class="filter-pill ok" aria-disabled="true">181 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/49 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">49/49 infos</a><span class="filter-pill ok" aria-disabled="true">182 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4646,7 +4646,7 @@ side?: ReactNode</code></pre>
       <div class="badges">
         <label for="c-22-ui-graph-graphside-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-22-ui-graph-graphside-info" class="badge info as-toggle">1 info</label>
-        <label for="c-22-ui-graph-graphside-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-22-ui-graph-graphside-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -4751,6 +4751,29 @@ width?: number | string = 260</code></pre>
               
               <pre><code>const TitleCenteredWhenNoTags = () =&gt; &lt;GraphSide
     node={{ id: &quot;settings&quot;, label: &quot;Graph settings&quot; }}
+    onClose={() =&gt; {}}
+    renderDetails={renderDetails} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Tags Wrap To Second Row</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Tags wrap to a second row beneath the title, indented to align under the label. Long sets of tags wrap onto further rows.</div>
+              <pre><code>const TagsWrapToSecondRow = () =&gt; &lt;GraphSide
+    node={{
+      id: &quot;balance&quot;,
+      label: &quot;Balance&quot;,
+      tags: [
+        &quot;finance&quot;,
+        &quot;ledger&quot;,
+        &quot;stripe&quot;,
+        &quot;monthly&quot;,
+        &quot;audit&quot;,
+        &quot;tax&quot;,
+      ],
+    }}
     onClose={() =&gt; {}}
     renderDetails={renderDetails} /&gt;;</code></pre>
             </div>
