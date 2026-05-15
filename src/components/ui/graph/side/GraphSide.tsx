@@ -48,8 +48,10 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
   return (
     <div
       className={cn(
-        "absolute top-0 right-0 h-full bg-surface-container-low border-l border-outline-variant rounded-r-xl shadow-xl transition-transform duration-200 ease-out flex flex-col",
-        isOpen ? "translate-x-0" : "translate-x-full",
+        "absolute top-0 right-0 h-full bg-surface-container-low border-l border-outline-variant rounded-r-xl shadow-xl transition-all duration-200 ease-out flex flex-col",
+        isOpen
+          ? "translate-x-0 opacity-100"
+          : "translate-x-full opacity-0 pointer-events-none",
         className,
       )}
       style={{ width }}
