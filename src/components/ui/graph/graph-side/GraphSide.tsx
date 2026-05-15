@@ -5,6 +5,11 @@ import { GraphSideHeader } from "./GraphSideHeader";
 import { SIDE_CARD_CLS } from "./styles";
 
 export { GraphSideHeader, type GraphSideHeaderProps } from "./GraphSideHeader";
+export {
+  GraphSideContent,
+  type GraphSideContentProps,
+  type GraphSideContentItem,
+} from "./GraphSideContent";
 
 export const meta: ComponentMeta = {
   name: "GraphSide",

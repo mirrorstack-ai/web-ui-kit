@@ -265,8 +265,11 @@ export {
 export {
   GraphSide,
   GraphSideHeader,
+  GraphSideContent,
   type GraphSideProps,
   type GraphSideHeaderProps,
+  type GraphSideContentProps,
+  type GraphSideContentItem,
   type GraphSideNode,
 } from "./components/ui/graph/graph-side/GraphSide";
 export {
