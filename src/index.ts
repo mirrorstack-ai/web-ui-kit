@@ -267,3 +267,10 @@ export {
   type GraphSideProps,
   type GraphSideNode,
 } from "./components/ui/graph/side/GraphSide";
+export {
+  Graph,
+  type GraphProps,
+  type GraphNode,
+  type GraphEdge,
+  type GraphHandle,
+} from "./components/ui/graph/graph/Graph";
