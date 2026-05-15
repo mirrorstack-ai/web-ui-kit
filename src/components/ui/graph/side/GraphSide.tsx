@@ -67,31 +67,29 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       style={{ width }}
       aria-hidden={!isOpen}
     >
-      <div className={cn(cardCls, "flex flex-col gap-2 p-3")}>
-        <div className="flex items-center gap-3">
-          <IconButton
-            icon="close"
-            aria-label="Close details"
-            tooltip="Close"
-            size="sm"
-            variant="outline"
-            onClick={onClose}
-          />
-          <span className="flex-1 min-w-0 text-sm font-medium text-on-surface truncate">
+      <div className={cn(cardCls, "flex items-center gap-2 p-3")}>
+        <IconButton
+          icon="close"
+          aria-label="Close details"
+          tooltip="Close"
+          size="sm"
+          variant="outline"
+          onClick={onClose}
+        />
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <span className="text-sm font-medium text-on-surface truncate">
             {display?.label ?? ""}
           </span>
+          {hasTags && (
+            <div className="flex flex-wrap items-center gap-1">
+              {tagList.map((t) => (
+                <Badge key={t} size="sm">
+                  {t}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
-        {hasTags && (
-          // Indent matches close-button-width + row gap so the badges sit
-          // directly under the title.
-          <div className="flex items-center gap-1 flex-wrap pl-11">
-            {tagList.map((t) => (
-              <Badge key={t} size="sm">
-                {t}
-              </Badge>
-            ))}
-          </div>
-        )}
       </div>
       <div className={cn(cardCls, "flex-1 min-h-0 overflow-y-auto p-3")}>
         {isOpen && display ? renderDetails(display) : null}
