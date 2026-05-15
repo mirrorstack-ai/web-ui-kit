@@ -58,8 +58,16 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       style={{ width }}
       aria-hidden={!isOpen}
     >
-      <div className={cn(cardCls, "flex items-center justify-between gap-2 pl-3 pr-9 py-3")}>
-        <div className="min-w-0">
+      <div className={cn(cardCls, "flex items-center gap-3 p-3")}>
+        <IconButton
+          icon="close"
+          aria-label="Close details"
+          tooltip="Close"
+          size="sm"
+          variant="outline"
+          onClick={onClose}
+        />
+        <div className="min-w-0 flex-1">
           <div className="text-sm font-medium text-on-surface truncate">
             {display?.label ?? ""}
           </div>
@@ -69,14 +77,6 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
             </div>
           )}
         </div>
-        <IconButton
-          icon="close"
-          aria-label="Close details"
-          tooltip="Close"
-          size="sm"
-          variant="outline"
-          onClick={onClose}
-        />
       </div>
       <div className={cn(cardCls, "flex-1 min-h-0 overflow-y-auto p-3")}>
         {isOpen && display ? renderDetails(display) : null}
