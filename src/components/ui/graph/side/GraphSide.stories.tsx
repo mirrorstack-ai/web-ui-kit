@@ -42,7 +42,7 @@ export const WithMultipleTags: Story = {
   },
 };
 
-export const TitleCenteredWhenNoTags: Story = {
+export const WithoutTags: Story = {
   args: {
     node: { id: "settings", label: "Graph settings" },
     onClose: () => {},

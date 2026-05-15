@@ -77,17 +77,9 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
             variant="outline"
             onClick={onClose}
           />
-          <span
-            className={cn(
-              "flex-1 min-w-0 text-sm font-medium text-on-surface truncate",
-              hasTags ? "text-left" : "text-center",
-            )}
-          >
+          <span className="flex-1 min-w-0 text-sm font-medium text-on-surface truncate">
             {display?.label ?? ""}
           </span>
-          {/* Spacer matching the close button so a tag-less title is
-              balanced relative to the panel, not just the area after close. */}
-          {!hasTags && <div className="w-8 shrink-0" aria-hidden />}
         </div>
         {hasTags && (
           // Indent matches close-button-width + row gap so the badges sit
