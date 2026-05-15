@@ -131,6 +131,50 @@ export const WithGraph: Story = {
 };
 
 /**
+ * Graph canvas with the settings (last) toolbar button toggling a side
+ * panel for graph-level configuration — independent of node selection.
+ */
+export const WithGraphAndSettings: Story = {
+  render: () => {
+    const graphRef = useRef<GraphHandle>(null);
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    return (
+      <GraphLayout
+        canvas={
+          <Graph
+            ref={graphRef}
+            nodes={GRAPH_NODES}
+            edges={GRAPH_EDGES}
+          />
+        }
+        action={
+          <GraphAction
+            onReplay={() => graphRef.current?.replay()}
+            onFit={() => graphRef.current?.fit()}
+            onSettings={() => setSettingsOpen((v) => !v)}
+          />
+        }
+        side={
+          <GraphSide
+            node={settingsOpen ? SETTINGS_NODE : null}
+            onClose={() => setSettingsOpen(false)}
+            renderDetails={() => (
+              <div className="flex flex-col gap-3 text-sm text-on-surface">
+                <p>Graph-level settings live here.</p>
+                <p className="text-on-surface-variant text-xs">
+                  Toggled via the settings toolbar button — independent of
+                  the node-click selection in the WithGraph story.
+                </p>
+              </div>
+            )}
+          />
+        }
+      />
+    );
+  },
+};
+
+/**
  * Click the settings (last) icon button to toggle the side panel open.
  */
 export const SettingsTogglesSide: Story = {
