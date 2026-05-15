@@ -23,6 +23,9 @@ type BaseProps = {
   size?: FloatingLabelInputSize;
   /** Hide the floating label (useful for compact inline inputs) */
   hideLabel?: boolean;
+  /** Use inverse-themed tokens (for placement on inverse surfaces such as
+   *  the agent sidebar where the surrounding bg is `on-background`). */
+  inverse?: boolean;
 };
 
 type InputModeProps = BaseProps &
@@ -54,6 +57,7 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     disabled,
     size = "md",
     hideLabel = false,
+    inverse = false,
     multiline,
     maxLength,
   } = props;
@@ -100,9 +104,15 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
   const isSmall = size === "sm";
 
   const fieldClassName = cn(
-    "peer w-full rounded-lg bg-transparent border-0 outline-none",
-    "text-on-surface transition-colors disabled:cursor-not-allowed",
-    error ? "focus:text-error" : "focus:text-primary",
+    "peer w-full rounded-lg bg-transparent border-0 outline-none transition-colors disabled:cursor-not-allowed",
+    inverse
+      ? "text-inverse-on-surface placeholder:text-inverse-on-surface/40"
+      : "text-on-surface",
+    error
+      ? "focus:text-error"
+      : inverse
+        ? "focus:text-inverse-on-surface"
+        : "focus:text-primary",
     isSmall ? "px-3 text-sm" : "px-4",
     multiline
       ? showCounter
@@ -114,24 +124,29 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
   );
 
   const borderClassName = cn(
-    "relative flex border rounded-lg transition-colors bg-surface-container-low",
+    "relative flex border rounded-lg transition-colors",
+    inverse ? "bg-inverse-on-surface/[0.06]" : "bg-surface-container-low",
     multiline ? "items-start" : "items-center",
     error
       ? "border-error hover:border-error focus-within:ring-2 focus-within:ring-error focus-within:border-error"
-      : "border-outline-variant hover:border-primary focus-within:ring-2 focus-within:ring-primary focus-within:border-primary",
-    disabled && "opacity-50 cursor-not-allowed hover:border-outline-variant",
+      : inverse
+        ? "border-inverse-on-surface/30 hover:border-inverse-on-surface/50 focus-within:ring-2 focus-within:ring-inverse-primary/30 focus-within:border-inverse-primary/60"
+        : "border-outline-variant hover:border-primary focus-within:ring-2 focus-within:ring-primary focus-within:border-primary",
+    disabled && "opacity-50 cursor-not-allowed",
   );
 
   const labelClassName = cn(
-    "absolute z-10 font-normal px-1",
-    "bg-surface-container-low rounded-md transition-all duration-200 ease-in-out",
+    "absolute z-10 font-normal px-1 rounded-md transition-all duration-200 ease-in-out",
     "origin-top-left pointer-events-none",
+    inverse ? "bg-inverse-surface" : "bg-surface-container-low",
     isSmall
       ? "text-sm left-3 top-2.5 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2.5 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2.5"
       : "text-base left-4 top-4 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-3 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-3",
     error
       ? "text-error peer-focus:text-error"
-      : "text-on-surface-variant peer-focus:text-primary",
+      : inverse
+        ? "text-inverse-on-surface/55 peer-focus:text-inverse-primary"
+        : "text-on-surface-variant peer-focus:text-primary",
   );
 
   return (

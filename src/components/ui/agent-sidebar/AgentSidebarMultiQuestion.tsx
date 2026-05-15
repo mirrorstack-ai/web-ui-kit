@@ -131,41 +131,6 @@ function formatAnswer(
   return value;
 }
 
-// Reskin kit primitives (FloatingLabelInput / SegmentedButton / Switch) for
-// the inverse-themed agent sidebar. Each entry uses arbitrary descendant or
-// state-variant selectors with v4 trailing `!` to override the primitive's
-// internal default tokens. Until those primitives gain a first-class
-// `inverse` mode, these overrides are the bridge.
-const inverseOverrides = {
-  fieldContainer: cn(
-    "[&>div]:bg-inverse-on-surface/[0.06]!",
-    "[&>div]:border-outline-variant/30!",
-    "[&>div]:hover:border-outline-variant/50!",
-    "[&>div]:focus-within:border-inverse-primary/60!",
-    "[&>div]:focus-within:ring-inverse-primary/30!",
-  ),
-  fieldInput: cn(
-    "text-inverse-on-surface!",
-    "placeholder:text-inverse-on-surface/40!",
-    "focus:text-inverse-on-surface!",
-    "py-1.5!",
-  ),
-  segmented: cn(
-    "flex-wrap",
-    "[&>button[aria-pressed=true]]:bg-inverse-primary!",
-    "[&>button[aria-pressed=true]]:text-inverse-surface!",
-    "[&>button[aria-pressed=false]]:bg-inverse-on-surface/[0.06]!",
-    "[&>button[aria-pressed=false]]:text-inverse-on-surface/70!",
-    "[&>button[aria-pressed=false]]:hover:bg-inverse-on-surface/[0.12]!",
-    "[&>button[aria-pressed=false]]:hover:text-inverse-on-surface!",
-  ),
-  switch: cn(
-    "aria-checked:bg-inverse-primary!",
-    "aria-[checked=false]:bg-inverse-on-surface/20!",
-    "[&>span]:bg-inverse-surface!",
-  ),
-};
-
 function renderField(
   q: AgentSidebarQuestion,
   value: AgentSidebarMultiQuestionAnswer,
@@ -186,8 +151,7 @@ function renderField(
           value={typeof value === "string" ? value : ""}
           onChange={(e) => setAnswer(q.id, e.target.value)}
           disabled={submitted}
-          containerClassName={inverseOverrides.fieldContainer}
-          className={inverseOverrides.fieldInput}
+          inverse
         />
       );
     }
@@ -200,8 +164,7 @@ function renderField(
         value={typeof value === "string" ? value : ""}
         onChange={(e) => setAnswer(q.id, e.target.value)}
         disabled={submitted}
-        containerClassName={inverseOverrides.fieldContainer}
-        className={inverseOverrides.fieldInput}
+        inverse
       />
     );
   }
@@ -212,7 +175,7 @@ function renderField(
         onChange={(checked) => setAnswer(q.id, checked)}
         aria-label={q.label}
         disabled={submitted}
-        className={inverseOverrides.switch}
+        inverse
       />
     );
   }
@@ -245,7 +208,8 @@ function renderField(
           disabled={submitted}
           onChange={(v) => setAnswer(q.id, v === singleCurrent ? "" : v)}
           options={q.options.map((o) => ({ value: o.value, label: o.label }))}
-          className={inverseOverrides.segmented}
+          inverse
+          className="flex-wrap"
         />
       );
     }
@@ -447,6 +411,7 @@ export function AgentSidebarMultiQuestion({
               <SegmentedButton
                 aria-label="Select a question"
                 size="sm"
+                inverse
                 value={activeTabId}
                 onChange={(id) => setActiveTabId(id)}
                 className="flex-wrap"
@@ -577,7 +542,7 @@ export function AgentSidebarMultiQuestion({
               size="sm"
               onClick={handleSubmit}
               rightIcon="check"
-              className="bg-inverse-primary/15! text-inverse-primary! hover:bg-inverse-primary! hover:text-inverse-surface!"
+              className="hover:bg-primary! hover:text-on-primary!"
             >
               {submitLabel}
             </Button>
