@@ -1,0 +1,5 @@
+import{j as e}from"./iframe-DvgzBJkp.js";import{A as a}from"./Alert-iF1F87Nt.js";function c({variant:t="error",title:r,items:s,className:i}){return e.jsx(a,{variant:t,hideIcon:!0,title:r,className:i,children:e.jsx("ul",{className:"list-disc pl-4 space-y-1.5",children:s.map((n,o)=>e.jsx("li",{children:n},o))})})}c.__docgenInfo={description:"",methods:[],displayName:"ConsequencesNotice",props:{variant:{required:!1,tsType:{name:"AlertVariant"},description:`Visual tone. Defaults to "error" since the component's primary use is
+destructive confirms; pass "warning" for reversible-but-noteworthy
+actions (rotating a key, toggling beta).`,defaultValue:{value:'"error"',computed:!1}},title:{required:!0,tsType:{name:"string"},description:`Heading. Required so the kit doesn't ship product copy — callers
+supply something contextual (e.g. "Before you continue", "Deleting
+this app will:", "Heads up").`},items:{required:!0,tsType:{name:"Array",elements:[{name:"ReactNode"}],raw:"ReactNode[]"},description:"One bullet per item. ReactNode so callers can mix in <strong>, links, etc."},className:{required:!1,tsType:{name:"string"},description:""}}};export{c as C};
