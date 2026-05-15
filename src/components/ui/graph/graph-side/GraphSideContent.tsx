@@ -7,7 +7,7 @@ import { SIDE_CARD_CLS } from "./styles";
 export const meta: ComponentMeta = {
   name: "GraphSideContent",
   description:
-    "Body card for a GraphSide panel — a single scrollable card containing a list of collapsible sections. The first section starts open; all sections can be toggled.",
+    "Body card for a GraphSide panel — a single scrollable card containing a list of collapsible sections. Each section header dims with rounded corners on hover. The first section starts open; all sections can be toggled.",
 };
 
 export interface GraphSideContentItem {
@@ -36,23 +36,22 @@ export function GraphSideContent({ items, className }: GraphSideContentProps) {
   };
 
   return (
-    <div className={cn(SIDE_CARD_CLS, "h-full overflow-y-auto", className)}>
-      {items.map((item, idx) => {
+    <div
+      className={cn(SIDE_CARD_CLS, "h-full overflow-y-auto p-1.5", className)}
+    >
+      {items.map((item) => {
         const isOpen = openIds.has(item.id);
         return (
-          <div
-            key={item.id}
-            className={cn(idx > 0 && "border-t border-outline-variant")}
-          >
+          <div key={item.id}>
             <button
               type="button"
               onClick={() => toggle(item.id)}
               aria-expanded={isOpen}
-              className="w-full flex items-center gap-2 px-3 py-3 cursor-pointer hover:bg-on-surface/4 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-on-surface/8 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <Icon
                 name="chevron_right"
-                size={20}
+                size={18}
                 className={cn(
                   "text-on-surface-variant transition-transform",
                   isOpen && "rotate-90",
@@ -62,7 +61,7 @@ export function GraphSideContent({ items, className }: GraphSideContentProps) {
                 {item.title}
               </span>
             </button>
-            {isOpen && <div className="px-3 pb-3">{item.body}</div>}
+            {isOpen && <div className="px-2 pb-2 pt-1">{item.body}</div>}
           </div>
         );
       })}
