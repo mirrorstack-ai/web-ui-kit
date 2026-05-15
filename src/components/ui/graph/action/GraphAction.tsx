@@ -10,17 +10,21 @@ export const meta: ComponentMeta = {
 };
 
 export interface GraphActionProps {
+  /** Fires when the user clicks play (motion_play). */
   onReplay: () => void;
+  /** Fires when the user clicks stop (stop_circle). Omit to fall back to onReplay. */
+  onStop?: () => void;
   onFit: () => void;
   /** Optional settings entry. Button is hidden when omitted. */
   onSettings?: () => void;
-  /** Controlled play/pause icon. When omitted, the button manages its own toggle state. */
+  /** Controlled play/stop icon. When omitted, the button manages its own toggle state. */
   playing?: boolean;
   className?: string;
 }
 
 export function GraphAction({
   onReplay,
+  onStop,
   onFit,
   onSettings,
   playing,
@@ -31,7 +35,11 @@ export function GraphAction({
 
   const handlePlayClick = () => {
     if (playing === undefined) setInternalPlaying((p) => !p);
-    onReplay();
+    if (isPlaying) {
+      (onStop ?? onReplay)();
+    } else {
+      onReplay();
+    }
   };
 
   return (

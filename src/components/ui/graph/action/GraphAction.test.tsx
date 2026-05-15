@@ -28,6 +28,30 @@ describe("GraphAction", () => {
     expect(getByRole("button", { name: "Replay layout" })).toBeInTheDocument();
   });
 
+  it("dispatches onReplay on play click and onStop on stop click", () => {
+    const onReplay = vi.fn();
+    const onStop = vi.fn();
+    const { getByRole } = render(
+      <GraphAction onReplay={onReplay} onStop={onStop} onFit={() => {}} />,
+    );
+    fireEvent.click(getByRole("button", { name: "Replay layout" }));
+    expect(onReplay).toHaveBeenCalledTimes(1);
+    expect(onStop).not.toHaveBeenCalled();
+    fireEvent.click(getByRole("button", { name: "Stop layout" }));
+    expect(onStop).toHaveBeenCalledTimes(1);
+    expect(onReplay).toHaveBeenCalledTimes(1);
+  });
+
+  it("falls back to onReplay when onStop is not provided", () => {
+    const onReplay = vi.fn();
+    const { getByRole } = render(
+      <GraphAction onReplay={onReplay} onFit={() => {}} />,
+    );
+    fireEvent.click(getByRole("button", { name: "Replay layout" }));
+    fireEvent.click(getByRole("button", { name: "Stop layout" }));
+    expect(onReplay).toHaveBeenCalledTimes(2);
+  });
+
   it("hides the settings button when onSettings is not provided", () => {
     const { queryByRole } = render(
       <GraphAction onReplay={() => {}} onFit={() => {}} />,
