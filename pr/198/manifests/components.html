@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/49 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">49/49 infos</a><span class="filter-pill ok" aria-disabled="true">180 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/49 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">49/49 infos</a><span class="filter-pill ok" aria-disabled="true">181 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -4528,7 +4528,7 @@ playing?: boolean</code></pre>
       <div class="badges">
         <label for="c-21-layout-graph-props" class="badge ok as-toggle">4 prop types</label>
         <label for="c-21-layout-graph-info" class="badge info as-toggle">1 info</label>
-        <label for="c-21-layout-graph-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-21-layout-graph-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -4645,6 +4645,51 @@ side?: ReactNode</code></pre>
               &lt;/p&gt;
             );
           }}
+        /&gt;
+      }
+    /&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Graph And Settings</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Graph canvas with the settings (last) toolbar button toggling a side panel for graph-level configuration — independent of node selection.</div>
+              <pre><code>const WithGraphAndSettings = () =&gt; {
+  const graphRef = useRef&lt;GraphHandle&gt;(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  return (
+    &lt;GraphLayout
+      canvas={
+        &lt;Graph
+          ref={graphRef}
+          nodes={GRAPH_NODES}
+          edges={GRAPH_EDGES}
+        /&gt;
+      }
+      action={
+        &lt;GraphAction
+          onReplay={() =&gt; graphRef.current?.replay()}
+          onFit={() =&gt; graphRef.current?.fit()}
+          onSettings={() =&gt; setSettingsOpen((v) =&gt; !v)}
+        /&gt;
+      }
+      side={
+        &lt;GraphSide
+          node={settingsOpen ? SETTINGS_NODE : null}
+          onClose={() =&gt; setSettingsOpen(false)}
+          renderDetails={() =&gt; (
+            &lt;div className=&quot;flex flex-col gap-3 text-sm text-on-surface&quot;&gt;
+              &lt;p&gt;Graph-level settings live here.&lt;/p&gt;
+              &lt;p className=&quot;text-on-surface-variant text-xs&quot;&gt;
+                Toggled via the settings toolbar button — independent of
+                the node-click selection in the WithGraph story.
+              &lt;/p&gt;
+            &lt;/div&gt;
+          )}
         /&gt;
       }
     /&gt;
