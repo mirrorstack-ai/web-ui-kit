@@ -38,7 +38,7 @@ export function GraphSideSetting({
   ) => onChange({ ...value, [key]: next });
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       <SliderRow
         label="Node size"
         min={nodeSizeRange[0]}
