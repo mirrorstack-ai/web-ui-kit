@@ -22,6 +22,10 @@ import {
   GraphSideSetting,
   type GraphSideSettingValue,
 } from "@/components/ui/graph/graph-side/GraphSideSetting";
+import { GraphSideNodeSummary } from "@/components/ui/graph/graph-side/GraphSideNodeSummary";
+import { GraphSideNodeDetail } from "@/components/ui/graph/graph-side/GraphSideNodeDetail";
+import { GraphSideNodeReferences } from "@/components/ui/graph/graph-side/GraphSideNodeReferences";
+import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 
 const meta: Meta<typeof GraphLayout> = {
   title: "Layout/Graph",
@@ -68,17 +72,121 @@ const GRAPH_EDGES: GraphEdge[] = [
   { source: "daily", target: "notes" },
 ];
 
-const NODE_DETAILS: Record<string, { summary: string; lastSeen?: string }> = {
-  user: { summary: "The root identity. Pinned at the center of the graph." },
-  account: { summary: "Workspace settings, identity, security." },
-  apps: { summary: "Installed modules in this workspace." },
-  projectify: { summary: "Project tracking module." },
-  crm: { summary: "Customer relationships and outreach." },
-  daily: { summary: "Daily journal — notes, mood, reflections." },
-  balance: { summary: "Finances, ledger, statements." },
-  stripe: { summary: "Connected Stripe account.", lastSeen: "2026-05-12" },
-  ledger: { summary: "Double-entry ledger powering Balance." },
-  notes: { summary: "Free-form journal entries.", lastSeen: "2026-05-14" },
+const mockId = (seed: string) => {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return h.toString(16).padStart(12, "0").slice(0, 12);
+};
+
+const referencesFor = (id: string) => {
+  const seen = new Set<string>();
+  const out: { id: string; label: string }[] = [];
+  for (const edge of GRAPH_EDGES) {
+    const other = edge.source === id ? edge.target : edge.target === id ? edge.source : null;
+    if (!other || seen.has(other)) continue;
+    seen.add(other);
+    const node = GRAPH_NODES.find((n) => n.id === other);
+    out.push({ id: other, label: node?.label ?? other });
+  }
+  return out;
+};
+
+const NODE_DETAILS: Record<
+  string,
+  { summary: string; lastSeen?: string; content?: string }
+> = {
+  user: {
+    summary: "The root identity. Pinned at the center of the graph.",
+    content: `# User
+
+The **user** is the root of every workspace. All modules attach as
+children of the user node, and permissions cascade from this anchor.
+
+## Pinning
+
+The user node stays pinned at the center of the canvas so the graph
+always orients around identity.`,
+  },
+  account: {
+    summary: "Workspace settings, identity, security.",
+    content: `# Account
+
+Workspace-level identity and configuration. Holds:
+
+- Display name & avatar
+- Authentication providers
+- Member roles
+- Billing contact
+
+Account is the only module that can mutate other modules' visibility.`,
+  },
+  apps: {
+    summary: "Installed modules in this workspace.",
+    content: `# Apps
+
+The catalog of modules installed in this workspace. Each entry tracks:
+
+- Module id (\`apps.<slug>\`)
+- Installed version
+- Permission scopes granted at install
+
+Removing an app cascades to all of its data.`,
+  },
+  projectify: {
+    summary: "Project tracking module.",
+    content: `# Projectify
+
+Project tracking — tasks, sprints, milestones. Stores entries under
+\`projectify.task.<id>\` and references the **user** for assignment.`,
+  },
+  crm: {
+    summary: "Customer relationships and outreach.",
+    content: `# CRM
+
+Customer relationships module. Manages contacts, deals, and outreach
+threads, all keyed by external email address.`,
+  },
+  daily: {
+    summary: "Daily journal — notes, mood, reflections.",
+    content: `# Daily
+
+A lightweight daily journal that aggregates notes, mood entries, and
+reflections into a single timeline. Pairs with **Notes** for free-form
+content.`,
+  },
+  balance: {
+    summary: "Finances, ledger, statements.",
+    content: `# Balance
+
+Finance hub — wires together the ledger, statements, and any external
+payment processors. Money never leaves Balance.
+
+References **Ledger** for double-entry bookkeeping and **Stripe** for
+processing.`,
+  },
+  stripe: {
+    summary: "Connected Stripe account.",
+    lastSeen: "2026-05-12",
+    content: `# Stripe
+
+Connected Stripe account used by **Balance** for processing customer
+payments. Synced webhooks land in the ledger as immutable entries.`,
+  },
+  ledger: {
+    summary: "Double-entry ledger powering Balance.",
+    content: `# Ledger
+
+Append-only double-entry ledger. Every monetary mutation in the workspace
+ends up here as paired debit/credit entries with a deterministic id.`,
+  },
+  notes: {
+    summary: "Free-form journal entries.",
+    lastSeen: "2026-05-14",
+    content: `# Notes
+
+Free-form journal entries. Stored as markdown, attached to the **Daily**
+timeline by date.`,
+  },
 };
 
 /**
@@ -139,6 +247,70 @@ export const WithGraph: Story = {
     );
   },
 };
+
+const NODE_DETAILS_FALLBACK = { summary: "No description for this node." };
+
+function NodeDetailsPanel({
+  node,
+  onSelect,
+}: {
+  node: GraphSideNode;
+  onSelect: (id: string) => void;
+}) {
+  const d = NODE_DETAILS[node.id] ?? NODE_DETAILS_FALLBACK;
+  const refs = referencesFor(node.id);
+  return (
+    <GraphSideContent
+      prepend={
+        <GraphSideNodeSummary
+          description={d.summary}
+          source={node.tag ?? "—"}
+          id={mockId(node.id)}
+        />
+      }
+      items={[
+        {
+          id: "content",
+          title: "Content",
+          trailing: (
+            <IconButton
+              icon="pip_exit"
+              aria-label="Expand content"
+              tooltip="Expand"
+              size="sm"
+              variant="outline"
+              onClick={() => console.log(`Expand content for ${node.id}`)}
+            />
+          ),
+          body: (
+            <GraphSideNodeDetail>
+              {d.content ? (
+                <div className="whitespace-pre-wrap text-xs leading-snug">
+                  {d.content}
+                </div>
+              ) : (
+                <p className="text-on-surface-variant">
+                  No content for this node yet.
+                </p>
+              )}
+            </GraphSideNodeDetail>
+          ),
+        },
+        {
+          id: "references",
+          title: "References",
+          body: (
+            <GraphSideNodeReferences
+              items={refs}
+              onSelect={onSelect}
+              className="-mt-1"
+            />
+          ),
+        },
+      ]}
+    />
+  );
+}
 
 type SideView =
   | { type: "node"; id: string }
@@ -244,20 +416,11 @@ export const WithGraphAndSettings: Story = {
                   />
                 );
               }
-              const d = NODE_DETAILS[n.id];
-              return d ? (
-                <div className="flex flex-col gap-3 p-3">
-                  <p className="text-sm text-on-surface">{d.summary}</p>
-                  {d.lastSeen && (
-                    <div className="text-xs text-on-surface-variant">
-                      Last activity: {d.lastSeen}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="p-3 text-sm text-on-surface-variant">
-                  No details for this node.
-                </p>
+              return (
+                <NodeDetailsPanel
+                  node={n}
+                  onSelect={(id) => setView({ type: "node", id })}
+                />
               );
             }}
           />
