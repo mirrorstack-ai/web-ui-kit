@@ -1,5 +1,14 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { GraphSideContent } from "./GraphSideContent";
+import {
+  GraphSideGroup,
+  type GraphSideGroupItem,
+} from "./GraphSideGroup";
+import {
+  GraphSideSetting,
+  type GraphSideSettingValue,
+} from "./GraphSideSetting";
 
 const meta: Meta<typeof GraphSideContent> = {
   title: "UI/Graph/GraphSide/GraphSideContent",
@@ -16,58 +25,36 @@ const meta: Meta<typeof GraphSideContent> = {
 export default meta;
 type Story = StoryObj<typeof GraphSideContent>;
 
-export const Default: Story = {
-  args: {
-    items: [
-      {
-        id: "summary",
-        title: "Summary",
-        body: (
-          <p>
-            The root identity. Owns workspace settings, identity, and
-            security configuration for everything below.
-          </p>
-        ),
-      },
-      {
-        id: "activity",
-        title: "Recent activity",
-        body: (
-          <ul className="list-disc pl-4 flex flex-col gap-1">
-            <li>Updated profile photo</li>
-            <li>Connected Stripe account</li>
-            <li>Joined Projectify</li>
-          </ul>
-        ),
-      },
-      {
-        id: "metadata",
-        title: "Metadata",
-        body: (
-          <dl className="flex flex-col gap-1">
-            <div className="flex justify-between">
-              <dt>Created</dt>
-              <dd>2025-08-14</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Owner</dt>
-              <dd>you</dd>
-            </div>
-          </dl>
-        ),
-      },
-    ],
-  },
+const WithGroupAndSetting = () => {
+  const [groups, setGroups] = useState<GraphSideGroupItem[]>([
+    { id: "core", name: "openclaude", color: "#f4a8a8" },
+    { id: "memory", name: "memory system brain", color: "#a8d8a8" },
+    { id: "wss", name: "wss tunnel", color: "#cbb6e5" },
+    { id: "mcp", name: "mcp", color: "#f5c14a" },
+    { id: "stripe", name: "stripe", color: "#8db8e8" },
+  ]);
+  const [setting, setSetting] = useState<GraphSideSettingValue>({
+    nodeSize: 8,
+    lineSize: 1,
+    showTags: true,
+  });
+
+  return (
+    <GraphSideContent
+      items={[
+        {
+          id: "groups",
+          title: "Groups",
+          body: <GraphSideGroup groups={groups} onChange={setGroups} />,
+        },
+        {
+          id: "settings",
+          title: "Settings",
+          body: <GraphSideSetting value={setting} onChange={setSetting} />,
+        },
+      ]}
+    />
+  );
 };
 
-export const SingleItemAlwaysOpen: Story = {
-  args: {
-    items: [
-      {
-        id: "only",
-        title: "Summary",
-        body: <p>Only one section — always open, no toggle.</p>,
-      },
-    ],
-  },
-};
+export const Default: Story = { render: () => <WithGroupAndSetting /> };
