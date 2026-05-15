@@ -1,8 +1,9 @@
 import { useRef, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
-import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
-import { Badge } from "@/components/ui/feedback/badge/Badge";
 import type { ComponentMeta } from "@/types/component-meta";
+import { GraphSideHeader } from "./GraphSideHeader";
+
+export { GraphSideHeader, type GraphSideHeaderProps } from "./GraphSideHeader";
 
 export const meta: ComponentMeta = {
   name: "GraphSide",
@@ -49,14 +50,6 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
   const display = node ?? lastNodeRef.current;
   const isOpen = open ?? Boolean(node);
 
-  const tagList: string[] = [];
-  if (display?.tags) tagList.push(...display.tags);
-  if (display?.tag) tagList.push(display.tag);
-  const hasTags = tagList.length > 0;
-
-  const cardCls =
-    "bg-surface-container-low border border-outline-variant rounded-xl shadow-xl";
-
   return (
     <div
       className={cn(
@@ -67,31 +60,8 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       style={{ width }}
       aria-hidden={!isOpen}
     >
-      <div className={cn(cardCls, "flex items-center gap-2.5 p-3")}>
-        <IconButton
-          icon="close"
-          aria-label="Close details"
-          tooltip="Close"
-          size="sm"
-          variant="outline"
-          onClick={onClose}
-        />
-        <div className="flex-1 min-w-0 flex flex-col gap-1">
-          <span className="text-sm font-medium text-on-surface truncate">
-            {display?.label ?? ""}
-          </span>
-          {hasTags && (
-            <div className="flex flex-wrap items-center gap-1">
-              {tagList.map((t) => (
-                <Badge key={t} size="sm">
-                  {t}
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-      <div className={cn(cardCls, "flex-1 min-h-0 overflow-y-auto p-3")}>
+      <GraphSideHeader node={display} onClose={onClose} />
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 bg-surface-container-low border border-outline-variant rounded-xl shadow-xl">
         {isOpen && display ? renderDetails(display) : null}
       </div>
     </div>

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { GraphSide, type GraphSideNode } from "./GraphSide";
 
 const meta: Meta<typeof GraphSide> = {
-  title: "UI/Graph/GraphSide",
+  title: "UI/Graph/GraphSide/GraphSide",
   component: GraphSide,
   decorators: [
     (Story) => (
@@ -45,22 +45,6 @@ export const WithMultipleTags: Story = {
 export const WithoutTags: Story = {
   args: {
     node: { id: "settings", label: "Graph settings" },
-    onClose: () => {},
-    renderDetails,
-  },
-};
-
-/**
- * Long titles truncate with an ellipsis while badges continue to wrap
- * on the line below.
- */
-export const WithLongTitleAndTags: Story = {
-  args: {
-    node: {
-      id: "report",
-      label: "Quarterly compliance and audit report",
-      tags: ["finance", "audit", "compliance"],
-    },
     onClose: () => {},
     renderDetails,
   },

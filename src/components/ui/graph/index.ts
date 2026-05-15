@@ -8,6 +8,8 @@ export {
 export { GraphAction, type GraphActionProps } from "./action/GraphAction";
 export {
   GraphSide,
+  GraphSideHeader,
   type GraphSideProps,
+  type GraphSideHeaderProps,
   type GraphSideNode,
-} from "./side/GraphSide";
+} from "./graph-side/GraphSide";
