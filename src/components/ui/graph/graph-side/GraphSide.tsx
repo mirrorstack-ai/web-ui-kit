@@ -10,6 +10,16 @@ export {
   type GraphSideContentProps,
   type GraphSideContentItem,
 } from "./GraphSideContent";
+export {
+  GraphSideSetting,
+  type GraphSideSettingProps,
+  type GraphSideSettingValue,
+} from "./GraphSideSetting";
+export {
+  GraphSideGroup,
+  type GraphSideGroupProps,
+  type GraphSideGroupItem,
+} from "./GraphSideGroup";
 
 export const meta: ComponentMeta = {
   name: "GraphSide",
