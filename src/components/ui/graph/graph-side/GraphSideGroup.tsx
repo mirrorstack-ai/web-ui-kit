@@ -1,6 +1,6 @@
 import { cn } from "@/utils/cn";
 import { Button } from "@/components/ui/actions/button/Button";
-import { Icon } from "@/components/ui/media/icon/Icon";
+import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import type { ComponentMeta } from "@/types/component-meta";
 
 export const meta: ComponentMeta = {
@@ -47,14 +47,14 @@ export function GraphSideGroup({
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       {groups.map((g) => (
-        <div key={g.id} className="flex items-center gap-1.5">
+        <div key={g.id} className="flex items-center gap-2.5">
           <input
             type="text"
             value={g.name}
             onChange={(e) => update(g.id, { name: e.target.value })}
             className="flex-1 min-w-0 px-2 py-1 text-sm bg-transparent text-on-surface border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center shrink-0 gap-0.5">
             <label
               className="relative w-5 h-5 rounded-full border border-outline-variant cursor-pointer"
               style={{ backgroundColor: g.color }}
@@ -67,22 +67,21 @@ export function GraphSideGroup({
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
             </label>
-            <button
-              type="button"
-              onClick={() => remove(g.id)}
+            <IconButton
+              icon="close"
               aria-label={`Delete ${g.name}`}
-              title="Delete group"
-              className="flex items-center justify-center w-6 h-6 rounded-md text-on-surface-variant cursor-pointer hover:bg-on-surface/8 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              <Icon name="close" size={16} />
-            </button>
+              tooltip="Delete group"
+              size="sm"
+              variant="text"
+              onClick={() => remove(g.id)}
+            />
           </div>
         </div>
       ))}
       <Button
         variant="filled"
         color="primary"
-        size="sm"
+        size="xs"
         className="w-full mt-1"
         onClick={add}
       >
