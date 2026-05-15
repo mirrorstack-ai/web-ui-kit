@@ -4526,7 +4526,7 @@ playing?: boolean</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> GraphLayout</h2>
       <div class="badges">
-        <label for="c-21-layout-graph-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-21-layout-graph-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-21-layout-graph-info" class="badge info as-toggle">1 info</label>
         <label for="c-21-layout-graph-stories" class="badge ok as-toggle">3 stories</label>
         
@@ -4560,7 +4560,7 @@ playing?: boolean</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">4 prop types</span>
+              <span class="badge ok">6 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/graph/graph-layout/GraphLayout.tsx::GraphLayout</code></pre>
             <pre><code>Props:</code></pre>
@@ -4576,7 +4576,17 @@ className?: string
 /**
  * Rendered as a direct child — the side component owns its own positioning.
  */
-side?: ReactNode</code></pre>
+side?: ReactNode
+
+/**
+ * When true, the canvas wrapper shrinks horizontally to leave room for the side panel.
+ */
+sideOpen?: boolean
+
+/**
+ * Width reserved for the side panel when sideOpen is true. Default 260.
+ */
+sideWidth?: number = 260</code></pre>
           </div>
         </div>
     
@@ -4602,20 +4612,21 @@ side?: ReactNode</code></pre>
               <pre><code>const WithGraph = () =&gt; {
   const graphRef = useRef&lt;GraphHandle&gt;(null);
   const [selectedId, setSelectedId] = useState&lt;string | null&gt;(null);
-  const selected =
-    (selectedId &amp;&amp; GRAPH_NODES.find((n) =&gt; n.id === selectedId)) || null;
+  const selected = selectedId
+    ? GRAPH_NODES.find((n) =&gt; n.id === selectedId) ?? null
+    : null;
 
   return (
     &lt;GraphLayout
+      sideOpen={Boolean(selected)}
       canvas={
         &lt;Graph
           ref={graphRef}
           nodes={GRAPH_NODES}
           edges={GRAPH_EDGES}
           selectedId={selectedId ?? undefined}
-          onNodeClick={(id) =&gt;
-            setSelectedId((cur) =&gt; (cur === id ? null : id))
-          }
+          onNodeClick={(id) =&gt; setSelectedId(id)}
+          className=&quot;border-0 bg-transparent rounded-none&quot;
         /&gt;
       }
       action={
@@ -4663,11 +4674,13 @@ side?: ReactNode</code></pre>
   const [settingsOpen, setSettingsOpen] = useState(false);
   return (
     &lt;GraphLayout
+      sideOpen={settingsOpen}
       canvas={
         &lt;Graph
           ref={graphRef}
           nodes={GRAPH_NODES}
           edges={GRAPH_EDGES}
+          className=&quot;border-0 bg-transparent rounded-none&quot;
         /&gt;
       }
       action={
@@ -4707,6 +4720,7 @@ side?: ReactNode</code></pre>
   const [open, setOpen] = useState(false);
   return (
     &lt;GraphLayout
+      sideOpen={open}
       action={
         &lt;GraphAction
           onReplay={() =&gt; {}}
