@@ -4303,7 +4303,7 @@ title: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Graph</h2>
       <div class="badges">
-        <label for="c-19-ui-graph-graph-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-19-ui-graph-graph-props" class="badge ok as-toggle">11 prop types</label>
         <label for="c-19-ui-graph-graph-info" class="badge info as-toggle">1 info</label>
         <label for="c-19-ui-graph-graph-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -4337,7 +4337,7 @@ title: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">6 prop types</span>
+              <span class="badge ok">11 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/graph/graph/Graph.tsx::Graph</code></pre>
             <pre><code>Props:</code></pre>
@@ -4350,14 +4350,39 @@ edges: GraphEdge[]
  */
 height?: number | string
 
+/**
+ * Multiplier applied to edge stroke width. Default 1.
+ */
+lineSize?: number = 1
+
+/**
+ * Spring rest length for edges. Default 70.
+ */
+linkDistance?: number = 70
+
 nodes: GraphNode[]
+
+/**
+ * Multiplier applied to node radii. Default 1.
+ */
+nodeSize?: number = 1
 
 onNodeClick?: (id: string) =&gt; void
 
 /**
+ * Pairwise repulsion strength. Default 1500.
+ */
+repulsion?: number = 1500
+
+/**
  * Controlled selection — highlighted with the same color as hover/drag.
  */
-selectedId?: string</code></pre>
+selectedId?: string
+
+/**
+ * Whether to render the text label under each node. Default true.
+ */
+showLabels?: boolean = true</code></pre>
           </div>
         </div>
     
@@ -4688,9 +4713,11 @@ sideWidth?: number = 260</code></pre>
     { id: &quot;stripe&quot;, name: &quot;stripe&quot;, color: &quot;#8db8e8&quot; },
   ]);
   const [setting, setSetting] = useState&lt;GraphSideSettingValue&gt;({
-    nodeSize: 8,
+    nodeSize: 1,
     lineSize: 1,
-    showTags: true,
+    showLabels: true,
+    repulsion: 1500,
+    linkDistance: 70,
   });
 
   const sideNode: GraphSideNode | null =
@@ -4710,6 +4737,11 @@ sideWidth?: number = 260</code></pre>
           edges={GRAPH_EDGES}
           selectedId={view?.type === &quot;node&quot; ? view.id : undefined}
           onNodeClick={(id) =&gt; setView({ type: &quot;node&quot;, id })}
+          nodeSize={setting.nodeSize}
+          lineSize={setting.lineSize}
+          showLabels={setting.showLabels}
+          repulsion={setting.repulsion}
+          linkDistance={setting.linkDistance}
           className=&quot;border-0 bg-transparent rounded-none&quot;
         /&gt;
       }
@@ -5099,7 +5131,7 @@ onClose: () =&gt; void</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> GraphSideSetting</h2>
       <div class="badges">
-        <label for="c-25-ui-graph-graphside-graphsidesetting-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-25-ui-graph-graphside-graphsidesetting-props" class="badge ok as-toggle">7 prop types</label>
         <label for="c-25-ui-graph-graphside-graphsidesetting-info" class="badge info as-toggle">1 info</label>
         <label for="c-25-ui-graph-graphside-graphsidesetting-stories" class="badge ok as-toggle">1 story</label>
         
@@ -5133,23 +5165,33 @@ onClose: () =&gt; void</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">5 prop types</span>
+              <span class="badge ok">7 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/graph/graph-side/GraphSideSetting.tsx::GraphSideSetting</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>className?: string
 
 /**
- * Range bounds for the line size slider. Default [0.5, 3].
+ * Range bounds for the line size multiplier slider. Default [0.5, 2].
  */
-lineSizeRange?: [number, number] = [0.5, 3]
+lineSizeRange?: [number, number] = [0.5, 2]
 
 /**
- * Range bounds for the node size slider. Default [4, 20].
+ * Range bounds for the link distance slider. Default [30, 150].
  */
-nodeSizeRange?: [number, number] = [4, 20]
+linkDistanceRange?: [number, number] = [30, 150]
+
+/**
+ * Range bounds for the node size multiplier slider. Default [0.5, 2].
+ */
+nodeSizeRange?: [number, number] = [0.5, 2]
 
 onChange: (next: GraphSideSettingValue) =&gt; void
+
+/**
+ * Range bounds for the repulsion slider. Default [500, 3000].
+ */
+repulsionRange?: [number, number] = [500, 3000]
 
 value: GraphSideSettingValue</code></pre>
           </div>
