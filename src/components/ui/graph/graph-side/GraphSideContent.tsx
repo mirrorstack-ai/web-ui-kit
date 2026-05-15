@@ -36,7 +36,7 @@ export function GraphSideContent({ items, className }: GraphSideContentProps) {
   };
 
   return (
-    <div className={cn(SIDE_CARD_CLS, "overflow-hidden", className)}>
+    <div className={cn(SIDE_CARD_CLS, "h-full overflow-y-auto", className)}>
       {items.map((item, idx) => {
         const isOpen = openIds.has(item.id);
         return (
