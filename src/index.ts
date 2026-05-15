@@ -37,6 +37,7 @@ export {
   Switch,
   type SwitchProps,
   type SwitchColor,
+  type SwitchSize,
 } from "./components/ui/inputs/switch/Switch";
 export {
   Slider,

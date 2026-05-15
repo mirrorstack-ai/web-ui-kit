@@ -87,8 +87,10 @@ export function GraphSideSetting({
       <label className="flex items-center justify-between gap-2 text-sm text-on-surface">
         <span>Show labels</span>
         <Switch
+          size="sm"
           checked={value.showLabels}
           onChange={(checked) => set("showLabels", checked)}
+          aria-label="Show labels"
         />
       </label>
     </div>
