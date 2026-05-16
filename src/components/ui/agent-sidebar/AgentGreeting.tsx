@@ -58,7 +58,7 @@ const NOTCH_PADDING_LEFT = 10;
 // a deeper "hook" into the dropdown body (rather than ending flush at the
 // trigger's bottom edge).
 const NOTCH_PADDING_BOTTOM = 6;
-// Optical nudge: shift the entire notch + dropdown ~2px right so the
+// Optical nudge: shift the entire notch + dropdown right so the
 // notch tab visually rests inside the trigger's rounded-full silhouette.
 const NOTCH_SHIFT_RIGHT = 4;
 // Lift the entire dropdown so the notch tab tucks above the trigger pill
