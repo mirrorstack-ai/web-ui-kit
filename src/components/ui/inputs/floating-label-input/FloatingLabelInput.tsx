@@ -13,7 +13,7 @@ export const meta: ComponentMeta = {
     "Text input or textarea with floating label animation, password toggle, and character counter.",
 };
 
-export type FloatingLabelInputSize = "sm" | "md";
+export type FloatingLabelInputSize = "xs" | "sm" | "md";
 
 type BaseProps = {
   label: string;
@@ -101,10 +101,15 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     originalOnBlur?.(e);
   };
 
+  const isXs = size === "xs";
   const isSmall = size === "sm";
 
   const fieldClassName = cn(
     "peer w-full rounded-lg bg-transparent border-0 outline-none transition-colors disabled:cursor-not-allowed",
+    // Hide the native WebKit search-cancel button (the 3D-looking `x` that
+    // appears on `<input type="search">` when it has text). Consumers can
+    // render their own flat clear button if needed.
+    "[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
     inverse
       ? "text-inverse-on-surface placeholder:text-inverse-on-surface/40"
       : "text-on-surface",
@@ -113,12 +118,12 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
       : inverse
         ? "focus:text-inverse-on-surface"
         : "focus:text-primary",
-    isSmall ? "px-3 text-sm" : "px-4",
+    isXs ? "px-2 text-sm" : isSmall ? "px-3 text-sm" : "px-4",
     multiline
       ? showCounter
         ? "pt-3 pb-6 resize-none"
         : "pt-3 pb-2 resize-none"
-      : isSmall ? "py-2.5" : "py-4",
+      : isXs ? "py-1.5" : isSmall ? "py-2.5" : "py-4",
     !multiline && showPasswordToggle && type === "password" && "pr-12",
     className,
   );
@@ -139,9 +144,11 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     "absolute z-10 font-normal px-1 rounded-md transition-all duration-200 ease-in-out",
     "origin-top-left pointer-events-none",
     inverse ? "bg-inverse-surface" : "bg-surface-container-low",
-    isSmall
-      ? "text-sm left-3 top-2.5 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2.5 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2.5"
-      : "text-base left-4 top-4 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-3 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-3",
+    isXs
+      ? "text-sm left-2 top-1.5 peer-focus:scale-90 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2 peer-[:not(:placeholder-shown)]:scale-90 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2"
+      : isSmall
+        ? "text-sm left-3 top-2.5 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2.5 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2.5"
+        : "text-base left-4 top-4 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-3 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-3",
     error
       ? "text-error peer-focus:text-error"
       : inverse

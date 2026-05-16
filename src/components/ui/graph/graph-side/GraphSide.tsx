@@ -16,6 +16,7 @@ export {
 } from "./GraphSideSetting";
 export {
   GraphSideGroup,
+  DEFAULT_GROUP_PALETTE,
   type GraphSideGroupProps,
   type GraphSideGroupItem,
 } from "./GraphSideGroup";

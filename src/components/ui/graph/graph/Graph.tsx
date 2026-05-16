@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { cn } from "@/utils/cn";
+import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
 
 export const meta: ComponentMeta = {
@@ -64,8 +65,8 @@ export interface GraphProps {
   nodeSize?: number;
   /** Multiplier applied to edge stroke width. Default 1. */
   lineSize?: number;
-  /** Whether to render the text label under each node. Default true. */
-  showLabels?: boolean;
+  /** Render each node's tag below its always-visible label. Default false. */
+  showTags?: boolean;
   /** Pairwise repulsion strength. Default 1500. */
   repulsion?: number;
   /** Spring rest length for edges. Default 70. */
@@ -197,6 +198,15 @@ const DEFAULT_H = 400;
 // when revealedRef changes.
 const REVEAL_TRANSITION_STYLE = { transition: "opacity 200ms ease" };
 
+// Shared text-style object so we don't allocate a new `{ fontSize }` literal
+// per node per frame.
+const LABEL_TEXT_STYLE = { fontSize: 10 };
+
+// Prefix used for synthetic "tag nodes" spawned when `showTags` is true.
+// One tag node per unique tag value in the consumer's nodes prop, each
+// connected via virtual edges to the real nodes carrying that tag.
+const TAG_PREFIX = "__tag:";
+
 export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   {
     nodes,
@@ -206,7 +216,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     selectedId,
     nodeSize = 1,
     lineSize = 1,
-    showLabels = true,
+    showTags = false,
     repulsion = DEFAULT_REPULSION,
     linkDistance = DEFAULT_LINK_DISTANCE,
     colors,
@@ -256,6 +266,43 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   const sizeRef = useRef(size);
   sizeRef.current = size;
 
+  // When `showTags` is on we synthesize one virtual tag node per unique
+  // tag value in the consumer's nodes, plus an edge from each tagged node
+  // to its tag node. The sim and render treat them like any other node;
+  // the only difference is the prefixed id, which we use at render time
+  // to flip to an outline style and at click time to suppress onNodeClick.
+  const allNodes = useMemo<GraphNode[]>(() => {
+    if (!showTags) return nodes;
+    if (isDev) {
+      const collision = nodes.find((n) => n.id.startsWith(TAG_PREFIX));
+      if (collision) {
+        console.warn(
+          `[Graph] node id "${collision.id}" collides with the synthetic ` +
+            `tag-node prefix "${TAG_PREFIX}". Tag rendering and ` +
+            `onNodeClick will misbehave for this node.`,
+        );
+      }
+    }
+    const uniqueTags = new Set<string>();
+    for (const n of nodes) if (n.tag) uniqueTags.add(n.tag);
+    const tagNodes: GraphNode[] = Array.from(uniqueTags).map((tag) => ({
+      id: `${TAG_PREFIX}${tag}`,
+      label: tag,
+    }));
+    return [...nodes, ...tagNodes];
+  }, [nodes, showTags]);
+
+  const allEdges = useMemo<GraphEdge[]>(() => {
+    if (!showTags) return edges;
+    const tagEdges: GraphEdge[] = [];
+    for (const n of nodes) {
+      if (n.tag) {
+        tagEdges.push({ source: n.id, target: `${TAG_PREFIX}${n.tag}` });
+      }
+    }
+    return [...edges, ...tagEdges];
+  }, [nodes, edges, showTags]);
+
   const seededFor = useRef<{ nodes: GraphNode[]; edges: GraphEdge[] } | null>(
     null,
   );
@@ -266,10 +313,10 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   // Rebuild node positions, byId map, and degree counts. Used both inline
   // when topology identity changes and from the replay-key effect.
   const rebuildSim = (w: number, h: number) => {
-    nodesRef.current = seed(nodes, w, h);
+    nodesRef.current = seed(allNodes, w, h);
     const map = new Map<string, Sim>();
     for (const n of nodesRef.current) map.set(n.id, n);
-    for (const e of edges) {
+    for (const e of allEdges) {
       const a = map.get(e.source);
       const b = map.get(e.target);
       if (a) a.degree += 1;
@@ -280,11 +327,11 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
 
   if (
     seededFor.current === null ||
-    seededFor.current.nodes !== nodes ||
-    seededFor.current.edges !== edges
+    seededFor.current.nodes !== allNodes ||
+    seededFor.current.edges !== allEdges
   ) {
     rebuildSim(W, H);
-    seededFor.current = { nodes, edges };
+    seededFor.current = { nodes: allNodes, edges: allEdges };
   }
 
   const [, setFrame] = useState(0);
@@ -310,13 +357,13 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
 
   const neighborsOf = useMemo(() => {
     const m = new Map<string, Set<string>>();
-    for (const n of nodes) m.set(n.id, new Set());
-    for (const e of edges) {
+    for (const n of allNodes) m.set(n.id, new Set());
+    for (const e of allEdges) {
       m.get(e.source)?.add(e.target);
       m.get(e.target)?.add(e.source);
     }
     return m;
-  }, [nodes, edges]);
+  }, [allNodes, allEdges]);
 
   // Pre-build a per-node style object so every <circle> reuses the same
   // reference across renders. Without this each frame would allocate a new
@@ -332,8 +379,8 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
 
   // RAF loop reads edges from a ref so a new array identity from the
   // consumer doesn't tear down and restart the simulation.
-  const edgesRef = useRef(edges);
-  edgesRef.current = edges;
+  const edgesRef = useRef(allEdges);
+  edgesRef.current = allEdges;
   // Physics tunables are read via refs so changing them never tears down
   // the RAF loop or restarts the simulation.
   const repulsionRef = useRef(repulsion);
@@ -364,7 +411,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   // Playback (sequential reveal) state. Default: every node visible.
   // `replay()` empties the set and adds nodes one-by-one in BFS order from
   // the first pinned node; `stop()` cancels and re-fills the set.
-  const revealedRef = useRef<Set<string>>(new Set(nodes.map((n) => n.id)));
+  const revealedRef = useRef<Set<string>>(new Set(allNodes.map((n) => n.id)));
   const [, setRevealFrame] = useState(0);
   const revealTimerRef = useRef<number | null>(null);
   const onPlaybackEndRef = useRef(onPlaybackEnd);
@@ -373,7 +420,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   // BFS order from the first pinned node (root). Unconnected nodes go at
   // the end so they still appear during playback.
   const revealOrder = useMemo(() => {
-    const root = nodes.find((n) => n.pin || n.fixed)?.id ?? nodes[0]?.id;
+    const root = allNodes.find((n) => n.pin || n.fixed)?.id ?? allNodes[0]?.id;
     if (!root) return [];
     const order: string[] = [];
     const visited = new Set<string>();
@@ -388,9 +435,9 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
         for (const nb of ns) if (!visited.has(nb)) queue.push(nb);
       }
     }
-    for (const n of nodes) if (!visited.has(n.id)) order.push(n.id);
+    for (const n of allNodes) if (!visited.has(n.id)) order.push(n.id);
     return order;
-  }, [nodes, neighborsOf]);
+  }, [allNodes, neighborsOf]);
 
   // Reset revealed set whenever the nodes prop identity changes, aborting
   // any in-progress playback. Also covers component unmount cleanup.
@@ -399,7 +446,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
       window.clearTimeout(revealTimerRef.current);
       revealTimerRef.current = null;
     }
-    revealedRef.current = new Set(nodes.map((n) => n.id));
+    revealedRef.current = new Set(allNodes.map((n) => n.id));
     setRevealFrame((f) => f + 1);
     return () => {
       if (revealTimerRef.current !== null) {
@@ -407,7 +454,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
         revealTimerRef.current = null;
       }
     };
-  }, [nodes]);
+  }, [allNodes]);
 
   const startReveal = useCallback(() => {
     if (revealTimerRef.current !== null) {
@@ -436,9 +483,9 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
       window.clearTimeout(revealTimerRef.current);
       revealTimerRef.current = null;
     }
-    revealedRef.current = new Set(nodes.map((n) => n.id));
+    revealedRef.current = new Set(allNodes.map((n) => n.id));
     setRevealFrame((f) => f + 1);
-  }, [nodes]);
+  }, [allNodes]);
 
   useEffect(() => {
     if (reseedKey === 0) return;
@@ -592,7 +639,12 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     }
     setDraggingId(null);
     draggingIdRef.current = null;
-    if (opts.fireClick && !pointerMovedRef.current && onNodeClickRef.current) {
+    if (
+      opts.fireClick &&
+      !pointerMovedRef.current &&
+      onNodeClickRef.current &&
+      !id.startsWith(TAG_PREFIX)
+    ) {
       onNodeClickRef.current(id);
     }
     pointerStartRef.current = null;
@@ -707,7 +759,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
           transform={`translate(${view.panX} ${view.panY}) scale(${view.zoom})`}
         >
           <g stroke="currentColor" className="text-on-surface-variant">
-            {edges.map((e, i) => {
+            {allEdges.map((e, i) => {
               const a = byIdRef.current.get(e.source);
               const b = byIdRef.current.get(e.target);
               if (!a || !b) return null;
@@ -734,14 +786,17 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
             {nodesRef.current.map((n) => {
               const lit = isLit(n.id);
               const isFocused = n.id === focused;
+              const isTagNode = n.id.startsWith(TAG_PREFIX);
               const r =
                 (4 + Math.min(n.degree, 6) + (isFocused ? 2 : 0)) * nodeSize;
               const nodeStyle = !isFocused ? nodeStyles?.[n.id] : undefined;
-              const fillClass = isFocused
-                ? "fill-primary"
-                : nodeStyle
-                  ? undefined
-                  : "fill-on-surface-variant";
+              const circleClass = isTagNode
+                ? "fill-none stroke-on-surface-variant"
+                : isFocused
+                  ? "fill-primary"
+                  : nodeStyle
+                    ? undefined
+                    : "fill-on-surface-variant";
               const revealed = revealedRef.current.has(n.id);
               return (
                 <g
@@ -760,20 +815,19 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                     cx={n.x}
                     cy={n.y}
                     r={r}
-                    className={fillClass}
-                    style={nodeStyle}
+                    className={circleClass}
+                    strokeWidth={isTagNode ? 1.25 / view.zoom : undefined}
+                    style={isTagNode ? undefined : nodeStyle}
                   />
-                  {showLabels && (
-                    <text
-                      x={n.x}
-                      y={n.y + r + 12}
-                      textAnchor="middle"
-                      className="fill-on-surface-variant pointer-events-none"
-                      style={{ fontSize: 10 }}
-                    >
-                      {n.label}
-                    </text>
-                  )}
+                  <text
+                    x={n.x}
+                    y={n.y + r + 12}
+                    textAnchor="middle"
+                    className="fill-on-surface-variant pointer-events-none"
+                    style={LABEL_TEXT_STYLE}
+                  >
+                    {n.label}
+                  </text>
                 </g>
               );
             })}

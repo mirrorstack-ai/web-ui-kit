@@ -12,6 +12,7 @@ export {
   GraphSideContent,
   GraphSideSetting,
   GraphSideGroup,
+  DEFAULT_GROUP_PALETTE,
   GraphSideSearch,
   GraphSideNodeSummary,
   GraphSideNodeDetail,

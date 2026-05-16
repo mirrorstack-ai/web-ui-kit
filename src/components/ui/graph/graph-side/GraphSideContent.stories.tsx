@@ -38,7 +38,7 @@ const WithSearchGroupAndSetting = () => {
   const [setting, setSetting] = useState<GraphSideSettingValue>({
     nodeSize: 1,
     lineSize: 1,
-    showLabels: true,
+    showTags: false,
     repulsion: 1500,
     linkDistance: 70,
   });
