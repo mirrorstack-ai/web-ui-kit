@@ -143,12 +143,21 @@ describe("AgentGreeting", () => {
       />,
     );
     fireEvent.click(screen.getByLabelText("Model: Fast"));
-    // OptionList commits selection on mouseDown to beat blur from the trigger.
-    fireEvent.mouseDown(
-      screen.getByRole("option", { name: /balanced/i }),
-    );
+    fireEvent.click(screen.getByRole("option", { name: /balanced/i }));
     expect(onSelectModel).toHaveBeenCalledWith("balanced");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+  });
+
+  it("renders the MirrorStack logo above the greeting by default", () => {
+    render(<AgentGreeting greeting="Welcome" />);
+    expect(screen.getByRole("img", { name: /mirrorstack logo/i })).toBeInTheDocument();
+  });
+
+  it("hides the logo when hideLogo is true", () => {
+    render(<AgentGreeting greeting="Welcome" hideLogo />);
+    expect(
+      screen.queryByRole("img", { name: /mirrorstack logo/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("closes the picker on Escape", () => {

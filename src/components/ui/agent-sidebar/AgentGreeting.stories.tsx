@@ -7,7 +7,7 @@ const meta: Meta<typeof AgentGreeting> = {
   component: AgentGreeting,
   decorators: [
     (Story) => (
-      <div className="min-h-[480px] w-full bg-background px-6 py-16">
+      <div className="min-h-[600px] w-full bg-background px-6 py-16">
         <Story />
       </div>
     ),
@@ -18,9 +18,9 @@ export default meta;
 type Story = StoryObj<typeof AgentGreeting>;
 
 const MODELS: AgentGreetingModel[] = [
-  { id: "fast", label: "Fast" },
-  { id: "balanced", label: "Balanced" },
-  { id: "deep", label: "Deep think" },
+  { id: "claude-sonnet-4-6", label: "Sonnet 4.6" },
+  { id: "claude-opus-4-7", label: "Opus 4.7" },
+  { id: "claude-haiku-4-5", label: "Haiku 4.5" },
 ];
 
 export const WelcomeBack: Story = {
@@ -54,7 +54,7 @@ export const WelcomeBack: Story = {
     greeting: "Welcome Back, Nothing Chang",
     placeholder: "plan something?",
     models: MODELS,
-    selectedModelId: "balanced",
+    selectedModelId: "claude-sonnet-4-6",
   },
 };
 
@@ -64,7 +64,7 @@ export const FirstTime: Story = {
     subtitle: "Tell the agent what you want to build.",
     placeholder: "what do you want to build?",
     models: MODELS,
-    selectedModelId: "fast",
+    selectedModelId: "claude-sonnet-4-6",
   },
 };
 
@@ -75,7 +75,7 @@ export const AppCreation: Story = {
       "Describe the app — modules, data, surfaces — and the agent will scaffold it.",
     placeholder: "describe your app...",
     models: MODELS,
-    selectedModelId: "deep",
+    selectedModelId: "claude-opus-4-7",
   },
 };
 
@@ -91,5 +91,14 @@ export const NoModelPicker: Story = {
   args: {
     greeting: "Welcome Back, Nothing Chang",
     placeholder: "plan something?",
+  },
+};
+
+export const NoLogo: Story = {
+  args: {
+    greeting: "Welcome Back, Nothing Chang",
+    placeholder: "plan something?",
+    models: MODELS,
+    hideLogo: true,
   },
 };

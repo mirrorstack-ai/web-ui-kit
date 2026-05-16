@@ -10,7 +10,8 @@ import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
-import { OptionList } from "@/components/ui/surfaces/option-list/OptionList";
+import { Logo } from "@/components/ui/media/logo-mirrorstack/LogoMirrorStack";
+import { Notch } from "@/components/ui/surfaces/notch/Notch";
 
 export const meta: ComponentMeta = {
   name: "AgentGreeting",
@@ -37,10 +38,15 @@ export interface AgentGreetingProps {
   /** Selected model id. Falls back to the first model when omitted. */
   selectedModelId?: string;
   onSelectModel?: (modelId: string) => void;
+  /** Hide the MirrorStack logo above the greeting. Defaults to false. */
+  hideLogo?: boolean;
   className?: string;
 }
 
 const MAX_TEXTAREA_HEIGHT = 200;
+const MENU_W = 200;
+const MENU_R = 12;
+const MENU_IR = 8;
 
 export function AgentGreeting({
   greeting,
@@ -52,14 +58,20 @@ export function AgentGreeting({
   models,
   selectedModelId,
   onSelectModel,
+  hideLogo = false,
   className,
 }: AgentGreetingProps) {
   const [text, setText] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
+  const [menuH, setMenuH] = useState(0);
+  const [notchX, setNotchX] = useState(0);
+  const [notchTabWidth, setNotchTabWidth] = useState(0);
+  const [notchTabHeight, setNotchTabHeight] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const modelTriggerRef = useRef<HTMLButtonElement>(null);
   const modelMenuRef = useRef<HTMLDivElement>(null);
+  const modelContentRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     const el = textareaRef.current;
@@ -67,6 +79,22 @@ export function AgentGreeting({
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
   }, [text]);
+
+  // Measure the trigger pill so the notch tab matches its size and sits
+  // directly under it — mirrors AgentSidebarHeader's overflow-dropdown pattern.
+  useLayoutEffect(() => {
+    if (!modelMenuOpen) return;
+    const trigger = modelTriggerRef.current;
+    const menu = modelMenuRef.current;
+    const content = modelContentRef.current;
+    if (!trigger || !menu || !content) return;
+    const tRect = trigger.getBoundingClientRect();
+    const mRect = menu.getBoundingClientRect();
+    setNotchTabWidth(tRect.width);
+    setNotchTabHeight(tRect.height);
+    setNotchX(tRect.left - mRect.left);
+    setMenuH(content.offsetHeight);
+  }, [modelMenuOpen, selectedModelId, models]);
 
   useEffect(() => {
     if (!modelMenuOpen) return;
@@ -110,42 +138,28 @@ export function AgentGreeting({
   const activeModel =
     models?.find((m) => m.id === selectedModelId) ?? models?.[0];
   const showModels = !!models?.length && !!activeModel;
-  const modelOptions =
-    models?.map((m) => ({
-      value: m.id,
-      label: (
-        <span className="flex items-center gap-1.5">
-          <Icon
-            name="check"
-            size={14}
-            className={cn(
-              "shrink-0",
-              m.id === activeModel?.id
-                ? "text-on-surface"
-                : "text-transparent",
-            )}
-          />
-          {m.label}
-        </span>
-      ),
-    })) ?? [];
-  const activeModelIndex =
-    models?.findIndex((m) => m.id === activeModel?.id) ?? -1;
 
   return (
     <div
       className={cn(
-        "w-full max-w-2xl mx-auto flex flex-col items-center gap-6",
+        "w-full max-w-2xl mx-auto flex flex-col items-center gap-10",
         className,
       )}
     >
-      <div className="flex flex-col gap-1 text-center">
-        <h1 className="text-3xl font-medium tracking-tight text-on-surface">
-          {greeting}
-        </h1>
-        {subtitle && (
-          <p className="text-base text-on-surface-variant">{subtitle}</p>
+      <div className="flex flex-col items-center gap-4 text-center">
+        {!hideLogo && (
+          <div className="size-14">
+            <Logo />
+          </div>
         )}
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-medium tracking-tight text-on-surface">
+            {greeting}
+          </h1>
+          {subtitle && (
+            <p className="text-base text-on-surface-variant">{subtitle}</p>
+          )}
+        </div>
       </div>
 
       <div className="flex w-full flex-col rounded-2xl border border-outline-variant bg-surface-container-low p-2 transition-colors focus-within:border-primary">
@@ -180,12 +194,12 @@ export function AgentGreeting({
           />
           <div className="flex-1" />
           {showModels && activeModel && (
-            <div className="relative mr-2">
+            <div className="relative mr-4">
               <button
                 ref={modelTriggerRef}
                 type="button"
                 onClick={() => setModelMenuOpen((open) => !open)}
-                className="flex h-8 cursor-pointer items-center gap-1 rounded-full px-2.5 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
+                className="relative z-[51] flex h-8 cursor-pointer items-center gap-1 rounded-full px-2.5 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
                 aria-label={`Model: ${activeModel.label}`}
                 aria-haspopup="listbox"
                 aria-expanded={modelMenuOpen}
@@ -198,16 +212,70 @@ export function AgentGreeting({
               {modelMenuOpen && (
                 <div
                   ref={modelMenuRef}
-                  className="absolute right-0 bottom-full z-50 mb-2 min-w-[160px]"
+                  className="absolute right-0 top-0 z-50 overflow-visible"
+                  style={{
+                    filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
+                  }}
                 >
-                  <OptionList
-                    items={modelOptions}
-                    activeIndex={activeModelIndex}
-                    onSelect={(item) => {
-                      onSelectModel?.(item.value);
-                      setModelMenuOpen(false);
+                  {menuH > 0 && notchTabWidth > 0 && (
+                    <Notch
+                      width={MENU_W}
+                      height={menuH}
+                      notchWidth={notchTabWidth}
+                      notchHeight={notchTabHeight}
+                      notchSide="bottom"
+                      notchOffset={notchX}
+                      radius={MENU_R}
+                      inverseRadius={MENU_IR}
+                      stroke="var(--color-primary)"
+                      strokeWidth={1.5}
+                      className="absolute top-0 left-0"
+                    />
+                  )}
+                  <div
+                    ref={modelContentRef}
+                    role="listbox"
+                    aria-label="Model"
+                    className="relative z-10 flex flex-col gap-0.5 py-1.5 px-1.5"
+                    style={{
+                      marginTop: notchTabHeight || 32,
+                      width: MENU_W,
                     }}
-                  />
+                  >
+                    {models.map((m) => {
+                      const selected = m.id === activeModel.id;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          role="option"
+                          aria-selected={selected}
+                          onClick={() => {
+                            onSelectModel?.(m.id);
+                            setModelMenuOpen(false);
+                          }}
+                          className={cn(
+                            "flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                            selected
+                              ? "bg-on-surface/8 font-medium text-on-surface"
+                              : "text-on-surface hover:bg-on-surface/8",
+                          )}
+                        >
+                          <Icon
+                            name="check"
+                            size={16}
+                            className={cn(
+                              "shrink-0",
+                              selected
+                                ? "text-on-surface"
+                                : "text-transparent",
+                            )}
+                          />
+                          {m.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
