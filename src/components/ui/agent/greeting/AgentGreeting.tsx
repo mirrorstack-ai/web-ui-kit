@@ -49,22 +49,22 @@ export interface AgentGreetingProps {
 const MIN_TEXTAREA_HEIGHT = 80;
 const MAX_TEXTAREA_HEIGHT = 200;
 const MENU_W = 220;
-const MENU_R = 12;
+const MENU_R = 14;
 const MENU_IR = 8;
 // Extra breathing room INSIDE the notch on the left of the trigger pill.
 // Right side stays flush — the send button sits there, so we don't intrude.
-const NOTCH_PADDING_LEFT = 10;
-// Extends the notch tab a few pixels BELOW the trigger so the tab reads as
-// a deeper "hook" into the dropdown body (rather than ending flush at the
-// trigger's bottom edge).
+const NOTCH_PADDING_LEFT = 12;
+// Extends the notch tab BELOW the trigger so the tab reads as a deeper
+// "hook" into the dropdown body (rather than ending flush at the trigger's
+// bottom edge).
 const NOTCH_PADDING_BOTTOM = 6;
 // Optical nudge: shift the entire notch + dropdown right so the
 // notch tab visually rests inside the trigger's rounded-full silhouette.
-const NOTCH_SHIFT_RIGHT = 4;
+const NOTCH_SHIFT_RIGHT = 6;
 // Lift the entire dropdown so the notch tab tucks above the trigger pill
 // — gives the trigger a "tab attached" look rather than just floating
 // above the body.
-const NOTCH_SHIFT_UP = 6;
+const NOTCH_SHIFT_UP = 8;
 
 export function AgentGreeting({
   greeting,
@@ -196,7 +196,7 @@ export function AgentGreeting({
         </div>
       </div>
 
-      <div className="flex w-full flex-col rounded-2xl border border-outline-variant bg-surface-container-low p-2 transition-colors focus-within:border-primary">
+      <div className="flex w-full flex-col rounded-2xl border border-outline-variant bg-surface-container-low p-3 transition-colors focus-within:border-primary">
         <textarea
           ref={textareaRef}
           value={text}
@@ -233,7 +233,7 @@ export function AgentGreeting({
                 ref={modelTriggerRef}
                 type="button"
                 onClick={() => setModelMenuOpen((open) => !open)}
-                className="relative z-[51] flex h-10 cursor-pointer items-center gap-1 rounded-full px-3 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
+                className="relative z-[51] flex h-10 cursor-pointer items-center gap-1.5 rounded-full px-4 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
                 aria-label={`Model: ${activeModel.label}`}
                 aria-haspopup="listbox"
                 aria-expanded={modelMenuOpen}
@@ -272,7 +272,7 @@ export function AgentGreeting({
                     ref={modelContentRef}
                     role="listbox"
                     aria-label="Model"
-                    className="relative z-10 flex flex-col gap-0.5 py-1.5 px-1.5"
+                    className="relative z-10 flex flex-col gap-1 p-2"
                     style={{
                       marginTop: notchTabHeight || 32,
                       width: MENU_W,
@@ -288,7 +288,7 @@ export function AgentGreeting({
                           aria-selected={selected}
                           onClick={() => handleSelectModel(m.id)}
                           className={cn(
-                            "flex items-baseline gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                            "flex items-baseline gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
                             selected
                               ? "bg-on-surface/8 text-on-surface"
                               : "text-on-surface hover:bg-on-surface/8",
@@ -323,6 +323,7 @@ export function AgentGreeting({
             variant="filled"
             color="primary"
             size="md"
+            className="rounded-xl"
             onClick={send}
             disabled={!canSend}
             aria-label="Send message"
