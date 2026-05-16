@@ -34,9 +34,21 @@ export type GraphEdge = {
 };
 
 export interface GraphHandle {
-  /** Re-seed node positions from scratch — the toolbar Replay button. */
+  /**
+   * Start (or restart) the playback animation: nodes appear one by one in
+   * BFS order from the first pinned node. Also re-seeds positions so a
+   * dragged pin returns to its consumer-defined ratio.
+   */
   replay: () => void;
-  /** Reset zoom and pan to 1 / origin — the toolbar Fit button. */
+  /**
+   * Abort an in-progress playback and reveal every node immediately.
+   * No-op when nothing is playing back.
+   */
+  stop: () => void;
+  /**
+   * Animate zoom + pan back to defaults and re-seed positions, which
+   * restores every pin-ratio node to its consumer-defined ratio.
+   */
   fit: () => void;
 }
 
@@ -58,6 +70,20 @@ export interface GraphProps {
   repulsion?: number;
   /** Spring rest length for edges. Default 70. */
   linkDistance?: number;
+  /**
+   * Map of node id → fill color (any CSS color). The consumer decides how
+   * each id maps to a color (e.g. by group/tag/property match). When a
+   * node's id is in the map its circle uses that color; otherwise the
+   * `on-surface-variant` token. Focused/dragged nodes still win with the
+   * primary token regardless.
+   */
+  colors?: Record<string, string>;
+  /**
+   * Fires after a playback (from `replay`) finishes revealing every node.
+   * Does NOT fire when playback is aborted via `stop`. Lets the consumer
+   * resync any "playing" UI state (e.g. a play/stop toolbar button).
+   */
+  onPlaybackEnd?: () => void;
   className?: string;
 }
 
@@ -70,6 +96,7 @@ const CLICK_THRESHOLD = 4;
 const ZOOM_MIN = 0.3;
 const ZOOM_MAX = 5;
 const ZOOM_STEP = 0.0015;
+const REVEAL_TICK_MS = 250;
 
 type Sim = GraphNode & {
   x: number;
@@ -165,6 +192,11 @@ function step(
 const DEFAULT_W = 600;
 const DEFAULT_H = 400;
 
+// Stable style object reused on every <g> / <line> so React's reconciler
+// can skip the diff and the browser can still animate the opacity change
+// when revealedRef changes.
+const REVEAL_TRANSITION_STYLE = { transition: "opacity 200ms ease" };
+
 export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   {
     nodes,
@@ -177,6 +209,8 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     showLabels = true,
     repulsion = DEFAULT_REPULSION,
     linkDistance = DEFAULT_LINK_DISTANCE,
+    colors,
+    onPlaybackEnd,
     className,
   },
   ref,
@@ -256,6 +290,10 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   const [, setFrame] = useState(0);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  // Ref mirror of draggingId so the window-level safety listener (which is
+  // bound once on mount) can read the current value without re-binding.
+  const draggingIdRef = useRef<string | null>(null);
+  draggingIdRef.current = draggingId;
 
   const [view, setView] = useState({ zoom: 1, panX: 0, panY: 0 });
   const viewRef = useRef(view);
@@ -279,6 +317,18 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     }
     return m;
   }, [nodes, edges]);
+
+  // Pre-build a per-node style object so every <circle> reuses the same
+  // reference across renders. Without this each frame would allocate a new
+  // `{ fill }` literal per node, defeating React's reconciler diffing.
+  const nodeStyles = useMemo(() => {
+    if (!colors) return undefined;
+    const out: Record<string, { fill: string }> = {};
+    for (const [nodeId, color] of Object.entries(colors)) {
+      out[nodeId] = { fill: color };
+    }
+    return out;
+  }, [colors]);
 
   // RAF loop reads edges from a ref so a new array identity from the
   // consumer doesn't tear down and restart the simulation.
@@ -311,6 +361,85 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Playback (sequential reveal) state. Default: every node visible.
+  // `replay()` empties the set and adds nodes one-by-one in BFS order from
+  // the first pinned node; `stop()` cancels and re-fills the set.
+  const revealedRef = useRef<Set<string>>(new Set(nodes.map((n) => n.id)));
+  const [, setRevealFrame] = useState(0);
+  const revealTimerRef = useRef<number | null>(null);
+  const onPlaybackEndRef = useRef(onPlaybackEnd);
+  onPlaybackEndRef.current = onPlaybackEnd;
+
+  // BFS order from the first pinned node (root). Unconnected nodes go at
+  // the end so they still appear during playback.
+  const revealOrder = useMemo(() => {
+    const root = nodes.find((n) => n.pin || n.fixed)?.id ?? nodes[0]?.id;
+    if (!root) return [];
+    const order: string[] = [];
+    const visited = new Set<string>();
+    const queue: string[] = [root];
+    while (queue.length > 0) {
+      const id = queue.shift()!;
+      if (visited.has(id)) continue;
+      visited.add(id);
+      order.push(id);
+      const ns = neighborsOf.get(id);
+      if (ns) {
+        for (const nb of ns) if (!visited.has(nb)) queue.push(nb);
+      }
+    }
+    for (const n of nodes) if (!visited.has(n.id)) order.push(n.id);
+    return order;
+  }, [nodes, neighborsOf]);
+
+  // Reset revealed set whenever the nodes prop identity changes, aborting
+  // any in-progress playback. Also covers component unmount cleanup.
+  useEffect(() => {
+    if (revealTimerRef.current !== null) {
+      window.clearTimeout(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+    revealedRef.current = new Set(nodes.map((n) => n.id));
+    setRevealFrame((f) => f + 1);
+    return () => {
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current);
+        revealTimerRef.current = null;
+      }
+    };
+  }, [nodes]);
+
+  const startReveal = useCallback(() => {
+    if (revealTimerRef.current !== null) {
+      window.clearTimeout(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+    revealedRef.current = new Set();
+    setRevealFrame((f) => f + 1);
+    let i = 0;
+    const tick = () => {
+      if (i >= revealOrder.length) {
+        revealTimerRef.current = null;
+        onPlaybackEndRef.current?.();
+        return;
+      }
+      revealedRef.current.add(revealOrder[i]);
+      i++;
+      setRevealFrame((f) => f + 1);
+      revealTimerRef.current = window.setTimeout(tick, REVEAL_TICK_MS);
+    };
+    tick();
+  }, [revealOrder]);
+
+  const stopReveal = useCallback(() => {
+    if (revealTimerRef.current !== null) {
+      window.clearTimeout(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+    revealedRef.current = new Set(nodes.map((n) => n.id));
+    setRevealFrame((f) => f + 1);
+  }, [nodes]);
+
   useEffect(() => {
     if (reseedKey === 0) return;
     rebuildSim(sizeRef.current.w, sizeRef.current.h);
@@ -319,13 +448,54 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reseedKey]);
 
+  // Animate view back to defaults instead of snapping. Used by `fit()`.
+  const fitRafRef = useRef<number | null>(null);
+  const animateFit = useCallback(() => {
+    if (fitRafRef.current !== null) cancelAnimationFrame(fitRafRef.current);
+    const start = viewRef.current;
+    const target = { zoom: 1, panX: 0, panY: 0 };
+    const startTime = performance.now();
+    const DURATION = 300;
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3); // ease-out cubic
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - startTime) / DURATION);
+      const k = ease(t);
+      setView({
+        zoom: start.zoom + (target.zoom - start.zoom) * k,
+        panX: start.panX + (target.panX - start.panX) * k,
+        panY: start.panY + (target.panY - start.panY) * k,
+      });
+      if (t < 1) {
+        fitRafRef.current = requestAnimationFrame(tick);
+      } else {
+        fitRafRef.current = null;
+      }
+    };
+    fitRafRef.current = requestAnimationFrame(tick);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (fitRafRef.current !== null) cancelAnimationFrame(fitRafRef.current);
+    };
+  }, []);
+
   useImperativeHandle(
     ref,
     () => ({
-      replay: () => setReseedKey((k) => k + 1),
-      fit: () => setView({ zoom: 1, panX: 0, panY: 0 }),
+      replay: () => {
+        setReseedKey((k) => k + 1);
+        startReveal();
+      },
+      stop: stopReveal,
+      fit: () => {
+        animateFit();
+        // Re-seed restores pinned-node positions from the consumer's `nodes`
+        // prop, so a dragged pin snaps back to its original ratio.
+        setReseedKey((k) => k + 1);
+      },
     }),
-    [],
+    [animateFit, startReveal, stopReveal],
   );
 
   const toGraph = useCallback((clientX: number, clientY: number) => {
@@ -397,37 +567,51 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     }
   };
 
-  const handlePointerUp = (e: React.PointerEvent) => {
+  // onNodeClick lives in a ref so `finishDrag` stays referentially stable
+  // even when consumers pass an inline arrow — otherwise the window-level
+  // pointerup listener would re-register on every parent render.
+  const onNodeClickRef = useRef(onNodeClick);
+  onNodeClickRef.current = onNodeClick;
+
+  // Shared drag cleanup. Called from pointerup, pointercancel, and the
+  // window-level safety listener so a pointer release outside the window
+  // can't leave a node stuck to the cursor.
+  const finishDrag = useCallback((opts: { fireClick: boolean }) => {
+    const id = draggingIdRef.current;
+    if (!id) return;
+    const node = byIdRef.current.get(id);
+    if (node) {
+      node.pinned = Boolean(node.fixed || node.pin);
+      if (node.pin && pointerMovedRef.current) {
+        const s = sizeRef.current;
+        node.pin = {
+          x: Math.min(1, Math.max(0, node.x / s.w)),
+          y: Math.min(1, Math.max(0, node.y / s.h)),
+        };
+      }
+    }
+    setDraggingId(null);
+    draggingIdRef.current = null;
+    if (opts.fireClick && !pointerMovedRef.current && onNodeClickRef.current) {
+      onNodeClickRef.current(id);
+    }
+    pointerStartRef.current = null;
+    pointerMovedRef.current = false;
+  }, []);
+
+  const handlePointerEnd = (e: React.PointerEvent, fireClick: boolean) => {
     if (draggingId) {
-      const id = draggingId;
-      const node = byIdRef.current.get(id);
-      if (node) {
-        node.pinned = Boolean(node.fixed || node.pin);
-        // When the user drags a pin-ratio node, rewrite the pin to the
-        // new ratio so future resizes track the dragged position
-        // proportionally instead of either drifting or being overlaid.
-        if (node.pin && pointerMovedRef.current) {
-          const s = sizeRef.current;
-          // The sim's soft walls keep node positions in [12, W-12], so the
-          // ratio is essentially always in (0,1) — clamp anyway against
-          // future bound changes.
-          node.pin = {
-            x: Math.min(1, Math.max(0, node.x / s.w)),
-            y: Math.min(1, Math.max(0, node.y / s.h)),
-          };
-        }
-      }
       (e.target as Element).releasePointerCapture?.(e.pointerId);
-      setDraggingId(null);
-      if (!pointerMovedRef.current && onNodeClick) {
-        onNodeClick(id);
-      }
-      pointerStartRef.current = null;
-      pointerMovedRef.current = false;
+      finishDrag({ fireClick });
       return;
     }
     panStartRef.current = null;
   };
+
+  const handlePointerUp = (e: React.PointerEvent) =>
+    handlePointerEnd(e, true);
+  const handlePointerCancel = (e: React.PointerEvent) =>
+    handlePointerEnd(e, false);
 
   const handleBackgroundPointerDown = (e: React.PointerEvent) => {
     if (e.target !== e.currentTarget) return;
@@ -439,6 +623,23 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
       panY: viewRef.current.panY,
     };
   };
+
+  // Safety net for drag releases that happen outside the window. Browser
+  // pointer capture mostly handles this, but releasing past the viewport
+  // edge can occasionally swallow pointerup — the node would then stick to
+  // the cursor until the next click. Listening on window for pointerup +
+  // pointercancel guarantees cleanup.
+  useEffect(() => {
+    const onAnywhereUp = () => {
+      if (draggingIdRef.current) finishDrag({ fireClick: false });
+    };
+    window.addEventListener("pointerup", onAnywhereUp);
+    window.addEventListener("pointercancel", onAnywhereUp);
+    return () => {
+      window.removeEventListener("pointerup", onAnywhereUp);
+      window.removeEventListener("pointercancel", onAnywhereUp);
+    };
+  }, [finishDrag]);
 
   // Native listener so we can preventDefault on pinch gestures (Safari/Chrome
   // synthesize wheel events with ctrlKey=true for trackpad pinch — without
@@ -500,6 +701,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
         onPointerDown={handleBackgroundPointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
       >
         <g
           transform={`translate(${view.panX} ${view.panY}) scale(${view.zoom})`}
@@ -510,6 +712,9 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
               const b = byIdRef.current.get(e.target);
               if (!a || !b) return null;
               const lit = isEdgeLit(e);
+              const visible =
+                revealedRef.current.has(e.source) &&
+                revealedRef.current.has(e.target);
               return (
                 <line
                   key={`${e.source}-${e.target}-${i}`}
@@ -519,6 +724,8 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                   y2={b.y}
                   strokeWidth={((lit ? 1.5 : 1) * lineSize) / view.zoom}
                   strokeOpacity={lit ? 0.7 : 0.15}
+                  opacity={visible ? 1 : 0}
+                  style={REVEAL_TRANSITION_STYLE}
                 />
               );
             })}
@@ -526,9 +733,16 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
           <g>
             {nodesRef.current.map((n) => {
               const lit = isLit(n.id);
+              const isFocused = n.id === focused;
               const r =
-                (4 + Math.min(n.degree, 6) + (n.id === focused ? 2 : 0)) *
-                nodeSize;
+                (4 + Math.min(n.degree, 6) + (isFocused ? 2 : 0)) * nodeSize;
+              const nodeStyle = !isFocused ? nodeStyles?.[n.id] : undefined;
+              const fillClass = isFocused
+                ? "fill-primary"
+                : nodeStyle
+                  ? undefined
+                  : "fill-on-surface-variant";
+              const revealed = revealedRef.current.has(n.id);
               return (
                 <g
                   key={n.id}
@@ -539,17 +753,15 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                   onPointerLeave={() =>
                     setHoveredId((cur) => (cur === n.id ? null : cur))
                   }
-                  opacity={lit ? 1 : 0.2}
+                  opacity={revealed ? (lit ? 1 : 0.2) : 0}
+                  style={REVEAL_TRANSITION_STYLE}
                 >
                   <circle
                     cx={n.x}
                     cy={n.y}
                     r={r}
-                    className={
-                      n.id === focused
-                        ? "fill-primary"
-                        : "fill-on-surface-variant"
-                    }
+                    className={fillClass}
+                    style={nodeStyle}
                   />
                   {showLabels && (
                     <text

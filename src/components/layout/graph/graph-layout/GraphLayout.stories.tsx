@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { GraphLayout } from "./GraphLayout";
 import { GraphAction } from "@/components/ui/graph/action/GraphAction";
@@ -328,11 +328,13 @@ export const WithGraphAndSettings: Story = {
     const graphRef = useRef<GraphHandle>(null);
     const [view, setView] = useState<SideView>(null);
     const [groups, setGroups] = useState<GraphSideGroupItem[]>([
-      { id: "core", name: "openclaude", color: "#f4a8a8" },
-      { id: "memory", name: "memory system brain", color: "#a8d8a8" },
-      { id: "wss", name: "wss tunnel", color: "#cbb6e5" },
-      { id: "mcp", name: "mcp", color: "#f5c14a" },
-      { id: "stripe", name: "stripe", color: "#8db8e8" },
+      { id: "user", name: "User", color: "#f5c14a" },
+      { id: "core", name: "Core", color: "#a8d8a8" },
+      { id: "project", name: "Project", color: "#cbb6e5" },
+      { id: "crm", name: "CRM", color: "#f4a8a8" },
+      { id: "daily", name: "Daily", color: "#fbb6ce" },
+      { id: "balance", name: "Balance", color: "#8db8e8" },
+      { id: "commerce", name: "Commerce", color: "#6ee7b7" },
     ]);
     const [setting, setSetting] = useState<GraphSideSettingValue>({
       nodeSize: 1,
@@ -342,6 +344,34 @@ export const WithGraphAndSettings: Story = {
       linkDistance: 70,
     });
     const [search, setSearch] = useState("");
+    const [playing, setPlaying] = useState(false);
+    // Default group matching: substring-search the group's name across each
+    // node's fields in priority order — Title (label) > Tags > Description
+    // (summary) > Content (markdown body). The highest-priority field that
+    // any group matches wins, breaking ties by group list order. The
+    // structured-query version (path:, tag:, [property:]) ships in a
+    // follow-up PR.
+    const colors = useMemo(() => {
+      const resolve = (n: GraphNode): string | undefined => {
+        const d = NODE_DETAILS[n.id];
+        const fieldsByPriority = [n.label, n.tag, d?.summary, d?.content];
+        for (const field of fieldsByPriority) {
+          if (!field) continue;
+          const f = field.toLowerCase();
+          for (const g of groups) {
+            const q = g.name.trim().toLowerCase();
+            if (q && f.includes(q)) return g.color;
+          }
+        }
+        return undefined;
+      };
+      const out: Record<string, string> = {};
+      for (const n of GRAPH_NODES) {
+        const c = resolve(n);
+        if (c) out[n.id] = c;
+      }
+      return out;
+    }, [groups]);
 
     const sideNode: GraphSideNode | null =
       view?.type === "node"
@@ -365,12 +395,22 @@ export const WithGraphAndSettings: Story = {
             showLabels={setting.showLabels}
             repulsion={setting.repulsion}
             linkDistance={setting.linkDistance}
+            colors={colors}
+            onPlaybackEnd={() => setPlaying(false)}
             className="border-0 bg-transparent rounded-none"
           />
         }
         action={
           <GraphAction
-            onReplay={() => graphRef.current?.replay()}
+            playing={playing}
+            onReplay={() => {
+              graphRef.current?.replay();
+              setPlaying(true);
+            }}
+            onStop={() => {
+              graphRef.current?.stop();
+              setPlaying(false);
+            }}
             onFit={() => graphRef.current?.fit()}
             onSettings={() =>
               setView((v) => (v?.type === "settings" ? null : { type: "settings" }))
