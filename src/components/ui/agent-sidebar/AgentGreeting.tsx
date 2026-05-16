@@ -60,11 +60,11 @@ const NOTCH_PADDING_LEFT = 10;
 const NOTCH_PADDING_BOTTOM = 6;
 // Optical nudge: shift the entire notch + dropdown ~2px right so the
 // notch tab visually rests inside the trigger's rounded-full silhouette.
-const NOTCH_SHIFT_RIGHT = 2;
-// Lift the entire dropdown 2px so the notch tab tucks slightly above
-// the trigger pill — gives the trigger a "tab attached" look rather than
-// just floating above the body.
-const NOTCH_SHIFT_UP = 2;
+const NOTCH_SHIFT_RIGHT = 4;
+// Lift the entire dropdown so the notch tab tucks above the trigger pill
+// — gives the trigger a "tab attached" look rather than just floating
+// above the body.
+const NOTCH_SHIFT_UP = 6;
 
 export function AgentGreeting({
   greeting,
@@ -86,6 +86,13 @@ export function AgentGreeting({
   const [notchX, setNotchX] = useState(0);
   const [notchTabWidth, setNotchTabWidth] = useState(0);
   const [notchTabHeight, setNotchTabHeight] = useState(0);
+  // Controlled if parent wires `onSelectModel`; otherwise the component
+  // owns the selection and `selectedModelId` acts as the initial value.
+  // This lets the trigger update on click even when the consumer doesn't
+  // bother with state plumbing.
+  const isControlledModel = onSelectModel !== undefined;
+  const [internalModelId, setInternalModelId] = useState(selectedModelId);
+  const activeModelId = isControlledModel ? selectedModelId : internalModelId;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const modelTriggerRef = useRef<HTMLButtonElement>(null);
   const modelMenuRef = useRef<HTMLDivElement>(null);
@@ -115,7 +122,7 @@ export function AgentGreeting({
     setNotchTabHeight(tRect.height + NOTCH_PADDING_BOTTOM);
     setNotchX(tRect.left - mRect.left - NOTCH_PADDING_LEFT + NOTCH_SHIFT_RIGHT);
     setMenuH(content.offsetHeight);
-  }, [modelMenuOpen, selectedModelId, models]);
+  }, [modelMenuOpen, activeModelId, models]);
 
   useEffect(() => {
     if (!modelMenuOpen) return;
@@ -157,8 +164,14 @@ export function AgentGreeting({
   };
 
   const activeModel =
-    models?.find((m) => m.id === selectedModelId) ?? models?.[0];
+    models?.find((m) => m.id === activeModelId) ?? models?.[0];
   const showModels = !!models?.length && !!activeModel;
+
+  const handleSelectModel = (id: string) => {
+    if (!isControlledModel) setInternalModelId(id);
+    onSelectModel?.(id);
+    setModelMenuOpen(false);
+  };
 
   return (
     <div
@@ -273,10 +286,7 @@ export function AgentGreeting({
                           type="button"
                           role="option"
                           aria-selected={selected}
-                          onClick={() => {
-                            onSelectModel?.(m.id);
-                            setModelMenuOpen(false);
-                          }}
+                          onClick={() => handleSelectModel(m.id)}
                           className={cn(
                             "flex items-baseline gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
                             selected

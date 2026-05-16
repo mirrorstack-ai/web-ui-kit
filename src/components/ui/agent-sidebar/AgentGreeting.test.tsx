@@ -210,4 +210,22 @@ describe("AgentGreeting", () => {
     expect(screen.queryByText("Quick replies")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Model: Fast")).toBeInTheDocument();
   });
+
+  it("updates the trigger label in uncontrolled mode (no onSelectModel)", () => {
+    // Regression: previously, when the consumer didn't wire onSelectModel
+    // the trigger stayed pinned to the initial selectedModelId because the
+    // prop never changed. The component should manage selection internally
+    // in that case.
+    render(
+      <AgentGreeting
+        greeting="Welcome"
+        models={MODELS}
+        selectedModelId="fast"
+      />,
+    );
+    expect(screen.getByLabelText("Model: Fast")).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Model: Fast"));
+    fireEvent.click(screen.getByRole("option", { name: /balanced/i }));
+    expect(screen.getByLabelText("Model: Balanced")).toBeInTheDocument();
+  });
 });
