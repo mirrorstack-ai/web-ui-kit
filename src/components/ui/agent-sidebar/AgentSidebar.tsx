@@ -9,6 +9,11 @@ export const meta: ComponentMeta = {
 export { AgentSidebarHeader, type AgentSidebarHeaderProps } from "./AgentSidebarHeader";
 export { AgentSidebarInput, type AgentSidebarInputProps } from "./AgentSidebarInput";
 export {
+  AgentGreeting,
+  type AgentGreetingProps,
+  type AgentGreetingModel,
+} from "./AgentGreeting";
+export {
   AgentSidebarUserMessage,
   type AgentSidebarUserMessageProps,
   AgentSidebarAgentMessage,
