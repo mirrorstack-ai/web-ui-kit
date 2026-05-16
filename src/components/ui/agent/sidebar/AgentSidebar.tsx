@@ -12,13 +12,13 @@ export {
   AgentGreeting,
   type AgentGreetingProps,
   type AgentGreetingModel,
-} from "./AgentGreeting";
+} from "../greeting/AgentGreeting";
 export {
   AgentSidebarUserMessage,
   type AgentSidebarUserMessageProps,
   AgentSidebarAgentMessage,
   type AgentSidebarAgentMessageProps,
-} from "./AgentSidebarMessage";
+} from "../messages/AgentSidebarMessage";
 export {
   AgentSidebarMultiQuestion,
   type AgentSidebarMultiQuestionProps,
@@ -27,12 +27,12 @@ export {
   type AgentSidebarMultiQuestionAnswer,
   type AgentSidebarMultiQuestionLayout,
   type AgentSidebarChoiceStyle,
-} from "./AgentSidebarMultiQuestion";
+} from "../asks/AgentSidebarMultiQuestion";
 export {
   AgentSidebarMessages,
   type AgentSidebarMessage,
   type AgentSidebarMessagesProps,
-} from "./AgentSidebarMessages";
+} from "../messages/AgentSidebarMessages";
 export {
   type AgentSidebarHistoryGroup,
   type AgentSidebarHistoryItem,

@@ -1,10 +1,17 @@
 import { useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
+import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Button } from "@/components/ui/actions/button/Button";
 import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
 import { SegmentedButton } from "@/components/ui/inputs/segmented-button/SegmentedButton";
 import { Switch } from "@/components/ui/inputs/switch/Switch";
+
+export const meta: ComponentMeta = {
+  name: "AgentAsks",
+  description:
+    "Multi-question prompt block — list or tabs layout, mixes text, choice (segmented/cards), and switch questions with a single submit gate.",
+};
 
 interface QuestionBase {
   id: string;

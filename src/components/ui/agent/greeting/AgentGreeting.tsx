@@ -16,7 +16,7 @@ import { Notch } from "@/components/ui/surfaces/notch/Notch";
 export const meta: ComponentMeta = {
   name: "AgentGreeting",
   description:
-    "Hero greeting plus chat input used to open a fresh agent-sidebar conversation. Drop it on init, return, app-creation, and overview surfaces.",
+    "Hero greeting plus chat input used to open a fresh agent conversation. Drop it on init, return, app-creation, and overview surfaces.",
 };
 
 export interface AgentGreetingModel {
@@ -180,7 +180,7 @@ export function AgentGreeting({
         className,
       )}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         {!hideLogo && (
           <div className="size-14 shrink-0">
             <Logo />
@@ -209,11 +209,11 @@ export function AgentGreeting({
           aria-label="Start a conversation with the agent"
           rows={1}
         />
-        <div className="flex w-full items-center gap-0.5 px-1 pb-0.5">
+        <div className="flex w-full items-center gap-1 px-1 pb-0.5">
           <IconButton
             icon="attach_file_add"
             variant="text"
-            size="sm"
+            size="md"
             className="text-on-surface-variant hover:text-on-surface"
             onClick={onAttachFile}
             aria-label="Attach file"
@@ -221,7 +221,7 @@ export function AgentGreeting({
           <IconButton
             icon="mic"
             variant="text"
-            size="sm"
+            size="md"
             className="text-on-surface-variant hover:text-on-surface"
             onClick={onMic}
             aria-label="Voice input"
@@ -233,7 +233,7 @@ export function AgentGreeting({
                 ref={modelTriggerRef}
                 type="button"
                 onClick={() => setModelMenuOpen((open) => !open)}
-                className="relative z-[51] flex h-8 cursor-pointer items-center gap-1 rounded-full px-2.5 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
+                className="relative z-[51] flex h-10 cursor-pointer items-center gap-1 rounded-full px-3 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
                 aria-label={`Model: ${activeModel.label}`}
                 aria-haspopup="listbox"
                 aria-expanded={modelMenuOpen}
@@ -322,7 +322,7 @@ export function AgentGreeting({
             icon="arrow_upward"
             variant="filled"
             color="primary"
-            size="sm"
+            size="md"
             onClick={send}
             disabled={!canSend}
             aria-label="Send message"

@@ -1,4 +1,4 @@
-import type { AgentSidebarMessage } from "./AgentSidebarMessages";
+import type { AgentSidebarMessage } from "../messages/AgentSidebarMessages";
 import type { AgentSidebarHistoryGroup } from "./types";
 
 export const mockAgentHistory: AgentSidebarHistoryGroup[] = Object.freeze([

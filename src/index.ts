@@ -241,7 +241,7 @@ export {
   mockAgentMessages,
   type AgentSidebarHistoryGroup,
   type AgentSidebarHistoryItem,
-} from "./components/ui/agent-sidebar/AgentSidebar";
+} from "./components/ui/agent/sidebar/AgentSidebar";
 export {
   DropZone,
   type DropZoneProps,

@@ -5,7 +5,7 @@ import { AgentSidebarInput } from "./AgentSidebarInput";
 import {
   AgentSidebarMessages,
   type AgentSidebarMessage,
-} from "./AgentSidebarMessages";
+} from "../messages/AgentSidebarMessages";
 import { mockAgentHistory, mockAgentMessages } from "./mock-data";
 
 const meta: Meta = {
