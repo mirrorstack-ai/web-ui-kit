@@ -4303,7 +4303,7 @@ title: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Graph</h2>
       <div class="badges">
-        <label for="c-19-ui-graph-graph-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-19-ui-graph-graph-props" class="badge ok as-toggle">13 prop types</label>
         <label for="c-19-ui-graph-graph-info" class="badge info as-toggle">1 info</label>
         <label for="c-19-ui-graph-graph-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -4337,11 +4337,20 @@ title: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">11 prop types</span>
+              <span class="badge ok">13 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/graph/graph/Graph.tsx::Graph</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>className?: string
+
+/**
+ * Map of node id → fill color (any CSS color). The consumer decides how
+ * each id maps to a color (e.g. by group/tag/property match). When a
+ * node&#39;s id is in the map its circle uses that color; otherwise the
+ * `on-surface-variant` token. Focused/dragged nodes still win with the
+ * primary token regardless.
+ */
+colors?: Record&lt;string, string&gt;
 
 edges: GraphEdge[]
 
@@ -4368,6 +4377,13 @@ nodes: GraphNode[]
 nodeSize?: number = 1
 
 onNodeClick?: (id: string) =&gt; void
+
+/**
+ * Fires after a playback (from `replay`) finishes revealing every node.
+ * Does NOT fire when playback is aborted via `stop`. Lets the consumer
+ * resync any &quot;playing&quot; UI state (e.g. a play/stop toolbar button).
+ */
+onPlaybackEnd?: () =&gt; void
 
 /**
  * Pairwise repulsion strength. Default 1500.
@@ -4711,11 +4727,13 @@ sideWidth?: number = 260</code></pre>
   const graphRef = useRef&lt;GraphHandle&gt;(null);
   const [view, setView] = useState&lt;SideView&gt;(null);
   const [groups, setGroups] = useState&lt;GraphSideGroupItem[]&gt;([
-    { id: &quot;core&quot;, name: &quot;openclaude&quot;, color: &quot;#f4a8a8&quot; },
-    { id: &quot;memory&quot;, name: &quot;memory system brain&quot;, color: &quot;#a8d8a8&quot; },
-    { id: &quot;wss&quot;, name: &quot;wss tunnel&quot;, color: &quot;#cbb6e5&quot; },
-    { id: &quot;mcp&quot;, name: &quot;mcp&quot;, color: &quot;#f5c14a&quot; },
-    { id: &quot;stripe&quot;, name: &quot;stripe&quot;, color: &quot;#8db8e8&quot; },
+    { id: &quot;user&quot;, name: &quot;User&quot;, color: &quot;#f5c14a&quot; },
+    { id: &quot;core&quot;, name: &quot;Core&quot;, color: &quot;#a8d8a8&quot; },
+    { id: &quot;project&quot;, name: &quot;Project&quot;, color: &quot;#cbb6e5&quot; },
+    { id: &quot;crm&quot;, name: &quot;CRM&quot;, color: &quot;#f4a8a8&quot; },
+    { id: &quot;daily&quot;, name: &quot;Daily&quot;, color: &quot;#fbb6ce&quot; },
+    { id: &quot;balance&quot;, name: &quot;Balance&quot;, color: &quot;#8db8e8&quot; },
+    { id: &quot;commerce&quot;, name: &quot;Commerce&quot;, color: &quot;#6ee7b7&quot; },
   ]);
   const [setting, setSetting] = useState&lt;GraphSideSettingValue&gt;({
     nodeSize: 1,
@@ -4725,6 +4743,34 @@ sideWidth?: number = 260</code></pre>
     linkDistance: 70,
   });
   const [search, setSearch] = useState(&quot;&quot;);
+  const [playing, setPlaying] = useState(false);
+  // Default group matching: substring-search the group&#39;s name across each
+  // node&#39;s fields in priority order — Title (label) &gt; Tags &gt; Description
+  // (summary) &gt; Content (markdown body). The highest-priority field that
+  // any group matches wins, breaking ties by group list order. The
+  // structured-query version (path:, tag:, [property:]) ships in a
+  // follow-up PR.
+  const colors = useMemo(() =&gt; {
+    const resolve = (n: GraphNode): string | undefined =&gt; {
+      const d = NODE_DETAILS[n.id];
+      const fieldsByPriority = [n.label, n.tag, d?.summary, d?.content];
+      for (const field of fieldsByPriority) {
+        if (!field) continue;
+        const f = field.toLowerCase();
+        for (const g of groups) {
+          const q = g.name.trim().toLowerCase();
+          if (q &amp;&amp; f.includes(q)) return g.color;
+        }
+      }
+      return undefined;
+    };
+    const out: Record&lt;string, string&gt; = {};
+    for (const n of GRAPH_NODES) {
+      const c = resolve(n);
+      if (c) out[n.id] = c;
+    }
+    return out;
+  }, [groups]);
 
   const sideNode: GraphSideNode | null =
     view?.type === &quot;node&quot;
@@ -4748,12 +4794,22 @@ sideWidth?: number = 260</code></pre>
           showLabels={setting.showLabels}
           repulsion={setting.repulsion}
           linkDistance={setting.linkDistance}
+          colors={colors}
+          onPlaybackEnd={() =&gt; setPlaying(false)}
           className=&quot;border-0 bg-transparent rounded-none&quot;
         /&gt;
       }
       action={
         &lt;GraphAction
-          onReplay={() =&gt; graphRef.current?.replay()}
+          playing={playing}
+          onReplay={() =&gt; {
+            graphRef.current?.replay();
+            setPlaying(true);
+          }}
+          onStop={() =&gt; {
+            graphRef.current?.stop();
+            setPlaying(false);
+          }}
           onFit={() =&gt; graphRef.current?.fit()}
           onSettings={() =&gt;
             setView((v) =&gt; (v?.type === &quot;settings&quot; ? null : { type: &quot;settings&quot; }))
