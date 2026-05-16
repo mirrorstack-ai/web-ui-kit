@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/59 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">59/59 infos</a><span class="filter-pill ok" aria-disabled="true">208 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/59 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">59/59 infos</a><span class="filter-pill ok" aria-disabled="true">209 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -742,9 +742,9 @@ onLoadMore?: () =&gt; void</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AgentGreeting</h2>
       <div class="badges">
-        <label for="c-1-ui-agent-greeting-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-1-ui-agent-greeting-props" class="badge ok as-toggle">11 prop types</label>
         <label for="c-1-ui-agent-greeting-info" class="badge info as-toggle">1 info</label>
-        <label for="c-1-ui-agent-greeting-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-1-ui-agent-greeting-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -776,7 +776,7 @@ onLoadMore?: () =&gt; void</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">10 prop types</span>
+              <span class="badge ok">11 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/agent-sidebar/AgentGreeting.tsx::AgentGreeting</code></pre>
             <pre><code>Props:</code></pre>
@@ -786,6 +786,11 @@ onLoadMore?: () =&gt; void</code></pre>
  * Main heading, e.g. &quot;Welcome back, Nothing Chang&quot;.
  */
 greeting: string
+
+/**
+ * Hide the MirrorStack logo above the greeting. Defaults to false.
+ */
+hideLogo?: boolean = false
 
 /**
  * Available models for the picker. Omit or pass an empty array to hide it.
@@ -874,7 +879,7 @@ subtitle?: string</code></pre>
     subtitle=&quot;Tell the agent what you want to build.&quot;
     placeholder=&quot;what do you want to build?&quot;
     models={MODELS}
-    selectedModelId=&quot;fast&quot; /&gt;;</code></pre>
+    selectedModelId=&quot;claude-sonnet-4-6&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -888,7 +893,7 @@ subtitle?: string</code></pre>
     subtitle=&quot;Describe the app — modules, data, surfaces — and the agent will scaffold it.&quot;
     placeholder=&quot;describe your app...&quot;
     models={MODELS}
-    selectedModelId=&quot;deep&quot; /&gt;;</code></pre>
+    selectedModelId=&quot;claude-opus-4-7&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -910,6 +915,19 @@ subtitle?: string</code></pre>
               
               
               <pre><code>const NoModelPicker = () =&gt; &lt;AgentGreeting greeting=&quot;Welcome Back, Nothing Chang&quot; placeholder=&quot;plan something?&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">No Logo</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const NoLogo = () =&gt; &lt;AgentGreeting
+    greeting=&quot;Welcome Back, Nothing Chang&quot;
+    placeholder=&quot;plan something?&quot;
+    models={MODELS}
+    hideLogo /&gt;;</code></pre>
             </div>
         </div>
     
