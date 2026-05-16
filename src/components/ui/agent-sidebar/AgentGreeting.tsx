@@ -1,6 +1,7 @@
 import {
   useState,
   useRef,
+  useEffect,
   useLayoutEffect,
   type KeyboardEvent,
   type ChangeEvent,
@@ -9,10 +10,7 @@ import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
-import {
-  DropdownMenu,
-  type DropdownMenuItem,
-} from "@/components/ui/navigation/dropdown-menu/DropdownMenu";
+import { OptionList } from "@/components/ui/surfaces/option-list/OptionList";
 
 export const meta: ComponentMeta = {
   name: "AgentGreeting",
@@ -58,7 +56,10 @@ export function AgentGreeting({
 }: AgentGreetingProps) {
   const [text, setText] = useState("");
   const [isComposing, setIsComposing] = useState(false);
+  const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const modelTriggerRef = useRef<HTMLButtonElement>(null);
+  const modelMenuRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     const el = textareaRef.current;
@@ -66,6 +67,25 @@ export function AgentGreeting({
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
   }, [text]);
+
+  useEffect(() => {
+    if (!modelMenuOpen) return;
+    const onMouseDown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (modelTriggerRef.current?.contains(target)) return;
+      if (modelMenuRef.current?.contains(target)) return;
+      setModelMenuOpen(false);
+    };
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") setModelMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [modelMenuOpen]);
 
   const canSend = text.trim().length > 0;
 
@@ -90,12 +110,27 @@ export function AgentGreeting({
   const activeModel =
     models?.find((m) => m.id === selectedModelId) ?? models?.[0];
   const showModels = !!models?.length && !!activeModel;
-  const modelItems: DropdownMenuItem[] =
+  const modelOptions =
     models?.map((m) => ({
-      id: m.id,
-      label: m.label,
-      icon: m.id === activeModel?.id ? "check" : undefined,
+      value: m.id,
+      label: (
+        <span className="flex items-center gap-1.5">
+          <Icon
+            name="check"
+            size={14}
+            className={cn(
+              "shrink-0",
+              m.id === activeModel?.id
+                ? "text-on-surface"
+                : "text-transparent",
+            )}
+          />
+          {m.label}
+        </span>
+      ),
     })) ?? [];
+  const activeModelIndex =
+    models?.findIndex((m) => m.id === activeModel?.id) ?? -1;
 
   return (
     <div
@@ -145,23 +180,37 @@ export function AgentGreeting({
           />
           <div className="flex-1" />
           {showModels && activeModel && (
-            <DropdownMenu
-              items={modelItems}
-              onSelect={(item) => onSelectModel?.(item.id)}
-              trigger={
-                <button
-                  type="button"
-                  className="flex h-8 cursor-pointer items-center gap-1 rounded-full px-2.5 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
-                  aria-label={`Model: ${activeModel.label}`}
+            <div className="relative mr-2">
+              <button
+                ref={modelTriggerRef}
+                type="button"
+                onClick={() => setModelMenuOpen((open) => !open)}
+                className="flex h-8 cursor-pointer items-center gap-1 rounded-full px-2.5 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
+                aria-label={`Model: ${activeModel.label}`}
+                aria-haspopup="listbox"
+                aria-expanded={modelMenuOpen}
+              >
+                <span className="max-w-[140px] truncate">
+                  {activeModel.label}
+                </span>
+                <Icon name="expand_more" size={16} />
+              </button>
+              {modelMenuOpen && (
+                <div
+                  ref={modelMenuRef}
+                  className="absolute right-0 bottom-full z-50 mb-2 min-w-[160px]"
                 >
-                  <span className="max-w-[140px] truncate">
-                    {activeModel.label}
-                  </span>
-                  <Icon name="expand_more" size={16} />
-                </button>
-              }
-              offset={-8}
-            />
+                  <OptionList
+                    items={modelOptions}
+                    activeIndex={activeModelIndex}
+                    onSelect={(item) => {
+                      onSelectModel?.(item.value);
+                      setModelMenuOpen(false);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           )}
           <IconButton
             icon="arrow_upward"

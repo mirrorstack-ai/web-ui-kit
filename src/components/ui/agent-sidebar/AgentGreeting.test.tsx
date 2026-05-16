@@ -119,7 +119,20 @@ describe("AgentGreeting", () => {
     expect(screen.getByLabelText("Model: Fast")).toBeInTheDocument();
   });
 
-  it("calls onSelectModel when picking a new model", () => {
+  it("opens the picker on click and exposes a listbox", () => {
+    render(
+      <AgentGreeting
+        greeting="Welcome"
+        models={MODELS}
+        selectedModelId="fast"
+      />,
+    );
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Model: Fast"));
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+  });
+
+  it("calls onSelectModel and closes the picker when an option is chosen", () => {
     const onSelectModel = vi.fn();
     render(
       <AgentGreeting
@@ -130,8 +143,20 @@ describe("AgentGreeting", () => {
       />,
     );
     fireEvent.click(screen.getByLabelText("Model: Fast"));
-    fireEvent.click(screen.getByRole("menuitem", { name: /balanced/i }));
+    // OptionList commits selection on mouseDown to beat blur from the trigger.
+    fireEvent.mouseDown(
+      screen.getByRole("option", { name: /balanced/i }),
+    );
     expect(onSelectModel).toHaveBeenCalledWith("balanced");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+  });
+
+  it("closes the picker on Escape", () => {
+    render(<AgentGreeting greeting="Welcome" models={MODELS} />);
+    fireEvent.click(screen.getByLabelText("Model: Fast"));
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
   });
 
   it("calls onAttachFile and onMic", () => {
