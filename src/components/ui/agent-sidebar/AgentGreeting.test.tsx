@@ -183,4 +183,31 @@ describe("AgentGreeting", () => {
     expect(onAttachFile).toHaveBeenCalledOnce();
     expect(onMic).toHaveBeenCalledOnce();
   });
+
+  it("renders the description tagline inside dropdown options", () => {
+    render(
+      <AgentGreeting
+        greeting="Welcome"
+        models={[
+          { id: "fast", label: "Fast", description: "Quick replies" },
+          { id: "balanced", label: "Balanced", description: "Adaptive" },
+        ]}
+      />,
+    );
+    fireEvent.click(screen.getByLabelText("Model: Fast"));
+    expect(screen.getByText("Quick replies")).toBeInTheDocument();
+    expect(screen.getByText("Adaptive")).toBeInTheDocument();
+  });
+
+  it("does not render description in the trigger pill", () => {
+    render(
+      <AgentGreeting
+        greeting="Welcome"
+        models={[{ id: "fast", label: "Fast", description: "Quick replies" }]}
+      />,
+    );
+    // Description should not appear until the picker opens.
+    expect(screen.queryByText("Quick replies")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Model: Fast")).toBeInTheDocument();
+  });
 });

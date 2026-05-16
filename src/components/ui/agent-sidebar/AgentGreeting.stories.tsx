@@ -18,9 +18,9 @@ export default meta;
 type Story = StoryObj<typeof AgentGreeting>;
 
 const MODELS: AgentGreetingModel[] = [
-  { id: "claude-sonnet-4-6", label: "Sonnet 4.6" },
-  { id: "claude-opus-4-7", label: "Opus 4.7" },
-  { id: "claude-haiku-4-5", label: "Haiku 4.5" },
+  { id: "claude-sonnet-4-6", label: "Sonnet 4.6", description: "Balanced" },
+  { id: "claude-opus-4-7", label: "Opus 4.7", description: "Adaptive" },
+  { id: "claude-haiku-4-5", label: "Haiku 4.5", description: "Fast" },
 ];
 
 export const WelcomeBack: Story = {

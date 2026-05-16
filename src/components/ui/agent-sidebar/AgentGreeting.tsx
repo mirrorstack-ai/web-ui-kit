@@ -22,6 +22,9 @@ export const meta: ComponentMeta = {
 export interface AgentGreetingModel {
   id: string;
   label: string;
+  /** Optional one-line tagline shown under the label inside the dropdown
+   *  (e.g. "Adaptive" for "Opus 4.7"). The trigger pill only shows label. */
+  description?: string;
 }
 
 export interface AgentGreetingProps {
@@ -43,10 +46,21 @@ export interface AgentGreetingProps {
   className?: string;
 }
 
+const MIN_TEXTAREA_HEIGHT = 80;
 const MAX_TEXTAREA_HEIGHT = 200;
-const MENU_W = 200;
+const MENU_W = 220;
 const MENU_R = 12;
 const MENU_IR = 8;
+// Extra breathing room INSIDE the notch on the left of the trigger pill.
+// Right side stays flush — the send button sits there, so we don't intrude.
+const NOTCH_PADDING_LEFT = 10;
+// Extends the notch tab a few pixels BELOW the trigger so the tab reads as
+// a deeper "hook" into the dropdown body (rather than ending flush at the
+// trigger's bottom edge).
+const NOTCH_PADDING_BOTTOM = 6;
+// Optical nudge: shift the entire notch + dropdown ~2px right so the
+// notch tab visually rests inside the trigger's rounded-full silhouette.
+const NOTCH_SHIFT_RIGHT = 2;
 
 export function AgentGreeting({
   greeting,
@@ -77,11 +91,14 @@ export function AgentGreeting({
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
+    el.style.height = `${Math.min(Math.max(el.scrollHeight, MIN_TEXTAREA_HEIGHT), MAX_TEXTAREA_HEIGHT)}px`;
   }, [text]);
 
-  // Measure the trigger pill so the notch tab matches its size and sits
-  // directly under it — mirrors AgentSidebarHeader's overflow-dropdown pattern.
+  // Measure the trigger pill so the notch tab sits directly under it —
+  // mirrors AgentSidebarHeader's overflow-dropdown measurement pattern.
+  // NOTCH_PADDING_LEFT extends the tab leftward for breathing room; the
+  // right side stays flush with the trigger so the dropdown doesn't
+  // intrude on the send button's territory.
   useLayoutEffect(() => {
     if (!modelMenuOpen) return;
     const trigger = modelTriggerRef.current;
@@ -90,9 +107,9 @@ export function AgentGreeting({
     if (!trigger || !menu || !content) return;
     const tRect = trigger.getBoundingClientRect();
     const mRect = menu.getBoundingClientRect();
-    setNotchTabWidth(tRect.width);
-    setNotchTabHeight(tRect.height);
-    setNotchX(tRect.left - mRect.left);
+    setNotchTabWidth(tRect.width + NOTCH_PADDING_LEFT);
+    setNotchTabHeight(tRect.height + NOTCH_PADDING_BOTTOM);
+    setNotchX(tRect.left - mRect.left - NOTCH_PADDING_LEFT + NOTCH_SHIFT_RIGHT);
     setMenuH(content.offsetHeight);
   }, [modelMenuOpen, selectedModelId, models]);
 
@@ -146,13 +163,13 @@ export function AgentGreeting({
         className,
       )}
     >
-      <div className="flex flex-col items-center gap-4 text-center">
+      <div className="flex items-center gap-4">
         {!hideLogo && (
-          <div className="size-14">
+          <div className="size-14 shrink-0">
             <Logo />
           </div>
         )}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col">
           <h1 className="text-3xl font-medium tracking-tight text-on-surface">
             {greeting}
           </h1>
@@ -212,8 +229,9 @@ export function AgentGreeting({
               {modelMenuOpen && (
                 <div
                   ref={modelMenuRef}
-                  className="absolute right-0 top-0 z-50 overflow-visible"
+                  className="absolute top-0 z-50 overflow-visible"
                   style={{
+                    right: -NOTCH_SHIFT_RIGHT,
                     filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
                   }}
                 >
@@ -255,9 +273,9 @@ export function AgentGreeting({
                             setModelMenuOpen(false);
                           }}
                           className={cn(
-                            "flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                            "flex items-baseline gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
                             selected
-                              ? "bg-on-surface/8 font-medium text-on-surface"
+                              ? "bg-on-surface/8 text-on-surface"
                               : "text-on-surface hover:bg-on-surface/8",
                           )}
                         >
@@ -265,13 +283,18 @@ export function AgentGreeting({
                             name="check"
                             size={16}
                             className={cn(
-                              "shrink-0",
-                              selected
-                                ? "text-on-surface"
-                                : "text-transparent",
+                              "shrink-0 translate-y-0.5",
+                              selected ? "text-on-surface" : "text-transparent",
                             )}
                           />
-                          {m.label}
+                          <span className={cn(selected && "font-medium")}>
+                            {m.label}
+                          </span>
+                          {m.description && (
+                            <span className="text-xs text-on-surface-variant">
+                              {m.description}
+                            </span>
+                          )}
                         </button>
                       );
                     })}
