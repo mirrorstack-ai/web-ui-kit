@@ -61,6 +61,10 @@ const NOTCH_PADDING_BOTTOM = 6;
 // Optical nudge: shift the entire notch + dropdown ~2px right so the
 // notch tab visually rests inside the trigger's rounded-full silhouette.
 const NOTCH_SHIFT_RIGHT = 2;
+// Lift the entire dropdown 2px so the notch tab tucks slightly above
+// the trigger pill — gives the trigger a "tab attached" look rather than
+// just floating above the body.
+const NOTCH_SHIFT_UP = 2;
 
 export function AgentGreeting({
   greeting,
@@ -229,9 +233,10 @@ export function AgentGreeting({
               {modelMenuOpen && (
                 <div
                   ref={modelMenuRef}
-                  className="absolute top-0 z-50 overflow-visible"
+                  className="absolute z-50 overflow-visible"
                   style={{
                     right: -NOTCH_SHIFT_RIGHT,
+                    top: -NOTCH_SHIFT_UP,
                     filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
                   }}
                 >
