@@ -6,7 +6,7 @@ import type { ComponentMeta } from "@/types/component-meta";
 export const meta: ComponentMeta = {
   name: "GraphSideSetting",
   description:
-    "Form for the Graph's display settings — node size, line thickness, label visibility, repulsion strength, and link distance.",
+    "Form for the Graph's display settings — node size, line thickness, tag visibility (labels always show), repulsion strength, and link distance.",
 };
 
 export interface GraphSideSettingValue {
@@ -14,8 +14,8 @@ export interface GraphSideSettingValue {
   nodeSize: number;
   /** Multiplier on edge stroke width. */
   lineSize: number;
-  /** Show the text label under each node. */
-  showLabels: boolean;
+  /** Render each node's tag text below its always-visible label. Default off. */
+  showTags: boolean;
   /** Force-sim pairwise repulsion strength. */
   repulsion: number;
   /** Force-sim edge spring rest length. */
@@ -53,12 +53,12 @@ export function GraphSideSetting({
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       <label className="flex items-center justify-between gap-2 py-2 text-sm text-on-surface">
-        <span>Show labels</span>
+        <span>Show tags</span>
         <Switch
           size="sm"
-          checked={value.showLabels}
-          onChange={(checked) => set("showLabels", checked)}
-          aria-label="Show labels"
+          checked={value.showTags}
+          onChange={(checked) => set("showTags", checked)}
+          aria-label="Show tags"
         />
       </label>
       <SliderRow

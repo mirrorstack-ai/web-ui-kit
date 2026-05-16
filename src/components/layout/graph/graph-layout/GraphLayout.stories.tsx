@@ -328,30 +328,40 @@ export const WithGraphAndSettings: Story = {
     const graphRef = useRef<GraphHandle>(null);
     const [view, setView] = useState<SideView>(null);
     const [groups, setGroups] = useState<GraphSideGroupItem[]>([
-      { id: "user", name: "User", color: "#f5c14a" },
-      { id: "core", name: "Core", color: "#a8d8a8" },
-      { id: "project", name: "Project", color: "#cbb6e5" },
-      { id: "crm", name: "CRM", color: "#f4a8a8" },
-      { id: "daily", name: "Daily", color: "#fbb6ce" },
-      { id: "balance", name: "Balance", color: "#8db8e8" },
-      { id: "commerce", name: "Commerce", color: "#6ee7b7" },
+      { id: "user", name: "User", query: "user", color: "#f5c14a" },
+      { id: "core", name: "Core", query: "core", color: "#a8d8a8" },
+      { id: "project", name: "Project", query: "project", color: "#cbb6e5" },
+      { id: "crm", name: "CRM", query: "crm", color: "#f4a8a8" },
+      { id: "daily", name: "Daily", query: "daily", color: "#fbb6ce" },
+      { id: "balance", name: "Balance", query: "balance", color: "#8db8e8" },
+      { id: "commerce", name: "Commerce", query: "commerce", color: "#6ee7b7" },
     ]);
     const [setting, setSetting] = useState<GraphSideSettingValue>({
       nodeSize: 1,
       lineSize: 1,
-      showLabels: true,
+      showTags: false,
       repulsion: 1500,
       linkDistance: 70,
     });
     const [search, setSearch] = useState("");
     const [playing, setPlaying] = useState(false);
-    // Default group matching: substring-search the group's name across each
-    // node's fields in priority order — Title (label) > Tags > Description
-    // (summary) > Content (markdown body). The highest-priority field that
-    // any group matches wins, breaking ties by group list order. The
-    // structured-query version (path:, tag:, [property:]) ships in a
-    // follow-up PR.
+    // Platform sources exposed to GraphSideGroup. Lowercase by convention
+    // so they match the input casing as the user types.
+    const nodeSources = useMemo(
+      () => ["apps", "account", "crm", "daily", "balance", "projectify"],
+      [],
+    );
+    // Default group matching: substring-search the group's `query` (falling
+    // back to `name` if empty) across each node's fields in priority order —
+    // Title (label) > Tags > Description (summary) > Content (markdown). The
+    // highest-priority field that any group matches wins, breaking ties by
+    // group list order. Known operator prefixes (`source:`, `name:`,
+    // `description:`, `content:`) are stripped before matching so picking a
+    // value from the popover Just Works; the structured per-field parser
+    // ships in a follow-up PR.
     const colors = useMemo(() => {
+      const stripOperator = (q: string) =>
+        q.replace(/^(?:source|name|description|content):\s*/i, "");
       const resolve = (n: GraphNode): string | undefined => {
         const d = NODE_DETAILS[n.id];
         const fieldsByPriority = [n.label, n.tag, d?.summary, d?.content];
@@ -359,7 +369,8 @@ export const WithGraphAndSettings: Story = {
           if (!field) continue;
           const f = field.toLowerCase();
           for (const g of groups) {
-            const q = g.name.trim().toLowerCase();
+            const raw = (g.query?.trim() || g.name);
+            const q = stripOperator(raw).trim().toLowerCase();
             if (q && f.includes(q)) return g.color;
           }
         }
@@ -392,7 +403,7 @@ export const WithGraphAndSettings: Story = {
             onNodeClick={(id) => setView({ type: "node", id })}
             nodeSize={setting.nodeSize}
             lineSize={setting.lineSize}
-            showLabels={setting.showLabels}
+            showTags={setting.showTags}
             repulsion={setting.repulsion}
             linkDistance={setting.linkDistance}
             colors={colors}
@@ -439,6 +450,7 @@ export const WithGraphAndSettings: Story = {
                           <GraphSideGroup
                             groups={groups}
                             onChange={setGroups}
+                            sources={nodeSources}
                           />
                         ),
                       },

@@ -88,6 +88,11 @@ export {
   type CardProps,
 } from "./components/ui/surfaces/card/Card";
 export {
+  OptionList,
+  type OptionListProps,
+  type OptionListItem,
+} from "./components/ui/surfaces/option-list/OptionList";
+export {
   Avatar,
   type AvatarProps,
   type AvatarSize,
@@ -273,6 +278,7 @@ export {
   GraphSideContent,
   GraphSideSetting,
   GraphSideGroup,
+  DEFAULT_GROUP_PALETTE,
   GraphSideSearch,
   GraphSideNodeSummary,
   GraphSideNodeDetail,
