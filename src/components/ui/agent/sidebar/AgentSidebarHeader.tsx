@@ -329,8 +329,11 @@ export function AgentSidebarHeader({
         </div>
       </div>
 
-      {/* Actions */}
-      <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
+      {/* Actions. relative z-10 lifts the icon buttons above the
+          active-tab Notch SVG (z-[5]), whose rendered path can extend
+          past its CSS bounding box and paint over the right edge of
+          the header when the tab is wide. */}
+      <div ref={overflowRef} className="relative z-10 flex items-center gap-0.5 pr-1 shrink-0">
         {overflowTabs.length > 0 ? (
           <div ref={triggerBtnRef} className="relative z-[51]">
             <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
