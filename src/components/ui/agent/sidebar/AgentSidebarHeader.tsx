@@ -287,10 +287,10 @@ export function AgentSidebarHeader({
               >
                 <div
                   className={cn(
-                    "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none",
+                    "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none min-w-0",
                     isActive
-                      ? "text-inverse-on-surface z-10 min-w-[100px]"
-                      : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50 min-w-[80px]",
+                      ? "text-inverse-on-surface z-10"
+                      : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50",
                     "w-full",
                   )}
                 >
