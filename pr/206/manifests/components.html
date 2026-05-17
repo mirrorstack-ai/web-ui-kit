@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1646,22 +1646,22 @@ logo: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Asks</h2>
       <div class="badges">
-        <label for="c-5-agent-asks-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-5-agent-asks-info" class="badge info as-toggle">1 info</label>
-        <label for="c-5-agent-asks-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-5-ui-agent-asks-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-5-ui-agent-asks-info" class="badge info as-toggle">1 info</label>
+        <label for="c-5-ui-agent-asks-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/agent/asks/AgentAsks.stories.tsx">agent-asks · ./src/components/ui/agent/asks/AgentAsks.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/agent/asks/AgentAsks.stories.tsx">ui-agent-asks · ./src/components/ui/agent/asks/AgentAsks.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-5-agent-asks-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-5-agent-asks-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-5-agent-asks-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-5-ui-agent-asks-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-5-ui-agent-asks-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-5-ui-agent-asks-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -1676,7 +1676,7 @@ logo: ReactNode</code></pre>
   4 |
 &gt; 5 | const meta: Meta = {
     | ^
-  6 |   title: &quot;Agent/Asks&quot;,
+  6 |   title: &quot;UI/Agent/Asks&quot;,
   7 |   decorators: [
   8 |     (Story) =&gt; (
 
@@ -1686,7 +1686,7 @@ import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
 import { AgentSidebarMultiQuestion } from &quot;./AgentSidebarMultiQuestion&quot;;
 
 const meta: Meta = {
-  title: &quot;Agent/Asks&quot;,
+  title: &quot;UI/Agent/Asks&quot;,
   decorators: [
     (Story) =&gt; (
       &lt;div className=&quot;h-[640px] w-[420px] rounded-2xl overflow-hidden flex flex-col bg-on-background p-4 overflow-y-auto&quot;&gt;
@@ -6531,22 +6531,22 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Messages</h2>
       <div class="badges">
-        <label for="c-35-agent-messages-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-35-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-35-agent-messages-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-35-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-35-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
+        <label for="c-35-ui-agent-messages-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/agent/messages/AgentMessages.stories.tsx">agent-messages · ./src/components/ui/agent/messages/AgentMessages.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/agent/messages/AgentMessages.stories.tsx">ui-agent-messages · ./src/components/ui/agent/messages/AgentMessages.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-35-agent-messages-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-35-agent-messages-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-35-agent-messages-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-35-ui-agent-messages-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-35-ui-agent-messages-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-35-ui-agent-messages-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6561,7 +6561,7 @@ variant?: &quot;filled&quot; | &quot;tonal&quot; | &quot;outline&quot; | &quot;t
    6 |
 &gt;  7 | const meta: Meta = {
      | ^
-   8 |   title: &quot;Agent/Messages&quot;,
+   8 |   title: &quot;UI/Agent/Messages&quot;,
    9 |   decorators: [
   10 |     (Story) =&gt; (
 
@@ -6573,7 +6573,7 @@ import {
 } from &quot;./AgentSidebarMessage&quot;;
 
 const meta: Meta = {
-  title: &quot;Agent/Messages&quot;,
+  title: &quot;UI/Agent/Messages&quot;,
   decorators: [
     (Story) =&gt; (
       &lt;div className=&quot;h-[420px] w-[420px] rounded-2xl overflow-hidden flex flex-col bg-on-background p-4&quot;&gt;
@@ -8945,22 +8945,22 @@ title: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Sidebar</h2>
       <div class="badges">
-        <label for="c-48-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-48-agent-sidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-48-agent-sidebar-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-48-ui-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-48-ui-agent-sidebar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-48-ui-agent-sidebar-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx">agent-sidebar · ./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx">ui-agent-sidebar · ./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-48-agent-sidebar-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-48-agent-sidebar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-48-agent-sidebar-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-48-ui-agent-sidebar-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-48-ui-agent-sidebar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-48-ui-agent-sidebar-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -8975,7 +8975,7 @@ title: ReactNode</code></pre>
   10 |
 &gt; 11 | const meta: Meta = {
      | ^
-  12 |   title: &quot;Agent/Sidebar&quot;,
+  12 |   title: &quot;UI/Agent/Sidebar&quot;,
   13 |   decorators: [
   14 |     (Story) =&gt; (
 
@@ -8991,7 +8991,7 @@ import {
 import { mockAgentHistory, mockAgentMessages } from &quot;./mock-data&quot;;
 
 const meta: Meta = {
-  title: &quot;Agent/Sidebar&quot;,
+  title: &quot;UI/Agent/Sidebar&quot;,
   decorators: [
     (Story) =&gt; (
       &lt;div className=&quot;h-[640px] w-[420px] rounded-2xl overflow-hidden flex flex-col&quot;&gt;
@@ -10788,22 +10788,22 @@ value: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Asks</h2>
       <div class="badges">
-        <label for="c-error-0-agent-asks-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-0-agent-asks-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-agent-asks-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-error-0-ui-agent-asks-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-0-ui-agent-asks-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-0-ui-agent-asks-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/agent/asks/AgentAsks.stories.tsx">agent-asks · ./src/components/ui/agent/asks/AgentAsks.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/agent/asks/AgentAsks.stories.tsx">ui-agent-asks · ./src/components/ui/agent/asks/AgentAsks.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-0-agent-asks-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-0-agent-asks-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-0-agent-asks-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-0-ui-agent-asks-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-0-ui-agent-asks-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-0-ui-agent-asks-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -10818,7 +10818,7 @@ value: string</code></pre>
   4 |
 &gt; 5 | const meta: Meta = {
     | ^
-  6 |   title: &quot;Agent/Asks&quot;,
+  6 |   title: &quot;UI/Agent/Asks&quot;,
   7 |   decorators: [
   8 |     (Story) =&gt; (
 
@@ -10828,7 +10828,7 @@ import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
 import { AgentSidebarMultiQuestion } from &quot;./AgentSidebarMultiQuestion&quot;;
 
 const meta: Meta = {
-  title: &quot;Agent/Asks&quot;,
+  title: &quot;UI/Agent/Asks&quot;,
   decorators: [
     (Story) =&gt; (
       &lt;div className=&quot;h-[640px] w-[420px] rounded-2xl overflow-hidden flex flex-col bg-on-background p-4 overflow-y-auto&quot;&gt;
@@ -11290,22 +11290,22 @@ export const MultiQuestionList: StoryObj = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Messages</h2>
       <div class="badges">
-        <label for="c-error-1-agent-messages-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-1-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-1-agent-messages-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-1-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-1-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-1-ui-agent-messages-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/agent/messages/AgentMessages.stories.tsx">agent-messages · ./src/components/ui/agent/messages/AgentMessages.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/agent/messages/AgentMessages.stories.tsx">ui-agent-messages · ./src/components/ui/agent/messages/AgentMessages.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-1-agent-messages-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-1-agent-messages-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-1-agent-messages-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-1-ui-agent-messages-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-1-ui-agent-messages-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-1-ui-agent-messages-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -11320,7 +11320,7 @@ export const MultiQuestionList: StoryObj = {
    6 |
 &gt;  7 | const meta: Meta = {
      | ^
-   8 |   title: &quot;Agent/Messages&quot;,
+   8 |   title: &quot;UI/Agent/Messages&quot;,
    9 |   decorators: [
   10 |     (Story) =&gt; (
 
@@ -11332,7 +11332,7 @@ import {
 } from &quot;./AgentSidebarMessage&quot;;
 
 const meta: Meta = {
-  title: &quot;Agent/Messages&quot;,
+  title: &quot;UI/Agent/Messages&quot;,
   decorators: [
     (Story) =&gt; (
       &lt;div className=&quot;h-[420px] w-[420px] rounded-2xl overflow-hidden flex flex-col bg-on-background p-4&quot;&gt;
@@ -11447,22 +11447,22 @@ export const AgentStreaming: StoryObj = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Sidebar</h2>
       <div class="badges">
-        <label for="c-error-2-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-2-agent-sidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-2-agent-sidebar-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-2-ui-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-2-ui-agent-sidebar-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-2-ui-agent-sidebar-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx">agent-sidebar · ./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx">ui-agent-sidebar · ./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-2-agent-sidebar-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-2-agent-sidebar-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-2-agent-sidebar-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-2-ui-agent-sidebar-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-2-ui-agent-sidebar-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-2-ui-agent-sidebar-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -11477,7 +11477,7 @@ export const AgentStreaming: StoryObj = {
   10 |
 &gt; 11 | const meta: Meta = {
      | ^
-  12 |   title: &quot;Agent/Sidebar&quot;,
+  12 |   title: &quot;UI/Agent/Sidebar&quot;,
   13 |   decorators: [
   14 |     (Story) =&gt; (
 
@@ -11493,7 +11493,7 @@ import {
 import { mockAgentHistory, mockAgentMessages } from &quot;./mock-data&quot;;
 
 const meta: Meta = {
-  title: &quot;Agent/Sidebar&quot;,
+  title: &quot;UI/Agent/Sidebar&quot;,
   decorators: [
     (Story) =&gt; (
       &lt;div className=&quot;h-[640px] w-[420px] rounded-2xl overflow-hidden flex flex-col&quot;&gt;
