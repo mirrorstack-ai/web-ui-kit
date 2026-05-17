@@ -141,9 +141,21 @@ export function AgentSidebarHeader({
     const tab = activeTabRef.current;
     const header = headerRef.current;
     if (!tab || !header) { setActiveTabRect(null); return; }
-    const tRect = tab.getBoundingClientRect();
-    const hRect = header.getBoundingClientRect();
-    setActiveTabRect({ left: tRect.left - hRect.left, width: tRect.width });
+    const measure = () => {
+      const tRect = tab.getBoundingClientRect();
+      const hRect = header.getBoundingClientRect();
+      setActiveTabRect({ left: tRect.left - hRect.left, width: tRect.width });
+    };
+    measure();
+    // Re-measure during drag: sidebarWidth state doesn't update until
+    // mouse-up, but the flex layout (and therefore the active tab's
+    // measured width) changes continuously. RO keeps the notch SVG in
+    // lockstep so it doesn't visibly lag the tab.
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(tab);
+    observer.observe(header);
+    return () => observer.disconnect();
   }, [activeTabId, visibleCount, sidebarWidth, tabs.length]);
 
   useLayoutEffect(() => {
@@ -270,8 +282,8 @@ export function AgentSidebarHeader({
       )}
 
       {/* Tabs */}
-      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 pr-1.5 gap-1.5">
-        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 h-full gap-1.5">
+      <div ref={tabsContainerRef} className="flex-1 min-w-0 flex h-full overflow-hidden pl-10 pr-1.5 gap-1.5">
+        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 min-w-0 h-full gap-1.5">
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
@@ -283,7 +295,7 @@ export function AgentSidebarHeader({
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTabId(tab.id)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTabId(tab.id); } }}
-                className="group relative h-full flex flex-1"
+                className="group relative h-full flex flex-1 min-w-0"
               >
                 <div
                   className={cn(
