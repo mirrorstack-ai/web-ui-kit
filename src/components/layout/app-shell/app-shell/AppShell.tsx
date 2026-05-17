@@ -189,11 +189,14 @@ function AppShellInner({
         </div>
       </div>
 
-      {/* Right: agent sidebar */}
+      {/* Right: agent sidebar. `starting:!w-0` compiles to an
+          @starting-style block that holds width at 0 on mount, then
+          transition-all interpolates up to the inline style — so open
+          uses the same curve + duration as drag-end + collapse. */}
       {sidebarWidth > 0 && (
         <div
           className={cn(
-            "flex justify-end shrink-0",
+            "flex justify-end shrink-0 starting:!w-0",
             isOverlaying
               ? "fixed top-0 right-0 h-screen z-30"
               : "relative z-50",
