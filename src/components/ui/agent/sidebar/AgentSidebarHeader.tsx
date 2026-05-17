@@ -284,9 +284,11 @@ export function AgentSidebarHeader({
         </div>
       )}
 
-      {/* Tabs */}
-      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 pr-1.5 gap-1.5">
-        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 h-full gap-1.5">
+      {/* Tabs — !transition-none on the tab + its inner box so flex-1
+          width changes snap during a live sidebar drag instead of easing
+          through whatever transition class the ancestor chain inherits. */}
+      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 pr-1.5 gap-1.5 !transition-none">
+        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 h-full gap-1.5 !transition-none">
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
@@ -298,11 +300,11 @@ export function AgentSidebarHeader({
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTabId(tab.id)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTabId(tab.id); } }}
-                className="group relative h-full flex flex-1"
+                className="group relative h-full flex flex-1 !transition-none"
               >
                 <div
                   className={cn(
-                    "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none",
+                    "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none !transition-none",
                     isActive
                       ? "text-inverse-on-surface z-10 min-w-[100px]"
                       : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50 min-w-[80px]",
