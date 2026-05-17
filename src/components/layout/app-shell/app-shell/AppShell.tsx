@@ -189,65 +189,69 @@ function AppShellInner({
         </div>
       </div>
 
-      {/* Right: agent sidebar */}
-      {sidebarWidth > 0 && (
-        <div
-          className={cn(
-            "flex justify-end shrink-0",
-            isOverlaying
-              ? "fixed top-0 right-0 h-screen z-30"
-              : "relative z-50",
-            !isResizing && "transition-all duration-300",
-          )}
-          style={isOverlaying ? undefined : { width: `${sidebarWidth + 10}px` }}
-        >
-          {isOverlaying && (
-            <div
-              className="fixed inset-0 bg-black/20 -z-10"
-              onClick={handleClose}
+      {/* Right: agent sidebar. Always rendered so the open/close transition
+          shares the same animated width track as the resize handle —
+          conditional render would pop the sidebar in without animation
+          (and the main column would jump-reflow). When sidebarWidth === 0
+          the wrapper collapses to width 0 and overflow-hidden swallows
+          the content; the toggle button below takes over. */}
+      <div
+        className={cn(
+          "flex justify-end shrink-0 overflow-hidden",
+          isOverlaying
+            ? "fixed top-0 right-0 h-screen z-30"
+            : "relative z-50",
+          !isResizing && "transition-all duration-300",
+        )}
+        style={isOverlaying ? undefined : { width: sidebarWidth > 0 ? `${sidebarWidth + 10}px` : "0px" }}
+        aria-hidden={sidebarWidth === 0}
+      >
+        {isOverlaying && sidebarWidth > 0 && (
+          <div
+            className="fixed inset-0 bg-black/20 -z-10"
+            onClick={handleClose}
+          />
+        )}
+
+        <div className="flex">
+          <div
+            className="w-2 flex cursor-ew-resize z-20 rounded-full hover:bg-primary-container transition-colors shrink-0"
+            onMouseDown={startResize}
+          />
+
+          <div
+            ref={sidebarElRef}
+            className="overflow-hidden relative my-2 mr-2 flex flex-col"
+            style={{ width: `${sidebarWidth}px`, height: "calc(100vh - 1rem)" }}
+          >
+            <AgentSidebarHeader
+              sidebarWidth={sidebarWidth}
+              onToggleCollapse={handleToggleCollapse}
+              onClose={handleClose}
+              history={agentHistory}
+              onSelectHistoryItem={onSelectAgentHistoryItem}
             />
-          )}
 
-          <div className="flex">
-            <div
-              className="w-2 flex cursor-ew-resize z-20 rounded-full hover:bg-primary-container transition-colors shrink-0"
-              onMouseDown={startResize}
-            />
-
-            <div
-              ref={sidebarElRef}
-              className="overflow-hidden relative my-2 mr-2 flex flex-col"
-              style={{ width: `${sidebarWidth}px`, height: "calc(100vh - 1rem)" }}
-            >
-              <AgentSidebarHeader
-                sidebarWidth={sidebarWidth}
-                onToggleCollapse={handleToggleCollapse}
-                onClose={handleClose}
-                history={agentHistory}
-                onSelectHistoryItem={onSelectAgentHistoryItem}
-              />
-
-              <div className="rounded-2xl bg-on-background flex-1 min-h-0 flex flex-col">
-                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
-                  {agentSidebarContent}
-                </div>
-
-                {agentPendingContent && (
-                  <div className="shrink-0 mx-3 mt-2 mb-1 rounded-xl bg-inverse-on-surface/[0.06] backdrop-blur-md border border-inverse-on-surface/[0.08] p-3">
-                    {agentPendingContent}
-                  </div>
-                )}
-
-                <AgentSidebarInput
-                  onSend={onAgentSend}
-                  onAttachFile={onAgentAttachFile}
-                  onMic={onAgentMic}
-                />
+            <div className="rounded-2xl bg-on-background flex-1 min-h-0 flex flex-col">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
+                {agentSidebarContent}
               </div>
+
+              {agentPendingContent && (
+                <div className="shrink-0 mx-3 mt-2 mb-1 rounded-xl bg-inverse-on-surface/[0.06] backdrop-blur-md border border-inverse-on-surface/[0.08] p-3">
+                  {agentPendingContent}
+                </div>
+              )}
+
+              <AgentSidebarInput
+                onSend={onAgentSend}
+                onAttachFile={onAgentAttachFile}
+                onMic={onAgentMic}
+              />
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Agent toggle button */}
       {sidebarWidth === 0 && (
