@@ -84,6 +84,13 @@
   --animate-progress-wave-dash: progress-dash 1.5s ease-in-out infinite;
   --animate-progress-four-color: progress-four-color 3s linear infinite;
   --animate-wave-bar: wave-bar 1s ease-in-out infinite;
+
+  /* Agent sidebar enter — fires once when AppShell mounts the sidebar
+     wrapper (closed → open). Animates width from 0 to the element's
+     current CSS width, so the main column visibly "pushes left"
+     instead of snapping. Drag + post-drag width changes stay on
+     transition-all and are unaffected. */
+  --animate-ms-sidebar-enter: ms-sidebar-enter 300ms ease-out;
 }
 
 /* Dark mode */
@@ -244,6 +251,12 @@ body {
 @keyframes wave-bar {
   0%, 100% { transform: scaleY(0.4); }
   50% { transform: scaleY(1); }
+}
+
+@keyframes ms-sidebar-enter {
+  from { width: 0; }
+  /* `to` is implicit — animates up to whatever inline-style width is
+     set on the element (e.g. sidebarWidth + 10px). */
 }
 
 /* Scrollbar — themed to match design tokens.
