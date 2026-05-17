@@ -5,7 +5,7 @@ import {
 } from "./AgentSidebarMessage";
 
 const meta: Meta = {
-  title: "Agent/Messages",
+  title: "UI/Agent/Messages",
   decorators: [
     (Story) => (
       <div className="h-[420px] w-[420px] rounded-2xl overflow-hidden flex flex-col bg-on-background p-4">

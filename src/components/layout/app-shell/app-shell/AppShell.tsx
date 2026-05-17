@@ -4,9 +4,9 @@ import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { SidebarProvider, useSidebarWidth } from "@/context/sidebar/SidebarProvider";
 import { SnackbarProvider, SnackbarOutlet } from "@/context/snackbar/SnackbarProvider";
-import { AgentSidebarHeader } from "@/components/ui/agent-sidebar/AgentSidebarHeader";
-import { AgentSidebarInput } from "@/components/ui/agent-sidebar/AgentSidebarInput";
-import type { AgentSidebarHistoryGroup } from "@/components/ui/agent-sidebar/types";
+import { AgentSidebarHeader } from "@/components/ui/agent/sidebar/AgentSidebarHeader";
+import { AgentSidebarInput } from "@/components/ui/agent/sidebar/AgentSidebarInput";
+import type { AgentSidebarHistoryGroup } from "@/components/ui/agent/sidebar/types";
 
 export const meta: ComponentMeta = {
   name: "AppShell",

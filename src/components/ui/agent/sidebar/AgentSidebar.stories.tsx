@@ -5,11 +5,11 @@ import { AgentSidebarInput } from "./AgentSidebarInput";
 import {
   AgentSidebarMessages,
   type AgentSidebarMessage,
-} from "./AgentSidebarMessages";
+} from "../messages/AgentSidebarMessages";
 import { mockAgentHistory, mockAgentMessages } from "./mock-data";
 
 const meta: Meta = {
-  title: "Agent/Sidebar",
+  title: "UI/Agent/Sidebar",
   decorators: [
     (Story) => (
       <div className="h-[640px] w-[420px] rounded-2xl overflow-hidden flex flex-col">

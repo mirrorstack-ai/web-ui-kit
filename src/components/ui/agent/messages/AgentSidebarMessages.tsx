@@ -11,7 +11,7 @@ import {
   type AgentSidebarMultiQuestionStatus,
   type AgentSidebarMultiQuestionAnswer,
   type AgentSidebarMultiQuestionLayout,
-} from "./AgentSidebarMultiQuestion";
+} from "../asks/AgentSidebarMultiQuestion";
 
 export type AgentSidebarMessage =
   | {
