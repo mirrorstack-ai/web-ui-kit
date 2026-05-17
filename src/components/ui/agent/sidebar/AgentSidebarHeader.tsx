@@ -141,20 +141,19 @@ export function AgentSidebarHeader({
     const tab = activeTabRef.current;
     const header = headerRef.current;
     if (!tab || !header) { setActiveTabRect(null); return; }
-    const measure = () => {
+    const update = () => {
       const tRect = tab.getBoundingClientRect();
       const hRect = header.getBoundingClientRect();
       setActiveTabRect({ left: tRect.left - hRect.left, width: tRect.width });
     };
-    measure();
-    // Re-measure during drag: sidebarWidth state doesn't update until
-    // mouse-up, but the flex layout (and therefore the active tab's
-    // measured width) changes continuously. RO keeps the notch SVG in
-    // lockstep so it doesn't visibly lag the tab.
+    update();
+    // ResizeObserver keeps the notch shape locked to the active tab even
+    // during a live sidebar drag — sidebarWidth (prop) only updates on
+    // drag release, so without this the notch would lag behind the
+    // flex-shrunk tab DOM until the user let go.
     if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
+    const observer = new ResizeObserver(update);
     observer.observe(tab);
-    observer.observe(header);
     return () => observer.disconnect();
   }, [activeTabId, visibleCount, sidebarWidth, tabs.length]);
 
@@ -282,8 +281,8 @@ export function AgentSidebarHeader({
       )}
 
       {/* Tabs */}
-      <div ref={tabsContainerRef} className="flex-1 min-w-0 flex h-full overflow-hidden pl-10 pr-1.5 gap-1.5">
-        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 min-w-0 h-full gap-1.5">
+      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 pr-1.5 gap-1.5">
+        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 h-full gap-1.5">
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
@@ -295,14 +294,14 @@ export function AgentSidebarHeader({
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTabId(tab.id)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTabId(tab.id); } }}
-                className="group relative h-full flex flex-1 min-w-0"
+                className="group relative h-full flex flex-1"
               >
                 <div
                   className={cn(
-                    "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none min-w-0",
+                    "relative flex items-center gap-2 px-3 h-full cursor-pointer select-none",
                     isActive
-                      ? "text-inverse-on-surface z-10"
-                      : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50",
+                      ? "text-inverse-on-surface z-10 min-w-[100px]"
+                      : "h-7 m-auto rounded-lg bg-secondary-container text-on-surface/80 hover:bg-on-secondary-container/50 min-w-[80px]",
                     "w-full",
                   )}
                 >
@@ -329,11 +328,8 @@ export function AgentSidebarHeader({
         </div>
       </div>
 
-      {/* Actions. relative z-10 lifts the icon buttons above the
-          active-tab Notch SVG (z-[5]), whose rendered path can extend
-          past its CSS bounding box and paint over the right edge of
-          the header when the tab is wide. */}
-      <div ref={overflowRef} className="relative z-10 flex items-center gap-0.5 pr-1 shrink-0">
+      {/* Actions */}
+      <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
         {overflowTabs.length > 0 ? (
           <div ref={triggerBtnRef} className="relative z-[51]">
             <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
