@@ -188,7 +188,11 @@ export function AgentSidebarHeader({
 
   return (
     <div ref={headerRef} className="relative flex items-center h-10 shrink-0">
-      {/* Active tab notch shape (rendered at header level to avoid overflow clip) */}
+      {/* Active tab notch shape (rendered at header level to avoid overflow clip).
+          transition-none + !transition-none keeps the notch snapping to the
+          tab on every ResizeObserver fire — without it, parent transitions
+          (e.g. the wrapper's transition-all on open / drag-end) can bleed in
+          via `all` and give the notch a perceptible easing curve. */}
       {activeTabRect && (
         <Notch
           width={1000}
@@ -202,7 +206,7 @@ export function AgentSidebarHeader({
           fill="var(--color-on-background)"
           stroke="none"
           headOnly
-          className="absolute z-[5]"
+          className="absolute z-[5] !transition-none"
           style={{ left: activeTabRect.left - TAB_IR, top: 0 }}
         />
       )}
