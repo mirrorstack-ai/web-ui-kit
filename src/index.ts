@@ -143,6 +143,10 @@ export {
   type StatCardProps,
 } from "./components/ui/data/stat-card/StatCard";
 export {
+  Markdown,
+  type MarkdownProps,
+} from "./components/ui/data/markdown/Markdown";
+export {
   SettingRow,
   type SettingRowProps,
 } from "./components/ui/data/setting-row/SettingRow";
