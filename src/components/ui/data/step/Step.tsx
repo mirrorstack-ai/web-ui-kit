@@ -67,7 +67,7 @@ export function Step({
             </Button>
           )}
         </div>
-        {children && <div className="mt-4">{children}</div>}
+        {children}
       </div>
     </section>
   );
