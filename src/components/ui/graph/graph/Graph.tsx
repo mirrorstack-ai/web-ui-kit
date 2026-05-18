@@ -214,6 +214,27 @@ const REVEAL_TRANSITION_STYLE = { transition: "opacity 200ms ease" };
 // per node per frame.
 const LABEL_TEXT_STYLE = { fontSize: 10 };
 
+// Per-node LOD: which labels to render at the current zoom level. Always
+// show anchors (pinned), interaction state (focused/hovered), and synthetic
+// tag nodes (their label IS the tag). Other labels reveal progressively as
+// the user zooms in — high-degree hubs first, low-degree leaves last —
+// so a dense graph stays readable when zoomed out.
+function shouldShowLabel(
+  degree: number,
+  pinned: boolean,
+  focused: boolean,
+  hovered: boolean,
+  isTagNode: boolean,
+  zoom: number,
+): boolean {
+  if (isTagNode || pinned || focused || hovered) return true;
+  // Thresholds are calibrated so the default zoom (1.0) shows every
+  // label — LOD only kicks in when the user actually zooms out.
+  if (degree >= 5) return zoom >= 0.4;
+  if (degree >= 2) return zoom >= 0.7;
+  return zoom >= 1.0;
+}
+
 // Prefix used for synthetic "tag nodes" spawned when `showTags` is true.
 // One tag node per unique tag value in the consumer's nodes prop, each
 // connected via virtual edges to the real nodes carrying that tag.
@@ -832,15 +853,24 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                     strokeWidth={isTagNode ? 1.25 / view.zoom : undefined}
                     style={isTagNode ? undefined : nodeStyle}
                   />
-                  <text
-                    x={n.x}
-                    y={n.y + r + 12}
-                    textAnchor="middle"
-                    className="fill-on-surface-variant pointer-events-none"
-                    style={LABEL_TEXT_STYLE}
-                  >
-                    {n.label}
-                  </text>
+                  {shouldShowLabel(
+                    n.degree,
+                    n.pinned,
+                    isFocused,
+                    hoveredId === n.id,
+                    isTagNode,
+                    view.zoom,
+                  ) && (
+                    <text
+                      x={n.x}
+                      y={n.y + r + 12}
+                      textAnchor="middle"
+                      className="fill-on-surface-variant pointer-events-none"
+                      style={LABEL_TEXT_STYLE}
+                    >
+                      {n.label}
+                    </text>
+                  )}
                 </g>
               );
             })}
