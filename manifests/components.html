@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/61 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">61/61 infos</a><span class="filter-pill ok" aria-disabled="true">225 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/61 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">61/61 infos</a><span class="filter-pill ok" aria-disabled="true">227 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2150,7 +2150,7 @@ export const MultiQuestionList: StoryObj = {
       <div class="badges">
         <label for="c-6-ui-media-avatar-props" class="badge ok as-toggle">9 prop types</label>
         <label for="c-6-ui-media-avatar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-6-ui-media-avatar-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-6-ui-media-avatar-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -2244,6 +2244,21 @@ src?: string | null</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
+                <span class="ex-name">Square Sizes</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Square avatars get a per-size radius — `sm` → `rounded-md`, `md` → `rounded-lg`, `lg` → `rounded-xl`, `xl` → `rounded-2xl`. Each radius is ~15-20% of the side length so the visual rounding ratio stays consistent as the avatar scales.</div>
+              <pre><code>const SquareSizes = () =&gt; (
+  &lt;div className=&quot;flex items-center gap-4&quot;&gt;
+    {([&quot;sm&quot;, &quot;md&quot;, &quot;lg&quot;, &quot;xl&quot;] as AvatarSize[]).map((size) =&gt; (
+      &lt;Avatar key={size} size={size} square fallback=&quot;M&quot; /&gt;
+    ))}
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
                 <span class="ex-name">With Image</span>
                 <span class="badge ok">story ok</span>
               </div>
@@ -2285,6 +2300,23 @@ src?: string | null</code></pre>
     size=&quot;xl&quot;
     editable
     overlay={&lt;Progress type=&quot;circular&quot; variant=&quot;wave&quot; size=&quot;sm&quot; color=&quot;primary&quot; /&gt;} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Icon Overlay</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`overlay` now renders for non-editable avatars too — useful for showing a material symbol icon as the avatar (e.g. a module&#39;s declared icon) instead of an initials fallback.</div>
+              <pre><code>const WithIconOverlay = () =&gt; &lt;Avatar
+    fallback=&quot;&quot;
+    size=&quot;xl&quot;
+    square
+    overlay={(&lt;span
+      className=&quot;material-symbols-rounded text-primary&quot;
+      style={{ fontSize: 40 }}
+    &gt;rocket_launch
+            &lt;/span&gt;)} /&gt;;</code></pre>
             </div>
         </div>
     
