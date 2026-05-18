@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/61 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">61/61 infos</a><span class="filter-pill ok" aria-disabled="true">221 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/61 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">61/61 infos</a><span class="filter-pill ok" aria-disabled="true">225 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -8158,9 +8158,9 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ReadOnlyField</h2>
       <div class="badges">
-        <label for="c-43-ui-data-readonlyfield-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-43-ui-data-readonlyfield-props" class="badge ok as-toggle">9 prop types</label>
         <label for="c-43-ui-data-readonlyfield-info" class="badge info as-toggle">1 info</label>
-        <label for="c-43-ui-data-readonlyfield-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-43-ui-data-readonlyfield-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -8192,7 +8192,7 @@ variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">7 prop types</span>
+              <span class="badge ok">9 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/data/read-only-field/ReadOnlyField.tsx::ReadOnlyField</code></pre>
             <pre><code>Props:</code></pre>
@@ -8202,10 +8202,23 @@ copyable?: boolean = false
 
 label: string
 
+/**
+ * &quot;stacked&quot; puts label above value (default). &quot;inline&quot; puts them on one row.
+ */
+layout?: &quot;stacked&quot; | &quot;inline&quot; = &quot;stacked&quot;
+
 mono?: boolean = false
 
 onCopy?: () =&gt; void
 
+/**
+ * Slot rendered before the value (e.g. small icon).
+ */
+prefix?: ReactNode
+
+/**
+ * Slot rendered after the value (e.g. status badge).
+ */
 suffix?: ReactNode
 
 value: string</code></pre>
@@ -8220,7 +8233,7 @@ value: string</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { Badge, ReadOnlyField } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { Badge, Icon, ReadOnlyField } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -8262,6 +8275,55 @@ value: string</code></pre>
               
               
               <pre><code>const Mono = () =&gt; &lt;ReadOnlyField label=&quot;Module ID&quot; value=&quot;oauth-core-v2&quot; mono /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Inline</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`layout=&quot;inline&quot;` puts the label on the left and the value on the right of the same row — useful for footer-style label/value pairs where vertical space matters.</div>
+              <pre><code>const Inline = () =&gt; &lt;ReadOnlyField label=&quot;Published by&quot; value=&quot;@i-am-nothing&quot; mono layout=&quot;inline&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Inline With Copy</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Inline + copyable + suffix all compose. The shared `valueRow` makes sure these work identically in both layouts.</div>
+              <pre><code>const InlineWithCopy = () =&gt; &lt;ReadOnlyField
+    label=&quot;API key&quot;
+    value=&quot;sk-live-1234567890abcdef&quot;
+    mono
+    copyable
+    layout=&quot;inline&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Prefix</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`prefix` is rendered before the value — useful for a leading icon or status dot.</div>
+              <pre><code>const WithPrefix = () =&gt; &lt;ReadOnlyField
+    label=&quot;Status&quot;
+    value=&quot;Connected&quot;
+    prefix={&lt;span className=&quot;size-2 rounded-full bg-success&quot; /&gt;} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Inline With Prefix</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`prefix` also works in the inline layout.</div>
+              <pre><code>const InlineWithPrefix = () =&gt; &lt;ReadOnlyField
+    label=&quot;Region&quot;
+    value=&quot;us-east-1&quot;
+    mono
+    layout=&quot;inline&quot;
+    prefix={&lt;Icon name=&quot;public&quot; size={16} className=&quot;text-on-surface-variant&quot; /&gt;} /&gt;;</code></pre>
             </div>
         </div>
     
