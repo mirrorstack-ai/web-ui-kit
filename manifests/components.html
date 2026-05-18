@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/61 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">61/61 infos</a><span class="filter-pill ok" aria-disabled="true">219 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/61 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">61/61 infos</a><span class="filter-pill ok" aria-disabled="true">221 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3531,9 +3531,9 @@ value: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Dialog</h2>
       <div class="badges">
-        <label for="c-14-ui-surfaces-dialog-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-14-ui-surfaces-dialog-props" class="badge ok as-toggle">7 prop types</label>
         <label for="c-14-ui-surfaces-dialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-14-ui-surfaces-dialog-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-14-ui-surfaces-dialog-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -3565,7 +3565,7 @@ value: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">6 prop types</span>
+              <span class="badge ok">7 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/dialog/Dialog.tsx::Dialog</code></pre>
             <pre><code>Props:</code></pre>
@@ -3574,6 +3574,12 @@ value: string</code></pre>
 children?: ReactNode
 
 className?: string
+
+/**
+ * Hide the built-in X close button in the top-right corner. The X is
+ *  rendered by default whenever `onClose` is provided.
+ */
+hideCloseButton?: boolean = false
 
 onClose?: () =&gt; void
 
@@ -3670,6 +3676,48 @@ title?: string</code></pre>
     open
     title={undefined}
     actions={[{ label: &quot;OK&quot;, onClick: () =&gt; {}, variant: &quot;filled&quot; }]}&gt;A simple message dialog without a title heading.&lt;/Dialog&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Close Button</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">The built-in X close button renders at the top-right whenever `onClose` is provided. It anchors to the outer wrapper, not the scrollable inner box, so it never gets clipped when the body overflows.</div>
+              <pre><code>const WithCloseButton = () =&gt; &lt;Dialog
+    open
+    title=&quot;Module detail&quot;
+    onClose={() =&gt; {}}
+    actions={[
+      { label: &quot;Close&quot;, onClick: () =&gt; {} },
+      { label: &quot;Install&quot;, onClick: () =&gt; {}, variant: &quot;filled&quot; },
+    ]}&gt;(&lt;p className=&quot;text-on-surface-variant text-sm&quot;&gt;The close affordance in the corner is provided by Dialog itself — no
+              extra JSX required at the call site. Pass &lt;code className=&quot;font-mono&quot;&gt;onClose&lt;/code&gt;and it appears.
+            &lt;/p&gt;)&lt;/Dialog&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Hide Close Button</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Pass `hideCloseButton` to suppress the built-in X — useful for hard-confirm flows where Escape / backdrop dismissal is also disabled and the only valid exit is one of the action buttons.</div>
+              <pre><code>const HideCloseButton = () =&gt; &lt;Dialog
+    open
+    title=&quot;Confirm permanent deletion&quot;
+    onClose={() =&gt; {}}
+    hideCloseButton
+    actions={[
+      { label: &quot;Cancel&quot;, onClick: () =&gt; {} },
+      {
+        label: &quot;Delete&quot;,
+        onClick: () =&gt; {},
+        variant: &quot;filled&quot;,
+        color: &quot;error&quot;,
+      },
+    ]}&gt;(&lt;p className=&quot;text-on-surface-variant text-sm&quot;&gt;With &lt;code className=&quot;font-mono&quot;&gt;hideCloseButton&lt;/code&gt;the user must
+              choose one of the actions — no X in the corner.
+            &lt;/p&gt;)&lt;/Dialog&gt;;</code></pre>
             </div>
         </div>
     
