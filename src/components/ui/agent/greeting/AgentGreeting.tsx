@@ -183,9 +183,9 @@ export function AgentGreeting({
         className,
       )}
     >
-      <div className="flex items-start gap-2">
+      <div className={cn("flex gap-2", subtitle ? "items-start" : "items-center")}>
         {!hideLogo && (
-          <div className="size-14 shrink-0 -mt-2">
+          <div className={cn("size-14 shrink-0", subtitle && "-mt-2")}>
             <Logo />
           </div>
         )}
