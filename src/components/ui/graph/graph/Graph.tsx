@@ -210,9 +210,40 @@ const DEFAULT_H = 400;
 // when revealedRef changes.
 const REVEAL_TRANSITION_STYLE = { transition: "opacity 200ms ease" };
 
-// Shared text-style object so we don't allocate a new `{ fontSize }` literal
-// per node per frame.
-const LABEL_TEXT_STYLE = { fontSize: 10 };
+// Shared text-style object so we don't allocate a new style literal per
+// node per frame. Includes a CSS opacity transition so labels fade in /
+// out smoothly when the LOD value changes (zoom, hover, focus) rather
+// than popping on/off.
+const LABEL_TEXT_STYLE = {
+  fontSize: 10,
+  transition: "opacity 200ms ease",
+};
+
+// Per-node LOD: target opacity (0..1) for each label at the current zoom.
+// Anchors (pinned), interaction state (focused/hovered), and synthetic
+// tag nodes always render at full opacity. Sparse graphs (< 10 nodes)
+// also stay at full opacity — there's nothing to declutter. Dense graphs
+// fade non-hub labels in/out based on a zoom-linear ramp per tier:
+// mid-degree fades early, leaves fade later. At default zoom (1.0) hubs
+// + mid show fully and leaves sit at ~20% opacity (faintly visible);
+// zoom in past ~1.4 reaches full opacity for everyone.
+function labelOpacity(
+  degree: number,
+  pinned: boolean,
+  focused: boolean,
+  hovered: boolean,
+  isTagNode: boolean,
+  zoom: number,
+  totalNodes: number,
+): number {
+  if (isTagNode || pinned || focused || hovered) return 1;
+  if (totalNodes < 10) return 1;
+  if (degree >= 5) return 1;
+  const ramp = (min: number, max: number) =>
+    Math.max(0, Math.min(1, (zoom - min) / (max - min)));
+  if (degree >= 2) return ramp(0.7, 1.0);
+  return ramp(0.9, 1.4);
+}
 
 // Prefix used for synthetic "tag nodes" spawned when `showTags` is true.
 // One tag node per unique tag value in the consumer's nodes prop, each
@@ -838,6 +869,15 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                     textAnchor="middle"
                     className="fill-on-surface-variant pointer-events-none"
                     style={LABEL_TEXT_STYLE}
+                    opacity={labelOpacity(
+                      n.degree,
+                      n.pinned,
+                      isFocused,
+                      hoveredId === n.id,
+                      isTagNode,
+                      view.zoom,
+                      allNodes.length,
+                    )}
                   >
                     {n.label}
                   </text>
