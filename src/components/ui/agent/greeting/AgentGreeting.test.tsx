@@ -160,6 +160,22 @@ describe("AgentGreeting", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("renders the chat input by default", () => {
+    render(<AgentGreeting greeting="Welcome" />);
+    expect(
+      screen.getByLabelText("Start a conversation with the agent"),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Send message")).toBeInTheDocument();
+  });
+
+  it("hides the chat input when hideInput is true", () => {
+    render(<AgentGreeting greeting="Welcome" hideInput />);
+    expect(
+      screen.queryByLabelText("Start a conversation with the agent"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Send message")).not.toBeInTheDocument();
+  });
+
   it("closes the picker on Escape", () => {
     render(<AgentGreeting greeting="Welcome" models={MODELS} />);
     fireEvent.click(screen.getByLabelText("Model: Fast"));

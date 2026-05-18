@@ -237,7 +237,7 @@ export function AgentGreeting({
                 ref={modelTriggerRef}
                 type="button"
                 onClick={() => setModelMenuOpen((open) => !open)}
-                className="relative z-[51] flex h-10 cursor-pointer items-center gap-1.5 rounded-full px-4 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
+                className="relative z-[51] flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-4 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
                 aria-label={`Model: ${activeModel.label}`}
                 aria-haspopup="listbox"
                 aria-expanded={modelMenuOpen}
