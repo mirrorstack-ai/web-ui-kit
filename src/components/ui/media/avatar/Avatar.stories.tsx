@@ -49,6 +49,26 @@ export const SquareSizes: Story = {
   ),
 };
 
+/**
+ * Fallback supports up to 3 characters. Pass "AB" for two-letter
+ * initials, "ABC" for three-letter monograms — the text size scales
+ * down per char count so each variant stays legible at every Avatar
+ * size.
+ */
+export const MultiCharFallback: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {(["sm", "md", "lg", "xl"] as AvatarSize[]).map((size) => (
+        <div key={size} className="flex items-center gap-4">
+          <Avatar size={size} fallback="A" />
+          <Avatar size={size} fallback="AB" />
+          <Avatar size={size} fallback="ABC" />
+        </div>
+      ))}
+    </div>
+  ),
+};
+
 export const WithImage: Story = {
   args: {
     src: "https://i.pravatar.cc/150?img=12",
