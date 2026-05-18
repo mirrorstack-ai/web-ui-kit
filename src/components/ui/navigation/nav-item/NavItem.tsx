@@ -42,7 +42,7 @@ export function NavItem({
   return (
     <button
       className={cn(
-        "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+        "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
         active && variant === "default" ? activeStyle : variantStyles[variant],
         className,
       )}
