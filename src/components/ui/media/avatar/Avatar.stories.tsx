@@ -33,6 +33,22 @@ export const Sizes: Story = {
   ),
 };
 
+/**
+ * Square avatars get a per-size radius — `sm` → `rounded-md`, `md` →
+ * `rounded-lg`, `lg` → `rounded-xl`, `xl` → `rounded-2xl`. Each radius
+ * is ~15-20% of the side length so the visual rounding ratio stays
+ * consistent as the avatar scales.
+ */
+export const SquareSizes: Story = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      {(["sm", "md", "lg", "xl"] as AvatarSize[]).map((size) => (
+        <Avatar key={size} size={size} square fallback="M" />
+      ))}
+    </div>
+  ),
+};
+
 export const WithImage: Story = {
   args: {
     src: "https://i.pravatar.cc/150?img=12",
@@ -62,5 +78,26 @@ export const WithOverlay: Story = {
     size: "xl",
     editable: true,
     overlay: <Progress type="circular" variant="wave" size="sm" color="primary" />,
+  },
+};
+
+/**
+ * `overlay` now renders for non-editable avatars too — useful for
+ * showing a material symbol icon as the avatar (e.g. a module's
+ * declared icon) instead of an initials fallback.
+ */
+export const WithIconOverlay: Story = {
+  args: {
+    size: "xl",
+    square: true,
+    fallback: "",
+    overlay: (
+      <span
+        className="material-symbols-rounded text-primary"
+        style={{ fontSize: 40 }}
+      >
+        rocket_launch
+      </span>
+    ),
   },
 };

@@ -76,3 +76,53 @@ export const NoTitle: Story = {
     actions: [{ label: "OK", onClick: () => {}, variant: "filled" }],
   },
 };
+
+/**
+ * The built-in X close button renders at the top-right whenever `onClose` is
+ * provided. It anchors to the outer wrapper, not the scrollable inner box, so
+ * it never gets clipped when the body overflows.
+ */
+export const WithCloseButton: Story = {
+  args: {
+    title: "Module detail",
+    onClose: () => {},
+    children: (
+      <p className="text-on-surface-variant text-sm">
+        The close affordance in the corner is provided by Dialog itself — no
+        extra JSX required at the call site. Pass <code className="font-mono">onClose</code> and it appears.
+      </p>
+    ),
+    actions: [
+      { label: "Close", onClick: () => {} },
+      { label: "Install", onClick: () => {}, variant: "filled" },
+    ],
+  },
+};
+
+/**
+ * Pass `hideCloseButton` to suppress the built-in X — useful for hard-confirm
+ * flows where Escape / backdrop dismissal is also disabled and the only valid
+ * exit is one of the action buttons.
+ */
+export const HideCloseButton: Story = {
+  args: {
+    title: "Confirm permanent deletion",
+    onClose: () => {},
+    hideCloseButton: true,
+    children: (
+      <p className="text-on-surface-variant text-sm">
+        With <code className="font-mono">hideCloseButton</code> the user must
+        choose one of the actions — no X in the corner.
+      </p>
+    ),
+    actions: [
+      { label: "Cancel", onClick: () => {} },
+      {
+        label: "Delete",
+        onClick: () => {},
+        variant: "filled",
+        color: "error",
+      },
+    ],
+  },
+};

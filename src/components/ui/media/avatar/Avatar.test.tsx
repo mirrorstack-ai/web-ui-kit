@@ -36,10 +36,13 @@ describe("Avatar", () => {
     expect(input).toBeInTheDocument();
   });
 
-  it("applies square shape when square prop set", () => {
-    const { container } = render(<Avatar square fallback="S" />);
-    const inner = container.querySelector(".rounded-2xl");
-    expect(inner).toBeInTheDocument();
+  it("applies a square radius that scales with size", () => {
+    const xl = render(<Avatar square size="xl" fallback="S" />);
+    expect(xl.container.querySelector(".rounded-3xl")).toBeInTheDocument();
+    xl.unmount();
+
+    const sm = render(<Avatar square size="sm" fallback="S" />);
+    expect(sm.container.querySelector(".rounded-lg")).toBeInTheDocument();
   });
 
   it("renders overlay and hides initials", () => {
@@ -48,10 +51,12 @@ describe("Avatar", () => {
     expect(screen.queryByText("U")).not.toBeInTheDocument();
   });
 
-  it("uses uniform rounded-2xl for non-editable square", () => {
-    const { container } = render(<Avatar square fallback="S" />);
-    const inner = container.querySelector(".rounded-2xl");
-    expect(inner).toBeInTheDocument();
-    expect(container.querySelector(".rounded-br-3xl")).not.toBeInTheDocument();
+  it("non-editable square avoids the badge-accommodating bottom-right radius", () => {
+    const { container } = render(<Avatar square size="xl" fallback="S" />);
+    expect(container.querySelector(".rounded-3xl")).toBeInTheDocument();
+    // The rounded-br-* override is only used when editable+square so
+    // the corner visually carves room for the edit badge; a
+    // non-editable square stays uniform.
+    expect(container.querySelector('[class*="rounded-br-"]')).not.toBeInTheDocument();
   });
 });
