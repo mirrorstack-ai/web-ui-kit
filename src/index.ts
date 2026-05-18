@@ -139,6 +139,10 @@ export {
   type ReadOnlyFieldProps,
 } from "./components/ui/data/read-only-field/ReadOnlyField";
 export {
+  StatCard,
+  type StatCardProps,
+} from "./components/ui/data/stat-card/StatCard";
+export {
   SettingRow,
   type SettingRowProps,
 } from "./components/ui/data/setting-row/SettingRow";
