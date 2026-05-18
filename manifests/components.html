@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/61 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">61/61 infos</a><span class="filter-pill ok" aria-disabled="true">227 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/61 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">61/61 infos</a><span class="filter-pill ok" aria-disabled="true">228 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2155,7 +2155,7 @@ export const MultiQuestionList: StoryObj = {
       <div class="badges">
         <label for="c-6-ui-media-avatar-props" class="badge ok as-toggle">9 prop types</label>
         <label for="c-6-ui-media-avatar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-6-ui-media-avatar-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-6-ui-media-avatar-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -2258,6 +2258,25 @@ src?: string | null</code></pre>
   &lt;div className=&quot;flex items-center gap-4&quot;&gt;
     {([&quot;sm&quot;, &quot;md&quot;, &quot;lg&quot;, &quot;xl&quot;] as AvatarSize[]).map((size) =&gt; (
       &lt;Avatar key={size} size={size} square fallback=&quot;M&quot; /&gt;
+    ))}
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Multi Char Fallback</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Fallback supports up to 3 characters. Pass &quot;AB&quot; for two-letter initials, &quot;ABC&quot; for three-letter monograms — the text size scales down per char count so each variant stays legible at every Avatar size.</div>
+              <pre><code>const MultiCharFallback = () =&gt; (
+  &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+    {([&quot;sm&quot;, &quot;md&quot;, &quot;lg&quot;, &quot;xl&quot;] as AvatarSize[]).map((size) =&gt; (
+      &lt;div key={size} className=&quot;flex items-center gap-4&quot;&gt;
+        &lt;Avatar size={size} fallback=&quot;A&quot; /&gt;
+        &lt;Avatar size={size} fallback=&quot;AB&quot; /&gt;
+        &lt;Avatar size={size} fallback=&quot;ABC&quot; /&gt;
+      &lt;/div&gt;
     ))}
   &lt;/div&gt;
 );</code></pre>
