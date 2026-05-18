@@ -185,7 +185,7 @@ export function AgentGreeting({
     >
       <div className="flex items-start gap-2">
         {!hideLogo && (
-          <div className="size-14 shrink-0 -mt-2">
+          <div className="size-14 shrink-0 -mt-4">
             <Logo />
           </div>
         )}
