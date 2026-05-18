@@ -216,9 +216,11 @@ const LABEL_TEXT_STYLE = { fontSize: 10 };
 
 // Per-node LOD: which labels to render at the current zoom level. Always
 // show anchors (pinned), interaction state (focused/hovered), and synthetic
-// tag nodes (their label IS the tag). Other labels reveal progressively as
-// the user zooms in — high-degree hubs first, low-degree leaves last —
-// so a dense graph stays readable when zoomed out.
+// tag nodes (their label IS the tag). Sparse graphs (< 10 nodes) keep
+// every label visible — there's nothing to declutter. Dense graphs hide
+// low-degree leaves at default zoom and reveal them progressively as the
+// user zooms in, so a 60-node graph reads as ~7 hub labels by default
+// and the leaf labels surface when the user wants the detail.
 function shouldShowLabel(
   degree: number,
   pinned: boolean,
@@ -226,13 +228,13 @@ function shouldShowLabel(
   hovered: boolean,
   isTagNode: boolean,
   zoom: number,
+  totalNodes: number,
 ): boolean {
   if (isTagNode || pinned || focused || hovered) return true;
-  // Thresholds are calibrated so the default zoom (1.0) shows every
-  // label — LOD only kicks in when the user actually zooms out.
+  if (totalNodes < 10) return true;
   if (degree >= 5) return zoom >= 0.4;
-  if (degree >= 2) return zoom >= 0.7;
-  return zoom >= 1.0;
+  if (degree >= 2) return zoom >= 1.2;
+  return zoom >= 1.5;
 }
 
 // Prefix used for synthetic "tag nodes" spawned when `showTags` is true.
@@ -860,6 +862,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                     hoveredId === n.id,
                     isTagNode,
                     view.zoom,
+                    allNodes.length,
                   ) && (
                     <text
                       x={n.x}
