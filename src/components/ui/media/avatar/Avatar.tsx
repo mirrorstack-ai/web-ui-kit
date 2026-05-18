@@ -15,10 +15,10 @@ const sizeMap: Record<
   AvatarSize,
   { container: string; text: string; badge: string; badgeIcon: number; squareRadius: string; squareBadgeRadius: string }
 > = {
-  sm: { container: "w-8 h-8", text: "text-xs", badge: "w-5 h-5", badgeIcon: 12, squareRadius: "rounded-md", squareBadgeRadius: "rounded-md rounded-br-lg" },
-  md: { container: "w-10 h-10", text: "text-sm", badge: "w-6 h-6", badgeIcon: 12, squareRadius: "rounded-lg", squareBadgeRadius: "rounded-lg rounded-br-xl" },
-  lg: { container: "w-16 h-16", text: "text-xl", badge: "w-6 h-6", badgeIcon: 14, squareRadius: "rounded-xl", squareBadgeRadius: "rounded-xl rounded-br-2xl" },
-  xl: { container: "w-20 h-20", text: "text-2xl", badge: "w-7 h-7", badgeIcon: 14, squareRadius: "rounded-2xl", squareBadgeRadius: "rounded-2xl rounded-br-3xl" },
+  sm: { container: "w-8 h-8", text: "text-xs", badge: "w-5 h-5", badgeIcon: 12, squareRadius: "rounded-lg", squareBadgeRadius: "rounded-lg rounded-br-xl" },
+  md: { container: "w-10 h-10", text: "text-sm", badge: "w-6 h-6", badgeIcon: 12, squareRadius: "rounded-xl", squareBadgeRadius: "rounded-xl rounded-br-2xl" },
+  lg: { container: "w-16 h-16", text: "text-xl", badge: "w-6 h-6", badgeIcon: 14, squareRadius: "rounded-2xl", squareBadgeRadius: "rounded-2xl rounded-br-3xl" },
+  xl: { container: "w-20 h-20", text: "text-2xl", badge: "w-7 h-7", badgeIcon: 14, squareRadius: "rounded-3xl", squareBadgeRadius: "rounded-3xl rounded-br-[2rem]" },
 };
 
 export interface AvatarProps {
