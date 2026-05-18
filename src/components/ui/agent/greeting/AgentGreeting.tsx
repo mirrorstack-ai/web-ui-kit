@@ -43,6 +43,8 @@ export interface AgentGreetingProps {
   onSelectModel?: (modelId: string) => void;
   /** Hide the MirrorStack logo above the greeting. Defaults to false. */
   hideLogo?: boolean;
+  /** Hide the chat input row — render greeting + logo only. */
+  hideInput?: boolean;
   className?: string;
 }
 
@@ -77,6 +79,7 @@ export function AgentGreeting({
   selectedModelId,
   onSelectModel,
   hideLogo = false,
+  hideInput = false,
   className,
 }: AgentGreetingProps) {
   const [text, setText] = useState("");
@@ -180,9 +183,9 @@ export function AgentGreeting({
         className,
       )}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-start gap-2">
         {!hideLogo && (
-          <div className="size-14 shrink-0">
+          <div className="size-14 shrink-0 -mt-2">
             <Logo />
           </div>
         )}
@@ -196,6 +199,7 @@ export function AgentGreeting({
         </div>
       </div>
 
+      {!hideInput && (
       <div className="flex w-full flex-col rounded-2xl border border-outline-variant bg-surface-container-low p-3 transition-colors focus-within:border-primary">
         <textarea
           ref={textareaRef}
@@ -330,6 +334,7 @@ export function AgentGreeting({
           />
         </div>
       </div>
+      )}
     </div>
   );
 }
