@@ -137,6 +137,7 @@ export {
 export {
   ReadOnlyField,
   type ReadOnlyFieldProps,
+  type ReadOnlyFieldLayout,
 } from "./components/ui/data/read-only-field/ReadOnlyField";
 export {
   Step,

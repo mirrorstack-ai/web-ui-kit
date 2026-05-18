@@ -6,8 +6,10 @@ import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 export const meta: ComponentMeta = {
   name: "ReadOnlyField",
   description:
-    "Label/value pair display with optional copy-to-clipboard button and suffix slot",
+    "Label/value pair display with optional copy-to-clipboard button, prefix/suffix slots, and stacked or inline layout.",
 };
+
+export type ReadOnlyFieldLayout = "stacked" | "inline";
 
 export interface ReadOnlyFieldProps {
   label: string;
@@ -15,7 +17,12 @@ export interface ReadOnlyFieldProps {
   mono?: boolean;
   copyable?: boolean;
   onCopy?: () => void;
+  /** Slot rendered before the value (e.g. small icon). */
+  prefix?: ReactNode;
+  /** Slot rendered after the value (e.g. status badge). */
   suffix?: ReactNode;
+  /** "stacked" puts label above value (default). "inline" puts them on one row. */
+  layout?: ReadOnlyFieldLayout;
   className?: string;
 }
 
@@ -25,7 +32,9 @@ export function ReadOnlyField({
   mono = false,
   copyable = false,
   onCopy,
+  prefix,
   suffix,
+  layout = "stacked",
   className,
 }: ReadOnlyFieldProps) {
   const [copied, setCopied] = useState(false);
@@ -40,32 +49,51 @@ export function ReadOnlyField({
     }).catch(() => {});
   }, [value, onCopy]);
 
+  const valueRow = (
+    <div className="flex items-center gap-2 min-h-8 min-w-0">
+      {prefix}
+      <span
+        className={cn(
+          "text-sm truncate",
+          mono ? "font-mono text-on-surface-variant" : "text-on-surface",
+        )}
+      >
+        {value}
+      </span>
+      {copyable && (
+        <IconButton
+          icon={copied ? "check" : "content_copy"}
+          variant="text"
+          size="sm"
+          onClick={handleCopy}
+          aria-label={copied ? "Copied" : `Copy ${label}`}
+          className={cn(
+            "shrink-0",
+            copied ? "text-success" : "text-on-surface-variant",
+          )}
+        />
+      )}
+      {suffix}
+    </div>
+  );
+
+  if (layout === "inline") {
+    return (
+      <div className={cn("flex items-center gap-3", className)}>
+        <label className="text-sm font-medium text-on-surface shrink-0">
+          {label}
+        </label>
+        <div className="flex-1 min-w-0">{valueRow}</div>
+      </div>
+    );
+  }
+
   return (
     <div className={className}>
       <label className="block text-sm font-medium text-on-surface mb-1">
         {label}
       </label>
-      <div className="flex items-center gap-2 min-h-8">
-        <span
-          className={cn(
-            "text-sm truncate",
-            mono ? "font-mono text-on-surface-variant" : "text-on-surface",
-          )}
-        >
-          {value}
-        </span>
-        {copyable && (
-          <IconButton
-            icon={copied ? "check" : "content_copy"}
-            variant="text"
-            size="sm"
-            onClick={handleCopy}
-            aria-label={copied ? "Copied" : `Copy ${label}`}
-            className={cn("shrink-0", copied ? "text-success" : "text-on-surface-variant")}
-          />
-        )}
-        {suffix}
-      </div>
+      {valueRow}
     </div>
   );
 }

@@ -53,4 +53,43 @@ describe("ReadOnlyField", () => {
     );
     expect(container.firstChild).toHaveClass("mt-4");
   });
+
+  it("renders the prefix slot before the value", () => {
+    render(
+      <ReadOnlyField
+        label="Status"
+        value="Connected"
+        prefix={<span data-testid="dot">●</span>}
+      />,
+    );
+    expect(screen.getByTestId("dot")).toBeInTheDocument();
+  });
+
+  it("renders stacked layout by default (label above value)", () => {
+    const { container } = render(<ReadOnlyField label="Email" value="a@b.c" />);
+    // The outer element does not get the inline flex wrapper.
+    expect(container.firstChild).not.toHaveClass("flex");
+  });
+
+  it("renders inline layout when layout='inline' (label beside value)", () => {
+    const { container } = render(
+      <ReadOnlyField label="Email" value="a@b.c" layout="inline" />,
+    );
+    expect(container.firstChild).toHaveClass("flex");
+    expect(container.firstChild).toHaveClass("items-center");
+  });
+
+  it("supports copyable + prefix together in inline layout", () => {
+    render(
+      <ReadOnlyField
+        label="Key"
+        value="abc-123"
+        layout="inline"
+        copyable
+        prefix={<span data-testid="dot">●</span>}
+      />,
+    );
+    expect(screen.getByTestId("dot")).toBeInTheDocument();
+    expect(screen.getByLabelText("Copy Key")).toBeInTheDocument();
+  });
 });
