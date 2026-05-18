@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
+import { flushSync } from "react-dom";
 import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
@@ -141,21 +142,28 @@ export function AgentSidebarHeader({
     const tab = activeTabRef.current;
     const header = headerRef.current;
     if (!tab || !header) { setActiveTabRect(null); return; }
-    const update = () => {
+    const measure = () => {
       const tRect = tab.getBoundingClientRect();
       const hRect = header.getBoundingClientRect();
-      setActiveTabRect({ left: tRect.left - hRect.left, width: tRect.width });
+      return { left: tRect.left - hRect.left, width: tRect.width };
     };
-    update();
-    // ResizeObserver keeps the notch shape locked to the active tab even
-    // during a live sidebar drag — sidebarWidth (prop) only updates on
-    // drag release, so without this the notch would lag behind the
-    // flex-shrunk tab DOM until the user let go.
+    setActiveTabRect(measure());
     if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(update);
+    // flushSync commits the notch position in the same frame the
+    // ResizeObserver fired — without it, RO → setState → render lags
+    // one frame behind the tab DOM during a live sidebar drag, which
+    // reads as a soft trailing curve on the notch.
+    const observer = new ResizeObserver(() => {
+      const next = measure();
+      flushSync(() =>
+        setActiveTabRect((prev) =>
+          prev && prev.left === next.left && prev.width === next.width ? prev : next,
+        ),
+      );
+    });
     observer.observe(tab);
     return () => observer.disconnect();
-  }, [activeTabId, visibleCount, sidebarWidth, tabs.length]);
+  }, [activeTabId, visibleCount, tabs.length]);
 
   useLayoutEffect(() => {
     if (!showOverflow || !ddContentRef.current) return;
