@@ -7,7 +7,33 @@ afterEach(cleanup);
 describe("Avatar", () => {
   it("renders initials fallback when no src", () => {
     render(<Avatar fallback="John" />);
-    expect(screen.getByText("J")).toBeInTheDocument();
+    expect(screen.getByText("JOH")).toBeInTheDocument();
+  });
+
+  it("uses up to 3 chars of the fallback, uppercased", () => {
+    const a = render(<Avatar fallback="A" />);
+    expect(a.getByText("A")).toBeInTheDocument();
+    a.unmount();
+
+    const ab = render(<Avatar fallback="ab" />);
+    expect(ab.getByText("AB")).toBeInTheDocument();
+    ab.unmount();
+
+    const abcde = render(<Avatar fallback="abcde" />);
+    expect(abcde.getByText("ABC")).toBeInTheDocument();
+  });
+
+  it("scales the text size down as char count grows", () => {
+    const one = render(<Avatar size="xl" fallback="A" />);
+    expect(one.getByText("A")).toHaveClass("text-2xl");
+    one.unmount();
+
+    const two = render(<Avatar size="xl" fallback="AB" />);
+    expect(two.getByText("AB")).toHaveClass("text-xl");
+    two.unmount();
+
+    const three = render(<Avatar size="xl" fallback="ABC" />);
+    expect(three.getByText("ABC")).toHaveClass("text-lg");
   });
 
   it("renders image when src provided", () => {

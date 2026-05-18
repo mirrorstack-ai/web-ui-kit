@@ -11,14 +11,49 @@ export const meta: ComponentMeta = {
 
 export type AvatarSize = "sm" | "md" | "lg" | "xl";
 
-const sizeMap: Record<
-  AvatarSize,
-  { container: string; text: string; badge: string; badgeIcon: number; squareRadius: string; squareBadgeRadius: string }
-> = {
-  sm: { container: "w-8 h-8", text: "text-xs", badge: "w-5 h-5", badgeIcon: 12, squareRadius: "rounded-lg", squareBadgeRadius: "rounded-lg rounded-br-xl" },
-  md: { container: "w-10 h-10", text: "text-sm", badge: "w-6 h-6", badgeIcon: 12, squareRadius: "rounded-xl", squareBadgeRadius: "rounded-xl rounded-br-2xl" },
-  lg: { container: "w-16 h-16", text: "text-xl", badge: "w-6 h-6", badgeIcon: 14, squareRadius: "rounded-2xl", squareBadgeRadius: "rounded-2xl rounded-br-3xl" },
-  xl: { container: "w-20 h-20", text: "text-2xl", badge: "w-7 h-7", badgeIcon: 14, squareRadius: "rounded-3xl", squareBadgeRadius: "rounded-3xl rounded-br-[2rem]" },
+interface SizeSpec {
+  container: string;
+  /** [1-char, 2-char, 3-char] text size class — narrower as char count grows. */
+  text: [string, string, string];
+  badge: string;
+  badgeIcon: number;
+  squareRadius: string;
+  squareBadgeRadius: string;
+}
+
+const sizeMap: Record<AvatarSize, SizeSpec> = {
+  sm: {
+    container: "w-8 h-8",
+    text: ["text-xs", "text-[10px]", "text-[9px]"],
+    badge: "w-5 h-5",
+    badgeIcon: 12,
+    squareRadius: "rounded-lg",
+    squareBadgeRadius: "rounded-lg rounded-br-xl",
+  },
+  md: {
+    container: "w-10 h-10",
+    text: ["text-sm", "text-xs", "text-[11px]"],
+    badge: "w-6 h-6",
+    badgeIcon: 12,
+    squareRadius: "rounded-xl",
+    squareBadgeRadius: "rounded-xl rounded-br-2xl",
+  },
+  lg: {
+    container: "w-16 h-16",
+    text: ["text-xl", "text-base", "text-sm"],
+    badge: "w-6 h-6",
+    badgeIcon: 14,
+    squareRadius: "rounded-2xl",
+    squareBadgeRadius: "rounded-2xl rounded-br-3xl",
+  },
+  xl: {
+    container: "w-20 h-20",
+    text: ["text-2xl", "text-xl", "text-lg"],
+    badge: "w-7 h-7",
+    badgeIcon: 14,
+    squareRadius: "rounded-3xl",
+    squareBadgeRadius: "rounded-3xl rounded-br-[2rem]",
+  },
 };
 
 export interface AvatarProps {
@@ -46,7 +81,11 @@ export function Avatar({
 }: AvatarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const s = sizeMap[size];
-  const initial = fallback.charAt(0).toUpperCase();
+  // Show up to 3 chars of the fallback, uppercased. Empty string falls back
+  // to the prop default "U" via destructuring, so initials is always at
+  // least length 1 unless the consumer explicitly passed "".
+  const initials = fallback.slice(0, 3).toUpperCase();
+  const textSize = s.text[Math.min(Math.max(initials.length, 1), 3) - 1];
   // Larger bottom-right radius only when editable+square (to accommodate the edit badge)
   const radius = square
     ? editable
@@ -80,8 +119,8 @@ export function Avatar({
         "bg-primary/20 flex items-center justify-center border-2 border-primary",
       )}
     >
-      {showInitial && (
-        <span className={cn("font-bold text-primary", s.text)}>{initial}</span>
+      {showInitial && initials && (
+        <span className={cn("font-bold text-primary", textSize)}>{initials}</span>
       )}
     </div>
   );
