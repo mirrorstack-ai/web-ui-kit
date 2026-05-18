@@ -13,12 +13,12 @@ export type AvatarSize = "sm" | "md" | "lg" | "xl";
 
 const sizeMap: Record<
   AvatarSize,
-  { container: string; text: string; badge: string; badgeIcon: number }
+  { container: string; text: string; badge: string; badgeIcon: number; squareRadius: string; squareBadgeRadius: string }
 > = {
-  sm: { container: "w-8 h-8", text: "text-xs", badge: "w-5 h-5", badgeIcon: 12 },
-  md: { container: "w-10 h-10", text: "text-sm", badge: "w-6 h-6", badgeIcon: 12 },
-  lg: { container: "w-16 h-16", text: "text-xl", badge: "w-6 h-6", badgeIcon: 14 },
-  xl: { container: "w-20 h-20", text: "text-2xl", badge: "w-7 h-7", badgeIcon: 14 },
+  sm: { container: "w-8 h-8", text: "text-xs", badge: "w-5 h-5", badgeIcon: 12, squareRadius: "rounded-md", squareBadgeRadius: "rounded-md rounded-br-lg" },
+  md: { container: "w-10 h-10", text: "text-sm", badge: "w-6 h-6", badgeIcon: 12, squareRadius: "rounded-lg", squareBadgeRadius: "rounded-lg rounded-br-xl" },
+  lg: { container: "w-16 h-16", text: "text-xl", badge: "w-6 h-6", badgeIcon: 14, squareRadius: "rounded-xl", squareBadgeRadius: "rounded-xl rounded-br-2xl" },
+  xl: { container: "w-20 h-20", text: "text-2xl", badge: "w-7 h-7", badgeIcon: 14, squareRadius: "rounded-2xl", squareBadgeRadius: "rounded-2xl rounded-br-3xl" },
 };
 
 export interface AvatarProps {
@@ -50,8 +50,8 @@ export function Avatar({
   // Larger bottom-right radius only when editable+square (to accommodate the edit badge)
   const radius = square
     ? editable
-      ? "rounded-2xl rounded-br-3xl"
-      : "rounded-2xl"
+      ? s.squareBadgeRadius
+      : s.squareRadius
     : "rounded-full";
 
   const handleClick = () => {
@@ -86,6 +86,17 @@ export function Avatar({
     </div>
   );
 
+  const overlayNode = overlay ? (
+    <div
+      className={cn(
+        "absolute inset-1 flex items-center justify-center pointer-events-none",
+        radius,
+      )}
+    >
+      {overlay}
+    </div>
+  ) : null;
+
   return (
     <div className={cn("relative inline-flex shrink-0", className)}>
       {editable ? (
@@ -98,16 +109,7 @@ export function Avatar({
           )}
         >
           {avatarContent}
-          {overlay ? (
-            <div
-              className={cn(
-                "absolute inset-1 flex items-center justify-center",
-                radius,
-              )}
-            >
-              {overlay}
-            </div>
-          ) : (
+          {overlayNode ?? (
             <div
               className={cn(
                 s.badge,
@@ -119,7 +121,10 @@ export function Avatar({
           )}
         </button>
       ) : (
-        avatarContent
+        <div className="relative">
+          {avatarContent}
+          {overlayNode}
+        </div>
       )}
 
       {editable && (
