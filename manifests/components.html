@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -742,7 +742,7 @@ onLoadMore?: () =&gt; void</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AgentGreeting</h2>
       <div class="badges">
-        <label for="c-1-ui-agent-greeting-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-1-ui-agent-greeting-props" class="badge ok as-toggle">12 prop types</label>
         <label for="c-1-ui-agent-greeting-info" class="badge info as-toggle">1 info</label>
         <label for="c-1-ui-agent-greeting-stories" class="badge ok as-toggle">6 stories</label>
         
@@ -776,7 +776,7 @@ onLoadMore?: () =&gt; void</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">11 prop types</span>
+              <span class="badge ok">12 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/agent/greeting/AgentGreeting.tsx::AgentGreeting</code></pre>
             <pre><code>Props:</code></pre>
@@ -786,6 +786,11 @@ onLoadMore?: () =&gt; void</code></pre>
  * Main heading, e.g. &quot;Welcome back, Nothing Chang&quot;.
  */
 greeting: string
+
+/**
+ * Hide the chat input row — render greeting + logo only.
+ */
+hideInput?: boolean = false
 
 /**
  * Hide the MirrorStack logo above the greeting. Defaults to false.
