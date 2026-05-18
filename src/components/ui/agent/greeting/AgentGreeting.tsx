@@ -185,7 +185,7 @@ export function AgentGreeting({
     >
       <div className="flex items-start gap-2">
         {!hideLogo && (
-          <div className="size-14 shrink-0 -mt-4">
+          <div className={cn("size-14 shrink-0", subtitle ? "-mt-2" : "-mt-4")}>
             <Logo />
           </div>
         )}
