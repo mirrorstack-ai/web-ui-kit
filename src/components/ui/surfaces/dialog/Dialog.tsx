@@ -2,6 +2,7 @@ import { useEffect, useRef, useId, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Button, type ButtonProps } from "@/components/ui/actions/button/Button";
+import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 
 export const meta: ComponentMeta = {
   name: "Dialog",
@@ -25,6 +26,9 @@ export interface DialogProps {
   children?: ReactNode;
   actions?: DialogAction[];
   className?: string;
+  /** Hide the built-in X close button in the top-right corner. The X is
+   *  rendered by default whenever `onClose` is provided. */
+  hideCloseButton?: boolean;
 }
 
 let scrollLockCount = 0;
@@ -48,6 +52,7 @@ export function Dialog({
   children,
   actions,
   className,
+  hideCloseButton = false,
 }: DialogProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -128,43 +133,57 @@ export function Dialog({
       />
       <div className="!m-0 fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
         <div
-          ref={dialogRef}
-          tabIndex={-1}
           className={cn(
-            "bg-surface rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl outline-none pointer-events-auto max-h-[90vh] overflow-y-auto",
+            "relative pointer-events-auto max-w-sm w-full mx-4",
             className,
           )}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={title ? titleId : undefined}
         >
-          {title && (
-            <h3
-              id={titleId}
-              className="text-lg font-semibold text-on-surface mb-4"
-            >
-              {title}
-            </h3>
+          {onClose && !hideCloseButton && (
+            <IconButton
+              icon="close"
+              variant="filled"
+              size="sm"
+              className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 z-10 shadow-md"
+              aria-label="Close"
+              onClick={onClose}
+            />
           )}
+          <div
+            ref={dialogRef}
+            tabIndex={-1}
+            className="bg-surface rounded-2xl border border-outline-variant p-6 shadow-xl outline-none max-h-[90vh] overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
+          >
+            {title && (
+              <h3
+                id={titleId}
+                className="text-lg font-semibold text-on-surface mb-4 pr-8"
+              >
+                {title}
+              </h3>
+            )}
 
-          {children}
+            {children}
 
-          {actions && actions.length > 0 && (
-            <div className="flex justify-end gap-3 mt-4">
-              {actions.map((action, i) => (
-                <Button
-                  key={`${i}-${action.label}`}
-                  variant={action.variant ?? "text"}
-                  color={action.color}
-                  onClick={action.onClick}
-                  loading={action.loading}
-                  disabled={action.disabled}
-                >
-                  {action.label}
-                </Button>
-              ))}
-            </div>
-          )}
+            {actions && actions.length > 0 && (
+              <div className="flex justify-end gap-3 mt-4">
+                {actions.map((action, i) => (
+                  <Button
+                    key={`${i}-${action.label}`}
+                    variant={action.variant ?? "text"}
+                    color={action.color}
+                    onClick={action.onClick}
+                    loading={action.loading}
+                    disabled={action.disabled}
+                  >
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
