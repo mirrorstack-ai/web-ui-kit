@@ -206,6 +206,102 @@ export const UnknownPrimitive: Story = {
   },
 };
 
+/** Custom notched shapes — exercises the outline tracer (PR #188) under
+ *  non-rectangular footprints. Demonstrates the four canonical patterns the
+ *  closed v1 stack used: L (corner notch), plus, T, and a 4×2 chart with a
+ *  notched top-right corner. Small accessory tiles drop into the notches. */
+export const CustomShapes: Story = {
+  args: {
+    primitives,
+    cols: 8,
+    blockMin: 96,
+    items: [
+      // L-hero (3×3 with bottom-right corner notched out)
+      {
+        key: "L",
+        desire: {
+          position: [0, 0],
+          shape: m([1, 1, 1], [1, 1, 1], [1, 1, 0]),
+        },
+        theme: { type: "filled", variant: "primary" },
+        ui: { type: "Label", label: "L-hero", value: "3×3 − ⌐" },
+      },
+      // 1×1 dropping into L's bottom-right notch (col 2, row 2)
+      {
+        key: "L-notch-fill",
+        desire: { position: [2, 2], shape: r(1, 1) },
+        theme: { type: "outlined", variant: "primary" },
+        ui: { type: "Label", label: "Nestled" },
+      },
+
+      // Plus shape (4 corner notches)
+      {
+        key: "plus",
+        desire: {
+          position: [3, 0],
+          shape: m([0, 1, 0], [1, 1, 1], [0, 1, 0]),
+        },
+        theme: { type: "filled", variant: "tertiary" },
+        ui: { type: "Center", label: "✚" },
+      },
+      // 1×1s dropping into the plus's four corner notches
+      {
+        key: "p-tl",
+        desire: { position: [3, 0], shape: r(1, 1) },
+        theme: { type: "filled", variant: "secondary" },
+        ui: { type: "Label", label: "↖" },
+      },
+      {
+        key: "p-tr",
+        desire: { position: [5, 0], shape: r(1, 1) },
+        theme: { type: "filled", variant: "secondary" },
+        ui: { type: "Label", label: "↗" },
+      },
+      {
+        key: "p-bl",
+        desire: { position: [3, 2], shape: r(1, 1) },
+        theme: { type: "filled", variant: "secondary" },
+        ui: { type: "Label", label: "↙" },
+      },
+      {
+        key: "p-br",
+        desire: { position: [5, 2], shape: r(1, 1) },
+        theme: { type: "filled", variant: "secondary" },
+        ui: { type: "Label", label: "↘" },
+      },
+
+      // T shape (3×2 with the bottom corners notched out)
+      {
+        key: "T",
+        desire: {
+          position: [0, 3],
+          shape: m([1, 1, 1], [0, 1, 0]),
+        },
+        theme: { type: "outlined", variant: "neutral" },
+        ui: { type: "Center", label: "T" },
+      },
+
+      // 4×2 chart with notched top-right corner (the closed PR's chart shape)
+      {
+        key: "chart",
+        desire: {
+          position: [4, 3],
+          shape: m([1, 1, 1, 0], [1, 1, 1, 1]),
+        },
+        theme: { type: "filled", variant: "tertiary" },
+        ui: { type: "Label", label: "Usage", value: "30d" },
+      },
+      // 1×1 dropping into the chart's top-right notch
+      {
+        key: "chart-notch",
+        desire: { position: [7, 3], shape: r(1, 1) },
+        theme: { type: "filled", variant: "primary" },
+        ui: { type: "Label", label: "Now" },
+      },
+    ] satisfies NotchGridItem[],
+  },
+};
+
 /** The architecture doc's overview-page example, adapted: an L-shaped hero,
  *  a sub-item panel with mixed sizes, and a few accessory tiles. */
 export const OverviewPage: Story = {

@@ -32,8 +32,13 @@ export interface ResolvedTheme {
   border: string;
   /** CSS `border-left` for elevated warn/error (color cue layered on lift). */
   borderLeft?: string;
-  /** CSS `box-shadow` — token reference or `"none"`. */
+  /** CSS `box-shadow` — rectangular shadow on the bounding box. Kept for
+   *  consumers that want bounding-box shadows. */
   boxShadow: string;
+  /** CSS `filter` — drop-shadow chain that traces the actual rendered shape
+   *  (SVG paths, notches). Use this on a wrapper around the painted content
+   *  for accurate-to-outline shadows. `"none"` when no lift is intended. */
+  filter: string;
 }
 
 const DEFAULT_VARIANT: Exclude<ThemeVariant, "auto"> = "neutral";
@@ -150,6 +155,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         color: FILL_FG[variant],
         border: "none",
         boxShadow: "none",
+        filter: "none",
       };
     }
     case "outlined": {
@@ -158,6 +164,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         color: ACCENT[variant],
         border: `1px solid ${OUTLINE_BORDER[variant]}`,
         boxShadow: "none",
+        filter: "none",
       };
     }
     case "elevated": {
@@ -168,6 +175,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         border: "none",
         ...(isAlert ? { borderLeft: `4px solid ${ACCENT[variant]}` } : {}),
         boxShadow: "var(--shadow-m3-1)",
+        filter: "var(--filter-m3-1)",
       };
     }
     case "ghost": {
@@ -176,6 +184,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         color: ACCENT[variant],
         border: "none",
         boxShadow: "none",
+        filter: "none",
       };
     }
   }

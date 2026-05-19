@@ -206,10 +206,28 @@ describe("resolveNotchTheme — exhaustive type×variant matrix", () => {
         const r = resolveNotchTheme({ type, variant });
         if (type === "elevated") {
           expect(r.boxShadow).toBe("var(--shadow-m3-1)");
+          expect(r.filter).toBe("var(--filter-m3-1)");
         } else {
           expect(r.boxShadow).toBe("none");
+          expect(r.filter).toBe("none");
         }
       }
     }
+  });
+
+  it("non-elevated chromes always return filter=none", () => {
+    const cases = [
+      { type: "filled" as const, variant: "primary" as const },
+      { type: "outlined" as const, variant: "primary" as const },
+      { type: "ghost" as const, variant: "primary" as const },
+    ];
+    for (const t of cases) {
+      expect(resolveNotchTheme(t).filter).toBe("none");
+    }
+  });
+
+  it("elevated returns filter=var(--filter-m3-1) — drop-shadow chain that traces the rendered shape", () => {
+    const r = resolveNotchTheme({ type: "elevated", variant: "primary" });
+    expect(r.filter).toBe("var(--filter-m3-1)");
   });
 });

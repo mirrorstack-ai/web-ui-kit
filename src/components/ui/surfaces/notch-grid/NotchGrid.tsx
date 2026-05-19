@@ -273,13 +273,15 @@ function NotchItem({
   }, [unknownPrimitive, onItemError, placement.key, item.ui]);
 
   // The wrapper carries placement + non-BlockShape theme bits (text color,
-  // shadow, optional borderLeft for elevated alerts).
+  // drop-shadow filter for elevated chromes — traces the SVG path rather
+  // than the bounding box — and optional border-left color cue for
+  // elevated warn/error).
   const wrapperStyle: CSSProperties = {
     position: "absolute",
     left: placement.col * block,
     top: placement.row * block,
     color: resolved.color,
-    boxShadow: resolved.boxShadow,
+    ...(resolved.filter !== "none" ? { filter: resolved.filter } : {}),
     ...(resolved.borderLeft ? { borderLeft: resolved.borderLeft } : {}),
   };
 
