@@ -44,6 +44,10 @@ export {
   type SliderProps,
 } from "./components/ui/inputs/slider/Slider";
 export {
+  SectionHeader,
+  type SectionHeaderProps,
+} from "./components/ui/data/section-header/SectionHeader";
+export {
   SectionLabel,
   type SectionLabelProps,
 } from "./components/ui/data/section-label/SectionLabel";
