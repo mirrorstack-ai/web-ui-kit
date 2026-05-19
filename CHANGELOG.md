@@ -8,11 +8,13 @@ Notable API additions and breaking changes. For the full commit log, see
 ### Components
 
 - **PageHeader** — new top-of-page header. `h1` title with optional
-  description and an optional trailing slot (`tail`) for a picker,
-  button, breadcrumb, or other element. Mid-page sibling is
-  `SectionHeader` (h2). Replaces the duplicated
-  `text-2xl font-bold mb-1 + on-surface-variant <p>` shape across
-  settings/profile pages.
+  description and three optional slots:
+  - `path` — back link / breadcrumb above the title
+  - `leading` — avatar or icon marker left of the title block
+  - `tail` — picker / button / status pill right of the title block
+  Mid-page sibling is `SectionHeader` (h2). Replaces the duplicated
+  `text-2xl font-bold + on-surface-variant <p>` shape across the
+  settings, profile, and module pages.
 
 ## 0.3.2
 

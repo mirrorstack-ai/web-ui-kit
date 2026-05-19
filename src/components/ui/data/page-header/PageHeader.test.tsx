@@ -32,6 +32,20 @@ describe("PageHeader", () => {
     expect(screen.getByText("my-tail")).toBeInTheDocument();
   });
 
+  it("renders the leading slot", () => {
+    render(
+      <PageHeader title="X" leading={<span>my-leading</span>} />,
+    );
+    expect(screen.getByText("my-leading")).toBeInTheDocument();
+  });
+
+  it("renders the path slot", () => {
+    render(
+      <PageHeader title="X" path={<a href="/back">my-path</a>} />,
+    );
+    expect(screen.getByText("my-path")).toBeInTheDocument();
+  });
+
   it("omits the description when not provided", () => {
     const { container } = render(<PageHeader title="Title only" />);
     expect(container.querySelectorAll("p").length).toBe(0);
