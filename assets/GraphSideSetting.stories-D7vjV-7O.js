@@ -1,3 +1,0 @@
-import{j as r,r as a}from"./iframe-B8EDps3W.js";import{G as o}from"./GraphSideSetting-B22zxQe3.js";import"./preload-helper-PPVm8Dsz.js";import"./cn-IyxL_b2c.js";import"./Switch-B45XMAC2.js";import"./Slider-DTsqg-5p.js";const u={title:"UI/Graph/GraphSide/GraphSideSetting",component:o,decorators:[t=>r.jsx("div",{style:{width:260},children:r.jsx(t,{})})]},n=()=>{const[t,s]=a.useState({nodeSize:1,lineSize:1,showTags:!1,repulsion:1500,linkDistance:70});return r.jsx(o,{value:t,onChange:s})},e={render:()=>r.jsx(n,{})};e.parameters={...e.parameters,docs:{...e.parameters?.docs,source:{originalSource:`{
-  render: () => <Controlled />
-}`,...e.parameters?.docs?.source}}};const x=["Default"];export{e as Default,x as __namedExportsOrder,u as default};
