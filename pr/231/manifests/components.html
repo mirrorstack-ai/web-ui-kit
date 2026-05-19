@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/63 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">63/63 infos</a><span class="filter-pill ok" aria-disabled="true">235 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/63 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">63/63 infos</a><span class="filter-pill ok" aria-disabled="true">237 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7986,9 +7986,9 @@ title?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> PageHeader</h2>
       <div class="badges">
-        <label for="c-42-ui-data-pageheader-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-42-ui-data-pageheader-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-42-ui-data-pageheader-info" class="badge info as-toggle">1 info</label>
-        <label for="c-42-ui-data-pageheader-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-42-ui-data-pageheader-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -8020,7 +8020,7 @@ title?: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">4 prop types</span>
+              <span class="badge ok">6 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/data/page-header/PageHeader.tsx::PageHeader</code></pre>
             <pre><code>Props:</code></pre>
@@ -8032,9 +8032,22 @@ title?: string</code></pre>
 description?: string
 
 /**
- * Optional trailing slot — picker, button, breadcrumb, or other
- * element rendered to the right of the title block. Wraps below on
- * narrow viewports.
+ * Optional leading element rendered to the left of the title block —
+ * typically an Avatar, Icon container, or other visual marker.
+ */
+leading?: ReactNode
+
+/**
+ * Optional path navigator rendered above the title — back link,
+ * breadcrumb, or any element that indicates where this page sits in
+ * a larger navigation hierarchy.
+ */
+path?: ReactNode
+
+/**
+ * Optional trailing slot rendered to the right of the title block —
+ * picker, button, breadcrumb, status pill, or other element. Wraps
+ * below on narrow viewports.
  */
 tail?: ReactNode
 
@@ -8053,7 +8066,7 @@ title: string</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { Button, PageHeader } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { Button, Icon, PageHeader } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -8070,6 +8083,15 @@ title: string</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
+                <span class="ex-name">Title Only</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const TitleOnly = () =&gt; &lt;PageHeader title=&quot;Billing&quot; description={undefined} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
                 <span class="ex-name">With Tail</span>
                 <span class="badge ok">story ok</span>
               </div>
@@ -8083,21 +8105,56 @@ title: string</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">No Description</span>
+                <span class="ex-name">With Leading</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const NoDescription = () =&gt; &lt;PageHeader title=&quot;Billing&quot; description={undefined} /&gt;;</code></pre>
+              <pre><code>const WithLeading = () =&gt; &lt;PageHeader
+    title=&quot;Acme Module&quot;
+    description=&quot;@acme/widgets&quot;
+    leading={(&lt;div className=&quot;flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary&quot;&gt;
+      &lt;Icon name=&quot;extension&quot; size={24} /&gt;
+    &lt;/div&gt;)} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Title Only</span>
+                <span class="ex-name">With Path</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const TitleOnly = () =&gt; &lt;PageHeader title=&quot;Profile&quot; description={undefined} /&gt;;</code></pre>
+              <pre><code>const WithPath = () =&gt; &lt;PageHeader
+    title=&quot;Usage detail&quot;
+    description={undefined}
+    path={(&lt;a
+      href=&quot;#&quot;
+      className=&quot;inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-on-surface&quot;
+    &gt;
+      &lt;Icon name=&quot;arrow_back&quot; size={16} /&gt;Billing
+            &lt;/a&gt;)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Module Page</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Mirrors the web-applications /dev/module/[slug] header — path navigator on top, tinted-icon leading marker, name + slug, and a Settings action on the right.</div>
+              <pre><code>const ModulePage = () =&gt; &lt;PageHeader
+    title=&quot;Acme Module&quot;
+    description=&quot;@acme/widgets&quot;
+    path={(&lt;a
+      href=&quot;#&quot;
+      className=&quot;inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-on-surface&quot;
+    &gt;
+      &lt;Icon name=&quot;arrow_back&quot; size={16} /&gt;Dev Modules
+            &lt;/a&gt;)}
+    leading={(&lt;div className=&quot;flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary&quot;&gt;
+      &lt;Icon name=&quot;extension&quot; size={24} /&gt;
+    &lt;/div&gt;)}
+    tail={(&lt;Button variant=&quot;outline&quot; size=&quot;sm&quot; onClick={() =&gt; {}}&gt;Settings
+            &lt;/Button&gt;)} /&gt;;</code></pre>
             </div>
         </div>
     
