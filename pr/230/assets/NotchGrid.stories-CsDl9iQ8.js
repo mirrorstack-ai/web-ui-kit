@@ -1,0 +1,480 @@
+import{r as I,j as N}from"./iframe-BNo6wRUL.js";import{c as K}from"./cn-IyxL_b2c.js";import"./preload-helper-PPVm8Dsz.js";const X=(e,t)=>`${e},${t}`;function ee(e){let t=0;for(const n of e)t=Math.max(t,n.length);return t}function ce(e,t){return e.map(n=>n.map(a=>a>=1&&a<=t))}function ue(e,{cell:t,radius:n=24,inverseRadius:a=32,gap:y=0}){const s=e.length,d=(i,c)=>i>=0&&i<s&&c>=0&&c<e[i].length&&!!e[i][c],h=Math.max(0,Math.min(y,t-2))/2,v=new Map,x=(i,c)=>{const u=X(i[0],i[1]),C=v.get(u);C?C.push(c):v.set(u,[c])};for(let i=0;i<s;i++)for(let c=0;c<e[i].length;c++){if(!e[i][c])continue;const u=[c,i],C=[c+1,i],T=[c+1,i+1],$=[c,i+1];d(i-1,c)||x(u,C),d(i,c+1)||x(C,T),d(i+1,c)||x(T,$),d(i,c-1)||x($,u)}const j=new Set,S=[],M=(i,c)=>`${i}>${c[0]},${c[1]}`;for(const[i,c]of v){const[u,C]=i.split(",").map(Number);for(const T of c){if(j.has(M(i,T)))continue;const $=[];let L=[u,C],o=i,r=T,b=[0,0];for(;r;){const m=M(o,r);if(j.has(m))break;j.add(m),$.push(L),b=[r[0]-L[0],r[1]-L[1]],L=r,o=X(r[0],r[1]);const p=v.get(o)??[];let g=null,l=Number.POSITIVE_INFINITY;for(const f of p){if(j.has(M(o,f)))continue;const R=f[0]-L[0],A=f[1]-L[1],V=b[0]*A-b[1]*R;V<l&&(l=V,g=f)}r=g}const k=pe($).map(([m,p])=>[m*t,p*t]);if(k.length>=3){const m=h>0?de(k,h):k;S.push(ye(m,n,a))}}}return S.join(" ")}function pe(e){const t=e.length,n=[];for(let a=0;a<t;a++){const y=e[(a-1+t)%t],s=e[a],d=e[(a+1)%t],h=s[0]-y[0],v=s[1]-y[1],x=d[0]-s[0],j=d[1]-s[1];h*j-v*x!==0&&n.push(s)}return n}function de(e,t){const n=e.length,a=e.map((s,d)=>{const h=e[(d+1)%n],v=Math.sign(h[0]-s[0]),x=Math.sign(h[1]-s[1]);return x===0?{axis:"y",value:s[1]+v*t}:{axis:"x",value:s[0]+-x*t}}),y=[];for(let s=0;s<n;s++){const d=a[(s-1+n)%n],h=a[s],v=d.axis==="x"?d.value:h.value,x=d.axis==="y"?d.value:h.value;y.push([v,x])}return y}function ye(e,t,n){const a=e.length,y=[];for(let s=0;s<a;s++){const d=e[(s-1+a)%a],h=e[s],v=e[(s+1)%a],x=Y(d,h),j=Y(h,v),S=H(d,h),M=H(h,v),c=S[0]*M[1]-S[1]*M[0]>0,u=Math.min(c?t:n,x/2,j/2),C=[h[0]-S[0]*u,h[1]-S[1]*u],T=[h[0]+M[0]*u,h[1]+M[1]*u];y.push(`${s===0?"M":"L"} ${Z(C)}`),u>0&&y.push(`A ${F(u)} ${F(u)} 0 0 ${c?1:0} ${Z(T)}`)}return y.push("Z"),y.join(" ")}function Y(e,t){return Math.abs(t[0]-e[0])+Math.abs(t[1]-e[1])}function H(e,t){return[Math.sign(t[0]-e[0]),Math.sign(t[1]-e[1])]}function F(e){return Number.isInteger(e)?String(e):e.toFixed(2)}function Z(e){return`${F(e[0])},${F(e[1])}`}const te=96;function ne({shape:e,tier:t=1,block:n=te,gap:a=0,radius:y=24,inverseRadius:s=32,fill:d="var(--color-surface-container-low)",stroke:h="var(--color-outline-variant)",strokeWidth:v=1,children:x,pad:j=16,noClip:S=!1,className:M,style:i}){const u=`block-shape-clip-${I.useId().replace(/[^a-zA-Z0-9_-]/g,"")}`,C=e.length,T=ee(e),$=I.useMemo(()=>ce(e,t),[e,t]),L=T*n,o=C*n,r=I.useMemo(()=>ue($,{cell:n,gap:a,radius:y,inverseRadius:s}),[$,n,a,y,s]),b=v/2;return N.jsxs("div",{className:K("relative",M),style:{width:L,height:o,...i},children:[N.jsxs("svg",{width:L,height:o,viewBox:`${-b} ${-b} ${L+v} ${o+v}`,className:"pointer-events-none absolute inset-0","aria-hidden":"true",children:[!S&&N.jsx("defs",{children:N.jsx("clipPath",{id:u,clipPathUnits:"userSpaceOnUse",children:N.jsx("path",{d:r})})}),N.jsx("path",{d:r,fill:d,stroke:h,strokeWidth:v,vectorEffect:"non-scaling-stroke",fillRule:"evenodd"})]}),N.jsx("div",{className:K("absolute inset-0",!S&&"overflow-hidden"),style:{padding:j,clipPath:S?void 0:`url(#${u})`},children:x})]})}ne.__docgenInfo={description:"",methods:[],displayName:"BlockShape",props:{shape:{required:!0,tsType:{name:"ReadonlyArray",elements:[{name:"ReadonlyArray",elements:[{name:"number"}],raw:"ReadonlyArray<number>"}],raw:"ReadonlyArray<ReadonlyArray<number>>"},description:"Footprint matrix. Cell values:\n - `0`  — always empty (a notch / hole)\n - `1`  — part of the shape at every size tier\n - `2+` — joins the shape only once that tier is reached (responsive growth)\n\ne.g. `[[0,1,1,1],[1,1,1,1],[1,1,1,0]]` — a base shape with two corners cut."},tier:{required:!1,tsType:{name:"number"},description:"Active size tier (>= 1). Cells whose value exceeds `tier` render as empty.",defaultValue:{value:"1",computed:!1}},block:{required:!1,tsType:{name:"number"},description:"Block edge length in px. Default {@link BLOCK_SIZE}.",defaultValue:{value:"96",computed:!1}},gap:{required:!1,tsType:{name:"number"},description:"Erode the outline by `gap / 2` px (outer edges in, notch holes out) so\n neighbours / nested items leave a `gap`-px space. Footprint size is\n unchanged. Normally set by the parent `NotchGrid`; default 0.",defaultValue:{value:"0",computed:!1}},radius:{required:!1,tsType:{name:"number"},description:"Convex corner radius (px). Default 24.",defaultValue:{value:"24",computed:!1}},inverseRadius:{required:!1,tsType:{name:"number"},description:"Concave / notch corner radius (px). Default 32.",defaultValue:{value:"32",computed:!1}},fill:{required:!1,tsType:{name:"string"},description:'Outline fill — a CSS color, or `"none"` to disable.',defaultValue:{value:'"var(--color-surface-container-low)"',computed:!1}},stroke:{required:!1,tsType:{name:"string"},description:'Outline stroke — a CSS color, or `"none"` to disable.',defaultValue:{value:'"var(--color-outline-variant)"',computed:!1}},strokeWidth:{required:!1,tsType:{name:"number"},description:"",defaultValue:{value:"1",computed:!1}},children:{required:!1,tsType:{name:"ReactNode"},description:"Content rendered on top of the shape (clipped to the shape's outline)."},pad:{required:!1,tsType:{name:"number"},description:"Padding (px) on the content layer. Default 16.",defaultValue:{value:"16",computed:!1}},noClip:{required:!1,tsType:{name:"boolean"},description:"Skip clipping the content layer to the outline.",defaultValue:{value:"false",computed:!1}},className:{required:!1,tsType:{name:"string"},description:""},style:{required:!1,tsType:{name:"CSSProperties"},description:""}}};const he=1e5,me={W_pos:3,W_shape:2,W_scale:1,maxScale:3};function re(e){if(e===null||typeof e!="object"||Array.isArray(e))return!1;const t=Object.keys(e);return t.length>0&&t.every(n=>/^\d+$/.test(n))}function Q(e){return re(e)?Object.keys(e).sort((t,n)=>Number(t)-Number(n)).map(t=>[t,e[t]]):[["0",e]]}function fe(e,t){if(t<=1)return e;const n=Math.floor(t),a=[];for(let y=0;y<e.length;y++)for(let s=0;s<n;s++){const d=[];for(let h=0;h<e[y].length;h++)for(let v=0;v<n;v++)d.push(e[y][h]);a.push(d)}return a}function oe(e,t){const n={...me,...t},a=Math.max(1,Math.floor(e.cols)),y=[],s=o=>{for(;y.length<=o;)y.push(new Array(a).fill(!1))},d=(o,r,b)=>{for(let k=0;k<o.length;k++){const m=o[k];for(let p=0;p<m.length;p++){if(!m[p])continue;const g=r+p;if(g<0||g>=a)return!0;const l=b+k;if(s(l),y[l][g])return!0}}return!1},h=(o,r,b)=>{for(let k=0;k<o.length;k++){const m=o[k];for(let p=0;p<m.length;p++)m[p]&&(s(b+k),y[b+k][r+p]=!0)}},v=(o,r,b)=>n.W_pos*Number(o)+n.W_shape*Number(r)+n.W_scale*(b-1),x=o=>{const r=o.desire.position===void 0?[["0",void 0]]:Q(o.desire.position),b=Q(o.desire.shape),k=o.desire.scale?Array.from({length:n.maxScale},(p,g)=>g+1):[1],m=[];for(const[p,g]of r)for(const[l,f]of b)for(const R of k){const A=R===1?f:fe(f,R);m.push({posKey:p,shapeKey:l,pos:g,mask:A,scale:R,cost:v(p,l,R)})}return m.sort((p,g)=>p.cost-g.cost),m},j=(o,r)=>{const b=ee(r.mask),k=r.mask.length;if(b>a)return null;const m=(p,g)=>(h(r.mask,p,g),{key:o.key,item:o.item,col:p,row:g,mask:r.mask,cols:b,rows:k,priorityUsed:{position:r.posKey,shape:r.shapeKey},scale:r.scale,cost:r.cost});if(r.pos){const[p,g]=r.pos;return p>=0&&p+b<=a&&g>=0&&!d(r.mask,p,g)?m(p,g):null}for(let p=0;p<he;p++)for(let g=0;g+b<=a;g++)if(!d(r.mask,g,p))return m(g,p);return null},S=o=>{for(const r of x(o)){const b=j(o,r);if(b)return b}return null},M=o=>{const r=o.desire.position;return r!==void 0&&!re(r)},i=[],c=[],u=[];for(const o of e.items)if(M(o)){const r=S(o);r?i.push(r):u.push({...o,desire:{...o.desire,position:void 0}})}else u.push(o);for(const o of u){const r=S(o);r?i.push(r):c.push(o.key)}let C=0,T=0;for(const o of i){const r=x(e.items.find(b=>b.key===o.key));C+=o.cost,T+=r[r.length-1]?.cost??0}const $=T===0?1:1-C/T;let L=0;for(const o of i)L=Math.max(L,o.row+o.rows);return{placements:i,rowsUsed:L,unfit:c,satisfaction:$}}const ve="neutral",be={primary:"var(--color-primary-container)",secondary:"var(--color-secondary-container)",tertiary:"var(--color-tertiary-container)",surface:"var(--color-surface-container)",neutral:"var(--color-surface-container-low)",warn:"var(--color-warning-container)",error:"var(--color-error-container)"},ge={primary:"var(--color-on-primary-container)",secondary:"var(--color-on-secondary-container)",tertiary:"var(--color-on-tertiary-container)",surface:"var(--color-on-surface)",neutral:"var(--color-on-surface-variant)",warn:"var(--color-on-warning-container)",error:"var(--color-on-error-container)"},W={primary:"var(--color-primary)",secondary:"var(--color-secondary)",tertiary:"var(--color-tertiary)",surface:"var(--color-on-surface)",neutral:"var(--color-on-surface-variant)",warn:"var(--color-warning)",error:"var(--color-error)"},ke={primary:"var(--color-primary)",secondary:"var(--color-secondary)",tertiary:"var(--color-tertiary)",surface:"var(--color-outline-variant)",neutral:"var(--color-outline-variant)",warn:"var(--color-warning)",error:"var(--color-error)"},we={primary:"var(--color-surface-container-low)",secondary:"var(--color-surface-container-low)",tertiary:"var(--color-surface-container-low)",surface:"var(--color-surface-container-low)",neutral:"var(--color-surface-container-lowest)",warn:"var(--color-surface-container-low)",error:"var(--color-surface-container-low)"};function xe(e){const t=e.variant??"auto",n=t==="auto"?ve:t,a=e.type??"auto";return{type:a==="auto"?t==="auto"?"ghost":"filled":a,variant:n}}function J(e,t){if(t<=0||e==="transparent")return e;const n=Math.min(1,t)*12;return`linear-gradient(180deg, color-mix(in oklab, ${e}, white ${n}%) 0%, ${e} 100%)`}function Le(e){const t=e??{},{type:n,variant:a}=xe(t),y=t.gradient??0;switch(n){case"filled":{const s=be[a];return{fill:s,cssBackground:J(s,y),color:ge[a],stroke:"none",strokeWidth:0,boxShadow:"none",filter:"none"}}case"outlined":return{fill:"transparent",cssBackground:"transparent",color:W[a],stroke:ke[a],strokeWidth:1,boxShadow:"none",filter:"none"};case"elevated":{const s=a==="warn"||a==="error",d=we[a];return{fill:d,cssBackground:J(d,y),color:"var(--color-on-surface)",stroke:"none",strokeWidth:0,...s?{accentBar:W[a]}:{},boxShadow:"var(--shadow-m3-1)",filter:"var(--filter-m3-1)"}}case"ghost":return{fill:"transparent",cssBackground:"transparent",color:W[a],stroke:"none",strokeWidth:0,boxShadow:"none",filter:"none"}}}function Ne(e){return e.map(t=>t.map(n=>n?1:0))}function Ce(e){return e.every(t=>t.key!=null)?e:e.map((t,n)=>t.key?t:{...t,key:`item-${n}`})}function ae({items:e,cols:t="auto",blockMin:n=te,gap:a=8,nest:y=!0,primitives:s,onItemError:d,draggable:h=!1,onItemMove:v,className:x,style:j}){const S=I.useRef(null),[M,i]=I.useState(null);I.useLayoutEffect(()=>{const l=S.current;if(!l)return;const f=()=>i(l.getBoundingClientRect().width);if(f(),typeof ResizeObserver>"u")return;const R=new ResizeObserver(f);return R.observe(l),()=>R.disconnect()},[]);const c=I.useMemo(()=>Ce(e),[e]),{resolvedCols:u,block:C}=I.useMemo(()=>{if(t!=="auto")return{resolvedCols:t,block:n};if(M==null)return{resolvedCols:null,block:n};const l=Math.max(1,Math.floor(M/n));return{resolvedCols:l,block:M/l}},[t,n,M]),[T,$]=I.useState(new Map),[L,o]=I.useState(null),r=I.useRef(null);r.current=L;const b=I.useCallback(l=>{const f=r.current;if(!f||l.pointerId!==f.pointerId)return;const R=l.clientX-f.startX,A=l.clientY-f.startY;R===f.dx&&A===f.dy||o({...f,dx:R,dy:A})},[]),k=I.useCallback(l=>{const f=r.current;if(!f||l.pointerId!==f.pointerId)return;try{l.currentTarget.releasePointerCapture(l.pointerId)}catch{}o(null);const R=C||n,V=Math.max(0,(u??1)-f.originCols),se=Math.min(V,Math.max(0,f.originCol+Math.round(f.dx/R))),ie=Math.max(0,f.originRow+Math.round(f.dy/R)),z=[se,ie];$(le=>new Map(le).set(f.key,z)),v?.(f.key,z)},[C,n,u,v]),m=I.useMemo(()=>u==null?null:oe({items:c.map(l=>{const f=T.get(l.key);return{key:l.key,desire:f?{...l.desire,position:f}:l.desire,groupKey:l.groupKey,item:l}}),cols:u}),[c,u,y,T]),p=m?.unfit.join(",")??"";I.useEffect(()=>{},[p,u,m]);const g=m?.rowsUsed??0;return N.jsx("div",{ref:S,className:K("relative w-full",x),style:{minHeight:g>0?g*C:void 0,...j},children:m?.placements.map(l=>{const R=L?.key===l.key&&L?[L.dx,L.dy]:void 0;return N.jsx(Te,{placement:l,item:l.item,block:C,gap:a,primitives:s,onItemError:d,parentTheme:void 0,draggable:h,dragOffset:R,hasOverride:T.has(l.key),onDragStart:h?A=>{if(!(A.button!=null&&A.button!==0)){try{A.currentTarget.setPointerCapture(A.pointerId)}catch{}o({key:l.key,pointerId:A.pointerId,startX:A.clientX,startY:A.clientY,originCol:l.col,originRow:l.row,originCols:l.cols,dx:0,dy:0})}}:void 0,onDragMove:b,onDragEnd:k},l.key)})})}const Te=I.memo(function e({placement:t,item:n,block:a,gap:y,primitives:s,onItemError:d,parentTheme:h,draggable:v=!1,dragOffset:x,hasOverride:j=!1,onDragStart:S,onDragMove:M,onDragEnd:i}){const c=h?{...n.theme,type:h.type}:n.theme??{},u=I.useMemo(()=>Le(c),[c.type,c.variant,c.gradient]),C=I.useMemo(()=>Ne(t.mask),[t.mask]),T=I.useMemo(()=>!n.subItems||n.subItems.length===0?null:oe({items:n.subItems.map((m,p)=>({key:m.key??`${t.key}/${p}`,desire:m.desire,item:m})),cols:t.cols}),[n.subItems,t.cols,t.key]),$=n.ui?s?.[n.ui.type]:void 0,L=n.ui!=null&&!$;I.useEffect(()=>{L&&d&&n.ui&&d(t.key,{kind:"unknown-primitive",type:n.ui.type})},[L,d,t.key,n.ui]);const o=x!==void 0,r={position:"absolute",left:t.col*a,top:t.row*a,color:u.color};u.filter!=="none"&&(r.filter=u.filter),o?(r.transform=`translate(${x[0]}px, ${x[1]}px)`,r.zIndex=20):j&&(r.zIndex=10),v&&(r.cursor=o?"grabbing":"grab",r.touchAction="none");const b=v?{onPointerDown:S,onPointerMove:M,onPointerUp:i,onPointerCancel:i}:void 0;let k=null;return T?k=N.jsx("div",{className:"relative h-full w-full",children:T.placements.map(m=>N.jsx(e,{placement:m,item:m.item,block:a,gap:y,primitives:s,onItemError:d,parentTheme:c},m.key))}):$&&n.ui?k=N.jsx($,{...n.ui}):L&&n.ui&&(k=N.jsx(Ie,{type:n.ui.type})),N.jsx("div",{...b,className:v?"select-none":void 0,style:r,children:N.jsxs(ne,{shape:C,block:a,gap:y,fill:u.fill,stroke:u.stroke,strokeWidth:u.strokeWidth,pad:T?0:16,children:[u.accentBar&&N.jsx("div",{"aria-hidden":"true",className:"pointer-events-none absolute inset-y-0 left-0 w-1",style:{background:u.accentBar}}),k]})})});function Ie({type:e}){return N.jsxs("div",{className:"flex h-full w-full items-center justify-center text-xs",style:{color:"var(--color-on-error-container)"},children:["Unknown primitive: ",N.jsx("code",{className:"ml-1",children:e})]})}ae.__docgenInfo={description:"",methods:[],displayName:"NotchGrid",props:{items:{required:!0,tsType:{name:"Array",elements:[{name:"NotchGridItem"}],raw:"NotchGridItem[]"},description:""},cols:{required:!1,tsType:{name:"union",raw:'number | "auto"',elements:[{name:"number"},{name:"literal",value:'"auto"'}]},description:'Column count, or `"auto"` (default) to derive from container width via\n the gain-1-col rule.',defaultValue:{value:'"auto"',computed:!1}},blockMin:{required:!1,tsType:{name:"number"},description:'Minimum block size in px when `cols="auto"`. The grid gains a column\n each time the container can fit one more `blockMin`. Default 96.',defaultValue:{value:"96",computed:!1}},gap:{required:!1,tsType:{name:"number"},description:"Gap between blocks in px (notch erosion). Default 8.",defaultValue:{value:"8",computed:!1}},nest:{required:!1,tsType:{name:"boolean"},description:"Reserved — already implied by the solver's cell-level collision.",defaultValue:{value:"true",computed:!1}},primitives:{required:!1,tsType:{name:"Record",elements:[{name:"string"},{name:"ComponentType",elements:[{name:"Record",elements:[{name:"string"},{name:"unknown"}],raw:"Record<string, unknown>"}],raw:"ComponentType<Record<string, unknown>>"}],raw:"Record<string, ComponentType<Record<string, unknown>>>"},description:"Map from `ui.type` → React component. Receives the full `ui` object as\n props. Unknown types fire `onItemError` and render a placeholder so the\n layout doesn't collapse."},onItemError:{required:!1,tsType:{name:"signature",type:"function",raw:"(key: ItemKey, error: NotchGridError) => void",signature:{arguments:[{type:{name:"string"},name:"key"},{type:{name:"NotchGridError"},name:"error"}],return:{name:"void"}}},description:""},draggable:{required:!1,tsType:{name:"boolean"},description:`Enable outer-grid drag-to-place. Dropped items pin to their new cell
+ (winning the cell on next solve); everything else re-flows around them.`,defaultValue:{value:"false",computed:!1}},onItemMove:{required:!1,tsType:{name:"signature",type:"function",raw:"(key: ItemKey, pos: Pos) => void",signature:{arguments:[{type:{name:"string"},name:"key"},{type:{name:"unknown"},name:"pos"}],return:{name:"void"}}},description:"Called after a drag drops an item, with its new block position."},className:{required:!1,tsType:{name:"string"},description:""},style:{required:!1,tsType:{name:"CSSProperties"},description:""}}};const Ae={title:"UI/Notch/NotchGrid",component:ae,parameters:{layout:"fullscreen"}},Se=({label:e,value:t})=>N.jsxs("div",{className:"flex h-full w-full flex-col justify-between p-1",children:[N.jsx("div",{className:"text-xs opacity-75",children:e}),N.jsx("div",{className:"text-xl font-semibold",children:t})]}),Me=({label:e,children:t})=>N.jsx("div",{className:"flex h-full w-full items-center justify-center text-sm font-medium",children:t??e}),D={Label:Se,Center:Me},P=(...e)=>e.map(t=>t.map(n=>n===1)),w=(e,t)=>Array.from({length:t},()=>Array(e).fill(!0)),U={args:{primitives:D,items:[{key:"hero",desire:{shape:w(2,2)},theme:{type:"filled",variant:"primary"},ui:{type:"Label",label:"Hero",value:"42"}},{key:"users",desire:{shape:w(1,1)},theme:{type:"filled",variant:"secondary"},ui:{type:"Label",label:"Users",value:"1,204"}},{key:"events",desire:{shape:w(1,1)},theme:{type:"filled",variant:"tertiary"},ui:{type:"Label",label:"Events",value:"8.3k"}},{key:"uptime",desire:{shape:w(2,1)},theme:{type:"outlined",variant:"neutral"},ui:{type:"Label",label:"Uptime",value:"99.94%"}}]}},E={args:{primitives:D,items:Array.from({length:12},(e,t)=>({key:`t${t}`,desire:{shape:w(1,1)},theme:{type:"filled",variant:["primary","secondary","tertiary","neutral"][t%4]},ui:{type:"Label",label:`#${t+1}`,value:t+1}}))}},_={args:{primitives:D,items:[{key:"panel",desire:{shape:w(3,3)},theme:{type:"filled",variant:"primary"},subItems:[{desire:{position:[0,0],shape:w(2,2)},ui:{type:"Label",label:"Big",value:"★"}},{desire:{position:[2,0],shape:w(1,1)},ui:{type:"Label",label:"A"}},{desire:{position:[0,2],shape:w(2,1)},ui:{type:"Label",label:"Wide"}},{desire:{position:[2,2],shape:w(1,1)},ui:{type:"Label",label:"B"}}]}]}},q={args:{primitives:D,items:[{key:"first",desire:{position:[0,0],shape:w(2,2)},theme:{type:"filled",variant:"primary"},ui:{type:"Label",label:"First",value:"wins (0,0)"}},{key:"second",desire:{position:{0:[0,0],1:[2,0]},shape:w(2,2)},theme:{type:"filled",variant:"secondary"},ui:{type:"Label",label:"Second",value:"falls to (2,0)"}}]}},B={args:{primitives:D,cols:4,blockMin:120,items:["filled","outlined","elevated","ghost"].flatMap(e=>["primary","secondary","tertiary","neutral","warn","error"].map(t=>({key:`${e}-${t}`,desire:{shape:w(1,1)},theme:{type:e,variant:t},ui:{type:"Center",label:`${t}`}})))}},G={args:{primitives:D,cols:8,blockMin:96,items:[{key:"L",desire:{position:[0,0],shape:P([1,1,1],[1,1,1],[1,1,0])},theme:{type:"filled",variant:"primary"},ui:{type:"Label",label:"L-hero",value:"3×3 − ⌐"}},{key:"L-notch-fill",desire:{position:[2,2],shape:w(1,1)},theme:{type:"outlined",variant:"primary"},ui:{type:"Label",label:"Nestled"}},{key:"plus",desire:{position:[3,0],shape:P([0,1,0],[1,1,1],[0,1,0])},theme:{type:"filled",variant:"tertiary"},ui:{type:"Center",label:"✚"}},{key:"p-tl",desire:{position:[3,0],shape:w(1,1)},theme:{type:"filled",variant:"secondary"},ui:{type:"Label",label:"↖"}},{key:"p-tr",desire:{position:[5,0],shape:w(1,1)},theme:{type:"filled",variant:"secondary"},ui:{type:"Label",label:"↗"}},{key:"p-bl",desire:{position:[3,2],shape:w(1,1)},theme:{type:"filled",variant:"secondary"},ui:{type:"Label",label:"↙"}},{key:"p-br",desire:{position:[5,2],shape:w(1,1)},theme:{type:"filled",variant:"secondary"},ui:{type:"Label",label:"↘"}},{key:"T",desire:{position:[0,3],shape:P([1,1,1],[0,1,0])},theme:{type:"outlined",variant:"neutral"},ui:{type:"Center",label:"T"}},{key:"chart",desire:{position:[4,3],shape:P([1,1,1,0],[1,1,1,1])},theme:{type:"filled",variant:"tertiary"},ui:{type:"Label",label:"Usage",value:"30d"}},{key:"chart-notch",desire:{position:[7,3],shape:w(1,1)},theme:{type:"filled",variant:"primary"},ui:{type:"Label",label:"Now"}},{key:"diagonal",desire:{position:[0,5],shape:P([1,1,0],[1,1,0],[0,0,1])},theme:{type:"filled",variant:"secondary"},ui:{type:"Label",label:"Diagonal",value:"junction"}}]}},O={args:{primitives:D,cols:6,blockMin:120,draggable:!0,onItemMove:(e,t)=>{console.log("[NotchGrid story] drop:",e,t)},items:[{key:"hero",desire:{shape:w(2,2)},theme:{type:"filled",variant:"primary"},ui:{type:"Label",label:"Drag me",value:"★"}},{key:"a",desire:{shape:w(1,1)},theme:{type:"filled",variant:"secondary"},ui:{type:"Label",label:"A"}},{key:"b",desire:{shape:w(1,1)},theme:{type:"filled",variant:"tertiary"},ui:{type:"Label",label:"B"}},{key:"c",desire:{shape:w(1,1)},theme:{type:"outlined",variant:"neutral"},ui:{type:"Label",label:"C"}},{key:"d",desire:{shape:w(1,1)},theme:{type:"outlined",variant:"neutral"},ui:{type:"Label",label:"D"}},{key:"wide",desire:{shape:w(2,1)},theme:{type:"elevated",variant:"neutral"},ui:{type:"Label",label:"Wide",value:"2×1"}}]}};U.parameters={...U.parameters,docs:{...U.parameters?.docs,source:{originalSource:`{
+  args: {
+    primitives,
+    items: [{
+      key: "hero",
+      desire: {
+        shape: r(2, 2)
+      },
+      theme: {
+        type: "filled",
+        variant: "primary"
+      },
+      ui: {
+        type: "Label",
+        label: "Hero",
+        value: "42"
+      }
+    }, {
+      key: "users",
+      desire: {
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled",
+        variant: "secondary"
+      },
+      ui: {
+        type: "Label",
+        label: "Users",
+        value: "1,204"
+      }
+    }, {
+      key: "events",
+      desire: {
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled",
+        variant: "tertiary"
+      },
+      ui: {
+        type: "Label",
+        label: "Events",
+        value: "8.3k"
+      }
+    }, {
+      key: "uptime",
+      desire: {
+        shape: r(2, 1)
+      },
+      theme: {
+        type: "outlined",
+        variant: "neutral"
+      },
+      ui: {
+        type: "Label",
+        label: "Uptime",
+        value: "99.94%"
+      }
+    }] satisfies NotchGridItem[]
+  }
+}`,...U.parameters?.docs?.source}}};E.parameters={...E.parameters,docs:{...E.parameters?.docs,source:{originalSource:`{
+  args: {
+    primitives,
+    items: Array.from({
+      length: 12
+    }, (_, i) => ({
+      key: \`t\${i}\`,
+      desire: {
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled" as const,
+        variant: (["primary", "secondary", "tertiary", "neutral"] as const)[i % 4]
+      },
+      ui: {
+        type: "Label",
+        label: \`#\${i + 1}\`,
+        value: i + 1
+      }
+    }))
+  }
+}`,...E.parameters?.docs?.source},description:{story:`Demonstrates the >96px gain-1-col / 1fr rule: items naturally fill the
+ container regardless of width. Resize the Storybook canvas to see the
+ column count jump (96px granularity) and the block size stretch between
+ jumps.`,...E.parameters?.docs?.description}}};_.parameters={..._.parameters,docs:{..._.parameters?.docs,source:{originalSource:`{
+  args: {
+    primitives,
+    items: [{
+      key: "panel",
+      desire: {
+        shape: r(3, 3)
+      },
+      theme: {
+        type: "filled",
+        variant: "primary"
+      },
+      subItems: [{
+        desire: {
+          position: [0, 0],
+          shape: r(2, 2)
+        },
+        ui: {
+          type: "Label",
+          label: "Big",
+          value: "★"
+        }
+      }, {
+        desire: {
+          position: [2, 0],
+          shape: r(1, 1)
+        },
+        ui: {
+          type: "Label",
+          label: "A"
+        }
+      }, {
+        desire: {
+          position: [0, 2],
+          shape: r(2, 1)
+        },
+        ui: {
+          type: "Label",
+          label: "Wide"
+        }
+      }, {
+        desire: {
+          position: [2, 2],
+          shape: r(1, 1)
+        },
+        ui: {
+          type: "Label",
+          label: "B"
+        }
+      }]
+    }] satisfies NotchGridItem[]
+  }
+}`,..._.parameters?.docs?.source},description:{story:`Sub-items inside a single themed panel. The panel's footprint is the
+ union of the sub-items' masks (so notches appear where no sub-cell sits).`,..._.parameters?.docs?.description}}};q.parameters={...q.parameters,docs:{...q.parameters?.docs,source:{originalSource:`{
+  args: {
+    primitives,
+    items: [{
+      key: "first",
+      desire: {
+        position: [0, 0],
+        shape: r(2, 2)
+      },
+      theme: {
+        type: "filled",
+        variant: "primary"
+      },
+      ui: {
+        type: "Label",
+        label: "First",
+        value: "wins (0,0)"
+      }
+    }, {
+      key: "second",
+      desire: {
+        position: {
+          "0": [0, 0],
+          "1": [2, 0]
+        },
+        shape: r(2, 2)
+      },
+      theme: {
+        type: "filled",
+        variant: "secondary"
+      },
+      ui: {
+        type: "Label",
+        label: "Second",
+        value: "falls to (2,0)"
+      }
+    }] satisfies NotchGridItem[]
+  }
+}`,...q.parameters?.docs?.source},description:{story:`Priority-mapped position: each tile prefers (0,0), but only the first to
+ claim it lands there. Others fall back to their secondary positions.`,...q.parameters?.docs?.description}}};B.parameters={...B.parameters,docs:{...B.parameters?.docs,source:{originalSource:`{
+  args: {
+    primitives,
+    cols: 4,
+    blockMin: 120,
+    items: (["filled", "outlined", "elevated", "ghost"] as const).flatMap(type => (["primary", "secondary", "tertiary", "neutral", "warn", "error"] as const).map(variant => ({
+      key: \`\${type}-\${variant}\`,
+      desire: {
+        shape: r(1, 1)
+      },
+      theme: {
+        type,
+        variant
+      },
+      ui: {
+        type: "Center",
+        label: \`\${variant}\`
+      }
+    }))) as NotchGridItem[]
+  }
+}`,...B.parameters?.docs?.source},description:{story:"Gallery of `type × variant` combinations applied to identical 1×1 tiles.",...B.parameters?.docs?.description}}};G.parameters={...G.parameters,docs:{...G.parameters?.docs,source:{originalSource:`{
+  args: {
+    primitives,
+    cols: 8,
+    blockMin: 96,
+    items: [
+    // L-hero (3×3 with bottom-right corner notched out)
+    {
+      key: "L",
+      desire: {
+        position: [0, 0],
+        shape: m([1, 1, 1], [1, 1, 1], [1, 1, 0])
+      },
+      theme: {
+        type: "filled",
+        variant: "primary"
+      },
+      ui: {
+        type: "Label",
+        label: "L-hero",
+        value: "3×3 − ⌐"
+      }
+    },
+    // 1×1 dropping into L's bottom-right notch (col 2, row 2)
+    {
+      key: "L-notch-fill",
+      desire: {
+        position: [2, 2],
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "outlined",
+        variant: "primary"
+      },
+      ui: {
+        type: "Label",
+        label: "Nestled"
+      }
+    },
+    // Plus shape (4 corner notches)
+    {
+      key: "plus",
+      desire: {
+        position: [3, 0],
+        shape: m([0, 1, 0], [1, 1, 1], [0, 1, 0])
+      },
+      theme: {
+        type: "filled",
+        variant: "tertiary"
+      },
+      ui: {
+        type: "Center",
+        label: "✚"
+      }
+    },
+    // 1×1s dropping into the plus's four corner notches
+    {
+      key: "p-tl",
+      desire: {
+        position: [3, 0],
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled",
+        variant: "secondary"
+      },
+      ui: {
+        type: "Label",
+        label: "↖"
+      }
+    }, {
+      key: "p-tr",
+      desire: {
+        position: [5, 0],
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled",
+        variant: "secondary"
+      },
+      ui: {
+        type: "Label",
+        label: "↗"
+      }
+    }, {
+      key: "p-bl",
+      desire: {
+        position: [3, 2],
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled",
+        variant: "secondary"
+      },
+      ui: {
+        type: "Label",
+        label: "↙"
+      }
+    }, {
+      key: "p-br",
+      desire: {
+        position: [5, 2],
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled",
+        variant: "secondary"
+      },
+      ui: {
+        type: "Label",
+        label: "↘"
+      }
+    },
+    // T shape (3×2 with the bottom corners notched out)
+    {
+      key: "T",
+      desire: {
+        position: [0, 3],
+        shape: m([1, 1, 1], [0, 1, 0])
+      },
+      theme: {
+        type: "outlined",
+        variant: "neutral"
+      },
+      ui: {
+        type: "Center",
+        label: "T"
+      }
+    },
+    // 4×2 chart with notched top-right corner (the closed PR's chart shape)
+    {
+      key: "chart",
+      desire: {
+        position: [4, 3],
+        shape: m([1, 1, 1, 0], [1, 1, 1, 1])
+      },
+      theme: {
+        type: "filled",
+        variant: "tertiary"
+      },
+      ui: {
+        type: "Label",
+        label: "Usage",
+        value: "30d"
+      }
+    },
+    // 1×1 dropping into the chart's top-right notch
+    {
+      key: "chart-notch",
+      desire: {
+        position: [7, 3],
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled",
+        variant: "primary"
+      },
+      ui: {
+        type: "Label",
+        label: "Now"
+      }
+    },
+    // Diagonal junction — a 2×2 block and a 1×1 block meet only at a
+    // corner. Exercises the outline tracer's diagonal-junction handling
+    // (the two regions read as one shape with two concave arcs facing
+    // each other, per PR #188).
+    //   o o x
+    //   o o x
+    //   x x o
+    {
+      key: "diagonal",
+      desire: {
+        position: [0, 5],
+        shape: m([1, 1, 0], [1, 1, 0], [0, 0, 1])
+      },
+      theme: {
+        type: "filled",
+        variant: "secondary"
+      },
+      ui: {
+        type: "Label",
+        label: "Diagonal",
+        value: "junction"
+      }
+    }] satisfies NotchGridItem[]
+  }
+}`,...G.parameters?.docs?.source},description:{story:`Custom notched shapes — exercises the outline tracer (PR #188) under
+ non-rectangular footprints. Demonstrates the four canonical patterns the
+ closed v1 stack used: L (corner notch), plus, T, and a 4×2 chart with a
+ notched top-right corner. Small accessory tiles drop into the notches.`,...G.parameters?.docs?.description}}};O.parameters={...O.parameters,docs:{...O.parameters?.docs,source:{originalSource:`{
+  args: {
+    primitives,
+    cols: 6,
+    blockMin: 120,
+    draggable: true,
+    onItemMove: (key, pos) => {
+      // eslint-disable-next-line no-console
+      console.log("[NotchGrid story] drop:", key, pos);
+    },
+    items: [{
+      key: "hero",
+      desire: {
+        shape: r(2, 2)
+      },
+      theme: {
+        type: "filled",
+        variant: "primary"
+      },
+      ui: {
+        type: "Label",
+        label: "Drag me",
+        value: "★"
+      }
+    }, {
+      key: "a",
+      desire: {
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled",
+        variant: "secondary"
+      },
+      ui: {
+        type: "Label",
+        label: "A"
+      }
+    }, {
+      key: "b",
+      desire: {
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "filled",
+        variant: "tertiary"
+      },
+      ui: {
+        type: "Label",
+        label: "B"
+      }
+    }, {
+      key: "c",
+      desire: {
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "outlined",
+        variant: "neutral"
+      },
+      ui: {
+        type: "Label",
+        label: "C"
+      }
+    }, {
+      key: "d",
+      desire: {
+        shape: r(1, 1)
+      },
+      theme: {
+        type: "outlined",
+        variant: "neutral"
+      },
+      ui: {
+        type: "Label",
+        label: "D"
+      }
+    }, {
+      key: "wide",
+      desire: {
+        shape: r(2, 1)
+      },
+      theme: {
+        type: "elevated",
+        variant: "neutral"
+      },
+      ui: {
+        type: "Label",
+        label: "Wide",
+        value: "2×1"
+      }
+    }] satisfies NotchGridItem[]
+  }
+}`,...O.parameters?.docs?.source},description:{story:"Outer-grid drag. `draggable` lets the user grab a tile and drop it on\n another cell; the dropped item pins to its new spot and everything else\n re-flows around it. `onItemMove` reports the new `[col, row]`.",...O.parameters?.docs?.description}}};const De=["Basic","AutoSize","SubItems","PriorityFallback","ThemeGallery","CustomShapes","Draggable"];export{E as AutoSize,U as Basic,G as CustomShapes,O as Draggable,q as PriorityFallback,_ as SubItems,B as ThemeGallery,De as __namedExportsOrder,Ae as default};

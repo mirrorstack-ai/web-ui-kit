@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/63 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">63/63 infos</a><span class="filter-pill ok" aria-disabled="true">239 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/63 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">63/63 infos</a><span class="filter-pill ok" aria-disabled="true">238 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7855,9 +7855,9 @@ width: number</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NotchGrid</h2>
       <div class="badges">
-        <label for="c-41-ui-notch-notchgrid-props" class="badge ok as-toggle">9 prop types</label>
+        <label for="c-41-ui-notch-notchgrid-props" class="badge ok as-toggle">11 prop types</label>
         <label for="c-41-ui-notch-notchgrid-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-ui-notch-notchgrid-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-41-ui-notch-notchgrid-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -7889,7 +7889,7 @@ width: number</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">9 prop types</span>
+              <span class="badge ok">11 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/notch-grid/NotchGrid.tsx::NotchGrid</code></pre>
             <pre><code>Props:</code></pre>
@@ -7908,6 +7908,12 @@ className?: string
 cols?: number | &quot;auto&quot; = &quot;auto&quot;
 
 /**
+ * Enable outer-grid drag-to-place. Dropped items pin to their new cell
+ *  (winning the cell on next solve); everything else re-flows around them.
+ */
+draggable?: boolean = false
+
+/**
  * Gap between blocks in px (notch erosion). Default 8.
  */
 gap?: number = 8
@@ -7920,6 +7926,11 @@ items: NotchGridItem[]
 nest?: boolean = true
 
 onItemError?: (key: ItemKey, error: NotchGridError) =&gt; void
+
+/**
+ * Called after a drag drops an item, with its new block position.
+ */
+onItemMove?: (key: ItemKey, pos: Pos) =&gt; void
 
 /**
  * Map from `ui.type` → React component. Receives the full `ui` object as
@@ -8089,34 +8100,6 @@ style?: CSSProperties</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Unknown Primitive</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              <div class="hint">Unknown `ui.type` fires `onItemError` and renders an in-tile placeholder so the layout doesn&#39;t collapse. The renderer can then drive the L3 agent-sidebar flow (see dynamic-ui TBD 04 L3).</div>
-              <pre><code>const UnknownPrimitive = () =&gt; &lt;NotchGrid
-    primitives={primitives}
-    onItemError={(key, error) =&gt; {
-      // eslint-disable-next-line no-console
-      console.warn(&quot;[NotchGrid story] onItemError:&quot;, key, error);
-    }}
-    items={[
-      {
-        key: &quot;known&quot;,
-        desire: { shape: r(1, 1) },
-        theme: { type: &quot;filled&quot;, variant: &quot;primary&quot; },
-        ui: { type: &quot;Label&quot;, label: &quot;OK&quot; },
-      },
-      {
-        key: &quot;broken&quot;,
-        desire: { shape: r(2, 2) },
-        theme: { type: &quot;outlined&quot;, variant: &quot;error&quot; },
-        ui: { type: &quot;DoesNotExist&quot; },
-      },
-    ] satisfies NotchGridItem[]} /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
                 <span class="ex-name">Custom Shapes</span>
                 <span class="badge ok">story ok</span>
               </div>
@@ -8230,49 +8213,56 @@ style?: CSSProperties</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Overview Page</span>
+                <span class="ex-name">Draggable</span>
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">The architecture doc&#39;s overview-page example, adapted: an L-shaped hero, a sub-item panel with mixed sizes, and a few accessory tiles.</div>
-              <pre><code>const OverviewPage = () =&gt; &lt;NotchGrid
+              <div class="hint">Outer-grid drag. `draggable` lets the user grab a tile and drop it on another cell; the dropped item pins to its new spot and everything else re-flows around it. `onItemMove` reports the new `[col, row]`.</div>
+              <pre><code>const Draggable = () =&gt; &lt;NotchGrid
     primitives={primitives}
+    cols={6}
+    blockMin={120}
+    draggable
+    onItemMove={(key, pos) =&gt; {
+      // eslint-disable-next-line no-console
+      console.log(&quot;[NotchGrid story] drop:&quot;, key, pos);
+    }}
     items={[
       {
         key: &quot;hero&quot;,
-        desire: {
-          position: [0, 0],
-          shape: m([1, 1, 1], [1, 1, 1], [1, 1, 0]),
-        },
+        desire: { shape: r(2, 2) },
         theme: { type: &quot;filled&quot;, variant: &quot;primary&quot; },
-        ui: { type: &quot;Label&quot;, label: &quot;Module&quot;, value: &quot;MirrorStack&quot; },
+        ui: { type: &quot;Label&quot;, label: &quot;Drag me&quot;, value: &quot;★&quot; },
       },
       {
-        key: &quot;installs&quot;,
-        desire: { position: [2, 2], shape: r(1, 1) },
-        theme: { type: &quot;outlined&quot;, variant: &quot;primary&quot; },
-        ui: { type: &quot;Label&quot;, label: &quot;Installs&quot;, value: &quot;12&quot; },
+        key: &quot;a&quot;,
+        desire: { shape: r(1, 1) },
+        theme: { type: &quot;filled&quot;, variant: &quot;secondary&quot; },
+        ui: { type: &quot;Label&quot;, label: &quot;A&quot; },
       },
       {
-        key: &quot;panel&quot;,
-        desire: { position: [3, 0], shape: r(2, 3) },
+        key: &quot;b&quot;,
+        desire: { shape: r(1, 1) },
         theme: { type: &quot;filled&quot;, variant: &quot;tertiary&quot; },
-        subItems: [
-          {
-            desire: { position: [0, 0], shape: r(1, 1) },
-            ui: { type: &quot;Label&quot;, label: &quot;Cron&quot;, value: &quot;8/d&quot; },
-          },
-          {
-            desire: { position: [0, 1], shape: r(2, 2) },
-            ui: { type: &quot;Label&quot;, label: &quot;Calls × markup&quot;, value: &quot;$420&quot; },
-          },
-        ],
+        ui: { type: &quot;Label&quot;, label: &quot;B&quot; },
       },
       {
-        key: &quot;tenants&quot;,
-        desire: { position: [0, 3], shape: r(1, 1) },
+        key: &quot;c&quot;,
+        desire: { shape: r(1, 1) },
+        theme: { type: &quot;outlined&quot;, variant: &quot;neutral&quot; },
+        ui: { type: &quot;Label&quot;, label: &quot;C&quot; },
+      },
+      {
+        key: &quot;d&quot;,
+        desire: { shape: r(1, 1) },
+        theme: { type: &quot;outlined&quot;, variant: &quot;neutral&quot; },
+        ui: { type: &quot;Label&quot;, label: &quot;D&quot; },
+      },
+      {
+        key: &quot;wide&quot;,
+        desire: { shape: r(2, 1) },
         theme: { type: &quot;elevated&quot;, variant: &quot;neutral&quot; },
-        ui: { type: &quot;Label&quot;, label: &quot;Tenants&quot;, value: &quot;47&quot; },
+        ui: { type: &quot;Label&quot;, label: &quot;Wide&quot;, value: &quot;2×1&quot; },
       },
     ] satisfies NotchGridItem[]} /&gt;;</code></pre>
             </div>
