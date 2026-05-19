@@ -45,13 +45,13 @@ export function PageHeader({
   return (
     <header className={cn("flex flex-col gap-2", className)}>
       {path}
-      <div className="flex items-end justify-between gap-4 flex-wrap">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3 min-w-0">
           {leading}
           <div className="min-w-0">
             <h1 className="text-2xl font-bold text-on-surface">{title}</h1>
             {description && (
-              <p className="mt-1 text-on-surface-variant">{description}</p>
+              <p className="text-on-surface-variant">{description}</p>
             )}
           </div>
         </div>
