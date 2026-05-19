@@ -24,12 +24,19 @@ export interface NotchTheme {
 }
 
 export interface ResolvedTheme {
-  /** CSS `background` — token reference, gradient, or `"transparent"`. */
-  background: string;
+  /** SVG-friendly fill — a solid token reference, or `"transparent"`. Never
+   *  a CSS gradient (those go in `cssBackground`). Feed directly to
+   *  `<BlockShape fill={...}>`. */
+  fill: string;
+  /** CSS `background` — may be a `linear-gradient(...)` when `gradient > 0`,
+   *  otherwise matches `fill`. For consumers layering a CSS background. */
+  cssBackground: string;
   /** CSS `color` — always a token reference. */
   color: string;
-  /** CSS `border` — `"1px solid var(...)"` or `"none"`. */
-  border: string;
+  /** SVG `stroke` — token reference, or `"none"`. */
+  stroke: string;
+  /** SVG `stroke-width` in px. `0` when there's no border. */
+  strokeWidth: number;
   /** Color (token reference) for an inset accent stripe along the chrome's
    *  left edge — used by elevated warn / error to signal severity without
    *  losing the lifted surface look. Renderers should paint this as a 4px
@@ -125,8 +132,8 @@ function resolveAuto(theme: NotchTheme): { type: ConcreteType; variant: Concrete
 }
 
 /** Apply a tonal gradient overlay to a fill token. `gradient = 0` returns the
- *  raw token; `gradient = 1` mixes ~12% white at the top. The overlay only
- *  applies to filled chromes — transparent backgrounds are returned unchanged. */
+ *  raw token; `gradient = 1` mixes ~12% white at the top. Returns the
+ *  CSS-side value (gradient or token); the SVG-side fill stays solid. */
 function applyGradient(bg: string, gradient: number): string {
   if (gradient <= 0 || bg === "transparent") return bg;
   const pct = Math.min(1, gradient) * 12;
@@ -152,30 +159,37 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
 
   switch (type) {
     case "filled": {
-      const bg = applyGradient(FILL_BG[variant], gradient);
+      const fill = FILL_BG[variant];
       return {
-        background: bg,
+        fill,
+        cssBackground: applyGradient(fill, gradient),
         color: FILL_FG[variant],
-        border: "none",
+        stroke: "none",
+        strokeWidth: 0,
         boxShadow: "none",
         filter: "none",
       };
     }
     case "outlined": {
       return {
-        background: "transparent",
+        fill: "transparent",
+        cssBackground: "transparent",
         color: ACCENT[variant],
-        border: `1px solid ${OUTLINE_BORDER[variant]}`,
+        stroke: OUTLINE_BORDER[variant],
+        strokeWidth: 1,
         boxShadow: "none",
         filter: "none",
       };
     }
     case "elevated": {
       const isAlert = variant === "warn" || variant === "error";
+      const fill = ELEVATED_BG[variant];
       return {
-        background: applyGradient(ELEVATED_BG[variant], gradient),
+        fill,
+        cssBackground: applyGradient(fill, gradient),
         color: "var(--color-on-surface)",
-        border: "none",
+        stroke: "none",
+        strokeWidth: 0,
         ...(isAlert ? { accentBar: ACCENT[variant] } : {}),
         boxShadow: "var(--shadow-m3-1)",
         filter: "var(--filter-m3-1)",
@@ -183,9 +197,11 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
     }
     case "ghost": {
       return {
-        background: "transparent",
+        fill: "transparent",
+        cssBackground: "transparent",
         color: ACCENT[variant],
-        border: "none",
+        stroke: "none",
+        strokeWidth: 0,
         boxShadow: "none",
         filter: "none",
       };

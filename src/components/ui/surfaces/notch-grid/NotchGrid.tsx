@@ -1,18 +1,20 @@
 // NotchGrid — desire-driven notched layout for the dynamic-ui wire format.
 //
-// Items declare position / shape priorities; `solveLayout` packs them;
-// each placement renders as a `BlockShape` themed via `resolveNotchTheme`.
-// No drag in this slice — that's PRs 5–7.
+// Items declare position / shape priorities; `solveLayout` packs them; each
+// placement renders as a `BlockShape` themed via `resolveNotchTheme`.
 //
-// Container sizing: when `cols="auto"` (default), a ResizeObserver measures
-// the wrapper width and applies the >96px-gain-1-col rule —
-//   `cols = max(1, floor(containerWidth / blockMin))` and
+// Container sizing (when `cols="auto"`): a ResizeObserver applies the
+// >blockMin-gain-1-col rule —
+//   `cols = max(1, floor(containerWidth / blockMin))`
 //   `block = containerWidth / cols`
-// so the surface never leaves dead space at the edges.
+// so the surface never leaves dead space at the edges, and block size lives
+// in `[blockMin, 2·blockMin)`.
 //
 // See `mirrorstack-docs/architecture/notch-grid-v2/02-api.md`.
 
 import {
+  memo,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -20,6 +22,8 @@ import {
   useState,
   type ComponentType,
   type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from "react";
 import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
@@ -30,6 +34,7 @@ import {
   type Desire,
   type Mask,
   type Placement,
+  type Pos,
 } from "./layout";
 import { resolveNotchTheme, type NotchTheme } from "./theme";
 
@@ -59,7 +64,7 @@ export interface NotchGridItem {
   desire: Desire;
   theme?: NotchTheme;
   /** Reserved — adjacency auto-link by `groupKey`. Renders as separate
-   *  chromes in PR 4; unified chrome lands in PR 6. */
+   *  chromes today; unified chrome via union-of-masks lands in a later slice. */
   groupKey?: string;
   /** Either `ui` (single primitive content) or `subItems` (nested panel). */
   ui?: NotchGridUI;
@@ -99,31 +104,41 @@ export interface NotchGridProps {
    *  layout doesn't collapse. */
   primitives?: PrimitiveRegistry;
   onItemError?: (key: ItemKey, error: NotchGridError) => void;
+  /** Enable outer-grid drag-to-place. Dropped items pin to their new cell
+   *  (winning the cell on next solve); everything else re-flows around them. */
+  draggable?: boolean;
+  /** Called after a drag drops an item, with its new block position. */
+  onItemMove?: (key: ItemKey, pos: Pos) => void;
   className?: string;
   style?: CSSProperties;
 }
 
 // --- Internal helpers ------------------------------------------------------
 
-/** Convert a boolean mask to BlockShape's tier-encoded shape matrix (0/1). */
 function maskToShape(mask: Mask): number[][] {
   return mask.map((row) => row.map((v) => (v ? 1 : 0)));
 }
 
-/** Parse `resolveNotchTheme().border` ("none" or "Npx solid var(--…)") into
- *  BlockShape's `stroke` + `strokeWidth` props. */
-function parseBorder(border: string): { stroke: string; strokeWidth: number } {
-  if (border === "none") return { stroke: "none", strokeWidth: 0 };
-  const m = border.match(/^(\d+)px\s+solid\s+(.+)$/);
-  if (m) return { stroke: m[2], strokeWidth: Number(m[1]) };
-  return { stroke: border, strokeWidth: 1 };
+/** Assign synthetic keys to items missing one. Returns the same array when
+ *  every item already has a key (preserves referential equality for memos). */
+function assignKeys(items: NotchGridItem[]): NotchGridItem[] {
+  if (items.every((it) => it.key != null)) return items;
+  return items.map((it, i) => (it.key ? it : { ...it, key: `item-${i}` }));
 }
 
-/** Assign synthetic keys to items missing one. Stable across re-renders for
- *  the same input order; matches the design doc's open question 2.1 lean
- *  (sequential, at parse). */
-function assignKeys(items: NotchGridItem[]): NotchGridItem[] {
-  return items.map((it, i) => (it.key ? it : { ...it, key: `item-${i}` }));
+interface DragState {
+  key: ItemKey;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  /** Origin position in block units (where the item sits at drag start). */
+  originCol: number;
+  originRow: number;
+  /** Footprint width in blocks (to clamp the dropped column). */
+  originCols: number;
+  /** Live pointer delta in px. */
+  dx: number;
+  dy: number;
 }
 
 // --- Component -------------------------------------------------------------
@@ -136,6 +151,8 @@ export function NotchGrid({
   nest = true,
   primitives,
   onItemError,
+  draggable = false,
+  onItemMove,
   className,
   style,
 }: NotchGridProps) {
@@ -155,7 +172,6 @@ export function NotchGrid({
 
   const keyedItems = useMemo(() => assignKeys(items), [items]);
 
-  // Compute cols + block size. Auto: gain-1-col rule + 1fr distribution.
   const { resolvedCols, block } = useMemo(() => {
     if (cols !== "auto") return { resolvedCols: cols, block: blockMin };
     if (containerWidth == null) return { resolvedCols: null as number | null, block: blockMin };
@@ -163,26 +179,75 @@ export function NotchGrid({
     return { resolvedCols: c, block: containerWidth / c };
   }, [cols, blockMin, containerWidth]);
 
-  // Solve layout once cols are known.
+  // Drag-to-place: positions the user has dropped items at (pinned) + the
+  // live drag offset for visual feedback. Overrides drive a re-solve;
+  // `drag` is paint-only state during the pointer sequence.
+  const [overrides, setOverrides] = useState<Map<ItemKey, Pos>>(new Map());
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const dragRef = useRef<DragState | null>(null);
+  dragRef.current = drag;
+
+  const handlePointerMove = useCallback((e: ReactPointerEvent) => {
+    const d = dragRef.current;
+    if (!d || e.pointerId !== d.pointerId) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    // Skip the no-op spread + re-render when the pointer hasn't actually moved.
+    if (dx === d.dx && dy === d.dy) return;
+    setDrag({ ...d, dx, dy });
+  }, []);
+
+  const handlePointerEnd = useCallback(
+    (e: ReactPointerEvent) => {
+      const d = dragRef.current;
+      if (!d || e.pointerId !== d.pointerId) return;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        /* pointer may already be released */
+      }
+      setDrag(null);
+      const blockPx = block || blockMin;
+      const colCount = resolvedCols ?? 1;
+      const maxCol = Math.max(0, colCount - d.originCols);
+      const nextCol = Math.min(maxCol, Math.max(0, d.originCol + Math.round(d.dx / blockPx)));
+      const nextRow = Math.max(0, d.originRow + Math.round(d.dy / blockPx));
+      const pos: Pos = [nextCol, nextRow];
+      setOverrides((prev) => new Map(prev).set(d.key, pos));
+      onItemMove?.(d.key, pos);
+    },
+    [block, blockMin, resolvedCols, onItemMove],
+  );
+
+  // Items with an override get their desire.position rewritten — that promotes
+  // them to the solver's fixed-position fast path so they win their cell on
+  // the next solve.
   const layout = useMemo(() => {
     if (resolvedCols == null) return null;
     return solveLayout({
-      items: keyedItems.map((it) => ({
-        key: it.key!,
-        desire: it.desire,
-        groupKey: it.groupKey,
-        item: it,
-      })),
+      items: keyedItems.map((it) => {
+        const ov = overrides.get(it.key!);
+        return {
+          key: it.key!,
+          desire: ov ? { ...it.desire, position: ov } : it.desire,
+          groupKey: it.groupKey,
+          item: it,
+        };
+      }),
       cols: resolvedCols,
       nest,
     });
-  }, [keyedItems, resolvedCols, nest]);
+  }, [keyedItems, resolvedCols, nest, overrides]);
 
-  if (isDev && layout && layout.unfit.length > 0) {
-    console.warn(
-      `[NotchGrid] ${layout.unfit.length} item(s) didn't fit: ${layout.unfit.join(", ")}. Mask wider than cols=${resolvedCols}.`,
-    );
-  }
+  // Warn-once-per-distinct-unfit-set, not every paint.
+  const unfitKey = layout?.unfit.join(",") ?? "";
+  useEffect(() => {
+    if (isDev && layout && layout.unfit.length > 0) {
+      console.warn(
+        `[NotchGrid] ${layout.unfit.length} item(s) didn't fit: ${layout.unfit.join(", ")}. Mask wider than cols=${resolvedCols}.`,
+      );
+    }
+  }, [unfitKey, resolvedCols, layout]);
 
   const totalRows = layout?.rowsUsed ?? 0;
 
@@ -191,26 +256,57 @@ export function NotchGrid({
       ref={wrapperRef}
       className={cn("relative w-full", className)}
       style={{
-        // Reserve vertical space pre-paint so the page doesn't reflow when
-        // layout resolves.
         minHeight: totalRows > 0 ? totalRows * block : undefined,
         ...style,
       }}
     >
-      {layout
-        ? layout.placements.map((p) => (
-            <NotchItem
-              key={p.key}
-              placement={p}
-              item={p.item as NotchGridItem}
-              block={block}
-              gap={gap}
-              primitives={primitives}
-              onItemError={onItemError}
-              parentTheme={undefined}
-            />
-          ))
-        : null}
+      {layout?.placements.map((p) => {
+        const isDragging = drag?.key === p.key;
+        const dragOffset: readonly [number, number] | undefined =
+          isDragging && drag ? [drag.dx, drag.dy] : undefined;
+        return (
+          <NotchItem
+            key={p.key}
+            placement={p}
+            item={p.item as NotchGridItem}
+            block={block}
+            gap={gap}
+            primitives={primitives}
+            onItemError={onItemError}
+            parentTheme={undefined}
+            draggable={draggable}
+            dragOffset={dragOffset}
+            hasOverride={overrides.has(p.key)}
+            onDragStart={
+              draggable
+                ? (e) => {
+                    // Ignore secondary buttons when the event reports one
+                    // (jsdom's fireEvent drops it — treat undefined as primary).
+                    if (e.button != null && e.button !== 0) return;
+                    try {
+                      e.currentTarget.setPointerCapture(e.pointerId);
+                    } catch {
+                      /* test envs (jsdom) lack pointer capture */
+                    }
+                    setDrag({
+                      key: p.key,
+                      pointerId: e.pointerId,
+                      startX: e.clientX,
+                      startY: e.clientY,
+                      originCol: p.col,
+                      originRow: p.row,
+                      originCols: p.cols,
+                      dx: 0,
+                      dy: 0,
+                    });
+                  }
+                : undefined
+            }
+            onDragMove={handlePointerMove}
+            onDragEnd={handlePointerEnd}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -226,9 +322,18 @@ interface NotchItemProps {
   onItemError?: (key: ItemKey, error: NotchGridError) => void;
   /** Set when rendered as a sub-item; inherits `type` from the parent panel. */
   parentTheme?: NotchTheme;
+  /** When true, the wrapper accepts pointer events for outer-grid drag. */
+  draggable?: boolean;
+  /** Live `[dx, dy]` in px while this tile is being dragged. */
+  dragOffset?: readonly [number, number];
+  /** True when this tile has a committed drop override (sits above non-pinned). */
+  hasOverride?: boolean;
+  onDragStart?: (e: ReactPointerEvent<HTMLDivElement>) => void;
+  onDragMove?: (e: ReactPointerEvent<HTMLDivElement>) => void;
+  onDragEnd?: (e: ReactPointerEvent<HTMLDivElement>) => void;
 }
 
-function NotchItem({
+const NotchItem = memo(function NotchItem({
   placement,
   item,
   block,
@@ -236,25 +341,33 @@ function NotchItem({
   primitives,
   onItemError,
   parentTheme,
+  draggable = false,
+  dragOffset,
+  hasOverride = false,
+  onDragStart,
+  onDragMove,
+  onDragEnd,
 }: NotchItemProps) {
   // Sub-items inherit `type` from the parent panel; only `variant` and
-  // `gradient` are overridable (design doc rationale: visual coherence).
+  // `gradient` are overridable (visual coherence — a filled panel with an
+  // outlined sub-item looks broken).
   const itemTheme: NotchTheme = parentTheme
     ? { ...item.theme, type: parentTheme.type }
     : item.theme ?? {};
-  const resolved = resolveNotchTheme(itemTheme);
-  const { stroke, strokeWidth } = parseBorder(resolved.border);
+  const resolved = useMemo(() => resolveNotchTheme(itemTheme), [
+    itemTheme.type,
+    itemTheme.variant,
+    itemTheme.gradient,
+  ]);
   const shape = useMemo(() => maskToShape(placement.mask), [placement.mask]);
 
-  // Sub-items: solve inner layout. The sub-grid's col count is the parent's
-  // bounding-box cols; each sub-cell uses the same `block` px size.
   const subLayout = useMemo(() => {
     if (!item.subItems || item.subItems.length === 0) return null;
     return solveLayout({
       items: item.subItems.map((s, i) => ({
         key: s.key ?? `${placement.key}/${i}`,
         desire: s.desire,
-        item: { ...s } as NotchGridItem,
+        item: s as NotchGridItem,
       })),
       cols: placement.cols,
     });
@@ -272,67 +385,85 @@ function NotchItem({
     }
   }, [unknownPrimitive, onItemError, placement.key, item.ui]);
 
-  // The wrapper carries placement + the drop-shadow filter for elevated
-  // chromes (traces the SVG path rather than the bounding box). The
-  // accent-bar color cue for elevated warn/error is rendered inside the
-  // BlockShape so it sits within the clipped chrome, not outside it.
+  const isDragging = dragOffset !== undefined;
   const wrapperStyle: CSSProperties = {
     position: "absolute",
     left: placement.col * block,
     top: placement.row * block,
     color: resolved.color,
-    ...(resolved.filter !== "none" ? { filter: resolved.filter } : {}),
   };
+  if (resolved.filter !== "none") wrapperStyle.filter = resolved.filter;
+  if (isDragging) {
+    wrapperStyle.transform = `translate(${dragOffset[0]}px, ${dragOffset[1]}px)`;
+    wrapperStyle.zIndex = 20;
+  } else if (hasOverride) {
+    wrapperStyle.zIndex = 10;
+  }
+  if (draggable) {
+    wrapperStyle.cursor = isDragging ? "grabbing" : "grab";
+    wrapperStyle.touchAction = "none";
+  }
 
-  // Gradient backgrounds (`linear-gradient(...)`) aren't valid SVG `fill`
-  // values. v1 falls back to the BlockShape's default solid fill when a
-  // gradient is requested. Tracked in the design doc.
-  const fill = resolved.background.startsWith("linear-gradient")
-    ? undefined
-    : resolved.background;
+  const dragHandlers = draggable
+    ? {
+        onPointerDown: onDragStart,
+        onPointerMove: onDragMove,
+        onPointerUp: onDragEnd,
+        onPointerCancel: onDragEnd,
+      }
+    : undefined;
+
+  let content: ReactNode = null;
+  if (subLayout) {
+    content = (
+      <div className="relative h-full w-full">
+        {subLayout.placements.map((sp) => (
+          <NotchItem
+            key={sp.key}
+            placement={sp}
+            item={sp.item as NotchGridItem}
+            block={block}
+            gap={gap}
+            primitives={primitives}
+            onItemError={onItemError}
+            parentTheme={itemTheme}
+          />
+        ))}
+      </div>
+    );
+  } else if (Primitive && item.ui) {
+    content = <Primitive {...item.ui} />;
+  } else if (unknownPrimitive && item.ui) {
+    content = <UnknownPrimitivePlaceholder type={item.ui.type} />;
+  }
 
   return (
-    <div style={wrapperStyle}>
+    <div
+      {...dragHandlers}
+      className={draggable ? "select-none" : undefined}
+      style={wrapperStyle}
+    >
       <BlockShape
         shape={shape}
         block={block}
         gap={gap}
-        fill={fill ?? "transparent"}
-        stroke={stroke}
-        strokeWidth={strokeWidth}
+        fill={resolved.fill}
+        stroke={resolved.stroke}
+        strokeWidth={resolved.strokeWidth}
         pad={subLayout ? 0 : 16}
       >
         {resolved.accentBar && (
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute top-2 bottom-2 left-2 w-1 rounded-full"
+            className="pointer-events-none absolute inset-y-0 left-0 w-1"
             style={{ background: resolved.accentBar }}
           />
         )}
-        {subLayout ? (
-          <div className="relative h-full w-full">
-            {subLayout.placements.map((sp) => (
-              <NotchItem
-                key={sp.key}
-                placement={sp}
-                item={sp.item as NotchGridItem}
-                block={block}
-                gap={gap}
-                primitives={primitives}
-                onItemError={onItemError}
-                parentTheme={itemTheme}
-              />
-            ))}
-          </div>
-        ) : Primitive && item.ui ? (
-          <Primitive {...item.ui} />
-        ) : unknownPrimitive && item.ui ? (
-          <UnknownPrimitivePlaceholder type={item.ui.type} />
-        ) : null}
+        {content}
       </BlockShape>
     </div>
   );
-}
+});
 
 // --- Placeholders ----------------------------------------------------------
 

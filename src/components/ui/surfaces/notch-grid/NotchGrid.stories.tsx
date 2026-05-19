@@ -179,33 +179,6 @@ export const ThemeGallery: Story = {
   },
 };
 
-/** Unknown `ui.type` fires `onItemError` and renders an in-tile placeholder
- *  so the layout doesn't collapse. The renderer can then drive the
- *  L3 agent-sidebar flow (see dynamic-ui TBD 04 L3). */
-export const UnknownPrimitive: Story = {
-  args: {
-    primitives,
-    onItemError: (key, error) => {
-      // eslint-disable-next-line no-console
-      console.warn("[NotchGrid story] onItemError:", key, error);
-    },
-    items: [
-      {
-        key: "known",
-        desire: { shape: r(1, 1) },
-        theme: { type: "filled", variant: "primary" },
-        ui: { type: "Label", label: "OK" },
-      },
-      {
-        key: "broken",
-        desire: { shape: r(2, 2) },
-        theme: { type: "outlined", variant: "error" },
-        ui: { type: "DoesNotExist" },
-      },
-    ] satisfies NotchGridItem[],
-  },
-};
-
 /** Custom notched shapes — exercises the outline tracer (PR #188) under
  *  non-rectangular footprints. Demonstrates the four canonical patterns the
  *  closed v1 stack used: L (corner notch), plus, T, and a 4×2 chart with a
@@ -319,47 +292,55 @@ export const CustomShapes: Story = {
   },
 };
 
-/** The architecture doc's overview-page example, adapted: an L-shaped hero,
- *  a sub-item panel with mixed sizes, and a few accessory tiles. */
-export const OverviewPage: Story = {
+/** Outer-grid drag. `draggable` lets the user grab a tile and drop it on
+ *  another cell; the dropped item pins to its new spot and everything else
+ *  re-flows around it. `onItemMove` reports the new `[col, row]`. */
+export const Draggable: Story = {
   args: {
     primitives,
+    cols: 6,
+    blockMin: 120,
+    draggable: true,
+    onItemMove: (key, pos) => {
+      // eslint-disable-next-line no-console
+      console.log("[NotchGrid story] drop:", key, pos);
+    },
     items: [
       {
         key: "hero",
-        desire: {
-          position: [0, 0],
-          shape: m([1, 1, 1], [1, 1, 1], [1, 1, 0]),
-        },
+        desire: { shape: r(2, 2) },
         theme: { type: "filled", variant: "primary" },
-        ui: { type: "Label", label: "Module", value: "MirrorStack" },
+        ui: { type: "Label", label: "Drag me", value: "★" },
       },
       {
-        key: "installs",
-        desire: { position: [2, 2], shape: r(1, 1) },
-        theme: { type: "outlined", variant: "primary" },
-        ui: { type: "Label", label: "Installs", value: "12" },
+        key: "a",
+        desire: { shape: r(1, 1) },
+        theme: { type: "filled", variant: "secondary" },
+        ui: { type: "Label", label: "A" },
       },
       {
-        key: "panel",
-        desire: { position: [3, 0], shape: r(2, 3) },
+        key: "b",
+        desire: { shape: r(1, 1) },
         theme: { type: "filled", variant: "tertiary" },
-        subItems: [
-          {
-            desire: { position: [0, 0], shape: r(1, 1) },
-            ui: { type: "Label", label: "Cron", value: "8/d" },
-          },
-          {
-            desire: { position: [0, 1], shape: r(2, 2) },
-            ui: { type: "Label", label: "Calls × markup", value: "$420" },
-          },
-        ],
+        ui: { type: "Label", label: "B" },
       },
       {
-        key: "tenants",
-        desire: { position: [0, 3], shape: r(1, 1) },
+        key: "c",
+        desire: { shape: r(1, 1) },
+        theme: { type: "outlined", variant: "neutral" },
+        ui: { type: "Label", label: "C" },
+      },
+      {
+        key: "d",
+        desire: { shape: r(1, 1) },
+        theme: { type: "outlined", variant: "neutral" },
+        ui: { type: "Label", label: "D" },
+      },
+      {
+        key: "wide",
+        desire: { shape: r(2, 1) },
         theme: { type: "elevated", variant: "neutral" },
-        ui: { type: "Label", label: "Tenants", value: "47" },
+        ui: { type: "Label", label: "Wide", value: "2×1" },
       },
     ] satisfies NotchGridItem[],
   },

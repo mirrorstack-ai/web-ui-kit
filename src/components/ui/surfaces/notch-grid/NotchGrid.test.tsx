@@ -153,4 +153,32 @@ describe("NotchGrid", () => {
     expect(tile.style.left).toBe("0px");
     expect(tile.style.top).toBe("0px");
   });
+
+  it("draggable: cursor=grab on tiles, no drag handlers when omitted", () => {
+    const items: NotchGridItem[] = [
+      { key: "a", desire: { shape: M(1, 1) } },
+    ];
+
+    // Without draggable: no cursor styling
+    const { container: plain } = render(
+      <NotchGrid items={items} cols={2} blockMin={100} />,
+    );
+    const plainTile = plain.querySelector(":scope > div > div") as HTMLElement;
+    expect(plainTile.style.cursor).toBe("");
+
+    // With draggable: cursor=grab
+    cleanup();
+    const { container: drag } = render(
+      <NotchGrid items={items} cols={2} blockMin={100} draggable />,
+    );
+    const dragTile = drag.querySelector(":scope > div > div") as HTMLElement;
+    expect(dragTile.style.cursor).toBe("grab");
+  });
+
+  // Full pointerDown → move → up drag flow isn't exercised here because
+  // jsdom's `fireEvent.pointer*` drops PointerEvent init properties
+  // (clientX/Y, button, pointerId all come through as `undefined`), so
+  // dx/dy resolves to NaN. The `cursor=grab` test above is the wiring
+  // smoke check; visual end-to-end verification lives in the `Draggable`
+  // story.
 });

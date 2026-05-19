@@ -4,95 +4,100 @@ import { resolveNotchTheme } from "./theme";
 describe("resolveNotchTheme — defaults & auto resolution", () => {
   it("undefined theme → ghost neutral (both knobs auto)", () => {
     const r = resolveNotchTheme();
-    expect(r.background).toBe("transparent");
+    expect(r.fill).toBe("transparent");
+    expect(r.cssBackground).toBe("transparent");
     expect(r.color).toBe("var(--color-on-surface-variant)");
-    expect(r.border).toBe("none");
+    expect(r.stroke).toBe("none");
+    expect(r.strokeWidth).toBe(0);
     expect(r.boxShadow).toBe("none");
   });
 
   it("variant=primary alone → filled primary (type defaults to filled when variant set)", () => {
     const r = resolveNotchTheme({ variant: "primary" });
-    expect(r.background).toBe("var(--color-primary-container)");
+    expect(r.fill).toBe("var(--color-primary-container)");
     expect(r.color).toBe("var(--color-on-primary-container)");
   });
 
   it("type=auto + variant=auto → ghost neutral", () => {
     const r = resolveNotchTheme({ type: "auto", variant: "auto" });
-    expect(r.background).toBe("transparent");
+    expect(r.fill).toBe("transparent");
     expect(r.color).toBe("var(--color-on-surface-variant)");
   });
 
   it("type=auto + variant=primary → filled primary", () => {
     const r = resolveNotchTheme({ type: "auto", variant: "primary" });
-    expect(r.background).toBe("var(--color-primary-container)");
+    expect(r.fill).toBe("var(--color-primary-container)");
     expect(r.color).toBe("var(--color-on-primary-container)");
   });
 
   it("variant=auto → resolves to neutral", () => {
     const r = resolveNotchTheme({ type: "outlined", variant: "auto" });
     expect(r.color).toBe("var(--color-on-surface-variant)");
-    expect(r.border).toBe("1px solid var(--color-outline-variant)");
+    expect(r.stroke).toBe("var(--color-outline-variant)");
+    expect(r.strokeWidth).toBe(1);
   });
 });
 
 describe("resolveNotchTheme — type=filled", () => {
   it("primary → primary-container fill, on-primary-container text", () => {
     const r = resolveNotchTheme({ type: "filled", variant: "primary" });
-    expect(r.background).toBe("var(--color-primary-container)");
+    expect(r.fill).toBe("var(--color-primary-container)");
     expect(r.color).toBe("var(--color-on-primary-container)");
-    expect(r.border).toBe("none");
+    expect(r.stroke).toBe("none");
+    expect(r.strokeWidth).toBe(0);
     expect(r.boxShadow).toBe("none");
   });
 
   it("secondary, tertiary, error → matching container tokens", () => {
-    expect(resolveNotchTheme({ type: "filled", variant: "secondary" }).background)
+    expect(resolveNotchTheme({ type: "filled", variant: "secondary" }).fill)
       .toBe("var(--color-secondary-container)");
-    expect(resolveNotchTheme({ type: "filled", variant: "tertiary" }).background)
+    expect(resolveNotchTheme({ type: "filled", variant: "tertiary" }).fill)
       .toBe("var(--color-tertiary-container)");
-    expect(resolveNotchTheme({ type: "filled", variant: "error" }).background)
+    expect(resolveNotchTheme({ type: "filled", variant: "error" }).fill)
       .toBe("var(--color-error-container)");
   });
 
   it("surface → surface-container; neutral → surface-container-low", () => {
-    expect(resolveNotchTheme({ type: "filled", variant: "surface" }).background)
+    expect(resolveNotchTheme({ type: "filled", variant: "surface" }).fill)
       .toBe("var(--color-surface-container)");
-    expect(resolveNotchTheme({ type: "filled", variant: "neutral" }).background)
+    expect(resolveNotchTheme({ type: "filled", variant: "neutral" }).fill)
       .toBe("var(--color-surface-container-low)");
   });
 
   it("warn → warning-container (schema→kit alias)", () => {
     const r = resolveNotchTheme({ type: "filled", variant: "warn" });
-    expect(r.background).toBe("var(--color-warning-container)");
+    expect(r.fill).toBe("var(--color-warning-container)");
     expect(r.color).toBe("var(--color-on-warning-container)");
   });
 });
 
 describe("resolveNotchTheme — type=outlined", () => {
-  it("primary → transparent bg, primary text, 1px primary border", () => {
+  it("primary → transparent bg, primary text, 1px primary stroke", () => {
     const r = resolveNotchTheme({ type: "outlined", variant: "primary" });
-    expect(r.background).toBe("transparent");
+    expect(r.fill).toBe("transparent");
     expect(r.color).toBe("var(--color-primary)");
-    expect(r.border).toBe("1px solid var(--color-primary)");
+    expect(r.stroke).toBe("var(--color-primary)");
+    expect(r.strokeWidth).toBe(1);
     expect(r.boxShadow).toBe("none");
   });
 
-  it("neutral / surface → outline-variant border", () => {
-    expect(resolveNotchTheme({ type: "outlined", variant: "neutral" }).border)
-      .toBe("1px solid var(--color-outline-variant)");
-    expect(resolveNotchTheme({ type: "outlined", variant: "surface" }).border)
-      .toBe("1px solid var(--color-outline-variant)");
+  it("neutral / surface → outline-variant stroke", () => {
+    expect(resolveNotchTheme({ type: "outlined", variant: "neutral" }).stroke)
+      .toBe("var(--color-outline-variant)");
+    expect(resolveNotchTheme({ type: "outlined", variant: "surface" }).stroke)
+      .toBe("var(--color-outline-variant)");
   });
 
-  it("warn → warning border (alias)", () => {
-    expect(resolveNotchTheme({ type: "outlined", variant: "warn" }).border)
-      .toBe("1px solid var(--color-warning)");
+  it("warn → warning stroke (alias)", () => {
+    expect(resolveNotchTheme({ type: "outlined", variant: "warn" }).stroke)
+      .toBe("var(--color-warning)");
   });
 });
 
 describe("resolveNotchTheme — type=elevated", () => {
   it("primary → surface-container-low fill, on-surface text, m3-1 shadow, no accent bar", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "primary" });
-    expect(r.background).toBe("var(--color-surface-container-low)");
+    expect(r.fill).toBe("var(--color-surface-container-low)");
     expect(r.color).toBe("var(--color-on-surface)");
     expect(r.boxShadow).toBe("var(--shadow-m3-1)");
     expect(r.accentBar).toBeUndefined();
@@ -100,12 +105,12 @@ describe("resolveNotchTheme — type=elevated", () => {
 
   it("neutral drops one surface tier (container-lowest)", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "neutral" });
-    expect(r.background).toBe("var(--color-surface-container-lowest)");
+    expect(r.fill).toBe("var(--color-surface-container-lowest)");
   });
 
   it("warn → exposes accentBar=warning color for the renderer's inset stripe", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "warn" });
-    expect(r.background).toBe("var(--color-surface-container-low)");
+    expect(r.fill).toBe("var(--color-surface-container-low)");
     expect(r.accentBar).toBe("var(--color-warning)");
     expect(r.boxShadow).toBe("var(--shadow-m3-1)");
   });
@@ -117,11 +122,11 @@ describe("resolveNotchTheme — type=elevated", () => {
 });
 
 describe("resolveNotchTheme — type=ghost", () => {
-  it("primary → transparent bg, primary text, no border or shadow", () => {
+  it("primary → transparent bg, primary text, no stroke or shadow", () => {
     const r = resolveNotchTheme({ type: "ghost", variant: "primary" });
-    expect(r.background).toBe("transparent");
+    expect(r.fill).toBe("transparent");
     expect(r.color).toBe("var(--color-primary)");
-    expect(r.border).toBe("none");
+    expect(r.stroke).toBe("none");
     expect(r.boxShadow).toBe("none");
   });
 
@@ -137,40 +142,43 @@ describe("resolveNotchTheme — type=ghost", () => {
 });
 
 describe("resolveNotchTheme — gradient overlay", () => {
-  it("gradient=0 leaves filled background unchanged", () => {
+  it("gradient=0 leaves cssBackground equal to fill", () => {
     const r = resolveNotchTheme({ type: "filled", variant: "primary", gradient: 0 });
-    expect(r.background).toBe("var(--color-primary-container)");
+    expect(r.cssBackground).toBe("var(--color-primary-container)");
+    expect(r.fill).toBe("var(--color-primary-container)");
   });
 
-  it("gradient>0 wraps the fill in a linear-gradient using color-mix", () => {
+  it("gradient>0 wraps cssBackground in a linear-gradient (fill stays solid)", () => {
     const r = resolveNotchTheme({ type: "filled", variant: "primary", gradient: 1 });
-    expect(r.background).toContain("linear-gradient(180deg");
-    expect(r.background).toContain("var(--color-primary-container)");
-    expect(r.background).toContain("color-mix(in oklab");
-    expect(r.background).toContain("white 12%");
+    expect(r.cssBackground).toContain("linear-gradient(180deg");
+    expect(r.cssBackground).toContain("var(--color-primary-container)");
+    expect(r.cssBackground).toContain("color-mix(in oklab");
+    expect(r.cssBackground).toContain("white 12%");
+    // SVG fill stays solid — gradient isn't a valid SVG paint.
+    expect(r.fill).toBe("var(--color-primary-container)");
   });
 
   it("gradient=0.5 → 6% white mix at top", () => {
     const r = resolveNotchTheme({ type: "filled", variant: "primary", gradient: 0.5 });
-    expect(r.background).toContain("white 6%");
+    expect(r.cssBackground).toContain("white 6%");
   });
 
   it("gradient clamped at 1 (gradient=2 still produces 12%)", () => {
     const r = resolveNotchTheme({ type: "filled", variant: "primary", gradient: 2 });
-    expect(r.background).toContain("white 12%");
+    expect(r.cssBackground).toContain("white 12%");
   });
 
   it("gradient ignored for transparent backgrounds (outlined, ghost)", () => {
     const outlined = resolveNotchTheme({ type: "outlined", variant: "primary", gradient: 1 });
-    expect(outlined.background).toBe("transparent");
+    expect(outlined.cssBackground).toBe("transparent");
     const ghost = resolveNotchTheme({ type: "ghost", variant: "primary", gradient: 1 });
-    expect(ghost.background).toBe("transparent");
+    expect(ghost.cssBackground).toBe("transparent");
   });
 
   it("gradient applies to elevated fill (it's a solid token, not transparent)", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "primary", gradient: 1 });
-    expect(r.background).toContain("linear-gradient(180deg");
-    expect(r.background).toContain("var(--color-surface-container-low)");
+    expect(r.cssBackground).toContain("linear-gradient(180deg");
+    expect(r.cssBackground).toContain("var(--color-surface-container-low)");
   });
 });
 
@@ -190,11 +198,12 @@ describe("resolveNotchTheme — exhaustive type×variant matrix", () => {
     for (const type of types) {
       for (const variant of variants) {
         const r = resolveNotchTheme({ type, variant });
-        expect(typeof r.background).toBe("string");
-        expect(r.background.length).toBeGreaterThan(0);
-        expect(typeof r.color).toBe("string");
+        expect(typeof r.fill).toBe("string");
+        expect(r.fill.length).toBeGreaterThan(0);
+        expect(typeof r.cssBackground).toBe("string");
         expect(r.color).toMatch(/^var\(--color-/);
-        expect(typeof r.border).toBe("string");
+        expect(typeof r.stroke).toBe("string");
+        expect(typeof r.strokeWidth).toBe("number");
         expect(typeof r.boxShadow).toBe("string");
       }
     }
