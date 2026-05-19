@@ -3,6 +3,17 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.3.1
+
+### Internal
+
+- **notch-grid v2** — first salvage slice. Pure-lift utilities from the
+  closed v1 stack: `grid-outline.ts` (SVG outline tracer), `breakpoints.ts`
+  (responsive resolution), `BlockShape.tsx` (rounded-mask React adapter).
+  No public exports yet — these are wired up in a later slice when the
+  `<NotchGrid>` component lands. Design doc:
+  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs/tree/main/architecture/notch-grid-v2).
+
 ## 0.3.0
 
 ### Components
