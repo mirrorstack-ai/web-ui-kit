@@ -3,6 +3,17 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.3.3
+
+### Components
+
+- **PageHeader** — new top-of-page header. `h1` title with optional
+  description and an optional trailing slot (`tail`) for a picker,
+  button, breadcrumb, or other element. Mid-page sibling is
+  `SectionHeader` (h2). Replaces the duplicated
+  `text-2xl font-bold mb-1 + on-surface-variant <p>` shape across
+  settings/profile pages.
+
 ## 0.3.2
 
 ### Components

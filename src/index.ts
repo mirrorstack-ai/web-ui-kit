@@ -44,6 +44,10 @@ export {
   type SliderProps,
 } from "./components/ui/inputs/slider/Slider";
 export {
+  PageHeader,
+  type PageHeaderProps,
+} from "./components/ui/data/page-header/PageHeader";
+export {
   SectionHeader,
   type SectionHeaderProps,
 } from "./components/ui/data/section-header/SectionHeader";
