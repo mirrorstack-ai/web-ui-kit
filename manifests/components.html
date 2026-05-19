@@ -3791,7 +3791,7 @@ title?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DropdownMenu</h2>
       <div class="badges">
-        <label for="c-15-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-15-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">8 prop types</label>
         <label for="c-15-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
         <label for="c-15-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">1 story</label>
         
@@ -3825,7 +3825,7 @@ title?: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">5 prop types</span>
+              <span class="badge ok">8 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/navigation/dropdown-menu/DropdownMenu.tsx::DropdownMenu</code></pre>
             <pre><code>Props:</code></pre>
@@ -3834,13 +3834,29 @@ title?: string</code></pre>
 items: DropdownMenuEntry[]
 
 /**
+ * Height of the notch tab (SVG units). Default `46`.
+ */
+notchHeight?: number = 46
+
+/**
+ * Width of the notch tab (SVG units). Default `52`.
+ */
+notchWidth?: number = 52
+
+/**
  * Horizontal offset from trigger. Positive = from start (left), negative = from end (right)
  */
 offset?: number = 0
 
 onSelect: (item: DropdownMenuItem) =&gt; void
 
-trigger: ReactNode</code></pre>
+trigger: ReactNode
+
+/**
+ * Render the kit&#39;s signature notch wrapping the trigger. Default `true`. Set
+ *  to `false` for a plain floating menu (e.g. selects, period pickers).
+ */
+useNotch?: boolean = true</code></pre>
           </div>
         </div>
     
