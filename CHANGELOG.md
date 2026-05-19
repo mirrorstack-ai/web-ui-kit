@@ -3,6 +3,17 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.3.2
+
+### Components
+
+- **SectionHeader** — new bare-style section header (title + optional
+  description + optional right-aligned action). Sibling of
+  `SectionLabel` (uppercase chip) and `SettingRow` (bordered card row).
+  Use above a content area when you want the Claude-style "bold title,
+  muted description, no card chrome" treatment — sections separate by
+  parent gap only.
+
 ## 0.3.1
 
 ### Internal
