@@ -6,7 +6,7 @@ import {
 } from "./NotchGrid";
 
 const meta: Meta<typeof NotchGrid> = {
-  title: "UI/Surfaces/NotchGrid",
+  title: "UI/Notch/NotchGrid",
   component: NotchGrid,
   parameters: {
     layout: "fullscreen",
