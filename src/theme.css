@@ -70,6 +70,18 @@
   --color-shadow: #000000;
   --color-scrim: #000000;
 
+  /* Material Design 3 elevation — see m3.material.io/styles/elevation */
+  --shadow-m3-1: 0 1px 2px 0 color-mix(in srgb, var(--color-shadow) 30%, transparent),
+                 0 1px 3px 1px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+  --shadow-m3-2: 0 1px 2px 0 color-mix(in srgb, var(--color-shadow) 30%, transparent),
+                 0 2px 6px 2px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+  --shadow-m3-3: 0 1px 3px 0 color-mix(in srgb, var(--color-shadow) 30%, transparent),
+                 0 4px 8px 3px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+  --shadow-m3-4: 0 2px 3px 0 color-mix(in srgb, var(--color-shadow) 30%, transparent),
+                 0 6px 10px 4px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+  --shadow-m3-5: 0 4px 4px 0 color-mix(in srgb, var(--color-shadow) 30%, transparent),
+                 0 8px 12px 6px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+
   /* Font */
   --font-sans: "Shantell Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, sans-serif;
