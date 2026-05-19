@@ -90,12 +90,12 @@ describe("resolveNotchTheme — type=outlined", () => {
 });
 
 describe("resolveNotchTheme — type=elevated", () => {
-  it("primary → surface-container-low fill, on-surface text, m3-1 shadow", () => {
+  it("primary → surface-container-low fill, on-surface text, m3-1 shadow, no accent bar", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "primary" });
     expect(r.background).toBe("var(--color-surface-container-low)");
     expect(r.color).toBe("var(--color-on-surface)");
     expect(r.boxShadow).toBe("var(--shadow-m3-1)");
-    expect(r.borderLeft).toBeUndefined();
+    expect(r.accentBar).toBeUndefined();
   });
 
   it("neutral drops one surface tier (container-lowest)", () => {
@@ -103,16 +103,16 @@ describe("resolveNotchTheme — type=elevated", () => {
     expect(r.background).toBe("var(--color-surface-container-lowest)");
   });
 
-  it("warn → adds 4px warning border-left as color cue on lifted chrome", () => {
+  it("warn → exposes accentBar=warning color for the renderer's inset stripe", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "warn" });
     expect(r.background).toBe("var(--color-surface-container-low)");
-    expect(r.borderLeft).toBe("4px solid var(--color-warning)");
+    expect(r.accentBar).toBe("var(--color-warning)");
     expect(r.boxShadow).toBe("var(--shadow-m3-1)");
   });
 
-  it("error → 4px error border-left", () => {
+  it("error → exposes accentBar=error color", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "error" });
-    expect(r.borderLeft).toBe("4px solid var(--color-error)");
+    expect(r.accentBar).toBe("var(--color-error)");
   });
 });
 

@@ -272,17 +272,16 @@ function NotchItem({
     }
   }, [unknownPrimitive, onItemError, placement.key, item.ui]);
 
-  // The wrapper carries placement + non-BlockShape theme bits (text color,
-  // drop-shadow filter for elevated chromes — traces the SVG path rather
-  // than the bounding box — and optional border-left color cue for
-  // elevated warn/error).
+  // The wrapper carries placement + the drop-shadow filter for elevated
+  // chromes (traces the SVG path rather than the bounding box). The
+  // accent-bar color cue for elevated warn/error is rendered inside the
+  // BlockShape so it sits within the clipped chrome, not outside it.
   const wrapperStyle: CSSProperties = {
     position: "absolute",
     left: placement.col * block,
     top: placement.row * block,
     color: resolved.color,
     ...(resolved.filter !== "none" ? { filter: resolved.filter } : {}),
-    ...(resolved.borderLeft ? { borderLeft: resolved.borderLeft } : {}),
   };
 
   // Gradient backgrounds (`linear-gradient(...)`) aren't valid SVG `fill`
@@ -303,6 +302,13 @@ function NotchItem({
         strokeWidth={strokeWidth}
         pad={subLayout ? 0 : 16}
       >
+        {resolved.accentBar && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute top-2 bottom-2 left-2 w-1 rounded-full"
+            style={{ background: resolved.accentBar }}
+          />
+        )}
         {subLayout ? (
           <div className="relative h-full w-full">
             {subLayout.placements.map((sp) => (

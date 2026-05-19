@@ -30,8 +30,11 @@ export interface ResolvedTheme {
   color: string;
   /** CSS `border` — `"1px solid var(...)"` or `"none"`. */
   border: string;
-  /** CSS `border-left` for elevated warn/error (color cue layered on lift). */
-  borderLeft?: string;
+  /** Color (token reference) for an inset accent stripe along the chrome's
+   *  left edge — used by elevated warn / error to signal severity without
+   *  losing the lifted surface look. Renderers should paint this as a 4px
+   *  vertical bar inside the chrome's clipped content area. */
+  accentBar?: string;
   /** CSS `box-shadow` — rectangular shadow on the bounding box. Kept for
    *  consumers that want bounding-box shadows. */
   boxShadow: string;
@@ -173,7 +176,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         background: applyGradient(ELEVATED_BG[variant], gradient),
         color: "var(--color-on-surface)",
         border: "none",
-        ...(isAlert ? { borderLeft: `4px solid ${ACCENT[variant]}` } : {}),
+        ...(isAlert ? { accentBar: ACCENT[variant] } : {}),
         boxShadow: "var(--shadow-m3-1)",
         filter: "var(--filter-m3-1)",
       };

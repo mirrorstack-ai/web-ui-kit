@@ -298,6 +298,23 @@ export const CustomShapes: Story = {
         theme: { type: "filled", variant: "primary" },
         ui: { type: "Label", label: "Now" },
       },
+
+      // Diagonal junction — a 2×2 block and a 1×1 block meet only at a
+      // corner. Exercises the outline tracer's diagonal-junction handling
+      // (the two regions read as one shape with two concave arcs facing
+      // each other, per PR #188).
+      //   o o x
+      //   o o x
+      //   x x o
+      {
+        key: "diagonal",
+        desire: {
+          position: [0, 5],
+          shape: m([1, 1, 0], [1, 1, 0], [0, 0, 1]),
+        },
+        theme: { type: "filled", variant: "secondary" },
+        ui: { type: "Label", label: "Diagonal", value: "junction" },
+      },
     ] satisfies NotchGridItem[],
   },
 };
