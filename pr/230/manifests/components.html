@@ -8209,6 +8209,23 @@ style?: CSSProperties</code></pre>
         theme: { type: &quot;filled&quot;, variant: &quot;primary&quot; },
         ui: { type: &quot;Label&quot;, label: &quot;Now&quot; },
       },
+
+      // Diagonal junction — a 2×2 block and a 1×1 block meet only at a
+      // corner. Exercises the outline tracer&#39;s diagonal-junction handling
+      // (the two regions read as one shape with two concave arcs facing
+      // each other, per PR #188).
+      //   o o x
+      //   o o x
+      //   x x o
+      {
+        key: &quot;diagonal&quot;,
+        desire: {
+          position: [0, 5],
+          shape: m([1, 1, 0], [1, 1, 0], [0, 0, 1]),
+        },
+        theme: { type: &quot;filled&quot;, variant: &quot;secondary&quot; },
+        ui: { type: &quot;Label&quot;, label: &quot;Diagonal&quot;, value: &quot;junction&quot; },
+      },
     ] satisfies NotchGridItem[]} /&gt;;</code></pre>
             </div>
             <div class="note ok">
