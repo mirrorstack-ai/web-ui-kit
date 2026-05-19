@@ -43,6 +43,13 @@ export interface DropdownMenuProps {
   trigger: ReactNode;
   /** Horizontal offset from trigger. Positive = from start (left), negative = from end (right) */
   offset?: number;
+  /** Width of the notch tab (SVG units). Default `52`. */
+  notchWidth?: number;
+  /** Height of the notch tab (SVG units). Default `46`. */
+  notchHeight?: number;
+  /** Render the kit's signature notch wrapping the trigger. Default `true`. Set
+   *  to `false` for a plain floating menu (e.g. selects, period pickers). */
+  useNotch?: boolean;
   className?: string;
 }
 
@@ -59,6 +66,9 @@ export function DropdownMenu({
   onSelect,
   trigger,
   offset = 0,
+  notchWidth = DD_NOTCH_W,
+  notchHeight = DD_NOTCH_H,
+  useNotch = true,
   className,
 }: DropdownMenuProps) {
   const fromEnd = offset < 0 || Object.is(offset, -0);
@@ -187,7 +197,7 @@ export function DropdownMenu({
   return (
     <div ref={containerRef} className={cn("relative inline-block", className)}>
       <div
-        className="relative z-[51]"
+        className={cn("relative", open && "z-[51]")}
         onClick={() => {
           if (open) {
             closeMenu();
@@ -208,17 +218,22 @@ export function DropdownMenu({
           onKeyDown={handleKeyDown}
           className="absolute z-50 overflow-visible outline-none"
           style={{
-            top: -7,
-            [fromEnd ? "right" : "left"]: (fromEnd? -5 : -7) - Math.abs(offset),
+            top: useNotch ? -7 : "calc(100% + 8px)",
+            // Notch mode adds extra -5/-7 to compensate for the curve
+            // overlapping the trigger; no-notch mode anchors flush to
+            // the trigger edge.
+            [fromEnd ? "right" : "left"]: useNotch
+              ? (fromEnd ? -5 : -7) - Math.abs(offset)
+              : -Math.abs(offset),
             filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
           }}
         >
-          {contentH > 0 && menuW > 0 && (
+          {useNotch && contentH > 0 && menuW > 0 && (
             <Notch
               width={menuW}
               height={contentH}
-              notchWidth={DD_NOTCH_W}
-              notchHeight={DD_NOTCH_H}
+              notchWidth={notchWidth}
+              notchHeight={notchHeight}
               notchSide="bottom"
               notchOffset={offset}
               radius={DD_R}
@@ -230,8 +245,12 @@ export function DropdownMenu({
           )}
           <div
             ref={contentRef}
-            className="relative z-10 min-w-[180px] py-1.5 px-1"
-            style={{ marginTop: DD_NOTCH_H }}
+            className={cn(
+              "relative z-10 flex flex-col gap-1 min-w-[180px] p-2",
+              !useNotch &&
+                "rounded-lg border border-outline-variant bg-surface-container-low",
+            )}
+            style={{ marginTop: useNotch ? notchHeight : 0 }}
           >
             {items.map((entry, index) => {
               if (isSeparator(entry)) {
@@ -254,7 +273,7 @@ export function DropdownMenu({
                   role="menuitem"
                   aria-disabled={item.disabled || undefined}
                   className={cn(
-                    "flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors rounded-md",
+                    "flex cursor-pointer items-baseline gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
                     item.disabled && "pointer-events-none opacity-38",
                     isDanger ? "text-error" : "text-on-surface",
                     isActive &&
@@ -274,8 +293,11 @@ export function DropdownMenu({
                   {item.icon && (
                     <Icon
                       name={item.icon}
-                      size={20}
-                      className={isDanger ? "text-error" : "text-on-surface-variant"}
+                      size={16}
+                      className={cn(
+                        "shrink-0 translate-y-0.5",
+                        isDanger ? "text-error" : "text-on-surface-variant",
+                      )}
                     />
                   )}
                   {item.label}
