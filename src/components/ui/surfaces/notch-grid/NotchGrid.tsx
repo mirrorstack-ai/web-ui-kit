@@ -31,7 +31,7 @@ import {
 import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
-import { maskCols } from "@/utils/grid-outline";
+import { maskCols, gridOutlinePath } from "@/utils/grid-outline";
 import { BlockShape, BLOCK_SIZE } from "./BlockShape";
 import {
   placementToMask,
@@ -307,6 +307,9 @@ interface DragState {
   /** Live pointer delta in px. */
   dx: number;
   dy: number;
+  /** Set on a whole-component drag (grab the linked chrome, not one cell):
+   *  every listed member shifts by the same cell delta on drop. */
+  members?: { key: ItemKey; col: number; row: number; cols: number; rows: number }[];
 }
 
 interface SubDragState {
@@ -418,6 +421,35 @@ export function NotchGrid({
     [],
   );
 
+  // Grabbing the linked chrome (the connection area between cells, not a
+  // sub-cell or content tile) drags the whole component as a unit.
+  const handleComponentDragStart = useCallback(
+    (members: Placement<NotchGridItem>[], e: ReactPointerEvent<HTMLDivElement>) => {
+      if (e.button != null && e.button !== 0) return;
+      safePointerCapture(e.currentTarget, e.pointerId);
+      const lead = members[0];
+      setDrag({
+        key: lead.key,
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        originCol: lead.col,
+        originRow: lead.row,
+        originCols: lead.cols,
+        dx: 0,
+        dy: 0,
+        members: members.map((m) => ({
+          key: m.key,
+          col: m.col,
+          row: m.row,
+          cols: m.cols,
+          rows: m.rows,
+        })),
+      });
+    },
+    [],
+  );
+
   const handleSubDragStart = useCallback(
     (
       p: Placement<NotchGridItem>,
@@ -470,6 +502,26 @@ export function NotchGrid({
       setDrag(null);
       const blockPx = block || blockMin;
       const colCount = resolvedCols ?? 1;
+      if (d.members) {
+        // Whole-component drag: shift every member by the same cell delta,
+        // clamped so the group's bounding box stays on the grid.
+        const minCol = Math.min(...d.members.map((m) => m.col));
+        const minRow = Math.min(...d.members.map((m) => m.row));
+        const maxRight = Math.max(...d.members.map((m) => m.col + m.cols));
+        const dCol = Math.max(
+          -minCol,
+          Math.min(colCount - maxRight, Math.round(d.dx / blockPx)),
+        );
+        const dRow = Math.max(-minRow, Math.round(d.dy / blockPx));
+        if (dCol === 0 && dRow === 0) return;
+        setOverrides((prev) => {
+          const next = new Map(prev);
+          for (const m of d.members!) next.set(m.key, [m.col + dCol, m.row + dRow]);
+          return next;
+        });
+        for (const m of d.members) onItemMove?.(m.key, [m.col + dCol, m.row + dRow]);
+        return;
+      }
       const maxCol = Math.max(0, colCount - d.originCols);
       const nextCol = Math.min(maxCol, Math.max(0, d.originCol + Math.round(d.dx / blockPx)));
       const nextRow = Math.max(0, d.originRow + Math.round(d.dy / blockPx));
@@ -625,6 +677,8 @@ export function NotchGrid({
             ? { parentKey: subDrag.parentKey, subIndex: subDrag.subIndex }
             : null;
         const overridden = members.some((m) => overrides.has(m.key));
+        // The whole component is being dragged (chrome grab) vs. one member.
+        const wholeDrag = drag?.members != null && dragMember != null;
         return (
           <NotchComponent
             key={compKey}
@@ -637,9 +691,11 @@ export function NotchGrid({
             panelSubLayouts={panelSubLayouts}
             dragKey={dragMember?.key ?? null}
             dragOffset={dragOffset}
+            wholeDrag={wholeDrag}
             draggingSub={draggingSub}
             overridden={overridden}
             onItemDragStart={handleItemDragStart}
+            onComponentDragStart={handleComponentDragStart}
             onSubDragStart={handleSubDragStart}
             onSubDragMove={handleSubPointerMove}
             onSubDragEnd={handleSubPointerEnd}
@@ -700,12 +756,19 @@ interface NotchComponentProps {
   /** The member key being outer-dragged (if any), + its live offset. */
   dragKey?: ItemKey | null;
   dragOffset?: readonly [number, number];
+  /** True when the *whole* component is being dragged (chrome grab) rather
+   *  than a single member — the wrapper moves as a unit. */
+  wholeDrag?: boolean;
   /** The sub being dragged out of a member panel (hidden during drag). */
   draggingSub?: { parentKey: ItemKey; subIndex: number } | null;
   /** Any member has a committed drop override (raises z-index). */
   overridden?: boolean;
   onItemDragStart?: (
     placement: Placement<NotchGridItem>,
+    e: ReactPointerEvent<HTMLDivElement>,
+  ) => void;
+  onComponentDragStart?: (
+    members: Placement<NotchGridItem>[],
     e: ReactPointerEvent<HTMLDivElement>,
   ) => void;
   onSubDragStart?: (
@@ -730,9 +793,11 @@ const NotchComponent = memo(function NotchComponent({
   panelSubLayouts,
   dragKey,
   dragOffset,
+  wholeDrag = false,
   draggingSub,
   overridden = false,
   onItemDragStart,
+  onComponentDragStart,
   onSubDragStart,
   onSubDragMove,
   onSubDragEnd,
@@ -770,6 +835,19 @@ const NotchComponent = memo(function NotchComponent({
     return grid;
   }, [members, compCols, compRows, minCol, minRow]);
 
+  // Outline of the chrome (same path BlockShape draws). Used to hit-clip the
+  // wrapper so its bounding-box rectangle doesn't intercept pointer events over
+  // empty notch cells — otherwise an overlapping neighbour's rectangle would
+  // steal clicks meant for this component (and vice-versa).
+  const chromePath = useMemo(
+    () =>
+      gridOutlinePath(
+        unionShape.map((row) => row.map(Boolean)),
+        { cell: block, gap, radius: 24, inverseRadius: 32 },
+      ),
+    [unionShape, block, gap],
+  );
+
   // Theme from the lead member — same-group members share their theme.
   const lead = members[0];
   const leadItem = lead.item as NotchGridItem;
@@ -790,10 +868,17 @@ const NotchComponent = memo(function NotchComponent({
   }, [members, primitives, onItemError]);
 
   // A lone non-panel tile drags as a whole (chrome + content move together);
-  // panels & multi-member chromes drag per sub-cell / per content tile.
+  // panels & multi-member chromes drag per sub-cell / per content tile, OR as
+  // a whole unit when the chrome (connection area) itself is grabbed.
   const isPlainSingleton =
     members.length === 1 && !panelSubLayouts.has(lead.key);
-  const isDraggingHere = dragKey != null || draggingSub != null;
+  // The whole wrapper moves as a unit — for a plain singleton always, or for a
+  // panel/linked chrome when the chrome itself (not a cell) is being dragged.
+  const wrapperMoves = (isPlainSingleton || wholeDrag) && dragKey === lead.key;
+  // Drop the shape clip only when a *single* member needs to escape the chrome
+  // (multi-member outer drag). A unit move keeps its clip so notched content
+  // stays inside the outline; a sub-drag uses a separate ghost.
+  const memberEscaping = dragKey != null && !isPlainSingleton && !wholeDrag;
 
   const wrapperStyle: CSSProperties = {
     position: "absolute",
@@ -801,18 +886,27 @@ const NotchComponent = memo(function NotchComponent({
     top: minRow * block,
     color: resolved.color,
   };
-  if (isPlainSingleton && dragKey === lead.key && dragOffset) {
+  if (wrapperMoves && dragOffset) {
     wrapperStyle.transform = `translate(${dragOffset[0]}px, ${dragOffset[1]}px)`;
     wrapperStyle.zIndex = 20;
   } else if (overridden) {
     wrapperStyle.zIndex = 10;
   }
-  if (draggable && isPlainSingleton) {
-    wrapperStyle.cursor = dragKey === lead.key ? "grabbing" : "grab";
+  if (draggable) {
+    wrapperStyle.cursor = wrapperMoves ? "grabbing" : "grab";
     wrapperStyle.touchAction = "none";
   }
+  // Hit-clip the wrapper rectangle to the chrome outline so it only catches
+  // pointers over the actual shape — except while a member is escaping (then
+  // the un-clipped tile needs to render past the bounds).
+  if (!memberEscaping) {
+    wrapperStyle.clipPath = `path('${chromePath}')`;
+  }
 
-  const singletonDrag =
+  // The wrapper-level drag: a plain singleton drags its one item; a panel or
+  // linked chrome drags every member together. Sub-cells / member tiles
+  // stopPropagation, so this only fires when the chrome itself is grabbed.
+  const wrapperDrag =
     draggable && isPlainSingleton && onItemDragStart
       ? {
           onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) =>
@@ -821,7 +915,15 @@ const NotchComponent = memo(function NotchComponent({
           onPointerUp: onDragEnd,
           onPointerCancel: onDragEnd,
         }
-      : undefined;
+      : draggable && !isPlainSingleton && onComponentDragStart
+        ? {
+            onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) =>
+              onComponentDragStart(members, e),
+            onPointerMove: onDragMove,
+            onPointerUp: onDragEnd,
+            onPointerCancel: onDragEnd,
+          }
+        : undefined;
 
   // Each member contributes content positioned at its bbox-relative cell.
   const tiles: ReactNode[] = [];
@@ -855,12 +957,14 @@ const NotchComponent = memo(function NotchComponent({
               }
             : undefined;
         tiles.push(
+          // Outer cell: no handler, so the padding frame / inter-cell gap
+          // bubbles up to the wrapper → whole-component drag (the "connection
+          // area"). The inner content div carries the sub-drag handler +
+          // stopPropagation so grabbing the content moves just this sub.
           <div
             key={`${m.key}/${entry.index}`}
-            {...subHandlers}
-            className={draggable ? "cursor-grab touch-none" : undefined}
+            className="absolute"
             style={{
-              position: "absolute",
               left: (offCol + sp.col) * block,
               top: (offRow + sp.row) * block,
               width: sp.cols * block,
@@ -869,11 +973,16 @@ const NotchComponent = memo(function NotchComponent({
               opacity: beingDragged ? 0 : undefined,
             }}
           >
-            {SubPrimitive ? (
-              <SubPrimitive {...sub.ui} />
-            ) : (
-              <UnknownPrimitivePlaceholder type={sub.ui.type} />
-            )}
+            <div
+              {...subHandlers}
+              className={cn("h-full w-full", draggable && "cursor-grab touch-none")}
+            >
+              {SubPrimitive ? (
+                <SubPrimitive {...sub.ui} />
+              ) : (
+                <UnknownPrimitivePlaceholder type={sub.ui.type} />
+              )}
+            </div>
           </div>,
         );
       }
@@ -894,21 +1003,22 @@ const NotchComponent = memo(function NotchComponent({
               onPointerCancel: onDragEnd,
             }
           : undefined;
-      // Only a member that moves its *own* tile (multi-member chrome) gets the
-      // pickup transform/background here. A plain singleton is moved by the
-      // wrapper (chrome + content together) — adding it here too would
+      // Only a member that moves its *own* tile (single-member outer drag) gets
+      // the pickup transform/background here. A plain singleton or a whole-
+      // component drag is moved by the wrapper — adding it here too would
       // double-translate the content away from its chrome.
-      const draggingThis = !isPlainSingleton && dragKey === m.key;
+      const draggingThis = !isPlainSingleton && !wholeDrag && dragKey === m.key;
       // Resolve the member's own theme so the picked-up tile keeps its themed
       // surface once the transform takes it past the shared chrome.
       const memberTheme = resolveNotchTheme(it.theme ?? {});
       tiles.push(
+        // Outer tile carries the pickup visual (transform/background) but no
+        // handler, so its frame bubbles to the wrapper → whole-component drag.
+        // The inner content div carries the member-drag handler.
         <div
           key={m.key}
-          {...memberHandlers}
-          className={draggable && !isPlainSingleton ? "cursor-grab touch-none" : undefined}
+          className="absolute"
           style={{
-            position: "absolute",
             left: offCol * block,
             top: offRow * block,
             width: m.cols * block,
@@ -929,11 +1039,19 @@ const NotchComponent = memo(function NotchComponent({
             borderRadius: draggingThis ? 24 : undefined,
           }}
         >
-          {Primitive && it.ui ? (
-            <Primitive {...it.ui} />
-          ) : it.ui ? (
-            <UnknownPrimitivePlaceholder type={it.ui.type} />
-          ) : null}
+          <div
+            {...memberHandlers}
+            className={cn(
+              "h-full w-full",
+              draggable && !isPlainSingleton && "cursor-grab touch-none",
+            )}
+          >
+            {Primitive && it.ui ? (
+              <Primitive {...it.ui} />
+            ) : it.ui ? (
+              <UnknownPrimitivePlaceholder type={it.ui.type} />
+            ) : null}
+          </div>
         </div>,
       );
     }
@@ -941,9 +1059,9 @@ const NotchComponent = memo(function NotchComponent({
 
   return (
     <div
-      {...singletonDrag}
+      {...wrapperDrag}
       className={cn(
-        draggable && isPlainSingleton && "select-none",
+        draggable && "select-none",
         resolved.elevated && "drop-shadow-lg",
       )}
       style={wrapperStyle}
@@ -956,7 +1074,7 @@ const NotchComponent = memo(function NotchComponent({
         stroke={resolved.stroke}
         strokeWidth={resolved.strokeWidth}
         pad={0}
-        noClip={isDraggingHere}
+        noClip={memberEscaping}
       >
         {resolved.accentBar && (
           <div

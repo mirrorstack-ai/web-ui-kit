@@ -257,6 +257,39 @@ describe("NotchGrid", () => {
     expect(cronCellAfter.style.left).toBe(cronLeftBefore);
   });
 
+  it("draggable: grabbing the chrome connection area drags the whole component", () => {
+    const onItemMove = vi.fn();
+    const onSubItemPromote = vi.fn();
+    const Leaf = (p: { tag?: string }) => <div data-testid="leaf">{p.tag}</div>;
+    const primitives: PrimitiveRegistry = {
+      Leaf: Leaf as unknown as PrimitiveRegistry[string],
+    };
+    const items: NotchGridItem[] = [
+      {
+        key: "panel",
+        desire: { position: [0, 0], shape: M(2, 1) },
+        subItems: [
+          { desire: { position: [0, 0], shape: M(1, 1) }, ui: { type: "Leaf", tag: "cron" } },
+          { desire: { position: [1, 0], shape: M(1, 1) }, ui: { type: "Leaf", tag: "calls" } },
+        ],
+      },
+    ];
+    const { getAllByTestId } = render(
+      <NotchGrid items={items} primitives={primitives} cols={4} blockMin={100} draggable onItemMove={onItemMove} onSubItemPromote={onSubItemPromote} />,
+    );
+    // The OUTER cell (frame) carries no handler — grabbing it bubbles to the
+    // wrapper → whole-component drag. (leaf → inner content div → outer cell.)
+    const cronOuter = getAllByTestId("leaf").find((l) => l.textContent === "cron")!
+      .parentElement!.parentElement as HTMLElement;
+    act(() => pointer(cronOuter, "pointerdown", { clientX: 10, clientY: 10 }));
+    act(() => pointer(cronOuter, "pointermove", { clientX: 210, clientY: 10 }));
+    act(() => pointer(cronOuter, "pointerup", { clientX: 210, clientY: 10 }));
+
+    // Whole panel shifts +2 cols; it's a sub-drag of neither cell.
+    expect(onSubItemPromote).not.toHaveBeenCalled();
+    expect(onItemMove).toHaveBeenCalledWith("panel", [2, 0]);
+  });
+
   it("draggable: the sub-drag ghost carries the sub's content (not a blank chrome)", () => {
     const Leaf = (p: { tag?: string }) => <div data-testid="leaf">{p.tag}</div>;
     const primitives: PrimitiveRegistry = {
