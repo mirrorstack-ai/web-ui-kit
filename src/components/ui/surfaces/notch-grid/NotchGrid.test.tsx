@@ -1,6 +1,12 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { NotchGrid, type NotchGridItem, type PrimitiveRegistry } from "./NotchGrid";
+import {
+  NotchGrid,
+  resolveSubDrop,
+  type NotchGridItem,
+  type PrimitiveRegistry,
+  type SubDropGeometry,
+} from "./NotchGrid";
 
 afterEach(cleanup);
 
@@ -184,5 +190,82 @@ describe("NotchGrid", () => {
   // (clientX/Y, button, pointerId all come through as `undefined`), so
   // dx/dy resolves to NaN. The `cursor=grab` test above is the wiring
   // smoke check; visual end-to-end verification lives in the `Draggable`
-  // story.
+  // story. The promote/reposition decision is unit-tested via
+  // `resolveSubDrop` below.
+
+  it("draggable: sub-cells become grab targets inside a panel", () => {
+    const Leaf = (p: { tag?: string }) => <div data-testid="leaf">{p.tag}</div>;
+    const primitives: PrimitiveRegistry = {
+      Leaf: Leaf as unknown as PrimitiveRegistry[string],
+    };
+    const items: NotchGridItem[] = [
+      {
+        key: "panel",
+        desire: { shape: M(2, 2) },
+        subItems: [
+          { desire: { position: [0, 0], shape: M(1, 1) }, ui: { type: "Leaf", tag: "a" } },
+          { desire: { position: [1, 1], shape: M(1, 1) }, ui: { type: "Leaf", tag: "b" } },
+        ],
+      },
+    ];
+    const { getAllByTestId } = render(
+      <NotchGrid items={items} primitives={primitives} cols={4} blockMin={100} draggable />,
+    );
+    // Each sub-cell wrapper (the leaf's parent) carries the grab cursor class.
+    const leaves = getAllByTestId("leaf");
+    expect(leaves).toHaveLength(2);
+    for (const leaf of leaves) {
+      expect((leaf.parentElement as HTMLElement).className).toContain("cursor-grab");
+    }
+  });
+});
+
+describe("resolveSubDrop", () => {
+  // Panel occupies outer cells [2..4) × [2..4); the sub starts at the panel's
+  // top-left cell (subCol/subRow = 0 → outer origin (2,2)). block = 100.
+  const base: SubDropGeometry = {
+    panelCol: 2,
+    panelRow: 2,
+    panelCols: 2,
+    panelRows: 2,
+    subCol: 0,
+    subRow: 0,
+    dx: 0,
+    dy: 0,
+  };
+
+  it("no movement → reposition at the same inner cell", () => {
+    expect(resolveSubDrop(base, 100)).toEqual({ kind: "reposition", pos: [0, 0] });
+  });
+
+  it("small move within the panel → reposition at the new inner cell", () => {
+    // +1 col, +1 row → outer (3,3), still inside → inner (1,1)
+    expect(resolveSubDrop({ ...base, dx: 100, dy: 100 }, 100)).toEqual({
+      kind: "reposition",
+      pos: [1, 1],
+    });
+  });
+
+  it("drag past the right edge → promote at the outer cell", () => {
+    // +3 cols → outer (5,2), panel spans cols 2..3 → outside → promote
+    expect(resolveSubDrop({ ...base, dx: 300 }, 100)).toEqual({
+      kind: "promote",
+      pos: [5, 2],
+    });
+  });
+
+  it("drag below the panel → promote", () => {
+    expect(resolveSubDrop({ ...base, dy: 300 }, 100)).toEqual({
+      kind: "promote",
+      pos: [2, 5],
+    });
+  });
+
+  it("drag far up-left clamps to 0 and promotes", () => {
+    // outer col = max(0, 2+0-3) = 0, outside panel (col < 2) → promote
+    expect(resolveSubDrop({ ...base, dx: -300, dy: -300 }, 100)).toEqual({
+      kind: "promote",
+      pos: [0, 0],
+    });
+  });
 });
