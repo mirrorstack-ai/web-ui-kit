@@ -16,6 +16,12 @@ Notable API additions and breaking changes. For the full commit log, see
   `text-2xl font-bold + on-surface-variant <p>` shape across the
   settings, profile, and module pages.
 
+- **Breadcrumb** — navigable path trail, rendered as
+  `← <root> / <…> / <next-level-up>`. The canonical content for
+  `PageHeader.path` when a page has more than one level of "where you
+  came from". Each segment is an anchor; the back arrow is implicit
+  (a trail IS where you came from). Lives under `navigation/`.
+
 ## 0.3.2
 
 ### Components

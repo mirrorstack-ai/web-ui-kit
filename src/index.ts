@@ -197,6 +197,11 @@ export {
   type VerificationCodeInputProps,
 } from "./components/ui/inputs/verification-code-input/VerificationCodeInput";
 export {
+  Breadcrumb,
+  type BreadcrumbItem,
+  type BreadcrumbProps,
+} from "./components/ui/navigation/breadcrumb/Breadcrumb";
+export {
   NavItem,
   type NavItemProps,
   type NavItemVariant,
