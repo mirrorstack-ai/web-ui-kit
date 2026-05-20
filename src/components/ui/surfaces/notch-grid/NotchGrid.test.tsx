@@ -257,6 +257,48 @@ describe("NotchGrid", () => {
     expect(cronCellAfter.style.left).toBe(cronLeftBefore);
   });
 
+  it("draggable: a promoted sub can be dragged AGAIN (override honoured on promoted items)", () => {
+    const onItemMove = vi.fn();
+    const onSubItemPromote = vi.fn();
+    const Leaf = (p: { tag?: string }) => <div data-testid="leaf">{p.tag}</div>;
+    const primitives: PrimitiveRegistry = {
+      Leaf: Leaf as unknown as PrimitiveRegistry[string],
+    };
+    const items: NotchGridItem[] = [
+      {
+        key: "panel",
+        desire: { position: [0, 0], shape: M(2, 1) },
+        subItems: [
+          { desire: { position: [0, 0], shape: M(1, 1) }, ui: { type: "Leaf", tag: "cron" } },
+          { desire: { position: [1, 0], shape: M(1, 1) }, ui: { type: "Leaf", tag: "calls" } },
+        ],
+      },
+    ];
+    const { getAllByTestId } = render(
+      <NotchGrid items={items} primitives={primitives} cols={4} blockMin={100} draggable onItemMove={onItemMove} onSubItemPromote={onSubItemPromote} />,
+    );
+    // Stage 1 — sub-drag Calls out of the panel to col 3 (promotes it).
+    const callsCell = getAllByTestId("leaf").find((l) => l.textContent === "calls")!
+      .parentElement as HTMLElement;
+    act(() => pointer(callsCell, "pointerdown", { clientX: 150, clientY: 50 }));
+    act(() => pointer(callsCell, "pointermove", { clientX: 350, clientY: 50 }));
+    act(() => pointer(callsCell, "pointerup", { clientX: 350, clientY: 50 }));
+    expect(onSubItemPromote).toHaveBeenCalledWith("panel", 1, [3, 0]);
+
+    // Stage 2 — the promoted Calls is now a standalone member; outer-drag it
+    // back two cells (col 3 → 1). Before the fix the solve ignored its override
+    // and it never moved.
+    const promotedCalls = getAllByTestId("leaf").find((l) => l.textContent === "calls")!
+      .parentElement as HTMLElement;
+    act(() => pointer(promotedCalls, "pointerdown", { clientX: 350, clientY: 50 }));
+    act(() => pointer(promotedCalls, "pointermove", { clientX: 150, clientY: 50 }));
+    act(() => pointer(promotedCalls, "pointerup", { clientX: 150, clientY: 50 }));
+
+    // Outer drag is delta-based: origin col 3 + round(-200/100) = col 1.
+    expect(onItemMove).toHaveBeenCalledTimes(1);
+    expect(onItemMove).toHaveBeenCalledWith("promoted::panel::1", [1, 0]);
+  });
+
   it("draggable: sub-cells become grab targets inside a panel", () => {
     const Leaf = (p: { tag?: string }) => <div data-testid="leaf">{p.tag}</div>;
     const primitives: PrimitiveRegistry = {

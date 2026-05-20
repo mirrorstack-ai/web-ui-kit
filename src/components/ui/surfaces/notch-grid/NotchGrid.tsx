@@ -565,12 +565,17 @@ export function NotchGrid({
     });
     // Promoted subs → synthetic top-level items. Skip orphans whose origin
     // panel was removed from `items` (their pinned tile shouldn't linger).
+    // A promoted sub can be outer-dragged again, so honour its `overrides`
+    // entry the same way a real item does — otherwise the second drag writes
+    // an override the solve ignores and the tile never moves.
     for (const { item, parentKey } of promoted.values()) {
       if (!liveKeys.has(parentKey)) continue;
+      const ov = overrides.get(item.key!);
+      const desire = ov ? { ...item.desire, position: ov } : item.desire;
       groupOf.set(item.key!, item.groupKey);
       solverItems.push({
         key: item.key!,
-        desire: item.desire,
+        desire,
         groupKey: item.groupKey,
         item,
       });
@@ -875,6 +880,7 @@ const NotchComponent = memo(function NotchComponent({
               onPointerCancel: onDragEnd,
             }
           : undefined;
+      const draggingThis = dragKey === m.key;
       tiles.push(
         <div
           key={m.key}
@@ -887,6 +893,14 @@ const NotchComponent = memo(function NotchComponent({
             width: m.cols * block,
             height: m.rows * block,
             padding: CONTENT_PAD,
+            // Follow the cursor while this member is outer-dragged so it reads
+            // as picked up (the sub-drag has its own ghost; standalone members
+            // move their own tile). Raised above siblings during the drag.
+            transform:
+              draggingThis && dragOffset
+                ? `translate(${dragOffset[0]}px, ${dragOffset[1]}px)`
+                : undefined,
+            zIndex: draggingThis ? 30 : undefined,
           }}
         >
           {Primitive && it.ui ? (
