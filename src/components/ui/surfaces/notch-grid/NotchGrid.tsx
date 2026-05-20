@@ -880,7 +880,14 @@ const NotchComponent = memo(function NotchComponent({
               onPointerCancel: onDragEnd,
             }
           : undefined;
-      const draggingThis = dragKey === m.key;
+      // Only a member that moves its *own* tile (multi-member chrome) gets the
+      // pickup transform/background here. A plain singleton is moved by the
+      // wrapper (chrome + content together) — adding it here too would
+      // double-translate the content away from its chrome.
+      const draggingThis = !isPlainSingleton && dragKey === m.key;
+      // Resolve the member's own theme so the picked-up tile keeps its themed
+      // surface once the transform takes it past the shared chrome.
+      const memberTheme = resolveNotchTheme(it.theme ?? {});
       tiles.push(
         <div
           key={m.key}
@@ -895,12 +902,17 @@ const NotchComponent = memo(function NotchComponent({
             padding: CONTENT_PAD,
             // Follow the cursor while this member is outer-dragged so it reads
             // as picked up (the sub-drag has its own ghost; standalone members
-            // move their own tile). Raised above siblings during the drag.
+            // move their own tile). The themed background + rounded corners
+            // only kick in during the drag — at rest the tile is transparent
+            // and the shared chrome shows through. Raised above siblings.
             transform:
               draggingThis && dragOffset
                 ? `translate(${dragOffset[0]}px, ${dragOffset[1]}px)`
                 : undefined,
             zIndex: draggingThis ? 30 : undefined,
+            background: draggingThis ? memberTheme.cssBackground : undefined,
+            color: draggingThis ? memberTheme.color : undefined,
+            borderRadius: draggingThis ? 24 : undefined,
           }}
         >
           {Primitive && it.ui ? (
