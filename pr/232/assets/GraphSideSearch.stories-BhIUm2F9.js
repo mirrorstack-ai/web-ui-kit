@@ -1,0 +1,5 @@
+import{j as r,r as p}from"./iframe-BJIwYDFU.js";import{G as o}from"./GraphSideSearch-Dp-lg707.js";import"./preload-helper-PPVm8Dsz.js";import"./FloatingLabelInput-BeyEIMJe.js";import"./cn-IyxL_b2c.js";import"./IconButton-C7qgkR_f.js";import"./Progress-CtIM9QS7.js";import"./Icon-HDn7EKod.js";import"./button-styles-BPC6xbbG.js";const E={title:"UI/Graph/GraphSide/GraphSideSearch",component:o,decorators:[a=>r.jsx("div",{style:{width:260},children:r.jsx(a,{})})]},s=({initial:a})=>{const[i,n]=p.useState(a);return r.jsx(o,{value:i,onChange:n})},e={render:()=>r.jsx(s,{initial:""})},t={render:()=>r.jsx(s,{initial:"balance"})};e.parameters={...e.parameters,docs:{...e.parameters?.docs,source:{originalSource:`{
+  render: () => <Controlled initial="" />
+}`,...e.parameters?.docs?.source}}};t.parameters={...t.parameters,docs:{...t.parameters?.docs,source:{originalSource:`{
+  render: () => <Controlled initial="balance" />
+}`,...t.parameters?.docs?.source}}};const G=["Empty","WithValue"];export{e as Empty,t as WithValue,G as __namedExportsOrder,E as default};
