@@ -42,13 +42,10 @@ export interface ResolvedTheme {
    *  losing the lifted surface look. Renderers should paint this as a 4px
    *  vertical bar inside the chrome's clipped content area. */
   accentBar?: string;
-  /** CSS `box-shadow` — rectangular shadow on the bounding box. Kept for
-   *  consumers that want bounding-box shadows. */
-  boxShadow: string;
-  /** CSS `filter` — drop-shadow chain that traces the actual rendered shape
-   *  (SVG paths, notches). Use this on a wrapper around the painted content
-   *  for accurate-to-outline shadows. `"none"` when no lift is intended. */
-  filter: string;
+  /** Whether this chrome reads as lifted. Renderers apply a drop-shadow that
+   *  traces the rendered shape (e.g. Tailwind's `drop-shadow-lg`, which is a
+   *  `filter` so it follows the notched SVG outline, not the bounding box). */
+  elevated: boolean;
 }
 
 const DEFAULT_VARIANT: Exclude<ThemeVariant, "auto"> = "neutral";
@@ -166,8 +163,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         color: FILL_FG[variant],
         stroke: "none",
         strokeWidth: 0,
-        boxShadow: "none",
-        filter: "none",
+        elevated: false,
       };
     }
     case "outlined": {
@@ -177,8 +173,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         color: ACCENT[variant],
         stroke: OUTLINE_BORDER[variant],
         strokeWidth: 1,
-        boxShadow: "none",
-        filter: "none",
+        elevated: false,
       };
     }
     case "elevated": {
@@ -193,8 +188,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         stroke: "none",
         strokeWidth: 0,
         ...(isAlert ? { accentBar: ACCENT[variant] } : {}),
-        boxShadow: "var(--shadow-m3-1)",
-        filter: "var(--filter-m3-1)",
+        elevated: true,
       };
     }
     case "ghost": {
@@ -204,8 +198,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         color: ACCENT[variant],
         stroke: "none",
         strokeWidth: 0,
-        boxShadow: "none",
-        filter: "none",
+        elevated: false,
       };
     }
   }

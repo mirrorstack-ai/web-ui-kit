@@ -433,7 +433,6 @@ const NotchItem = memo(function NotchItem({
     top: placement.row * block,
     color: resolved.color,
   };
-  if (resolved.filter !== "none") wrapperStyle.filter = resolved.filter;
   if (isDragging) {
     wrapperStyle.transform = `translate(${dragOffset[0]}px, ${dragOffset[1]}px)`;
     wrapperStyle.zIndex = 20;
@@ -495,7 +494,12 @@ const NotchItem = memo(function NotchItem({
   return (
     <div
       {...dragHandlers}
-      className={draggable ? "select-none" : undefined}
+      className={cn(
+        draggable && "select-none",
+        // drop-shadow (a filter) traces the notched SVG outline; plain
+        // box-shadow would be rectangular.
+        resolved.elevated && "drop-shadow-lg",
+      )}
       style={wrapperStyle}
     >
       <BlockShape

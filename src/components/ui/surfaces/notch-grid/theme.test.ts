@@ -9,7 +9,7 @@ describe("resolveNotchTheme — defaults & auto resolution", () => {
     expect(r.color).toBe("var(--color-on-surface-variant)");
     expect(r.stroke).toBe("none");
     expect(r.strokeWidth).toBe(0);
-    expect(r.boxShadow).toBe("none");
+    expect(r.elevated).toBe(false);
   });
 
   it("variant=primary alone → filled primary (type defaults to filled when variant set)", () => {
@@ -45,7 +45,7 @@ describe("resolveNotchTheme — type=filled", () => {
     expect(r.color).toBe("var(--color-on-primary-container)");
     expect(r.stroke).toBe("none");
     expect(r.strokeWidth).toBe(0);
-    expect(r.boxShadow).toBe("none");
+    expect(r.elevated).toBe(false);
   });
 
   it("secondary, tertiary, error → matching container tokens", () => {
@@ -78,7 +78,7 @@ describe("resolveNotchTheme — type=outlined", () => {
     expect(r.color).toBe("var(--color-primary)");
     expect(r.stroke).toBe("var(--color-primary)");
     expect(r.strokeWidth).toBe(1);
-    expect(r.boxShadow).toBe("none");
+    expect(r.elevated).toBe(false);
   });
 
   it("neutral / surface → outline-variant stroke", () => {
@@ -95,12 +95,12 @@ describe("resolveNotchTheme — type=outlined", () => {
 });
 
 describe("resolveNotchTheme — type=elevated", () => {
-  it("primary → surface-container-low fill, primary accent text, m3-1 shadow, no accent bar", () => {
+  it("primary → surface-container-low fill, primary accent text, elevated, no accent bar", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "primary" });
     expect(r.fill).toBe("var(--color-surface-container-low)");
     // Text carries the variant accent so lifted tiles differ by variant.
     expect(r.color).toBe("var(--color-primary)");
-    expect(r.boxShadow).toBe("var(--shadow-m3-1)");
+    expect(r.elevated).toBe(true);
     expect(r.accentBar).toBeUndefined();
   });
 
@@ -122,7 +122,7 @@ describe("resolveNotchTheme — type=elevated", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "warn" });
     expect(r.fill).toBe("var(--color-surface-container-low)");
     expect(r.accentBar).toBe("var(--color-warning)");
-    expect(r.boxShadow).toBe("var(--shadow-m3-1)");
+    expect(r.elevated).toBe(true);
   });
 
   it("error → exposes accentBar=error color", () => {
@@ -137,7 +137,7 @@ describe("resolveNotchTheme — type=ghost", () => {
     expect(r.fill).toBe("transparent");
     expect(r.color).toBe("var(--color-primary)");
     expect(r.stroke).toBe("none");
-    expect(r.boxShadow).toBe("none");
+    expect(r.elevated).toBe(false);
   });
 
   it("neutral → on-surface-variant text", () => {
@@ -204,7 +204,7 @@ describe("resolveNotchTheme — exhaustive type×variant matrix", () => {
     "error",
   ] as const;
 
-  it("every (type, variant) pair returns valid CSS-shaped strings", () => {
+  it("every (type, variant) pair returns valid CSS-shaped values", () => {
     for (const type of types) {
       for (const variant of variants) {
         const r = resolveNotchTheme({ type, variant });
@@ -214,39 +214,17 @@ describe("resolveNotchTheme — exhaustive type×variant matrix", () => {
         expect(r.color).toMatch(/^var\(--color-/);
         expect(typeof r.stroke).toBe("string");
         expect(typeof r.strokeWidth).toBe("number");
-        expect(typeof r.boxShadow).toBe("string");
+        expect(typeof r.elevated).toBe("boolean");
       }
     }
   });
 
-  it("elevated rows are the only chromes carrying a shadow", () => {
+  it("elevated is the only chrome that reads as lifted", () => {
     for (const variant of variants) {
       for (const type of types) {
         const r = resolveNotchTheme({ type, variant });
-        if (type === "elevated") {
-          expect(r.boxShadow).toBe("var(--shadow-m3-1)");
-          expect(r.filter).toBe("var(--filter-m3-1)");
-        } else {
-          expect(r.boxShadow).toBe("none");
-          expect(r.filter).toBe("none");
-        }
+        expect(r.elevated).toBe(type === "elevated");
       }
     }
-  });
-
-  it("non-elevated chromes always return filter=none", () => {
-    const cases = [
-      { type: "filled" as const, variant: "primary" as const },
-      { type: "outlined" as const, variant: "primary" as const },
-      { type: "ghost" as const, variant: "primary" as const },
-    ];
-    for (const t of cases) {
-      expect(resolveNotchTheme(t).filter).toBe("none");
-    }
-  });
-
-  it("elevated returns filter=var(--filter-m3-1) — drop-shadow chain that traces the rendered shape", () => {
-    const r = resolveNotchTheme({ type: "elevated", variant: "primary" });
-    expect(r.filter).toBe("var(--filter-m3-1)");
   });
 });
