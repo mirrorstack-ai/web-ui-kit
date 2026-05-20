@@ -118,6 +118,9 @@ export interface NotchGridProps {
 
 // --- Internal helpers ------------------------------------------------------
 
+/** Content inset (px) inside a tile / sub-cell. Matches BlockShape's default. */
+const CONTENT_PAD = 16;
+
 function maskToShape(mask: Mask): number[][] {
   return mask.map((row) => row.map((v) => (v ? 1 : 0)));
 }
@@ -167,21 +170,6 @@ function solvePanel(
     })),
     cols: subGridCols(subItems),
   });
-}
-
-interface DragState {
-  key: ItemKey;
-  pointerId: number;
-  startX: number;
-  startY: number;
-  /** Origin position in block units (where the item sits at drag start). */
-  originCol: number;
-  originRow: number;
-  /** Footprint width in blocks (to clamp the dropped column). */
-  originCols: number;
-  /** Live pointer delta in px. */
-  dx: number;
-  dy: number;
 }
 
 interface DragState {
@@ -485,7 +473,7 @@ const NotchItem = memo(function NotchItem({
                 top: sp.row * block,
                 width: sp.cols * block,
                 height: sp.rows * block,
-                padding: 16,
+                padding: CONTENT_PAD,
               }}
             >
               {SubPrimitive ? (
@@ -517,7 +505,7 @@ const NotchItem = memo(function NotchItem({
         fill={resolved.fill}
         stroke={resolved.stroke}
         strokeWidth={resolved.strokeWidth}
-        pad={subLayout ? 0 : 16}
+        pad={subLayout ? 0 : CONTENT_PAD}
       >
         {resolved.accentBar && (
           <div
