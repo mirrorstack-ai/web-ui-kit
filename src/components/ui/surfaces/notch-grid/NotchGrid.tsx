@@ -815,9 +815,12 @@ const NotchComponent = memo(function NotchComponent({
       // Panel member — render its sub-cells (each sub-draggable).
       for (const sp of subLayout.placements) {
         const entry = sp.item as SubEntry;
-        if (draggingSub?.parentKey === m.key && draggingSub.subIndex === entry.index) {
-          continue; // hidden — its ghost follows the cursor
-        }
+        // The cell being dragged is kept MOUNTED but invisible (opacity 0) —
+        // the pointer was captured on this element, so unmounting it would
+        // kill the capture and stop pointermove/up firing. Its visible
+        // stand-in is the cursor-follow ghost at the grid root.
+        const beingDragged =
+          draggingSub?.parentKey === m.key && draggingSub.subIndex === entry.index;
         const sub = entry.sub;
         const SubPrimitive = sub.ui ? primitives?.[sub.ui.type] : undefined;
         const subHandlers =
@@ -844,6 +847,7 @@ const NotchComponent = memo(function NotchComponent({
               width: sp.cols * block,
               height: sp.rows * block,
               padding: CONTENT_PAD,
+              opacity: beingDragged ? 0 : undefined,
             }}
           >
             {SubPrimitive ? (
