@@ -28,13 +28,16 @@ import {
 import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
+import { maskCols } from "@/utils/grid-outline";
 import { BlockShape, BLOCK_SIZE } from "./BlockShape";
 import {
+  placementToMask,
   solveLayout,
   type Desire,
   type Mask,
   type Placement,
   type Pos,
+  type SolverOutput,
 } from "./layout";
 import { resolveNotchTheme, type NotchTheme } from "./theme";
 
@@ -124,6 +127,61 @@ function maskToShape(mask: Mask): number[][] {
 function assignKeys(items: NotchGridItem[]): NotchGridItem[] {
   if (items.every((it) => it.key != null)) return items;
   return items.map((it, i) => (it.key ? it : { ...it, key: `item-${i}` }));
+}
+
+/** First (highest-priority) mask from a `Priority<Mask>` — used for width. */
+function firstMask(shape: Desire["shape"]): Mask {
+  if (Array.isArray(shape)) return shape as Mask;
+  const keys = Object.keys(shape as Record<string, Mask>).sort(
+    (a, b) => Number(a) - Number(b),
+  );
+  return (shape as Record<string, Mask>)[keys[0]];
+}
+
+/** Inner column count a panel's sub-grid spans, from explicit positions +
+ *  shape widths (flow sub-items contribute their own width at col 0). */
+function subGridCols(subItems: NotchSubItem[]): number {
+  let cols = 1;
+  for (const s of subItems) {
+    const w = maskCols(firstMask(s.desire.shape));
+    const pos = s.desire.position;
+    const startCol = Array.isArray(pos) ? pos[0] : 0;
+    cols = Math.max(cols, startCol + w);
+  }
+  return cols;
+}
+
+/** Solve a panel's sub-items into placements within their bounding sub-grid.
+ *  The panel's rendered footprint is the union of these placements (so notches
+ *  appear where no sub-item sits, and adjacent/diagonal sub-items bridge into
+ *  one chrome). */
+function solvePanel(
+  subItems: NotchSubItem[],
+  keyPrefix: ItemKey,
+): SolverOutput<NotchSubItem> {
+  return solveLayout<NotchSubItem>({
+    items: subItems.map((s, i) => ({
+      key: s.key ?? `${keyPrefix}/${i}`,
+      desire: s.desire,
+      item: s,
+    })),
+    cols: subGridCols(subItems),
+  });
+}
+
+interface DragState {
+  key: ItemKey;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  /** Origin position in block units (where the item sits at drag start). */
+  originCol: number;
+  originRow: number;
+  /** Footprint width in blocks (to clamp the dropped column). */
+  originCols: number;
+  /** Live pointer delta in px. */
+  dx: number;
+  dy: number;
 }
 
 interface DragState {
@@ -221,15 +279,22 @@ export function NotchGrid({
 
   // Items with an override get their desire.position rewritten — that promotes
   // them to the solver's fixed-position fast path so they win their cell on
-  // the next solve.
+  // the next solve. Panels get their desire.shape replaced by the union of
+  // their sub-item footprints, so the outer grid reserves the real (notched)
+  // shape rather than the panel's declared bounding box.
   const layout = useMemo(() => {
     if (resolvedCols == null) return null;
     return solveLayout({
       items: keyedItems.map((it) => {
         const ov = overrides.get(it.key!);
+        let desire = ov ? { ...it.desire, position: ov } : it.desire;
+        if (it.subItems && it.subItems.length > 0) {
+          const unionMask = placementToMask(solvePanel(it.subItems, it.key!).placements);
+          desire = { ...desire, shape: unionMask };
+        }
         return {
           key: it.key!,
-          desire: ov ? { ...it.desire, position: ov } : it.desire,
+          desire,
           groupKey: it.groupKey,
           item: it,
         };
@@ -273,7 +338,6 @@ export function NotchGrid({
             gap={gap}
             primitives={primitives}
             onItemError={onItemError}
-            parentTheme={undefined}
             draggable={draggable}
             dragOffset={dragOffset}
             hasOverride={overrides.has(p.key)}
@@ -320,8 +384,6 @@ interface NotchItemProps {
   gap: number;
   primitives?: PrimitiveRegistry;
   onItemError?: (key: ItemKey, error: NotchGridError) => void;
-  /** Set when rendered as a sub-item; inherits `type` from the parent panel. */
-  parentTheme?: NotchTheme;
   /** When true, the wrapper accepts pointer events for outer-grid drag. */
   draggable?: boolean;
   /** Live `[dx, dy]` in px while this tile is being dragged. */
@@ -340,7 +402,6 @@ const NotchItem = memo(function NotchItem({
   gap,
   primitives,
   onItemError,
-  parentTheme,
   draggable = false,
   dragOffset,
   hasOverride = false,
@@ -348,12 +409,7 @@ const NotchItem = memo(function NotchItem({
   onDragMove,
   onDragEnd,
 }: NotchItemProps) {
-  // Sub-items inherit `type` from the parent panel; only `variant` and
-  // `gradient` are overridable (visual coherence — a filled panel with an
-  // outlined sub-item looks broken).
-  const itemTheme: NotchTheme = parentTheme
-    ? { ...item.theme, type: parentTheme.type }
-    : item.theme ?? {};
+  const itemTheme: NotchTheme = item.theme ?? {};
   const resolved = useMemo(() => resolveNotchTheme(itemTheme), [
     itemTheme.type,
     itemTheme.variant,
@@ -361,17 +417,14 @@ const NotchItem = memo(function NotchItem({
   ]);
   const shape = useMemo(() => maskToShape(placement.mask), [placement.mask]);
 
+  // Sub-items share the panel's single chrome (placement.mask is already the
+  // union of these placements, computed in the outer layout prep). Re-solving
+  // here with the same inputs yields the matching sub-cell positions for
+  // laying out content.
   const subLayout = useMemo(() => {
     if (!item.subItems || item.subItems.length === 0) return null;
-    return solveLayout({
-      items: item.subItems.map((s, i) => ({
-        key: s.key ?? `${placement.key}/${i}`,
-        desire: s.desire,
-        item: s as NotchGridItem,
-      })),
-      cols: placement.cols,
-    });
-  }, [item.subItems, placement.cols, placement.key]);
+    return solvePanel(item.subItems, placement.key);
+  }, [item.subItems, placement.key]);
 
   const Primitive = item.ui ? primitives?.[item.ui.type] : undefined;
   const unknownPrimitive = item.ui != null && !Primitive;
@@ -415,20 +468,34 @@ const NotchItem = memo(function NotchItem({
 
   let content: ReactNode = null;
   if (subLayout) {
+    // Sub-items render as positioned content inside the panel's single chrome
+    // (no nested BlockShape) — they inherit the panel fill + text color, and
+    // the union mask provides the notches / bridges between them.
     content = (
       <div className="relative h-full w-full">
-        {subLayout.placements.map((sp) => (
-          <NotchItem
-            key={sp.key}
-            placement={sp}
-            item={sp.item as NotchGridItem}
-            block={block}
-            gap={gap}
-            primitives={primitives}
-            onItemError={onItemError}
-            parentTheme={itemTheme}
-          />
-        ))}
+        {subLayout.placements.map((sp) => {
+          const sub = sp.item as NotchSubItem;
+          const SubPrimitive = sub.ui ? primitives?.[sub.ui.type] : undefined;
+          return (
+            <div
+              key={sp.key}
+              className="absolute"
+              style={{
+                left: sp.col * block,
+                top: sp.row * block,
+                width: sp.cols * block,
+                height: sp.rows * block,
+                padding: 16,
+              }}
+            >
+              {SubPrimitive ? (
+                <SubPrimitive {...sub.ui} />
+              ) : (
+                <UnknownPrimitivePlaceholder type={sub.ui.type} />
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   } else if (Primitive && item.ui) {

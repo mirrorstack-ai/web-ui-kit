@@ -104,7 +104,7 @@ describe("NotchGrid", () => {
     expect(tiles.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("renders sub-items as nested tiles inside the parent's content area", () => {
+  it("renders sub-items as content within a single unified panel chrome", () => {
     const Leaf = (props: { tag?: string }) => (
       <div data-testid="leaf">{props.tag}</div>
     );
@@ -116,17 +116,21 @@ describe("NotchGrid", () => {
         key: "panel",
         desire: { shape: M(2, 2) },
         subItems: [
-          { desire: { shape: M(1, 1) }, ui: { type: "Leaf", tag: "a" } },
-          { desire: { shape: M(1, 1) }, ui: { type: "Leaf", tag: "b" } },
+          { desire: { position: [0, 0], shape: M(1, 1) }, ui: { type: "Leaf", tag: "a" } },
+          { desire: { position: [1, 1], shape: M(1, 1) }, ui: { type: "Leaf", tag: "b" } },
         ],
       },
     ];
-    const { getAllByTestId } = render(
-      <NotchGrid items={items} primitives={primitives} />,
+    const { getAllByTestId, container } = render(
+      <NotchGrid items={items} primitives={primitives} cols={4} blockMin={100} />,
     );
+    // Both sub-items render their content...
     const leaves = getAllByTestId("leaf");
     expect(leaves).toHaveLength(2);
     expect(leaves.map((l) => l.textContent)).toEqual(["a", "b"]);
+    // ...but as ONE chrome (one BlockShape svg), not one per sub-item. The
+    // two diagonal sub-items bridge into a single unioned outline.
+    expect(container.querySelectorAll("svg")).toHaveLength(1);
   });
 
   it("applies inline color from resolved theme (variant=primary)", () => {
