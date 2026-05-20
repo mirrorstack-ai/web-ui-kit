@@ -330,6 +330,10 @@ interface SubDragState {
   ghostFill: string;
   ghostStroke: string;
   ghostStrokeWidth: number;
+  /** Sub content + text colour so the ghost shows the real cell, not a blank
+   *  chrome, while it's dragged. */
+  ghostUi: NotchGridUI;
+  ghostColor: string;
 }
 
 /** A sub-item promoted to a top-level tile, with its origin panel key so it
@@ -442,6 +446,8 @@ export function NotchGrid({
         ghostFill: panel.fill,
         ghostStroke: panel.stroke,
         ghostStrokeWidth: panel.strokeWidth,
+        ghostUi: entry.sub.ui,
+        ghostColor: panel.color,
       });
     },
     [],
@@ -643,26 +649,34 @@ export function NotchGrid({
         );
       })}
 
-      {/* Cursor-follow ghost for the sub-item being dragged. */}
-      {subDrag && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute z-30 opacity-90"
-          style={{
-            left: (subDrag.panelCol + subDrag.subCol) * block + subDrag.dx,
-            top: (subDrag.panelRow + subDrag.subRow) * block + subDrag.dy,
-          }}
-        >
-          <BlockShape
-            shape={subDrag.ghostShape}
-            block={block}
-            gap={gap}
-            fill={subDrag.ghostFill}
-            stroke={subDrag.ghostStroke}
-            strokeWidth={subDrag.ghostStrokeWidth}
-          />
-        </div>
-      )}
+      {/* Cursor-follow ghost for the sub-item being dragged — carries the
+          sub's own content so it reads as the real cell, not a blank chrome. */}
+      {subDrag &&
+        (() => {
+          const GhostPrimitive = primitives?.[subDrag.ghostUi.type];
+          return (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute z-30 opacity-90"
+              style={{
+                left: (subDrag.panelCol + subDrag.subCol) * block + subDrag.dx,
+                top: (subDrag.panelRow + subDrag.subRow) * block + subDrag.dy,
+                color: subDrag.ghostColor,
+              }}
+            >
+              <BlockShape
+                shape={subDrag.ghostShape}
+                block={block}
+                gap={gap}
+                fill={subDrag.ghostFill}
+                stroke={subDrag.ghostStroke}
+                strokeWidth={subDrag.ghostStrokeWidth}
+              >
+                {GhostPrimitive ? <GhostPrimitive {...subDrag.ghostUi} /> : null}
+              </BlockShape>
+            </div>
+          );
+        })()}
     </div>
   );
 }

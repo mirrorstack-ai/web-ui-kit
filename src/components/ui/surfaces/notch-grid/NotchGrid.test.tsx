@@ -257,6 +257,38 @@ describe("NotchGrid", () => {
     expect(cronCellAfter.style.left).toBe(cronLeftBefore);
   });
 
+  it("draggable: the sub-drag ghost carries the sub's content (not a blank chrome)", () => {
+    const Leaf = (p: { tag?: string }) => <div data-testid="leaf">{p.tag}</div>;
+    const primitives: PrimitiveRegistry = {
+      Leaf: Leaf as unknown as PrimitiveRegistry[string],
+    };
+    const items: NotchGridItem[] = [
+      {
+        key: "panel",
+        desire: { position: [0, 0], shape: M(2, 1) },
+        subItems: [
+          { desire: { position: [0, 0], shape: M(1, 1) }, ui: { type: "Leaf", tag: "cron" } },
+          { desire: { position: [1, 0], shape: M(1, 1) }, ui: { type: "Leaf", tag: "calls" } },
+        ],
+      },
+    ];
+    const { container, getAllByTestId } = render(
+      <NotchGrid items={items} primitives={primitives} cols={4} blockMin={100} draggable />,
+    );
+    const callsCell = getAllByTestId("leaf").find((l) => l.textContent === "calls")!
+      .parentElement as HTMLElement;
+    act(() => pointer(callsCell, "pointerdown", { clientX: 150, clientY: 50 }));
+    act(() => pointer(callsCell, "pointermove", { clientX: 250, clientY: 90 }));
+
+    // The cursor-follow ghost (aria-hidden, z-30) must contain the dragged
+    // sub's content — before the fix it rendered only a blank themed chrome.
+    const ghost = container.querySelector('div[aria-hidden="true"].z-30');
+    expect(ghost).toBeTruthy();
+    expect(ghost!.textContent).toContain("calls");
+
+    act(() => pointer(callsCell, "pointerup", { clientX: 250, clientY: 90 }));
+  });
+
   it("draggable: a promoted sub can be dragged AGAIN (override honoured on promoted items)", () => {
     const onItemMove = vi.fn();
     const onSubItemPromote = vi.fn();
