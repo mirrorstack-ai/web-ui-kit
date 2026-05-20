@@ -44,6 +44,10 @@ export {
   type SliderProps,
 } from "./components/ui/inputs/slider/Slider";
 export {
+  PageHeader,
+  type PageHeaderProps,
+} from "./components/ui/data/page-header/PageHeader";
+export {
   SectionHeader,
   type SectionHeaderProps,
 } from "./components/ui/data/section-header/SectionHeader";
@@ -192,6 +196,11 @@ export {
   VerificationCodeInput,
   type VerificationCodeInputProps,
 } from "./components/ui/inputs/verification-code-input/VerificationCodeInput";
+export {
+  Breadcrumb,
+  type BreadcrumbItem,
+  type BreadcrumbProps,
+} from "./components/ui/navigation/breadcrumb/Breadcrumb";
 export {
   NavItem,
   type NavItemProps,

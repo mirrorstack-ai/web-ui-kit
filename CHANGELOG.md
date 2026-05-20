@@ -3,6 +3,25 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.3.3
+
+### Components
+
+- **PageHeader** — new top-of-page header. `h1` title with optional
+  description and three optional slots:
+  - `path` — back link / breadcrumb above the title
+  - `leading` — avatar or icon marker left of the title block
+  - `tail` — picker / button / status pill right of the title block
+  Mid-page sibling is `SectionHeader` (h2). Replaces the duplicated
+  `text-2xl font-bold + on-surface-variant <p>` shape across the
+  settings, profile, and module pages.
+
+- **Breadcrumb** — navigable path trail, rendered as
+  `← <root> / <…> / <next-level-up>`. The canonical content for
+  `PageHeader.path` when a page has more than one level of "where you
+  came from". Each segment is an anchor; the back arrow is implicit
+  (a trail IS where you came from). Lives under `navigation/`.
+
 ## 0.3.2
 
 ### Components
