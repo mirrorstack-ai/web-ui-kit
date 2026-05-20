@@ -5,7 +5,6 @@ import {
   resolveSubDrop,
   type NotchGridItem,
   type PrimitiveRegistry,
-  type SubDropGeometry,
 } from "./NotchGrid";
 
 afterEach(cleanup);
@@ -221,49 +220,41 @@ describe("NotchGrid", () => {
 });
 
 describe("resolveSubDrop", () => {
-  // Panel occupies outer cells [2..4) × [2..4); the sub starts at the panel's
-  // top-left cell (subCol/subRow = 0 → outer origin (2,2)). block = 100.
-  const base: SubDropGeometry = {
-    panelCol: 2,
-    panelRow: 2,
-    panelCols: 2,
-    panelRows: 2,
-    subCol: 0,
-    subRow: 0,
-    dx: 0,
-    dy: 0,
-  };
+  // Panel occupies outer cells [2..4) × [2..4).
+  const panel = { col: 2, row: 2, cols: 2, rows: 2 };
 
-  it("no movement → reposition at the same inner cell", () => {
-    expect(resolveSubDrop(base, 100)).toEqual({ kind: "reposition", pos: [0, 0] });
-  });
-
-  it("small move within the panel → reposition at the new inner cell", () => {
-    // +1 col, +1 row → outer (3,3), still inside → inner (1,1)
-    expect(resolveSubDrop({ ...base, dx: 100, dy: 100 }, 100)).toEqual({
+  it("cursor inside the panel → reposition at the grab-relative inner cell", () => {
+    // Cursor at (3,3) is inside; reposition uses the provided inner cell.
+    expect(resolveSubDrop(panel, 3, 3, [1, 1])).toEqual({
       kind: "reposition",
       pos: [1, 1],
     });
   });
 
-  it("drag past the right edge → promote at the outer cell", () => {
-    // +3 cols → outer (5,2), panel spans cols 2..3 → outside → promote
-    expect(resolveSubDrop({ ...base, dx: 300 }, 100)).toEqual({
+  it("cursor at the panel's top-left → reposition (boundary is inclusive)", () => {
+    expect(resolveSubDrop(panel, 2, 2, [0, 0])).toEqual({
+      kind: "reposition",
+      pos: [0, 0],
+    });
+  });
+
+  it("cursor past the right edge → promote at the cursor cell", () => {
+    // Col 5 is outside [2..4); promote target ignores the inner cell.
+    expect(resolveSubDrop(panel, 5, 2, [9, 9])).toEqual({
       kind: "promote",
       pos: [5, 2],
     });
   });
 
-  it("drag below the panel → promote", () => {
-    expect(resolveSubDrop({ ...base, dy: 300 }, 100)).toEqual({
+  it("cursor below the panel → promote at the cursor cell", () => {
+    expect(resolveSubDrop(panel, 2, 5, [0, 0])).toEqual({
       kind: "promote",
       pos: [2, 5],
     });
   });
 
-  it("drag far up-left clamps to 0 and promotes", () => {
-    // outer col = max(0, 2+0-3) = 0, outside panel (col < 2) → promote
-    expect(resolveSubDrop({ ...base, dx: -300, dy: -300 }, 100)).toEqual({
+  it("cursor above-left of the panel → promote", () => {
+    expect(resolveSubDrop(panel, 0, 0, [0, 0])).toEqual({
       kind: "promote",
       pos: [0, 0],
     });

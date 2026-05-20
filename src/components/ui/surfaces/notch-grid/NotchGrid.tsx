@@ -272,36 +272,37 @@ interface PromotedSub {
   parentKey: ItemKey;
 }
 
-/** The geometry `resolveSubDrop` needs (a subset of `SubDragState`). */
-export interface SubDropGeometry {
-  panelCol: number;
-  panelRow: number;
-  panelCols: number;
-  panelRows: number;
-  subCol: number;
-  subRow: number;
-  dx: number;
-  dy: number;
+/** The panel's outer bounding rect (block units) — promote hit-box. */
+export interface PanelRect {
+  col: number;
+  row: number;
+  cols: number;
+  rows: number;
 }
 
-/** Decide where a dropped sub-item lands: repositioned within its panel
- *  (inner coords) or promoted out (outer coords). Drop cell is the sub's
- *  origin outer cell plus the rounded pointer delta. Exported for testing. */
+/** Decide where a dropped sub-item lands. The decision + promote target use
+ *  the **cursor's** outer-grid cell (so dragging the cursor out of the panel
+ *  promotes, matching where you actually dropped it); the reposition target
+ *  uses the sub's `originInner` cell so the move stays grab-relative within
+ *  the panel. Pure — exported for testing. */
 export type SubDrop =
   | { kind: "reposition"; pos: Pos }
   | { kind: "promote"; pos: Pos };
 
-export function resolveSubDrop(g: SubDropGeometry, blockPx: number): SubDrop {
-  const outerCol = Math.max(0, g.panelCol + g.subCol + Math.round(g.dx / blockPx));
-  const outerRow = Math.max(0, g.panelRow + g.subRow + Math.round(g.dy / blockPx));
+export function resolveSubDrop(
+  panel: PanelRect,
+  cursorCol: number,
+  cursorRow: number,
+  repositionInner: Pos,
+): SubDrop {
   const inside =
-    outerCol >= g.panelCol &&
-    outerCol < g.panelCol + g.panelCols &&
-    outerRow >= g.panelRow &&
-    outerRow < g.panelRow + g.panelRows;
+    cursorCol >= panel.col &&
+    cursorCol < panel.col + panel.cols &&
+    cursorRow >= panel.row &&
+    cursorRow < panel.row + panel.rows;
   return inside
-    ? { kind: "reposition", pos: [outerCol - g.panelCol, outerRow - g.panelRow] }
-    : { kind: "promote", pos: [outerCol, outerRow] };
+    ? { kind: "reposition", pos: repositionInner }
+    : { kind: "promote", pos: [cursorCol, cursorRow] };
 }
 
 // --- Component -------------------------------------------------------------
@@ -456,7 +457,26 @@ export function NotchGrid({
       if (!s || e.pointerId !== s.pointerId) return;
       safePointerRelease(e.currentTarget, e.pointerId);
       setSubDrag(null);
-      const drop = resolveSubDrop(s, block || blockMin);
+      const blockPx = block || blockMin;
+      // Promote decision + target use the cursor's outer-grid cell; the
+      // reposition target uses the sub's origin + rounded delta (grab-relative).
+      const rect = wrapperRef.current?.getBoundingClientRect();
+      const cursorCol = rect
+        ? Math.max(0, Math.floor((e.clientX - rect.left) / blockPx))
+        : s.panelCol + s.subCol;
+      const cursorRow = rect
+        ? Math.max(0, Math.floor((e.clientY - rect.top) / blockPx))
+        : s.panelRow + s.subRow;
+      const repositionInner: Pos = [
+        Math.max(0, s.subCol + Math.round(s.dx / blockPx)),
+        Math.max(0, s.subRow + Math.round(s.dy / blockPx)),
+      ];
+      const drop = resolveSubDrop(
+        { col: s.panelCol, row: s.panelRow, cols: s.panelCols, rows: s.panelRows },
+        cursorCol,
+        cursorRow,
+        repositionInner,
+      );
       const sk = subKeyOf(s.parentKey, s.subIndex);
       if (drop.kind === "reposition") {
         setSubOverrides((prev) => new Map(prev).set(sk, drop.pos));
@@ -479,6 +499,14 @@ export function NotchGrid({
           }),
         );
       }
+      // Pin the parent at its current cell — promoting shrinks its mask, and
+      // without a pin the outer pack would reflow the panel (and its remaining
+      // siblings) to a new cell. Don't override an existing pin.
+      setOverrides((prev) =>
+        prev.has(s.parentKey)
+          ? prev
+          : new Map(prev).set(s.parentKey, [s.panelCol, s.panelRow]),
+      );
       onSubItemPromote?.(s.parentKey, s.subIndex, drop.pos);
     },
     [block, blockMin, keyedItems, onSubItemMove, onSubItemPromote],
