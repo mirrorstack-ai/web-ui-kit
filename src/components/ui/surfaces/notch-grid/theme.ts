@@ -187,7 +187,9 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
       return {
         fill,
         cssBackground: applyGradient(fill, gradient),
-        color: "var(--color-on-surface)",
+        // Variant accent on the text differentiates the lifted tiles —
+        // surface tones alone leave primary/secondary/tertiary identical.
+        color: ACCENT[variant],
         stroke: "none",
         strokeWidth: 0,
         ...(isAlert ? { accentBar: ACCENT[variant] } : {}),

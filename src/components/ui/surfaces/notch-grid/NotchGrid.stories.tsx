@@ -158,11 +158,14 @@ export const PriorityFallback: Story = {
   },
 };
 
-/** Gallery of `type × variant` combinations applied to identical 1×1 tiles. */
+/** Gallery of `type × variant` combinations. `cols: 6` keeps each chrome
+ *  `type` on its own row (6 variants across) so the rows read as
+ *  filled / outlined / elevated / ghost top-to-bottom. Elevated tiles
+ *  carry the variant accent on their text so they don't all look alike. */
 export const ThemeGallery: Story = {
   args: {
     primitives,
-    cols: 4,
+    cols: 6,
     blockMin: 120,
     items: (
       ["filled", "outlined", "elevated", "ghost"] as const
@@ -173,7 +176,7 @@ export const ThemeGallery: Story = {
         key: `${type}-${variant}`,
         desire: { shape: r(1, 1) },
         theme: { type, variant },
-        ui: { type: "Center", label: `${variant}` },
+        ui: { type: "Center", label: `${type} ${variant}` },
       })),
     ) as NotchGridItem[],
   },
@@ -292,14 +295,20 @@ export const CustomShapes: Story = {
   },
 };
 
-/** Outer-grid drag. `draggable` lets the user grab a tile and drop it on
- *  another cell; the dropped item pins to its new spot and everything else
- *  re-flows around it. `onItemMove` reports the new `[col, row]`. */
+/** Outer-grid drag over the same rich notched footprints as `CustomShapes`:
+ *  grab any top-level tile (incl. L-hero, plus, chart, diagonal, and the
+ *  sub-item panel) and drop it on another cell — it pins to the new spot and
+ *  everything else re-flows around it. `onItemMove` reports the new
+ *  `[col, row]`.
+ *
+ *  NOTE: dragging a *sub-item* out of the panel (promote-to-outer) and
+ *  dragging the panel chrome itself are the next slice (re-targeted from
+ *  closed PRs #193 / #194) — not wired in this story yet. */
 export const Draggable: Story = {
   args: {
     primitives,
-    cols: 6,
-    blockMin: 120,
+    cols: 8,
+    blockMin: 96,
     draggable: true,
     onItemMove: (key, pos) => {
       // eslint-disable-next-line no-console
@@ -307,40 +316,43 @@ export const Draggable: Story = {
     },
     items: [
       {
-        key: "hero",
-        desire: { shape: r(2, 2) },
+        key: "L",
+        desire: { position: [0, 0], shape: m([1, 1, 1], [1, 1, 1], [1, 1, 0]) },
         theme: { type: "filled", variant: "primary" },
-        ui: { type: "Label", label: "Drag me", value: "★" },
+        ui: { type: "Label", label: "L-hero", value: "drag me" },
       },
       {
-        key: "a",
-        desire: { shape: r(1, 1) },
-        theme: { type: "filled", variant: "secondary" },
-        ui: { type: "Label", label: "A" },
-      },
-      {
-        key: "b",
-        desire: { shape: r(1, 1) },
+        key: "plus",
+        desire: { position: [3, 0], shape: m([0, 1, 0], [1, 1, 1], [0, 1, 0]) },
         theme: { type: "filled", variant: "tertiary" },
-        ui: { type: "Label", label: "B" },
+        ui: { type: "Center", label: "✚" },
       },
       {
-        key: "c",
-        desire: { shape: r(1, 1) },
-        theme: { type: "outlined", variant: "neutral" },
-        ui: { type: "Label", label: "C" },
+        key: "chart",
+        desire: { position: [6, 0], shape: m([1, 1, 0], [1, 1, 1]) },
+        theme: { type: "elevated", variant: "secondary" },
+        ui: { type: "Label", label: "Usage", value: "30d" },
       },
       {
-        key: "d",
-        desire: { shape: r(1, 1) },
-        theme: { type: "outlined", variant: "neutral" },
-        ui: { type: "Label", label: "D" },
+        key: "diagonal",
+        desire: { position: [0, 3], shape: m([1, 1, 0], [1, 1, 0], [0, 0, 1]) },
+        theme: { type: "filled", variant: "secondary" },
+        ui: { type: "Label", label: "Diagonal", value: "junction" },
       },
       {
-        key: "wide",
-        desire: { shape: r(2, 1) },
-        theme: { type: "elevated", variant: "neutral" },
-        ui: { type: "Label", label: "Wide", value: "2×1" },
+        key: "panel",
+        desire: { position: [3, 3], shape: r(2, 2) },
+        theme: { type: "filled", variant: "primary" },
+        subItems: [
+          {
+            desire: { position: [0, 0], shape: r(1, 1) },
+            ui: { type: "Label", label: "Cron", value: "8/d" },
+          },
+          {
+            desire: { position: [1, 1], shape: r(1, 1) },
+            ui: { type: "Label", label: "Calls", value: "1.2k" },
+          },
+        ],
       },
     ] satisfies NotchGridItem[],
   },

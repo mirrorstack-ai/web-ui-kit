@@ -95,12 +95,22 @@ describe("resolveNotchTheme — type=outlined", () => {
 });
 
 describe("resolveNotchTheme — type=elevated", () => {
-  it("primary → surface-container-low fill, on-surface text, m3-1 shadow, no accent bar", () => {
+  it("primary → surface-container-low fill, primary accent text, m3-1 shadow, no accent bar", () => {
     const r = resolveNotchTheme({ type: "elevated", variant: "primary" });
     expect(r.fill).toBe("var(--color-surface-container-low)");
-    expect(r.color).toBe("var(--color-on-surface)");
+    // Text carries the variant accent so lifted tiles differ by variant.
+    expect(r.color).toBe("var(--color-primary)");
     expect(r.boxShadow).toBe("var(--shadow-m3-1)");
     expect(r.accentBar).toBeUndefined();
+  });
+
+  it("variants get distinct accent text (secondary, tertiary, neutral)", () => {
+    expect(resolveNotchTheme({ type: "elevated", variant: "secondary" }).color)
+      .toBe("var(--color-secondary)");
+    expect(resolveNotchTheme({ type: "elevated", variant: "tertiary" }).color)
+      .toBe("var(--color-tertiary)");
+    expect(resolveNotchTheme({ type: "elevated", variant: "neutral" }).color)
+      .toBe("var(--color-on-surface-variant)");
   });
 
   it("neutral drops one surface tier (container-lowest)", () => {
