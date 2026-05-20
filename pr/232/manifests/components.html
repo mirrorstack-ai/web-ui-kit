@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7970,7 +7970,7 @@ width: number</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NotchGrid</h2>
       <div class="badges">
-        <label for="c-42-ui-notch-notchgrid-props" class="badge ok as-toggle">13 prop types</label>
+        <label for="c-42-ui-notch-notchgrid-props" class="badge ok as-toggle">12 prop types</label>
         <label for="c-42-ui-notch-notchgrid-info" class="badge info as-toggle">1 info</label>
         <label for="c-42-ui-notch-notchgrid-stories" class="badge ok as-toggle">7 stories</label>
         
@@ -8004,7 +8004,7 @@ width: number</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">13 prop types</span>
+              <span class="badge ok">12 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/notch-grid/NotchGrid.tsx::NotchGrid</code></pre>
             <pre><code>Props:</code></pre>
@@ -8047,13 +8047,8 @@ onItemError?: (key: ItemKey, error: NotchGridError) =&gt; void
 onItemMove?: (key: ItemKey, pos: Pos) =&gt; void
 
 /**
- * Called after a sub-item is repositioned within its panel.
- */
-onSubItemMove?: (parentKey: ItemKey, subIndex: number, pos: Pos) =&gt; void
-
-/**
- * Called after a sub-item is dragged out of its panel (promoted to a
- *  top-level tile), with its new outer block position.
+ * Called after a sub-item is dragged to a new cell (it becomes a top-level
+ *  group member; auto-link re-unions it with adjacent same-group tiles).
  */
 onSubItemPromote?: (parentKey: ItemKey, subIndex: number, pos: Pos) =&gt; void
 
@@ -8352,13 +8347,9 @@ style?: CSSProperties</code></pre>
       // eslint-disable-next-line no-console
       console.log(&quot;[NotchGrid story] drop:&quot;, key, pos);
     }}
-    onSubItemMove={(parentKey, subIndex, pos) =&gt; {
-      // eslint-disable-next-line no-console
-      console.log(&quot;[NotchGrid story] sub reposition:&quot;, parentKey, subIndex, pos);
-    }}
     onSubItemPromote={(parentKey, subIndex, pos) =&gt; {
       // eslint-disable-next-line no-console
-      console.log(&quot;[NotchGrid story] sub promote:&quot;, parentKey, subIndex, pos);
+      console.log(&quot;[NotchGrid story] sub drop:&quot;, parentKey, subIndex, pos);
     }}
     items={[
       {
