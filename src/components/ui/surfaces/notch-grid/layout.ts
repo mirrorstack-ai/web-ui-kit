@@ -53,9 +53,19 @@ export function rectMask(cols: number, rows: number): boolean[][] {
   return Array.from({ length: r }, () => Array<boolean>(c).fill(true));
 }
 
+/** A positioned block rectangle — the structural subset `placementToMask`
+ *  needs. Both `PlacedItem` (from `packItems`) and `Placement` (from
+ *  `solveLayout`) satisfy it. */
+export interface CellRect {
+  col: number;
+  row: number;
+  cols: number;
+  rows: number;
+}
+
 /** Union of placed rectangular items into one boolean mask — the derived
  *  footprint of a panel built from sub-items. Empty cells become notches. */
-export function placementToMask<T>(placed: ReadonlyArray<PlacedItem<T>>): boolean[][] {
+export function placementToMask(placed: ReadonlyArray<CellRect>): boolean[][] {
   let maxRow = 1;
   let maxCol = 1;
   for (const p of placed) {

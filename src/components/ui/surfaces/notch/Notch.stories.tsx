@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Notch } from "./Notch";
 
 const meta: Meta<typeof Notch> = {
-  title: "UI/Surfaces/Notch",
+  title: "UI/Notch/Notch",
   component: Notch,
   args: {
     width: 200,
