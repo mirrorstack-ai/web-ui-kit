@@ -114,10 +114,8 @@ export interface NotchGridProps {
   draggable?: boolean;
   /** Called after an outer tile drops, with its new block position. */
   onItemMove?: (key: ItemKey, pos: Pos) => void;
-  /** Called after a sub-item is repositioned within its panel. */
-  onSubItemMove?: (parentKey: ItemKey, subIndex: number, pos: Pos) => void;
-  /** Called after a sub-item is dragged out of its panel (promoted to a
-   *  top-level tile), with its new outer block position. */
+  /** Called after a sub-item is dragged to a new cell (it becomes a top-level
+   *  group member; auto-link re-unions it with adjacent same-group tiles). */
   onSubItemPromote?: (parentKey: ItemKey, subIndex: number, pos: Pos) => void;
   className?: string;
   style?: CSSProperties;
@@ -190,23 +188,18 @@ function subGridCols(entries: SubEntry[]): number {
   return cols;
 }
 
-/** A panel's effective sub-items: promoted ones removed, repositioned ones
- *  given their override position. Original indices are preserved. */
+/** A panel's effective sub-items: promoted ones removed (they now render as
+ *  top-level group members). Original indices are preserved so drag handlers
+ *  can identify the cell. */
 function effectiveSubEntries(
   panelKey: ItemKey,
   subItems: NotchSubItem[],
-  subOverrides: Map<SubKey, Pos>,
   promoted: ReadonlySet<SubKey> | Map<SubKey, unknown>,
 ): SubEntry[] {
   const out: SubEntry[] = [];
   subItems.forEach((sub, index) => {
-    const sk = subKeyOf(panelKey, index);
-    if (promoted.has(sk)) return;
-    const ov = subOverrides.get(sk);
-    out.push({
-      sub: ov ? { ...sub, desire: { ...sub.desire, position: ov } } : sub,
-      index,
-    });
+    if (promoted.has(subKeyOf(panelKey, index))) return;
+    out.push({ sub, index });
   });
   return out;
 }
@@ -225,6 +218,80 @@ function solvePanel(
     })),
     cols: subGridCols(entries),
   });
+}
+
+/** Outer-grid cells a placement fills (its mask's true cells offset by its
+ *  top-left). Used for 8-connected adjacency. */
+function placedCells(p: Placement<unknown>): Array<readonly [number, number]> {
+  const out: Array<readonly [number, number]> = [];
+  for (let r = 0; r < p.mask.length; r++) {
+    const row = p.mask[r];
+    for (let c = 0; c < row.length; c++) {
+      if (row[c]) out.push([p.col + c, p.row + r]);
+    }
+  }
+  return out;
+}
+
+/** Group placements into 8-connected components — two placements join if any
+ *  filled cell of one is within 1 row/col of any filled cell of the other
+ *  (edge OR corner touch, matching the outline tracer's diagonal-junction
+ *  bridge). Exported for testing. */
+export function findConnectedComponents<T>(
+  items: ReadonlyArray<Placement<T>>,
+): Placement<T>[][] {
+  if (items.length <= 1) return items.length ? [[...items]] : [];
+  const cells = items.map(placedCells);
+  const seen = new Array<boolean>(items.length).fill(false);
+  const adjacent = (i: number, j: number): boolean => {
+    for (const [ax, ay] of cells[i]) {
+      for (const [bx, by] of cells[j]) {
+        if (Math.abs(ax - bx) <= 1 && Math.abs(ay - by) <= 1) return true;
+      }
+    }
+    return false;
+  };
+  const out: Placement<T>[][] = [];
+  for (let s = 0; s < items.length; s++) {
+    if (seen[s]) continue;
+    seen[s] = true;
+    const queue = [s];
+    const comp: Placement<T>[] = [];
+    while (queue.length) {
+      const i = queue.shift()!;
+      comp.push(items[i]);
+      for (let j = 0; j < items.length; j++) {
+        if (!seen[j] && adjacent(i, j)) {
+          seen[j] = true;
+          queue.push(j);
+        }
+      }
+    }
+    out.push(comp);
+  }
+  return out;
+}
+
+/** Bucket placements by their effective group (from `groupOf`, keyed by item
+ *  key), then split each bucket into 8-connected components. Items without a
+ *  group are singleton buckets so they never merge with anything. */
+function groupComponents(
+  placements: ReadonlyArray<Placement<NotchGridItem>>,
+  groupOf: ReadonlyMap<ItemKey, string | undefined>,
+): Placement<NotchGridItem>[][] {
+  const buckets = new Map<string, Placement<NotchGridItem>[]>();
+  placements.forEach((p, i) => {
+    const gk = groupOf.get(p.key);
+    const bucket = gk != null ? `g:${gk}` : `s:${i}`;
+    const list = buckets.get(bucket);
+    if (list) list.push(p);
+    else buckets.set(bucket, [p]);
+  });
+  const out: Placement<NotchGridItem>[][] = [];
+  for (const members of buckets.values()) {
+    for (const comp of findConnectedComponents(members)) out.push(comp);
+  }
+  return out;
 }
 
 interface DragState {
@@ -272,39 +339,6 @@ interface PromotedSub {
   parentKey: ItemKey;
 }
 
-/** The panel's outer bounding rect (block units) — promote hit-box. */
-export interface PanelRect {
-  col: number;
-  row: number;
-  cols: number;
-  rows: number;
-}
-
-/** Decide where a dropped sub-item lands. The decision + promote target use
- *  the **cursor's** outer-grid cell (so dragging the cursor out of the panel
- *  promotes, matching where you actually dropped it); the reposition target
- *  uses the sub's `originInner` cell so the move stays grab-relative within
- *  the panel. Pure — exported for testing. */
-export type SubDrop =
-  | { kind: "reposition"; pos: Pos }
-  | { kind: "promote"; pos: Pos };
-
-export function resolveSubDrop(
-  panel: PanelRect,
-  cursorCol: number,
-  cursorRow: number,
-  repositionInner: Pos,
-): SubDrop {
-  const inside =
-    cursorCol >= panel.col &&
-    cursorCol < panel.col + panel.cols &&
-    cursorRow >= panel.row &&
-    cursorRow < panel.row + panel.rows;
-  return inside
-    ? { kind: "reposition", pos: repositionInner }
-    : { kind: "promote", pos: [cursorCol, cursorRow] };
-}
-
 // --- Component -------------------------------------------------------------
 
 export function NotchGrid({
@@ -317,7 +351,6 @@ export function NotchGrid({
   onItemError,
   draggable = false,
   onItemMove,
-  onSubItemMove,
   onSubItemPromote,
   className,
   style,
@@ -354,7 +387,6 @@ export function NotchGrid({
   // Sub-item state: repositioned subs, promoted subs (now top-level), and the
   // live sub-drag. Promoted entries carry their origin `parentKey` so they
   // can be dropped when the parent item is removed.
-  const [subOverrides, setSubOverrides] = useState<Map<SubKey, Pos>>(new Map());
   const [promoted, setPromoted] = useState<Map<SubKey, PromotedSub>>(new Map());
   const [subDrag, setSubDrag] = useState<SubDragState | null>(null);
   const subDragRef = useRef<SubDragState | null>(null);
@@ -457,33 +489,20 @@ export function NotchGrid({
       if (!s || e.pointerId !== s.pointerId) return;
       safePointerRelease(e.currentTarget, e.pointerId);
       setSubDrag(null);
+      // Unified drop: the sub lands at the cursor's outer-grid cell as a
+      // group member. Render-time auto-link re-unions it with same-group
+      // tiles it's adjacent to (so a drop next to the panel reads as "stayed
+      // in the panel"); dropped far, it stands alone.
       const blockPx = block || blockMin;
-      // Promote decision + target use the cursor's outer-grid cell; the
-      // reposition target uses the sub's origin + rounded delta (grab-relative).
       const rect = wrapperRef.current?.getBoundingClientRect();
-      const cursorCol = rect
+      const dropCol = rect
         ? Math.max(0, Math.floor((e.clientX - rect.left) / blockPx))
         : s.panelCol + s.subCol;
-      const cursorRow = rect
+      const dropRow = rect
         ? Math.max(0, Math.floor((e.clientY - rect.top) / blockPx))
         : s.panelRow + s.subRow;
-      const repositionInner: Pos = [
-        Math.max(0, s.subCol + Math.round(s.dx / blockPx)),
-        Math.max(0, s.subRow + Math.round(s.dy / blockPx)),
-      ];
-      const drop = resolveSubDrop(
-        { col: s.panelCol, row: s.panelRow, cols: s.panelCols, rows: s.panelRows },
-        cursorCol,
-        cursorRow,
-        repositionInner,
-      );
+      const pos: Pos = [dropCol, dropRow];
       const sk = subKeyOf(s.parentKey, s.subIndex);
-      if (drop.kind === "reposition") {
-        setSubOverrides((prev) => new Map(prev).set(sk, drop.pos));
-        onSubItemMove?.(s.parentKey, s.subIndex, drop.pos);
-        return;
-      }
-      // Promote: synthesize a top-level item from the sub.
       const parent = keyedItems.find((it) => it.key === s.parentKey);
       const sub = parent?.subItems?.[s.subIndex];
       if (sub) {
@@ -492,51 +511,63 @@ export function NotchGrid({
             parentKey: s.parentKey,
             item: {
               key: `promoted::${sk}`,
-              desire: { position: drop.pos, shape: firstMask(sub.desire.shape) },
+              desire: { position: pos, shape: firstMask(sub.desire.shape) },
               theme: { ...parent.theme, ...sub.theme } as NotchTheme,
+              // Share the panel's group so auto-link re-unions when adjacent.
+              groupKey: parent.groupKey ?? s.parentKey,
               ui: sub.ui,
             },
           }),
         );
       }
-      // Pin the parent at its current cell — promoting shrinks its mask, and
-      // without a pin the outer pack would reflow the panel (and its remaining
-      // siblings) to a new cell. Don't override an existing pin.
+      // Pin the parent at its current cell — moving a sub out shrinks its
+      // mask, and without a pin the outer pack would reflow the panel (and its
+      // remaining siblings). Don't override an existing pin.
       setOverrides((prev) =>
         prev.has(s.parentKey)
           ? prev
           : new Map(prev).set(s.parentKey, [s.panelCol, s.panelRow]),
       );
-      onSubItemPromote?.(s.parentKey, s.subIndex, drop.pos);
+      onSubItemPromote?.(s.parentKey, s.subIndex, pos);
     },
-    [block, blockMin, keyedItems, onSubItemMove, onSubItemPromote],
+    [block, blockMin, keyedItems, onSubItemPromote],
   );
 
   // Solve: panels get their desire.shape replaced by the union of their
   // *effective* sub-item footprints; promoted subs are appended as top-level
   // items. The per-panel sub-layouts are kept so NotchItem renders content
   // without re-solving.
-  const { layout, panelSubLayouts } = useMemo(() => {
-    if (resolvedCols == null) {
-      return { layout: null, panelSubLayouts: new Map<ItemKey, SolverOutput<SubEntry>>() };
-    }
+  const { layout, panelSubLayouts, components } = useMemo(() => {
+    const empty = {
+      layout: null,
+      panelSubLayouts: new Map<ItemKey, SolverOutput<SubEntry>>(),
+      components: [] as Placement<NotchGridItem>[][],
+    };
+    if (resolvedCols == null) return empty;
     const liveKeys = new Set(keyedItems.map((it) => it.key!));
     const subLayouts = new Map<ItemKey, SolverOutput<SubEntry>>();
+    const groupOf = new Map<ItemKey, string | undefined>();
     const solverItems = keyedItems.map((it) => {
       const ov = overrides.get(it.key!);
       let desire = ov ? { ...it.desire, position: ov } : it.desire;
+      // A panel's group is its own key (unless explicitly grouped) so its
+      // promoted subs — which share that group — auto-link back to it.
+      let groupKey = it.groupKey;
       if (it.subItems && it.subItems.length > 0) {
-        const entries = effectiveSubEntries(it.key!, it.subItems, subOverrides, promoted);
+        const entries = effectiveSubEntries(it.key!, it.subItems, promoted);
         const sub = solvePanel(entries, it.key!);
         subLayouts.set(it.key!, sub);
         desire = { ...desire, shape: placementToMask(sub.placements) };
+        groupKey = it.groupKey ?? it.key;
       }
-      return { key: it.key!, desire, groupKey: it.groupKey, item: it };
+      groupOf.set(it.key!, groupKey);
+      return { key: it.key!, desire, groupKey, item: it };
     });
     // Promoted subs → synthetic top-level items. Skip orphans whose origin
     // panel was removed from `items` (their pinned tile shouldn't linger).
     for (const { item, parentKey } of promoted.values()) {
       if (!liveKeys.has(parentKey)) continue;
+      groupOf.set(item.key!, item.groupKey);
       solverItems.push({
         key: item.key!,
         desire: item.desire,
@@ -544,11 +575,13 @@ export function NotchGrid({
         item,
       });
     }
+    const solved = solveLayout({ items: solverItems, cols: resolvedCols, nest });
     return {
-      layout: solveLayout({ items: solverItems, cols: resolvedCols, nest }),
+      layout: solved,
       panelSubLayouts: subLayouts,
+      components: groupComponents(solved.placements, groupOf),
     };
-  }, [keyedItems, resolvedCols, nest, overrides, subOverrides, promoted]);
+  }, [keyedItems, resolvedCols, nest, overrides, promoted]);
 
   const unfitKey = layout?.unfit.join(",") ?? "";
   useEffect(() => {
@@ -570,26 +603,31 @@ export function NotchGrid({
         ...style,
       }}
     >
-      {layout?.placements.map((p) => {
-        const isDragging = drag?.key === p.key;
+      {components.map((members) => {
+        const compKey = members.map((m) => m.key).join("|");
+        // Outer-drag offset, if a member of this component is being dragged.
+        const dragMember = drag ? members.find((m) => m.key === drag.key) : undefined;
         const dragOffset: readonly [number, number] | undefined =
-          isDragging && drag ? [drag.dx, drag.dy] : undefined;
+          dragMember && drag ? [drag.dx, drag.dy] : undefined;
+        const draggingSub =
+          subDrag && members.some((m) => m.key === subDrag.parentKey)
+            ? { parentKey: subDrag.parentKey, subIndex: subDrag.subIndex }
+            : null;
+        const overridden = members.some((m) => overrides.has(m.key));
         return (
-          <NotchItem
-            key={p.key}
-            placement={p}
-            item={p.item as NotchGridItem}
+          <NotchComponent
+            key={compKey}
+            members={members}
             block={block}
             gap={gap}
             primitives={primitives}
             onItemError={onItemError}
             draggable={draggable}
+            panelSubLayouts={panelSubLayouts}
+            dragKey={dragMember?.key ?? null}
             dragOffset={dragOffset}
-            hasOverride={overrides.has(p.key)}
-            subLayout={panelSubLayouts.get(p.key) ?? null}
-            draggingSubIndex={
-              subDrag && subDrag.parentKey === p.key ? subDrag.subIndex : null
-            }
+            draggingSub={draggingSub}
+            overridden={overridden}
             onItemDragStart={handleItemDragStart}
             onSubDragStart={handleSubDragStart}
             onSubDragMove={handleSubPointerMove}
@@ -624,27 +662,29 @@ export function NotchGrid({
   );
 }
 
-// --- NotchItem (internal) --------------------------------------------------
+// --- NotchComponent (internal) ---------------------------------------------
+//
+// Renders one 8-connected component of same-group placements as a SINGLE
+// unioned BlockShape chrome, with each member's content positioned inside.
+// A panel member lays out its sub-cells (each sub-draggable); a standalone
+// member renders its content (outer-draggable). Adjacent same-group tiles
+// thus read as one chrome — that's the auto-link.
 
-interface NotchItemProps {
-  placement: Placement<NotchGridItem>;
-  item: NotchGridItem;
+interface NotchComponentProps {
+  members: Placement<NotchGridItem>[];
   block: number;
   gap: number;
   primitives?: PrimitiveRegistry;
   onItemError?: (key: ItemKey, error: NotchGridError) => void;
-  /** When true, the wrapper accepts pointer events for outer-grid drag. */
   draggable?: boolean;
-  /** Live `[dx, dy]` in px while this tile is being dragged. */
+  panelSubLayouts: ReadonlyMap<ItemKey, SolverOutput<SubEntry>>;
+  /** The member key being outer-dragged (if any), + its live offset. */
+  dragKey?: ItemKey | null;
   dragOffset?: readonly [number, number];
-  /** True when this tile has a committed drop override (sits above non-pinned). */
-  hasOverride?: boolean;
-  /** Pre-solved sub-item placements for a panel (null for leaf tiles). */
-  subLayout?: SolverOutput<SubEntry> | null;
-  /** The sub-item index currently being dragged out of this panel (hidden). */
-  draggingSubIndex?: number | null;
-  /** Stable drag-start callbacks (receive this tile's placement at call time)
-   *  so NotchItem's memo holds during a drag. */
+  /** The sub being dragged out of a member panel (hidden during drag). */
+  draggingSub?: { parentKey: ItemKey; subIndex: number } | null;
+  /** Any member has a committed drop override (raises z-index). */
+  overridden?: boolean;
   onItemDragStart?: (
     placement: Placement<NotchGridItem>,
     e: ReactPointerEvent<HTMLDivElement>,
@@ -661,147 +701,218 @@ interface NotchItemProps {
   onDragEnd?: (e: ReactPointerEvent<HTMLDivElement>) => void;
 }
 
-const NotchItem = memo(function NotchItem({
-  placement,
-  item,
+const NotchComponent = memo(function NotchComponent({
+  members,
   block,
   gap,
   primitives,
   onItemError,
   draggable = false,
+  panelSubLayouts,
+  dragKey,
   dragOffset,
-  hasOverride = false,
-  subLayout,
-  draggingSubIndex,
+  draggingSub,
+  overridden = false,
   onItemDragStart,
   onSubDragStart,
   onSubDragMove,
   onSubDragEnd,
   onDragMove,
   onDragEnd,
-}: NotchItemProps) {
-  const itemTheme: NotchTheme = item.theme ?? {};
-  const resolved = useMemo(() => resolveNotchTheme(itemTheme), [
-    itemTheme.type,
-    itemTheme.variant,
-    itemTheme.gradient,
-  ]);
-  const shape = useMemo(() => maskToShape(placement.mask), [placement.mask]);
+}: NotchComponentProps) {
+  // Component bounding box (outer cells) — the wrapper sits here and the
+  // union mask is built relative to it.
+  let minCol = Infinity;
+  let minRow = Infinity;
+  let maxCol = 0;
+  let maxRow = 0;
+  for (const m of members) {
+    minCol = Math.min(minCol, m.col);
+    minRow = Math.min(minRow, m.row);
+    maxCol = Math.max(maxCol, m.col + m.cols);
+    maxRow = Math.max(maxRow, m.row + m.rows);
+  }
+  const compCols = Math.max(1, maxCol - minCol);
+  const compRows = Math.max(1, maxRow - minRow);
 
-  const Primitive = item.ui ? primitives?.[item.ui.type] : undefined;
-  const unknownPrimitive = item.ui != null && !Primitive;
-
-  useEffect(() => {
-    if (unknownPrimitive && onItemError && item.ui) {
-      onItemError(placement.key, {
-        kind: "unknown-primitive",
-        type: item.ui.type,
-      });
+  // Union mask of every member's filled cells, at bbox-relative positions.
+  const unionShape = useMemo(() => {
+    const grid = Array.from({ length: compRows }, () =>
+      new Array<number>(compCols).fill(0),
+    );
+    for (const m of members) {
+      for (let r = 0; r < m.mask.length; r++) {
+        const row = m.mask[r];
+        for (let c = 0; c < row.length; c++) {
+          if (row[c]) grid[m.row - minRow + r][m.col - minCol + c] = 1;
+        }
+      }
     }
-  }, [unknownPrimitive, onItemError, placement.key, item.ui]);
+    return grid;
+  }, [members, compCols, compRows, minCol, minRow]);
 
-  const isDragging = dragOffset !== undefined;
+  // Theme from the lead member — same-group members share their theme.
+  const lead = members[0];
+  const leadItem = lead.item as NotchGridItem;
+  const resolved = useMemo(
+    () => resolveNotchTheme(leadItem.theme ?? {}),
+    [leadItem.theme?.type, leadItem.theme?.variant, leadItem.theme?.gradient],
+  );
+
+  // Report unknown primitives across all members' content.
+  useEffect(() => {
+    if (!onItemError) return;
+    for (const m of members) {
+      const it = m.item as NotchGridItem;
+      if (it.ui && !primitives?.[it.ui.type]) {
+        onItemError(m.key, { kind: "unknown-primitive", type: it.ui.type });
+      }
+    }
+  }, [members, primitives, onItemError]);
+
+  // A lone non-panel tile drags as a whole (chrome + content move together);
+  // panels & multi-member chromes drag per sub-cell / per content tile.
+  const isPlainSingleton =
+    members.length === 1 && !panelSubLayouts.has(lead.key);
+  const isDraggingHere = dragKey != null || draggingSub != null;
+
   const wrapperStyle: CSSProperties = {
     position: "absolute",
-    left: placement.col * block,
-    top: placement.row * block,
+    left: minCol * block,
+    top: minRow * block,
     color: resolved.color,
   };
-  if (isDragging) {
+  if (isPlainSingleton && dragKey === lead.key && dragOffset) {
     wrapperStyle.transform = `translate(${dragOffset[0]}px, ${dragOffset[1]}px)`;
     wrapperStyle.zIndex = 20;
-  } else if (hasOverride) {
+  } else if (overridden) {
     wrapperStyle.zIndex = 10;
   }
-  if (draggable) {
-    wrapperStyle.cursor = isDragging ? "grabbing" : "grab";
+  if (draggable && isPlainSingleton) {
+    wrapperStyle.cursor = dragKey === lead.key ? "grabbing" : "grab";
     wrapperStyle.touchAction = "none";
   }
 
-  const dragHandlers =
-    draggable && onItemDragStart
+  const singletonDrag =
+    draggable && isPlainSingleton && onItemDragStart
       ? {
           onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) =>
-            onItemDragStart(placement, e),
+            onItemDragStart(lead, e),
           onPointerMove: onDragMove,
           onPointerUp: onDragEnd,
           onPointerCancel: onDragEnd,
         }
       : undefined;
 
-  let content: ReactNode = null;
-  if (subLayout) {
-    // Sub-items render as positioned content inside the panel's single chrome
-    // (no nested BlockShape). The cell being dragged out is hidden (its ghost
-    // follows the cursor at the grid level).
-    content = (
-      <div className="relative h-full w-full">
-        {subLayout.placements.map((sp) => {
-          const entry = sp.item as SubEntry;
-          if (draggingSubIndex === entry.index) return null;
-          const sub = entry.sub;
-          const SubPrimitive = sub.ui ? primitives?.[sub.ui.type] : undefined;
-          const subHandlers =
-            draggable && onSubDragStart
-              ? {
-                  onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => {
-                    e.stopPropagation(); // don't start the panel's outer drag
-                    onSubDragStart(placement, entry, sp, e);
-                  },
-                  onPointerMove: onSubDragMove,
-                  onPointerUp: onSubDragEnd,
-                  onPointerCancel: onSubDragEnd,
-                }
-              : undefined;
-          return (
-            <div
-              key={sp.key}
-              {...subHandlers}
-              className={draggable ? "cursor-grab touch-none" : undefined}
-              style={{
-                position: "absolute",
-                left: sp.col * block,
-                top: sp.row * block,
-                width: sp.cols * block,
-                height: sp.rows * block,
-                padding: CONTENT_PAD,
-              }}
-            >
-              {SubPrimitive ? (
-                <SubPrimitive {...sub.ui} />
-              ) : (
-                <UnknownPrimitivePlaceholder type={sub.ui.type} />
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  } else if (Primitive && item.ui) {
-    content = <Primitive {...item.ui} />;
-  } else if (unknownPrimitive && item.ui) {
-    content = <UnknownPrimitivePlaceholder type={item.ui.type} />;
+  // Each member contributes content positioned at its bbox-relative cell.
+  const tiles: ReactNode[] = [];
+  for (const m of members) {
+    const it = m.item as NotchGridItem;
+    const offCol = m.col - minCol;
+    const offRow = m.row - minRow;
+    const subLayout = panelSubLayouts.get(m.key);
+    if (subLayout) {
+      // Panel member — render its sub-cells (each sub-draggable).
+      for (const sp of subLayout.placements) {
+        const entry = sp.item as SubEntry;
+        if (draggingSub?.parentKey === m.key && draggingSub.subIndex === entry.index) {
+          continue; // hidden — its ghost follows the cursor
+        }
+        const sub = entry.sub;
+        const SubPrimitive = sub.ui ? primitives?.[sub.ui.type] : undefined;
+        const subHandlers =
+          draggable && onSubDragStart
+            ? {
+                onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => {
+                  e.stopPropagation();
+                  onSubDragStart(m, entry, sp, e);
+                },
+                onPointerMove: onSubDragMove,
+                onPointerUp: onSubDragEnd,
+                onPointerCancel: onSubDragEnd,
+              }
+            : undefined;
+        tiles.push(
+          <div
+            key={`${m.key}/${entry.index}`}
+            {...subHandlers}
+            className={draggable ? "cursor-grab touch-none" : undefined}
+            style={{
+              position: "absolute",
+              left: (offCol + sp.col) * block,
+              top: (offRow + sp.row) * block,
+              width: sp.cols * block,
+              height: sp.rows * block,
+              padding: CONTENT_PAD,
+            }}
+          >
+            {SubPrimitive ? (
+              <SubPrimitive {...sub.ui} />
+            ) : (
+              <UnknownPrimitivePlaceholder type={sub.ui.type} />
+            )}
+          </div>,
+        );
+      }
+    } else {
+      // Standalone member — render its content. In a multi-member component
+      // it carries its own outer-drag handlers; a plain singleton is dragged
+      // by the wrapper instead (singletonDrag above).
+      const Primitive = it.ui ? primitives?.[it.ui.type] : undefined;
+      const memberHandlers =
+        draggable && !isPlainSingleton && onItemDragStart
+          ? {
+              onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => {
+                e.stopPropagation();
+                onItemDragStart(m, e);
+              },
+              onPointerMove: onDragMove,
+              onPointerUp: onDragEnd,
+              onPointerCancel: onDragEnd,
+            }
+          : undefined;
+      tiles.push(
+        <div
+          key={m.key}
+          {...memberHandlers}
+          className={draggable && !isPlainSingleton ? "cursor-grab touch-none" : undefined}
+          style={{
+            position: "absolute",
+            left: offCol * block,
+            top: offRow * block,
+            width: m.cols * block,
+            height: m.rows * block,
+            padding: CONTENT_PAD,
+          }}
+        >
+          {Primitive && it.ui ? (
+            <Primitive {...it.ui} />
+          ) : it.ui ? (
+            <UnknownPrimitivePlaceholder type={it.ui.type} />
+          ) : null}
+        </div>,
+      );
+    }
   }
 
   return (
     <div
-      {...dragHandlers}
+      {...singletonDrag}
       className={cn(
-        draggable && "select-none",
-        // drop-shadow (a filter) traces the notched SVG outline; plain
-        // box-shadow would be rectangular.
+        draggable && isPlainSingleton && "select-none",
         resolved.elevated && "drop-shadow-lg",
       )}
       style={wrapperStyle}
     >
       <BlockShape
-        shape={shape}
+        shape={unionShape}
         block={block}
         gap={gap}
         fill={resolved.fill}
         stroke={resolved.stroke}
         strokeWidth={resolved.strokeWidth}
-        pad={subLayout ? 0 : CONTENT_PAD}
+        pad={0}
+        noClip={isDraggingHere}
       >
         {resolved.accentBar && (
           <div
@@ -810,7 +921,7 @@ const NotchItem = memo(function NotchItem({
             style={{ background: resolved.accentBar }}
           />
         )}
-        {content}
+        {tiles}
       </BlockShape>
     </div>
   );

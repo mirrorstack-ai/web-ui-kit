@@ -314,13 +314,9 @@ export const Draggable: Story = {
       // eslint-disable-next-line no-console
       console.log("[NotchGrid story] drop:", key, pos);
     },
-    onSubItemMove: (parentKey, subIndex, pos) => {
-      // eslint-disable-next-line no-console
-      console.log("[NotchGrid story] sub reposition:", parentKey, subIndex, pos);
-    },
     onSubItemPromote: (parentKey, subIndex, pos) => {
       // eslint-disable-next-line no-console
-      console.log("[NotchGrid story] sub promote:", parentKey, subIndex, pos);
+      console.log("[NotchGrid story] sub drop:", parentKey, subIndex, pos);
     },
     items: [
       {

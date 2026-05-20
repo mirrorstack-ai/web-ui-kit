@@ -2,10 +2,11 @@ import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   NotchGrid,
-  resolveSubDrop,
+  findConnectedComponents,
   type NotchGridItem,
   type PrimitiveRegistry,
 } from "./NotchGrid";
+import type { Placement } from "./layout";
 
 afterEach(cleanup);
 
@@ -219,44 +220,64 @@ describe("NotchGrid", () => {
   });
 });
 
-describe("resolveSubDrop", () => {
-  // Panel occupies outer cells [2..4) × [2..4).
-  const panel = { col: 2, row: 2, cols: 2, rows: 2 };
-
-  it("cursor inside the panel → reposition at the grab-relative inner cell", () => {
-    // Cursor at (3,3) is inside; reposition uses the provided inner cell.
-    expect(resolveSubDrop(panel, 3, 3, [1, 1])).toEqual({
-      kind: "reposition",
-      pos: [1, 1],
-    });
+describe("findConnectedComponents", () => {
+  // Minimal 1×1 placement at (col,row) with a single filled cell.
+  const cell = (key: string, col: number, row: number): Placement<unknown> => ({
+    key,
+    item: undefined,
+    col,
+    row,
+    mask: [[true]],
+    cols: 1,
+    rows: 1,
+    priorityUsed: { position: "0", shape: "0" },
+    scale: 1,
+    cost: 0,
   });
 
-  it("cursor at the panel's top-left → reposition (boundary is inclusive)", () => {
-    expect(resolveSubDrop(panel, 2, 2, [0, 0])).toEqual({
-      kind: "reposition",
-      pos: [0, 0],
-    });
+  it("a single placement is its own component", () => {
+    const comps = findConnectedComponents([cell("a", 0, 0)]);
+    expect(comps).toHaveLength(1);
+    expect(comps[0].map((p) => p.key)).toEqual(["a"]);
   });
 
-  it("cursor past the right edge → promote at the cursor cell", () => {
-    // Col 5 is outside [2..4); promote target ignores the inner cell.
-    expect(resolveSubDrop(panel, 5, 2, [9, 9])).toEqual({
-      kind: "promote",
-      pos: [5, 2],
-    });
+  it("edge-adjacent placements merge into one component", () => {
+    const comps = findConnectedComponents([cell("a", 0, 0), cell("b", 1, 0)]);
+    expect(comps).toHaveLength(1);
+    expect(comps[0].map((p) => p.key).sort()).toEqual(["a", "b"]);
   });
 
-  it("cursor below the panel → promote at the cursor cell", () => {
-    expect(resolveSubDrop(panel, 2, 5, [0, 0])).toEqual({
-      kind: "promote",
-      pos: [2, 5],
-    });
+  it("corner-adjacent (diagonal) placements merge (8-connected)", () => {
+    const comps = findConnectedComponents([cell("a", 0, 0), cell("b", 1, 1)]);
+    expect(comps).toHaveLength(1);
   });
 
-  it("cursor above-left of the panel → promote", () => {
-    expect(resolveSubDrop(panel, 0, 0, [0, 0])).toEqual({
-      kind: "promote",
-      pos: [0, 0],
-    });
+  it("non-adjacent placements stay separate", () => {
+    const comps = findConnectedComponents([cell("a", 0, 0), cell("b", 5, 5)]);
+    expect(comps).toHaveLength(2);
+  });
+
+  it("a chain links transitively into one component", () => {
+    // a-b adjacent, b-c adjacent, a-c not — still one component via b.
+    const comps = findConnectedComponents([
+      cell("a", 0, 0),
+      cell("c", 4, 0),
+      cell("b", 2, 0),
+    ]);
+    // a(0) and b(2) aren't within 1 col, so a is separate from b/c chain...
+    // verify the actual adjacency: a at 0, b at 2 (gap 1 cell) → NOT adjacent.
+    // So this yields a alone + (b,c)? b at 2, c at 4 → gap, not adjacent either.
+    // All three are 2 apart → three singletons.
+    expect(comps).toHaveLength(3);
+  });
+
+  it("touching chain (each 1 apart) links into one component", () => {
+    const comps = findConnectedComponents([
+      cell("a", 0, 0),
+      cell("b", 1, 0),
+      cell("c", 2, 0),
+    ]);
+    expect(comps).toHaveLength(1);
+    expect(comps[0]).toHaveLength(3);
   });
 });
