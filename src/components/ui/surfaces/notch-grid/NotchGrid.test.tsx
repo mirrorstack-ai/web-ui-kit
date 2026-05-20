@@ -235,6 +235,9 @@ describe("NotchGrid", () => {
       <NotchGrid items={items} primitives={primitives} cols={4} blockMin={100} draggable onSubItemPromote={onSubItemPromote} />,
     );
     // The "calls" sub-cell wrapper (its leaf's parent).
+    const cronCellBefore = getAllByTestId("leaf").find((l) => l.textContent === "cron")!
+      .parentElement as HTMLElement;
+    const cronLeftBefore = cronCellBefore.style.left;
     const callsLeaf = getAllByTestId("leaf").find((l) => l.textContent === "calls")!;
     const callsCell = callsLeaf.parentElement as HTMLElement;
     // Grab calls (~150,50 = its cell at outer col 1) and drop at col 3 (~350).
@@ -247,6 +250,11 @@ describe("NotchGrid", () => {
     expect(onSubItemPromote).toHaveBeenCalledTimes(1);
     // Dropped at clientX 350 / block 100 → col 3, row 0.
     expect(onSubItemPromote).toHaveBeenCalledWith("panel", 1, [3, 0]);
+
+    // Cron must NOT move — only Calls relocates.
+    const cronCellAfter = getAllByTestId("leaf").find((l) => l.textContent === "cron")!
+      .parentElement as HTMLElement;
+    expect(cronCellAfter.style.left).toBe(cronLeftBefore);
   });
 
   it("draggable: sub-cells become grab targets inside a panel", () => {
