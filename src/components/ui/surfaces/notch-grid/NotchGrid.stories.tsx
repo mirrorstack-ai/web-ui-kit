@@ -296,14 +296,14 @@ export const CustomShapes: Story = {
 };
 
 /** Outer-grid drag over the same rich notched footprints as `CustomShapes`:
- *  grab any top-level tile (incl. L-hero, plus, chart, diagonal, and the
- *  sub-item panel) and drop it on another cell — it pins to the new spot and
- *  everything else re-flows around it. `onItemMove` reports the new
- *  `[col, row]`.
+ *  grab any top-level tile (L-hero, plus, chart, diagonal, panel) and drop it
+ *  on another cell — it pins and everything else re-flows. `onItemMove`
+ *  reports the new `[col, row]`.
  *
- *  NOTE: dragging a *sub-item* out of the panel (promote-to-outer) and
- *  dragging the panel chrome itself are the next slice (re-targeted from
- *  closed PRs #193 / #194) — not wired in this story yet. */
+ *  Sub-items in the panel are draggable too: drag a sub-cell within the panel
+ *  to reposition it, or drag it *out* past the panel to promote it to a
+ *  standalone top-level tile (`onSubItemMove` / `onSubItemPromote`). Dragging
+ *  the whole panel chrome by its gaps + adjacency auto-link land in PR 6. */
 export const Draggable: Story = {
   args: {
     primitives,
@@ -313,6 +313,10 @@ export const Draggable: Story = {
     onItemMove: (key, pos) => {
       // eslint-disable-next-line no-console
       console.log("[NotchGrid story] drop:", key, pos);
+    },
+    onSubItemPromote: (parentKey, subIndex, pos) => {
+      // eslint-disable-next-line no-console
+      console.log("[NotchGrid story] sub drop:", parentKey, subIndex, pos);
     },
     items: [
       {
@@ -340,8 +344,9 @@ export const Draggable: Story = {
         ui: { type: "Label", label: "Diagonal", value: "junction" },
       },
       {
+        // 3×2 panel — drag its sub-cells around, or out to promote them.
         key: "panel",
-        desire: { position: [3, 3], shape: r(2, 2) },
+        desire: { position: [3, 3], shape: r(3, 2) },
         theme: { type: "filled", variant: "primary" },
         subItems: [
           {
@@ -349,8 +354,12 @@ export const Draggable: Story = {
             ui: { type: "Label", label: "Cron", value: "8/d" },
           },
           {
-            desire: { position: [1, 1], shape: r(1, 1) },
+            desire: { position: [1, 0], shape: r(1, 1) },
             ui: { type: "Label", label: "Calls", value: "1.2k" },
+          },
+          {
+            desire: { position: [2, 1], shape: r(1, 1) },
+            ui: { type: "Label", label: "Errs", value: "3" },
           },
         ],
       },
