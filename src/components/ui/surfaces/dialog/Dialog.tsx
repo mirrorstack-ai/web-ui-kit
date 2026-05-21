@@ -33,16 +33,27 @@ export interface DialogProps {
 
 let scrollLockCount = 0;
 
+// Reserve the scrollbar gutter as right-padding while scroll is
+// locked, otherwise the page reflows by the gutter width (≈15px on
+// macOS Safari/Chrome) the moment overflow flips to hidden and the
+// scrollbar disappears. Pages that already opt into
+// `scrollbar-gutter: stable` at the html level will see gutter === 0
+// and skip the padding adjustment.
 function lockScroll() {
   if (typeof document === "undefined") return;
   scrollLockCount++;
-  if (scrollLockCount === 1) document.body.style.overflow = "hidden";
+  if (scrollLockCount !== 1) return;
+  const gutter = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.overflow = "hidden";
+  if (gutter > 0) document.body.style.paddingRight = `${gutter}px`;
 }
 
 function unlockScroll() {
   if (typeof document === "undefined") return;
   scrollLockCount = Math.max(0, scrollLockCount - 1);
-  if (scrollLockCount === 0) document.body.style.overflow = "";
+  if (scrollLockCount !== 0) return;
+  document.body.style.overflow = "";
+  document.body.style.paddingRight = "";
 }
 
 export function Dialog({
