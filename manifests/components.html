@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7970,7 +7970,7 @@ width: number</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NotchGrid</h2>
       <div class="badges">
-        <label for="c-42-ui-notch-notchgrid-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-42-ui-notch-notchgrid-props" class="badge ok as-toggle">12 prop types</label>
         <label for="c-42-ui-notch-notchgrid-info" class="badge info as-toggle">1 info</label>
         <label for="c-42-ui-notch-notchgrid-stories" class="badge ok as-toggle">7 stories</label>
         
@@ -8004,7 +8004,7 @@ width: number</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">11 prop types</span>
+              <span class="badge ok">12 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/notch-grid/NotchGrid.tsx::NotchGrid</code></pre>
             <pre><code>Props:</code></pre>
@@ -8023,8 +8023,7 @@ className?: string
 cols?: number | &quot;auto&quot; = &quot;auto&quot;
 
 /**
- * Enable outer-grid drag-to-place. Dropped items pin to their new cell
- *  (winning the cell on next solve); everything else re-flows around them.
+ * Enable outer-grid drag-to-place AND sub-item drag + promote.
  */
 draggable?: boolean = false
 
@@ -8043,9 +8042,15 @@ nest?: boolean = true
 onItemError?: (key: ItemKey, error: NotchGridError) =&gt; void
 
 /**
- * Called after a drag drops an item, with its new block position.
+ * Called after an outer tile drops, with its new block position.
  */
 onItemMove?: (key: ItemKey, pos: Pos) =&gt; void
+
+/**
+ * Called after a sub-item is dragged to a new cell (it becomes a top-level
+ *  group member; auto-link re-unions it with adjacent same-group tiles).
+ */
+onSubItemPromote?: (parentKey: ItemKey, subIndex: number, pos: Pos) =&gt; void
 
 /**
  * Map from `ui.type` → React component. Receives the full `ui` object as
@@ -8332,7 +8337,7 @@ style?: CSSProperties</code></pre>
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Outer-grid drag over the same rich notched footprints as `CustomShapes`: grab any top-level tile (incl. L-hero, plus, chart, diagonal, and the sub-item panel) and drop it on another cell — it pins to the new spot and everything else re-flows around it. `onItemMove` reports the new `[col, row]`. NOTE: dragging a *sub-item* out of the panel (promote-to-outer) and dragging the panel chrome itself are the next slice (re-targeted from closed PRs #193 / #194) — not wired in this story yet.</div>
+              <div class="hint">Outer-grid drag over the same rich notched footprints as `CustomShapes`: grab any top-level tile (L-hero, plus, chart, diagonal, panel) and drop it on another cell — it pins and everything else re-flows. `onItemMove` reports the new `[col, row]`. Sub-items in the panel are draggable too: drag a sub-cell within the panel to reposition it, or drag it *out* past the panel to promote it to a standalone top-level tile (`onSubItemMove` / `onSubItemPromote`). Dragging the whole panel chrome by its gaps + adjacency auto-link land in PR 6.</div>
               <pre><code>const Draggable = () =&gt; &lt;NotchGrid
     primitives={primitives}
     cols={8}
@@ -8341,6 +8346,10 @@ style?: CSSProperties</code></pre>
     onItemMove={(key, pos) =&gt; {
       // eslint-disable-next-line no-console
       console.log(&quot;[NotchGrid story] drop:&quot;, key, pos);
+    }}
+    onSubItemPromote={(parentKey, subIndex, pos) =&gt; {
+      // eslint-disable-next-line no-console
+      console.log(&quot;[NotchGrid story] sub drop:&quot;, parentKey, subIndex, pos);
     }}
     items={[
       {
@@ -8368,8 +8377,9 @@ style?: CSSProperties</code></pre>
         ui: { type: &quot;Label&quot;, label: &quot;Diagonal&quot;, value: &quot;junction&quot; },
       },
       {
+        // 3×2 panel — drag its sub-cells around, or out to promote them.
         key: &quot;panel&quot;,
-        desire: { position: [3, 3], shape: r(2, 2) },
+        desire: { position: [3, 3], shape: r(3, 2) },
         theme: { type: &quot;filled&quot;, variant: &quot;primary&quot; },
         subItems: [
           {
@@ -8377,8 +8387,12 @@ style?: CSSProperties</code></pre>
             ui: { type: &quot;Label&quot;, label: &quot;Cron&quot;, value: &quot;8/d&quot; },
           },
           {
-            desire: { position: [1, 1], shape: r(1, 1) },
+            desire: { position: [1, 0], shape: r(1, 1) },
             ui: { type: &quot;Label&quot;, label: &quot;Calls&quot;, value: &quot;1.2k&quot; },
+          },
+          {
+            desire: { position: [2, 1], shape: r(1, 1) },
+            ui: { type: &quot;Label&quot;, label: &quot;Errs&quot;, value: &quot;3&quot; },
           },
         ],
       },
