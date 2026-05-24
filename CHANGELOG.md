@@ -3,6 +3,29 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.3.5
+
+### Components
+
+- **NotchGrid** — now publicly exported (the v2 component landed in the
+  tarball at 0.3.4 but was not re-exported, so it was not importable). A
+  desire-driven notched layout for the dynamic-ui wire format: items
+  declare position/shape priorities, the solver packs them, and each
+  placement renders as a themed `BlockShape`. Supports the gain-1-col /
+  `1fr` auto-sizing rule (`cols="auto"` + `blockMin`), outer drag-to-place,
+  and sub-item drag + promote-to-top-level. Exports `NotchGrid` plus its
+  public types (`NotchGridProps`, `NotchGridItem`, `NotchSubItem`,
+  `NotchGridUI`, `PrimitiveRegistry`) and the desire/theme model types
+  (`Desire`, `Pos`, `Mask`, `Priority`, `NotchTheme`). Design doc:
+  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs/tree/main/architecture/notch-grid-v2).
+
+## 0.3.4
+
+### Components
+
+- **Dialog** — compensate for scrollbar-gutter when locking body scroll,
+  so opening a dialog no longer shifts the page content under it.
+
 ## 0.3.3
 
 ### Components

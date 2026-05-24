@@ -239,6 +239,27 @@ export {
   type NotchSide,
 } from "./components/ui/surfaces/notch/Notch";
 export {
+  NotchGrid,
+  type NotchGridProps,
+  type NotchGridItem,
+  type NotchSubItem,
+  type NotchGridUI,
+  type NotchGridError,
+  type PrimitiveRegistry,
+  type ItemKey,
+} from "./components/ui/surfaces/notch-grid/NotchGrid";
+export {
+  type Desire,
+  type Pos,
+  type Mask,
+  type Priority,
+} from "./components/ui/surfaces/notch-grid/layout";
+export {
+  type NotchTheme,
+  type ThemeType,
+  type ThemeVariant,
+} from "./components/ui/surfaces/notch-grid/theme";
+export {
   AgentSidebarHeader,
   type AgentSidebarHeaderProps,
   AgentSidebarInput,
