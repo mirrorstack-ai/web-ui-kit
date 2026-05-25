@@ -60,6 +60,8 @@ export function Button({
   children,
   className,
   disabled,
+  // Default to "button" — prevents implicit submit inside <form>.
+  type = "button",
   ...props
 }: ButtonProps) {
   if (isDev) {
@@ -80,6 +82,7 @@ export function Button({
         fullWidth && "w-full",
         className,
       )}
+      type={type}
       disabled={disabled || loading}
       {...props}
     >

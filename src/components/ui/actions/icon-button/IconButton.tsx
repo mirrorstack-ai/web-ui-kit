@@ -44,6 +44,8 @@ export function IconButton({
   tooltip,
   className,
   disabled,
+  // Default to "button" — prevents implicit submit inside <form>.
+  type = "button",
   "aria-label": ariaLabel,
   ...props
 }: IconButtonProps) {
@@ -59,6 +61,7 @@ export function IconButton({
         sizeStyles[size],
         className,
       )}
+      type={type}
       disabled={disabled || loading}
       aria-label={ariaLabel}
       title={tooltip ?? ariaLabel}
