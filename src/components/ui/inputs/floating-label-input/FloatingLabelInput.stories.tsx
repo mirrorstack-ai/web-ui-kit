@@ -220,12 +220,11 @@ export const LeadingIconHiddenLabel: Story = {
     const [query, setQuery] = useState("");
     return (
       <FloatingLabelInput
-        label="Search"
+        label="Search users…"
         id="leading-search-hl"
         size="sm"
         hideLabel
         leadingIcon="search"
-        placeholder="Search users…"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="max-w-sm"
