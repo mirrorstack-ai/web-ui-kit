@@ -181,9 +181,9 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
   const leadingIconSize = isXs ? 18 : isSmall ? 20 : 22;
   const leadingIconWrap = leadingIcon
     ? cn(
-        "inline-flex items-center shrink-0 pointer-events-none pr-2",
+        "inline-flex items-center shrink-0 pointer-events-none",
         inverse ? "text-inverse-on-surface/55" : "text-on-surface-variant",
-        isXs ? "pl-2" : isSmall ? "pl-3" : "pl-4",
+        isXs ? "pl-2 pr-2" : isSmall ? "pl-3 pr-2" : "pl-4 pr-3",
       )
     : "";
 
