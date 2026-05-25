@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/65 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">65/65 infos</a><span class="filter-pill ok" aria-disabled="true">247 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/65 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">65/65 infos</a><span class="filter-pill ok" aria-disabled="true">252 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4504,7 +4504,7 @@ title: string</code></pre>
       <div class="badges">
         
         <label for="c-20-ui-inputs-floatinglabelinput-info" class="badge info as-toggle">1 info</label>
-        <label for="c-20-ui-inputs-floatinglabelinput-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-20-ui-inputs-floatinglabelinput-stories" class="badge ok as-toggle">14 stories</label>
         
       </div>
     </div>
@@ -4726,6 +4726,129 @@ title: string</code></pre>
     &lt;/div&gt;
   );
 };</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Leading Icon</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LeadingIcon = () =&gt; {
+  const [query, setQuery] = useState(&quot;&quot;);
+  return (
+    &lt;FloatingLabelInput
+      label=&quot;Search users&quot;
+      id=&quot;search-users&quot;
+      leadingIcon=&quot;search&quot;
+      value={query}
+      onChange={(e) =&gt; setQuery(e.target.value)}
+      className=&quot;max-w-sm&quot;
+    /&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Leading Icon With Value</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LeadingIconWithValue = () =&gt; {
+  const [email, setEmail] = useState(&quot;ada@mirrorstack.ai&quot;);
+  return (
+    &lt;FloatingLabelInput
+      label=&quot;Email&quot;
+      id=&quot;leading-email-filled&quot;
+      leadingIcon=&quot;mail&quot;
+      value={email}
+      onChange={(e) =&gt; setEmail(e.target.value)}
+      className=&quot;max-w-sm&quot;
+    /&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Leading Icon All Sizes</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LeadingIconAllSizes = () =&gt; {
+  const [xs, setXs] = useState(&quot;&quot;);
+  const [sm, setSm] = useState(&quot;&quot;);
+  const [md, setMd] = useState(&quot;&quot;);
+  return (
+    &lt;div className=&quot;space-y-3 max-w-sm&quot;&gt;
+      &lt;FloatingLabelInput
+        label=&quot;Compact&quot;
+        id=&quot;leading-xs&quot;
+        size=&quot;xs&quot;
+        leadingIcon=&quot;search&quot;
+        value={xs}
+        onChange={(e) =&gt; setXs(e.target.value)}
+      /&gt;
+      &lt;FloatingLabelInput
+        label=&quot;Inline&quot;
+        id=&quot;leading-sm&quot;
+        size=&quot;sm&quot;
+        leadingIcon=&quot;search&quot;
+        value={sm}
+        onChange={(e) =&gt; setSm(e.target.value)}
+      /&gt;
+      &lt;FloatingLabelInput
+        label=&quot;Default&quot;
+        id=&quot;leading-md&quot;
+        leadingIcon=&quot;search&quot;
+        value={md}
+        onChange={(e) =&gt; setMd(e.target.value)}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Leading Icon Hidden Label</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LeadingIconHiddenLabel = () =&gt; {
+  const [query, setQuery] = useState(&quot;&quot;);
+  return (
+    &lt;FloatingLabelInput
+      label=&quot;Search&quot;
+      id=&quot;leading-search-hl&quot;
+      size=&quot;sm&quot;
+      hideLabel
+      leadingIcon=&quot;search&quot;
+      placeholder=&quot;Search users…&quot;
+      value={query}
+      onChange={(e) =&gt; setQuery(e.target.value)}
+      className=&quot;max-w-sm&quot;
+    /&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Leading Icon Error</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LeadingIconError = () =&gt; &lt;FloatingLabelInput
+    label=&quot;Email&quot;
+    id=&quot;leading-email-error&quot;
+    size=&quot;md&quot;
+    hideLabel={false}
+    leadingIcon=&quot;mail&quot;
+    error
+    helperText=&quot;Please enter a valid email address&quot;
+    value=&quot;invalid&quot; /&gt;;</code></pre>
             </div>
         </div>
     
