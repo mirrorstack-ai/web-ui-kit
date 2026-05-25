@@ -6,11 +6,12 @@ import {
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
+import { Icon } from "@/components/ui/media/icon/Icon";
 
 export const meta: ComponentMeta = {
   name: "FloatingLabelInput",
   description:
-    "Text input or textarea with floating label animation, password toggle, and character counter.",
+    "Text input or textarea with floating label animation, password toggle, character counter, and optional leading icon.",
 };
 
 export type FloatingLabelInputSize = "xs" | "sm" | "md";
@@ -26,6 +27,8 @@ type BaseProps = {
   /** Use inverse-themed tokens (for placement on inverse surfaces such as
    *  the agent sidebar where the surrounding bg is `on-background`). */
   inverse?: boolean;
+  /** Material Symbols icon name shown inside the field on the left. Not valid in multiline mode. */
+  leadingIcon?: string;
 };
 
 type InputModeProps = BaseProps &
@@ -42,6 +45,7 @@ type TextareaModeProps = BaseProps &
     showPasswordToggle?: never;
     rows?: number;
     maxLength?: number;
+    leadingIcon?: never;
   };
 
 export type FloatingLabelInputProps = InputModeProps | TextareaModeProps;
@@ -58,6 +62,7 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     size = "md",
     hideLabel = false,
     inverse = false,
+    leadingIcon,
     multiline,
     maxLength,
   } = props;
@@ -118,7 +123,10 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
       : inverse
         ? "focus:text-inverse-on-surface"
         : "focus:text-primary",
-    isXs ? "px-2 text-sm" : isSmall ? "px-3 text-sm" : "px-4",
+    // Left/right horizontal padding. Left collapses to 0 when leadingIcon
+    // is present — the icon span owns the leading edge.
+    isXs ? "pr-2 text-sm" : isSmall ? "pr-3 text-sm" : "pr-4",
+    leadingIcon ? "pl-0" : isXs ? "pl-2" : isSmall ? "pl-3" : "pl-4",
     multiline
       ? showCounter
         ? "pt-3 pb-6 resize-none"
@@ -140,15 +148,24 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     disabled && "opacity-50 cursor-not-allowed",
   );
 
+  // Label rest-position left offset. When leadingIcon is present the
+  // label sits inside the field area to the right of the icon; when
+  // focused/filled the existing peer-focus / peer-not-placeholder-shown
+  // classes lift it to the original top-of-border position regardless
+  // of icon, so we only override the rest-state left.
+  const baseLabelRestLeft = isXs ? "left-2" : isSmall ? "left-3" : "left-4";
+  const iconLabelRestLeft = isXs ? "left-9" : isSmall ? "left-10" : "left-12";
+
   const labelClassName = cn(
     "absolute z-10 font-normal px-1 rounded-md transition-all duration-200 ease-in-out",
     "origin-top-left pointer-events-none",
     inverse ? "bg-inverse-surface" : "bg-surface-container-low",
+    leadingIcon ? iconLabelRestLeft : baseLabelRestLeft,
     isXs
-      ? "text-sm left-2 top-1.5 peer-focus:scale-90 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2 peer-[:not(:placeholder-shown)]:scale-90 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2"
+      ? "text-sm top-1.5 peer-focus:scale-90 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2 peer-[:not(:placeholder-shown)]:scale-90 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2"
       : isSmall
-        ? "text-sm left-3 top-2.5 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2.5 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2.5"
-        : "text-base left-4 top-4 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-3 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-3",
+        ? "text-sm top-2.5 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-2.5 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-2.5"
+        : "text-base top-4 peer-focus:scale-75 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:left-3 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:left-3",
     error
       ? "text-error peer-focus:text-error"
       : inverse
@@ -156,9 +173,28 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
         : "text-on-surface-variant peer-focus:text-primary",
   );
 
+  // Only compute when there's an icon to render. inline-flex +
+  // items-center guarantees the glyph centers vertically inside the
+  // (variable-height-per-size) field — the parent border div's
+  // items-center isn't enough because the span is otherwise inline,
+  // and Material Symbols glyphs carry their own line-height.
+  const leadingIconSize = isXs ? 18 : isSmall ? 20 : 22;
+  const leadingIconWrap = leadingIcon
+    ? cn(
+        "inline-flex items-center shrink-0 pointer-events-none",
+        inverse ? "text-inverse-on-surface/55" : "text-on-surface-variant",
+        isXs ? "pl-2 pr-2" : isSmall ? "pl-3 pr-2" : "pl-4 pr-3",
+      )
+    : "";
+
   return (
     <div className={cn("relative", containerClassName)}>
       <div className={borderClassName}>
+        {leadingIcon && !multiline && (
+          <span className={leadingIconWrap} aria-hidden>
+            <Icon name={leadingIcon} size={leadingIconSize} />
+          </span>
+        )}
         {multiline ? (
           <textarea
             id={id}

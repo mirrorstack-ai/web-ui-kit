@@ -75,73 +75,50 @@ export const Multiline: Story = {
   },
 };
 
-export const Disabled: Story = {
-  args: {
-    label: "Read only",
-    id: "disabled",
-    disabled: true,
-    value: "Cannot edit this",
-  },
-};
-
-export const WithHelperText: Story = {
-  args: {
-    label: "Username",
-    id: "username",
-    helperText: "3-20 characters, letters and numbers only",
-  },
-};
-
 export const Small: Story = {
   render: () => {
     const [title, setTitle] = useState("");
-    const [url, setUrl] = useState("");
     return (
-      <div className="space-y-2 max-w-md">
-        <FloatingLabelInput
-          label="Title"
-          id="link-title"
-          size="sm"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <FloatingLabelInput
-          label="URL"
-          id="link-url"
-          size="sm"
-          type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-        />
-      </div>
+      <FloatingLabelInput
+        label="Title"
+        id="link-title"
+        size="sm"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
     );
   },
 };
 
-export const SmallHiddenLabel: Story = {
+export const LeadingIcon: Story = {
   render: () => {
-    const [title, setTitle] = useState("");
-    const [url, setUrl] = useState("");
+    const [search, setSearch] = useState("");
+    const [searchSm, setSearchSm] = useState("");
+    const [email, setEmail] = useState("ada@mirrorstack.ai");
     return (
-      <div className="flex gap-2 max-w-md">
+      <div className="space-y-3 max-w-sm">
         <FloatingLabelInput
-          label="Title"
-          id="link-title-hl"
-          size="sm"
-          hideLabel
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-1/3"
+          label="Search users"
+          id="leading-search-md"
+          leadingIcon="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
         <FloatingLabelInput
-          label="URL"
-          id="link-url-hl"
+          label="Search"
+          id="leading-search-sm-hl"
           size="sm"
           hideLabel
-          type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          className="flex-1"
+          leadingIcon="search"
+          value={searchSm}
+          onChange={(e) => setSearchSm(e.target.value)}
+        />
+        <FloatingLabelInput
+          label="Email"
+          id="leading-email"
+          leadingIcon="mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
       </div>
     );
