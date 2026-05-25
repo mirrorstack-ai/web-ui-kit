@@ -173,12 +173,15 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
         : "text-on-surface-variant peer-focus:text-primary",
   );
 
-  // Only compute when there's an icon to render — most inputs don't
-  // have one, so the cn() call would be wasted work on hot paths.
+  // Only compute when there's an icon to render. inline-flex +
+  // items-center guarantees the glyph centers vertically inside the
+  // (variable-height-per-size) field — the parent border div's
+  // items-center isn't enough because the span is otherwise inline,
+  // and Material Symbols glyphs carry their own line-height.
   const leadingIconSize = isXs ? 18 : isSmall ? 20 : 22;
   const leadingIconWrap = leadingIcon
     ? cn(
-        "shrink-0 pointer-events-none",
+        "inline-flex items-center shrink-0 pointer-events-none",
         inverse ? "text-inverse-on-surface/55" : "text-on-surface-variant",
         isXs ? "pl-2" : isSmall ? "pl-3" : "pl-4",
       )
