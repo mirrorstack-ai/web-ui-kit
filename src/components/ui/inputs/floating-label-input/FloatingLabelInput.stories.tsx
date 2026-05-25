@@ -147,3 +147,100 @@ export const SmallHiddenLabel: Story = {
     );
   },
 };
+
+export const LeadingIcon: Story = {
+  render: () => {
+    const [query, setQuery] = useState("");
+    return (
+      <FloatingLabelInput
+        label="Search users"
+        id="search-users"
+        leadingIcon="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="max-w-sm"
+      />
+    );
+  },
+};
+
+export const LeadingIconWithValue: Story = {
+  render: () => {
+    const [email, setEmail] = useState("ada@mirrorstack.ai");
+    return (
+      <FloatingLabelInput
+        label="Email"
+        id="leading-email-filled"
+        leadingIcon="mail"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="max-w-sm"
+      />
+    );
+  },
+};
+
+export const LeadingIconAllSizes: Story = {
+  render: () => {
+    const [xs, setXs] = useState("");
+    const [sm, setSm] = useState("");
+    const [md, setMd] = useState("");
+    return (
+      <div className="space-y-3 max-w-sm">
+        <FloatingLabelInput
+          label="Compact"
+          id="leading-xs"
+          size="xs"
+          leadingIcon="search"
+          value={xs}
+          onChange={(e) => setXs(e.target.value)}
+        />
+        <FloatingLabelInput
+          label="Inline"
+          id="leading-sm"
+          size="sm"
+          leadingIcon="search"
+          value={sm}
+          onChange={(e) => setSm(e.target.value)}
+        />
+        <FloatingLabelInput
+          label="Default"
+          id="leading-md"
+          leadingIcon="search"
+          value={md}
+          onChange={(e) => setMd(e.target.value)}
+        />
+      </div>
+    );
+  },
+};
+
+export const LeadingIconHiddenLabel: Story = {
+  render: () => {
+    const [query, setQuery] = useState("");
+    return (
+      <FloatingLabelInput
+        label="Search"
+        id="leading-search-hl"
+        size="sm"
+        hideLabel
+        leadingIcon="search"
+        placeholder="Search users…"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="max-w-sm"
+      />
+    );
+  },
+};
+
+export const LeadingIconError: Story = {
+  args: {
+    label: "Email",
+    id: "leading-email-error",
+    leadingIcon: "mail",
+    error: true,
+    helperText: "Please enter a valid email address",
+    value: "invalid",
+  },
+};
