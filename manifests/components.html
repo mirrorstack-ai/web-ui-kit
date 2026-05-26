@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -5301,7 +5301,7 @@ sideWidth?: number = 260</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> GraphSideContent</h2>
       <div class="badges">
-        <label for="c-24-ui-graph-graphside-graphsidecontent-props" class="badge ok as-toggle">3 prop types</label>
+        <label for="c-24-ui-graph-graphside-graphsidecontent-props" class="badge ok as-toggle">4 prop types</label>
         <label for="c-24-ui-graph-graphside-graphsidecontent-info" class="badge info as-toggle">1 info</label>
         <label for="c-24-ui-graph-graphside-graphsidecontent-stories" class="badge ok as-toggle">1 story</label>
         
@@ -5335,7 +5335,7 @@ sideWidth?: number = 260</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">3 prop types</span>
+              <span class="badge ok">4 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/graph/graph-side/GraphSideContent.tsx::GraphSideContent</code></pre>
             <pre><code>Props:</code></pre>
@@ -5348,7 +5348,18 @@ items: GraphSideContentItem[]
  *       chevron, not toggleable). Use for a search input or other always-on
  *       controls.
  */
-prepend?: ReactNode</code></pre>
+prepend?: ReactNode
+
+/**
+ * Class for the wrapper around `prepend`. Defaults to
+ *       `&quot;px-1 pt-1.5 pb-1&quot;` (a tight inset that matches the items&#39;
+ *       header padding). Pass an empty string when the consumer wants
+ *       the prepend to bleed edge-to-edge (e.g. a primary action button
+ *       that should share the same width as the divider below it), or
+ *       pass any other class to override entirely. The prepend slot
+ *       itself is omitted when `prepend` is nullish, regardless.
+ */
+prependClassName?: string</code></pre>
           </div>
         </div>
     
