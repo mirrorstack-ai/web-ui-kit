@@ -24,10 +24,20 @@ export interface GraphSideContentProps {
       chevron, not toggleable). Use for a search input or other always-on
       controls. */
   prepend?: ReactNode;
+  /** Class for the wrapper around `prepend`. Defaults to
+      `"px-1 pt-1.5 pb-1"` (a tight inset that matches the items'
+      header padding). Pass an empty string when the consumer wants
+      the prepend to bleed edge-to-edge (e.g. a primary action button
+      that should share the same width as the divider below it), or
+      pass any other class to override entirely. The prepend slot
+      itself is omitted when `prepend` is nullish, regardless. */
+  prependClassName?: string;
   className?: string;
 }
 
-export function GraphSideContent({ items, prepend, className }: GraphSideContentProps) {
+const DEFAULT_PREPEND_CLS = "px-1 pt-1.5 pb-1";
+
+export function GraphSideContent({ items, prepend, prependClassName, className }: GraphSideContentProps) {
   const [openIds, setOpenIds] = useState<Set<string>>(
     () => new Set(items.map((i) => i.id)),
   );
@@ -49,7 +59,9 @@ export function GraphSideContent({ items, prepend, className }: GraphSideContent
         className,
       )}
     >
-      {prepend && <div className="px-1 pt-1.5 pb-1">{prepend}</div>}
+      {prepend && (
+        <div className={prependClassName ?? DEFAULT_PREPEND_CLS}>{prepend}</div>
+      )}
       {items.map((item) => {
         const isOpen = openIds.has(item.id);
         return (
