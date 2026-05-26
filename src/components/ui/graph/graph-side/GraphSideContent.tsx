@@ -60,7 +60,9 @@ export function GraphSideContent({ items, prepend, prependClassName, className }
       )}
     >
       {prepend && (
-        <div className={prependClassName ?? DEFAULT_PREPEND_CLS}>{prepend}</div>
+        <div className={cn(prependClassName ?? DEFAULT_PREPEND_CLS)}>
+          {prepend}
+        </div>
       )}
       {items.map((item) => {
         const isOpen = openIds.has(item.id);
