@@ -66,6 +66,11 @@ export interface GraphSideProps<T extends GraphSideNode = GraphSideNode> {
   /** Panel width — number for pixels, string for any CSS value. Default 260. */
   width?: number | string;
   className?: string;
+  /** Class passed straight to the auto-rendered GraphSideHeader.
+      Useful for theming the header per node — e.g. swapping the
+      surface to a success / warning / error tint while the details
+      body keeps its default styling. */
+  headerClassName?: string;
 }
 
 export function GraphSide<T extends GraphSideNode = GraphSideNode>({
@@ -75,6 +80,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
   renderDetails,
   width = 260,
   className,
+  headerClassName,
 }: GraphSideProps<T>) {
   // Remember the last non-null node so the close animation keeps showing
   // its label/tags while sliding out, instead of snapping to an empty header.
@@ -93,7 +99,7 @@ export function GraphSide<T extends GraphSideNode = GraphSideNode>({
       style={{ width }}
       aria-hidden={!isOpen}
     >
-      <GraphSideHeader node={display} onClose={onClose} />
+      <GraphSideHeader node={display} onClose={onClose} className={headerClassName} />
       <div className="flex-1 min-h-0 overflow-hidden">
         {isOpen && display ? renderDetails(display) : null}
       </div>
