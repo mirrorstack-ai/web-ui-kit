@@ -50,11 +50,9 @@ function normalize(raw: string | null | undefined): Theme {
 
 export interface ThemeProviderProps {
   children: ReactNode;
-  /** API base URL for fetching user theme preference. If omitted, no API sync. */
-  apiBaseUrl?: string;
 }
 
-export function ThemeProvider({ children, apiBaseUrl }: ThemeProviderProps) {
+export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>("auto");
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
@@ -75,26 +73,7 @@ export function ThemeProvider({ children, apiBaseUrl }: ThemeProviderProps) {
     const resolved = resolve(stored);
     setResolvedTheme(resolved);
     applyClass(resolved);
-
-    if (!apiBaseUrl) return;
-
-    fetch(`${apiBaseUrl}/v1/auth/me?detail=true`, { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!data?.theme) return;
-        const apiTheme = normalize(data.theme);
-        const localTheme = normalize(localStorage.getItem(STORAGE_KEY));
-        if (apiTheme !== localTheme) {
-          localStorage.setItem(STORAGE_KEY, apiTheme);
-          setCookie(apiTheme);
-          setThemeState(apiTheme);
-          const r = resolve(apiTheme);
-          setResolvedTheme(r);
-          applyClass(r);
-        }
-      })
-      .catch(() => {});
-  }, [apiBaseUrl]);
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");

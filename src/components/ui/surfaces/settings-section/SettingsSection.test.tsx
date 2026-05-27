@@ -15,14 +15,14 @@ describe("SettingsSection", () => {
     expect(getByText("body")).toBeInTheDocument();
   });
 
-  it("applies p-6 to the inner Surface by default", () => {
+  it("applies p-5 to the inner Surface by default", () => {
     const { getByText } = render(
       <SettingsSection title="Info">
         <p>body</p>
       </SettingsSection>,
     );
     const surface = getByText("body").parentElement as HTMLElement;
-    expect(surface.className).toContain("p-6");
+    expect(surface.className).toContain("p-5");
     expect(surface.className).toContain("rounded-2xl");
     expect(surface.className).toContain("border-outline-variant");
   });
