@@ -30,7 +30,7 @@ export function SettingsSection({
   return (
     <section className={className}>
       <SectionLabel className="mb-2">{title}</SectionLabel>
-      <Surface className={cn("p-6", surfaceClassName)}>{children}</Surface>
+      <Surface className={cn("p-5", surfaceClassName)}>{children}</Surface>
     </section>
   );
 }

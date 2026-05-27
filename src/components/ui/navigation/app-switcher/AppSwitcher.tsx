@@ -76,7 +76,7 @@ export function AppSwitcher({
     setOutline(
       buildOutline(
         trigger.offsetWidth,
-        trigger.offsetHeight,
+        trigger.offsetHeight - 7,
         container.offsetWidth,
         container.offsetHeight,
       ),
@@ -121,10 +121,10 @@ export function AppSwitcher({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         className={cn(
-          "relative z-10 flex items-center gap-2 cursor-pointer px-4 py-3",
+          "relative z-10 flex items-center gap-2 cursor-pointer pl-4 pr-6 py-3",
           open
             ? "w-fit pr-6 rounded-t-2xl"
-            : "rounded-xl bg-surface hover:bg-surface-container transition-colors",
+            : "rounded-2xl hover:bg-surface-container transition-colors",
         )}
       >
         {logo}

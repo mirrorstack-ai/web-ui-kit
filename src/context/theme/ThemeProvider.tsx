@@ -19,6 +19,15 @@ export interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const STORAGE_KEY = "theme";
+const COOKIE_KEY = "ms-theme";
+
+function setCookie(theme: Theme) {
+  document.cookie = `${COOKIE_KEY}=${theme}; path=/; max-age=31536000; SameSite=Lax`;
+}
+
+function getCookie(): string | null {
+  return document.cookie.match(new RegExp(`(?:^|; )${COOKIE_KEY}=(\\w+)`))?.[1] ?? null;
+}
 
 function getMediaDark() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -52,21 +61,24 @@ export function ThemeProvider({ children, apiBaseUrl }: ThemeProviderProps) {
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
     localStorage.setItem(STORAGE_KEY, next);
+    setCookie(next);
     const resolved = resolve(next);
     setResolvedTheme(resolved);
     applyClass(resolved);
   }, []);
 
   useEffect(() => {
-    const stored = normalize(localStorage.getItem(STORAGE_KEY));
+    const stored = normalize(getCookie() ?? localStorage.getItem(STORAGE_KEY));
     setThemeState(stored);
+    localStorage.setItem(STORAGE_KEY, stored);
+    setCookie(stored);
     const resolved = resolve(stored);
     setResolvedTheme(resolved);
     applyClass(resolved);
 
     if (!apiBaseUrl) return;
 
-    fetch(`${apiBaseUrl}/v1/auth/me/preferences`, { credentials: "include" })
+    fetch(`${apiBaseUrl}/v1/auth/me?detail=true`, { credentials: "include" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!data?.theme) return;
@@ -74,6 +86,7 @@ export function ThemeProvider({ children, apiBaseUrl }: ThemeProviderProps) {
         const localTheme = normalize(localStorage.getItem(STORAGE_KEY));
         if (apiTheme !== localTheme) {
           localStorage.setItem(STORAGE_KEY, apiTheme);
+          setCookie(apiTheme);
           setThemeState(apiTheme);
           const r = resolve(apiTheme);
           setResolvedTheme(r);

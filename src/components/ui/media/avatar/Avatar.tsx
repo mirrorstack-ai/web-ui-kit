@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
@@ -80,6 +80,8 @@ export function Avatar({
   className,
 }: AvatarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imgFailed, setImgFailed] = useState(false);
+  useEffect(() => setImgFailed(false), [src]);
   const s = sizeMap[size];
   // Show up to 3 chars of the fallback, uppercased. Empty string falls back
   // to the prop default "U" via destructuring, so initials is always at
@@ -105,10 +107,11 @@ export function Avatar({
 
   const showInitial = !overlay;
 
-  const avatarContent = src ? (
+  const avatarContent = src && !imgFailed ? (
     <img
       src={src}
       alt=""
+      onError={() => setImgFailed(true)}
       className={cn(s.container, radius, "object-cover border-2 border-primary")}
     />
   ) : (
