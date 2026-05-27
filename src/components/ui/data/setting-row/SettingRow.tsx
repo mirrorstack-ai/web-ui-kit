@@ -36,7 +36,7 @@ export function SettingRow({
   return (
     <div
       className={cn(
-        "flex items-center gap-4 px-3.5 py-3 rounded-xl border bg-surface-container",
+        "flex items-center gap-4 px-4 py-3 rounded-xl border bg-surface-container",
         border,
         className,
       )}

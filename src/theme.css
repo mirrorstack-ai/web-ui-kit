@@ -43,8 +43,8 @@
   --color-info-container: #d1e4ff;
   --color-on-info-container: #001d36;
 
-  --color-background: #e6f5f6;
-  --color-on-background: #171d1e;
+  --color-background: #ffffff;
+  --color-on-background: #000000;
 
   --color-surface: #f5fafb;
   --color-on-surface: #171d1e;
@@ -127,8 +127,8 @@
   --color-info-container: #00497d;
   --color-on-info-container: #d1e4ff;
 
-  --color-background: #101417;
-  --color-on-background: #dfe3e7;
+  --color-background: #000000;
+  --color-on-background: #ffffff;
 
   --color-surface: #101417;
   --color-on-surface: #dfe3e7;
