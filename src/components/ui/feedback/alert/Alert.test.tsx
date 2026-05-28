@@ -6,7 +6,7 @@ afterEach(cleanup);
 
 describe("Alert", () => {
   it("renders with role=alert", () => {
-    render(<Alert variant="info">Test message</Alert>);
+    render(<Alert variant="success">Test message</Alert>);
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("Test message")).toBeInTheDocument();
   });
@@ -38,13 +38,13 @@ describe("Alert", () => {
   });
 
   it("does not show dismiss button without onDismiss", () => {
-    render(<Alert variant="info">Info</Alert>);
+    render(<Alert variant="success">Info</Alert>);
     expect(screen.queryByLabelText("Dismiss")).not.toBeInTheDocument();
   });
 
   it("applies custom className", () => {
     render(
-      <Alert variant="info" className="mt-4">
+      <Alert variant="success" className="mt-4">
         Test
       </Alert>,
     );
@@ -53,17 +53,17 @@ describe("Alert", () => {
 
   it("renders override icon when icon prop is provided", () => {
     render(
-      <Alert variant="info" icon="passkey">
+      <Alert variant="success" icon="passkey">
         Set up a passkey
       </Alert>,
     );
     expect(screen.getByText("passkey")).toBeInTheDocument();
-    expect(screen.queryByText("info")).not.toBeInTheDocument();
+    expect(screen.queryByText("check_circle")).not.toBeInTheDocument();
   });
 
   it("respects iconSize override", () => {
     render(
-      <Alert variant="info" icon="passkey" iconSize={28}>
+      <Alert variant="success" icon="passkey" iconSize={28}>
         Big icon
       </Alert>,
     );
@@ -71,8 +71,8 @@ describe("Alert", () => {
   });
 
   it("uses default icon size of 20 when iconSize not provided", () => {
-    render(<Alert variant="info">Default size</Alert>);
-    expect(screen.getByText("info")).toHaveStyle({ fontSize: "20px" });
+    render(<Alert variant="success">Default size</Alert>);
+    expect(screen.getByText("check_circle")).toHaveStyle({ fontSize: "20px" });
   });
 
   it("hides leading icon and drops content margin when hideIcon is set", () => {

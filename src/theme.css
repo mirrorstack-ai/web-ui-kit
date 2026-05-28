@@ -38,11 +38,6 @@
   --color-warning-container: #ffdea6;
   --color-on-warning-container: #271900;
 
-  --color-info: #0061a4;
-  --color-on-info: #ffffff;
-  --color-info-container: #d1e4ff;
-  --color-on-info-container: #001d36;
-
   --color-background: #ffffff;
   --color-on-background: #000000;
 
@@ -65,10 +60,6 @@
   --color-inverse-primary: #50d8e8;
   --color-inverse-surface: #2b3132;
   --color-inverse-on-surface: #ecf2f3;
-  --color-surface-tint: #006973;
-
-  --color-shadow: #000000;
-  --color-scrim: #000000;
 
   /* Font */
   --font-sans: "Shantell Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -122,11 +113,6 @@
   --color-warning-container: #5e4200;
   --color-on-warning-container: #ffdea6;
 
-  --color-info: #9ecaff;
-  --color-on-info: #003258;
-  --color-info-container: #00497d;
-  --color-on-info-container: #d1e4ff;
-
   --color-background: #000000;
   --color-on-background: #ffffff;
 
@@ -149,7 +135,6 @@
   --color-inverse-primary: #006973;
   --color-inverse-surface: #dee3e4;
   --color-inverse-on-surface: #101417;
-  --color-surface-tint: #93cdf6;
 }
 
 /* Base */

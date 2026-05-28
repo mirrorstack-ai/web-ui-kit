@@ -13,8 +13,7 @@ export type Tone =
   | "tertiary"
   | "error"
   | "warning"
-  | "success"
-  | "info";
+  | "success";
 
 // Each map uses Tailwind's `<color>/40` opacity for borders so the
 // accent stays subtle against the surface background; text maps keep
@@ -26,7 +25,6 @@ export const toneBorderClass: Record<Tone, string> = {
   error: "border-error/40",
   warning: "border-warning/40",
   success: "border-success/40",
-  info: "border-info/40",
 };
 
 export const toneTextClass: Record<Tone, string> = {
@@ -36,5 +34,4 @@ export const toneTextClass: Record<Tone, string> = {
   error: "text-error",
   warning: "text-warning",
   success: "text-success",
-  info: "text-info",
 };

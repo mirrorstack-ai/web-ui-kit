@@ -248,7 +248,7 @@ export function ReauthDialog({
       )}
 
       {showingEmail && showPasskeySetup && (
-        <Alert variant="info" icon="passkey" iconSize={28} className="mt-4">
+        <Alert variant="success" icon="passkey" iconSize={28} className="mt-4">
           <button
             type="button"
             onClick={onPasskeySetup}

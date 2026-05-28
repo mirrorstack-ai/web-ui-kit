@@ -10,7 +10,12 @@ export const meta: ComponentMeta = {
     "Dismissible inline alert banner with error/success/warning/info variants",
 };
 
-export type AlertVariant = "error" | "success" | "warning" | "info";
+export type AlertVariant =
+  | "error"
+  | "success"
+  | "warning"
+  | "primary"
+  | "secondary";
 
 export interface AlertProps {
   variant: AlertVariant;
@@ -31,14 +36,16 @@ const variantStyles: Record<AlertVariant, string> = {
   error: "bg-error/10 border-error/30 text-error",
   success: "bg-success/10 border-success/30 text-success",
   warning: "bg-warning/10 border-warning/30 text-warning",
-  info: "bg-info/10 border-info/30 text-info",
+  primary: "bg-primary/10 border-primary/30 text-primary",
+  secondary: "bg-secondary/10 border-secondary/30 text-secondary",
 };
 
 const variantIcons: Record<AlertVariant, string> = {
   error: "error",
   success: "check_circle",
   warning: "warning",
-  info: "info",
+  primary: "info",
+  secondary: "info",
 };
 
 export function Alert({

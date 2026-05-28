@@ -5,13 +5,13 @@ const meta: Meta<typeof Alert> = {
   title: "UI/Feedback/Alert",
   component: Alert,
   args: {
-    variant: "info",
+    variant: "primary",
     children: "This is an informational alert message.",
   },
   argTypes: {
     variant: {
       control: "select",
-      options: ["error", "success", "warning", "info"],
+      options: ["error", "success", "warning", "primary", "secondary"],
     },
   },
 };
@@ -24,7 +24,7 @@ export const Playground: Story = {};
 export const Variants: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
-      {(["info", "success", "warning", "error"] as AlertVariant[]).map((v) => (
+      {(["primary", "secondary", "success", "warning", "error"] as AlertVariant[]).map((v) => (
         <Alert key={v} variant={v}>
           This is a {v} alert message.
         </Alert>
@@ -52,7 +52,7 @@ export const Dismissible: Story = {
 
 export const WithCustomIcon: Story = {
   args: {
-    variant: "info",
+    variant: "primary",
     icon: "passkey",
     iconSize: 28,
     children: "Set up a passkey for faster verification next time.",

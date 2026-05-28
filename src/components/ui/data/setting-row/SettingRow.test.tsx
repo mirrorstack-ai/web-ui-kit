@@ -48,7 +48,6 @@ describe("SettingRow", () => {
     ["error", "border-error/40"],
     ["warning", "border-warning/40"],
     ["success", "border-success/40"],
-    ["info", "border-info/40"],
   ] as const)("applies the %s tone border", (tone, expected) => {
     const { container } = render(
       <SettingRow title="X" control={<span />} tone={tone} />,
