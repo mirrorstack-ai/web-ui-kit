@@ -1012,7 +1012,11 @@ onDismiss?: () =&gt; void
 
 title?: string
 
-variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;info&quot;</code></pre>
+variant: | &quot;error&quot;
+| &quot;success&quot;
+| &quot;warning&quot;
+| &quot;primary&quot;
+| &quot;secondary&quot;</code></pre>
           </div>
         </div>
     
@@ -1035,7 +1039,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
               </div>
               
               
-              <pre><code>const Playground = () =&gt; &lt;Alert variant=&quot;info&quot;&gt;This is an informational alert message.&lt;/Alert&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;Alert variant=&quot;primary&quot;&gt;This is an informational alert message.&lt;/Alert&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1046,7 +1050,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
               
               <pre><code>const Variants = () =&gt; (
   &lt;div className=&quot;flex flex-col gap-3&quot;&gt;
-    {([&quot;info&quot;, &quot;success&quot;, &quot;warning&quot;, &quot;error&quot;] as AlertVariant[]).map((v) =&gt; (
+    {([&quot;primary&quot;, &quot;secondary&quot;, &quot;success&quot;, &quot;warning&quot;, &quot;error&quot;] as AlertVariant[]).map((v) =&gt; (
       &lt;Alert key={v} variant={v}&gt;
         This is a {v} alert message.
       &lt;/Alert&gt;
@@ -1079,7 +1083,7 @@ variant: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;i
               </div>
               
               
-              <pre><code>const WithCustomIcon = () =&gt; &lt;Alert variant=&quot;info&quot; icon=&quot;passkey&quot; iconSize={28}&gt;Set up a passkey for faster verification next time.&lt;/Alert&gt;;</code></pre>
+              <pre><code>const WithCustomIcon = () =&gt; &lt;Alert variant=&quot;primary&quot; icon=&quot;passkey&quot; iconSize={28}&gt;Set up a passkey for faster verification next time.&lt;/Alert&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -2604,8 +2608,7 @@ variant?: | &quot;default&quot;
 | &quot;primary&quot;
 | &quot;success&quot;
 | &quot;warning&quot;
-| &quot;error&quot;
-| &quot;info&quot; = &quot;default&quot;</code></pre>
+| &quot;error&quot; = &quot;default&quot;</code></pre>
           </div>
         </div>
     
@@ -2639,7 +2642,7 @@ variant?: | &quot;default&quot;
               
               <pre><code>const Variants = () =&gt; (
   &lt;div className=&quot;flex flex-wrap items-center gap-2&quot;&gt;
-    {([&quot;default&quot;, &quot;primary&quot;, &quot;success&quot;, &quot;warning&quot;, &quot;error&quot;, &quot;info&quot;] as BadgeVariant[]).map(
+    {([&quot;default&quot;, &quot;primary&quot;, &quot;success&quot;, &quot;warning&quot;, &quot;error&quot;] as BadgeVariant[]).map(
       (v) =&gt; (
         &lt;Badge key={v} variant={v}&gt;
           {v}
@@ -2661,7 +2664,6 @@ variant?: | &quot;default&quot;
     &lt;Badge variant=&quot;success&quot; icon=&quot;check_circle&quot;&gt;Ready&lt;/Badge&gt;
     &lt;Badge variant=&quot;error&quot; icon=&quot;error&quot;&gt;Failed&lt;/Badge&gt;
     &lt;Badge variant=&quot;warning&quot; icon=&quot;warning&quot;&gt;Pending&lt;/Badge&gt;
-    &lt;Badge variant=&quot;info&quot; icon=&quot;info&quot;&gt;Info&lt;/Badge&gt;
   &lt;/div&gt;
 );</code></pre>
             </div>
@@ -3503,7 +3505,11 @@ title: string
  * destructive confirms; pass &quot;warning&quot; for reversible-but-noteworthy
  * actions (rotating a key, toggling beta).
  */
-variant?: &quot;error&quot; | &quot;success&quot; | &quot;warning&quot; | &quot;info&quot; = &quot;error&quot;</code></pre>
+variant?: | &quot;error&quot;
+| &quot;success&quot;
+| &quot;warning&quot;
+| &quot;primary&quot;
+| &quot;secondary&quot; = &quot;error&quot;</code></pre>
           </div>
         </div>
     
@@ -9859,8 +9865,7 @@ tone?: | &quot;primary&quot;
 | &quot;tertiary&quot;
 | &quot;error&quot;
 | &quot;warning&quot;
-| &quot;success&quot;
-| &quot;info&quot;</code></pre>
+| &quot;success&quot;</code></pre>
           </div>
         </div>
     
