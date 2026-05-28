@@ -11,7 +11,7 @@ const meta: Meta<typeof Badge> = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["default", "primary", "success", "warning", "error", "info"],
+      options: ["default", "primary", "success", "warning", "error"],
     },
     size: { control: "select", options: ["sm", "md"] },
     icon: { control: "text" },
@@ -27,7 +27,7 @@ export const Playground: Story = {};
 export const Variants: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-2">
-      {(["default", "primary", "success", "warning", "error", "info"] as BadgeVariant[]).map(
+      {(["default", "primary", "success", "warning", "error"] as BadgeVariant[]).map(
         (v) => (
           <Badge key={v} variant={v}>
             {v}
@@ -44,7 +44,6 @@ export const WithIcon: Story = {
       <Badge variant="success" icon="check_circle">Ready</Badge>
       <Badge variant="error" icon="error">Failed</Badge>
       <Badge variant="warning" icon="warning">Pending</Badge>
-      <Badge variant="info" icon="info">Info</Badge>
     </div>
   ),
 };

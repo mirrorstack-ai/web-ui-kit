@@ -12,8 +12,7 @@ export type BadgeVariant =
   | "primary"
   | "success"
   | "warning"
-  | "error"
-  | "info";
+  | "error";
 
 export type BadgeSize = "sm" | "md";
 
@@ -33,7 +32,6 @@ const variantStyles: Record<BadgeVariant, string> = {
   success: "bg-success/10 text-success border border-success/20",
   warning: "bg-warning/10 text-warning border border-warning/20",
   error: "bg-error/10 text-error border border-error/20",
-  info: "bg-tertiary/10 text-tertiary border border-tertiary/20",
 };
 
 const dotColors: Record<BadgeVariant, string> = {
@@ -42,7 +40,6 @@ const dotColors: Record<BadgeVariant, string> = {
   success: "bg-success",
   warning: "bg-warning",
   error: "bg-error",
-  info: "bg-tertiary",
 };
 
 const sizeStyles: Record<BadgeSize, string> = {
