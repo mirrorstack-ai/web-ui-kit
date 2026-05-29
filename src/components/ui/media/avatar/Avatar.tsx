@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
@@ -66,6 +66,10 @@ export interface AvatarProps {
   square?: boolean;
   overlay?: ReactNode;
   className?: string;
+  /** Inline styles for the root element. Handy for setting CSS variables
+   *  (e.g. `--color-primary`) to theme the border/initials fallback per
+   *  instance, since those resolve through `var(--color-primary)`. */
+  style?: CSSProperties;
 }
 
 export function Avatar({
@@ -78,6 +82,7 @@ export function Avatar({
   square = false,
   overlay,
   className,
+  style,
 }: AvatarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgFailed, setImgFailed] = useState(false);
@@ -140,7 +145,7 @@ export function Avatar({
   ) : null;
 
   return (
-    <div className={cn("relative inline-flex shrink-0", className)}>
+    <div className={cn("relative inline-flex shrink-0", className)} style={style}>
       {editable ? (
         <button
           type="button"
