@@ -7,7 +7,7 @@ import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 export const meta: ComponentMeta = {
   name: "Alert",
   description:
-    "Dismissible inline alert banner with error/success/warning/info variants",
+    "Dismissible inline alert banner with error/success/warning/primary/secondary variants",
 };
 
 export type AlertVariant =
