@@ -7,7 +7,7 @@ import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 export const meta: ComponentMeta = {
   name: "Alert",
   description:
-    "Dismissible inline alert banner with error/success/warning/primary/secondary variants",
+    "Dismissible inline alert banner with error/success/warning/primary/secondary/neutral variants",
 };
 
 export type AlertVariant =
@@ -15,7 +15,8 @@ export type AlertVariant =
   | "success"
   | "warning"
   | "primary"
-  | "secondary";
+  | "secondary"
+  | "neutral";
 
 export interface AlertProps {
   variant: AlertVariant;
@@ -38,6 +39,9 @@ const variantStyles: Record<AlertVariant, string> = {
   warning: "bg-warning/10 border-warning/30 text-warning",
   primary: "bg-primary/10 border-primary/30 text-primary",
   secondary: "bg-secondary/10 border-secondary/30 text-secondary",
+  // Neutral resting-state box: no severity tint. Pairs with `hideIcon`
+  // when used purely as an informational container.
+  neutral: "bg-surface-container-low border-outline-variant text-on-surface",
 };
 
 const variantIcons: Record<AlertVariant, string> = {
@@ -46,6 +50,7 @@ const variantIcons: Record<AlertVariant, string> = {
   warning: "warning",
   primary: "info",
   secondary: "info",
+  neutral: "info",
 };
 
 export function Alert({

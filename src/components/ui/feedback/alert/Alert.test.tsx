@@ -75,6 +75,15 @@ describe("Alert", () => {
     expect(screen.getByText("check_circle")).toHaveStyle({ fontSize: "20px" });
   });
 
+  it("renders the neutral variant with untinted surface tokens", () => {
+    render(<Alert variant="neutral">Resting state</Alert>);
+    const el = screen.getByRole("alert");
+    expect(el).toHaveClass("bg-surface-container-low");
+    expect(el).toHaveClass("text-on-surface");
+    // Not severity-tinted.
+    expect(el).not.toHaveClass("bg-error/10");
+  });
+
   it("hides leading icon and drops content margin when hideIcon is set", () => {
     render(
       <Alert variant="error" hideIcon>

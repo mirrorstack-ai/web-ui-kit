@@ -11,7 +11,7 @@ const meta: Meta<typeof Alert> = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["error", "success", "warning", "primary", "secondary"],
+      options: ["error", "success", "warning", "primary", "secondary", "neutral"],
     },
   },
 };
@@ -24,7 +24,7 @@ export const Playground: Story = {};
 export const Variants: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
-      {(["primary", "secondary", "success", "warning", "error"] as AlertVariant[]).map((v) => (
+      {(["primary", "secondary", "success", "warning", "error", "neutral"] as AlertVariant[]).map((v) => (
         <Alert key={v} variant={v}>
           This is a {v} alert message.
         </Alert>
@@ -66,5 +66,15 @@ export const HideIcon: Story = {
     hideIcon: true,
     children:
       "Useful when the surrounding container (like a destructive Dialog) already conveys severity and a leading icon would crowd the title.",
+  },
+};
+
+export const Neutral: Story = {
+  args: {
+    variant: "neutral",
+    title: "Dev tunnel not running",
+    hideIcon: true,
+    children:
+      "A resting, untinted status box for informational state that isn't a severity. Use hideIcon when there's no signal to convey.",
   },
 };
