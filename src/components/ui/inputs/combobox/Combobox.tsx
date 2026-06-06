@@ -232,7 +232,9 @@ export function Combobox({
           type="button"
           tabIndex={-1}
           aria-label="Toggle options"
+          disabled={disabled}
           onClick={() => {
+            if (disabled) return;
             if (open) {
               setOpen(false);
               setIsTyping(false);
@@ -242,7 +244,10 @@ export function Combobox({
               inputRef.current?.focus();
             }
           }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center p-1 text-on-surface-variant hover:text-primary transition-colors"
+          className={cn(
+            "absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center p-1 text-on-surface-variant transition-colors",
+            disabled ? "cursor-not-allowed" : "hover:text-primary",
+          )}
         >
           <Icon
             name="expand_more"

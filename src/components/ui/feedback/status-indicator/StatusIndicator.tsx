@@ -42,6 +42,14 @@ const defaultPulse: Record<StatusLevel, boolean> = {
   unknown: false,
 };
 
+const statusLabelMap: Record<StatusLevel, string> = {
+  online: "Online",
+  offline: "Offline",
+  warning: "Warning",
+  error: "Error",
+  unknown: "Unknown",
+};
+
 export function StatusIndicator({
   status,
   label,
@@ -52,13 +60,18 @@ export function StatusIndicator({
 }: StatusIndicatorProps) {
   const color = colorMap[status];
   const shouldPulse = pulse ?? defaultPulse[status];
+  const statusLabel = statusLabelMap[status];
 
   return (
-    <div className={cn("h-full w-full flex flex-col justify-between", className)}>
+    <div
+      className={cn("h-full w-full flex flex-col justify-between", className)}
+      role="status"
+    >
+      <span className="sr-only">{`Status: ${statusLabel}`}</span>
       {/* Top section: dot or icon */}
       <div>
         {icon ? (
-          <span style={{ color }}>
+          <span style={{ color }} aria-label={statusLabel}>
             <Icon name={icon} size={20} />
           </span>
         ) : (
