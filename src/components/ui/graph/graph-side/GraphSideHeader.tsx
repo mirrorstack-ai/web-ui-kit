@@ -3,7 +3,7 @@ import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Badge } from "@/components/ui/feedback/badge/Badge";
 import type { ComponentMeta } from "@/types/component-meta";
 import type { GraphSideNode } from "./types";
-import { SIDE_CARD_CLS } from "./styles";
+import { Surface } from "@/components/ui/surfaces/surface/Surface";
 
 export const meta: ComponentMeta = {
   name: "GraphSideHeader",
@@ -28,10 +28,9 @@ export function GraphSideHeader({
   const hasTags = tagList.length > 0;
 
   return (
-    <div
+    <Surface
       className={cn(
-        SIDE_CARD_CLS,
-        "flex items-center gap-3 p-3",
+        "rounded-xl shadow-xl flex items-center gap-3 p-3",
         className,
       )}
     >
@@ -57,6 +56,6 @@ export function GraphSideHeader({
           </div>
         )}
       </div>
-    </div>
+    </Surface>
   );
 }

@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import type { ComponentMeta } from "@/types/component-meta";
-import { SIDE_CARD_CLS } from "./styles";
+import { Surface } from "@/components/ui/surfaces/surface/Surface";
 
 export const meta: ComponentMeta = {
   name: "GraphSideContent",
@@ -52,10 +52,9 @@ export function GraphSideContent({ items, prepend, prependClassName, className }
   };
 
   return (
-    <div
+    <Surface
       className={cn(
-        SIDE_CARD_CLS,
-        "h-full overflow-y-auto [scrollbar-gutter:stable] pl-1.5 pr-0.5 pb-3 divide-y divide-outline-variant",
+        "rounded-xl shadow-xl h-full overflow-y-auto [scrollbar-gutter:stable] pl-1.5 pr-0.5 pb-3 divide-y divide-outline-variant",
         className,
       )}
     >
@@ -100,6 +99,6 @@ export function GraphSideContent({ items, prepend, prependClassName, className }
           </div>
         );
       })}
-    </div>
+    </Surface>
   );
 }
