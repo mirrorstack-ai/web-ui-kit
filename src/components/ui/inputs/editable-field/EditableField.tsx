@@ -71,7 +71,7 @@ export function EditableField({
         id={id}
         label={label}
         size="sm"
-        hideLabel
+        labelledExternally
         value={value}
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
         error={!!error}
