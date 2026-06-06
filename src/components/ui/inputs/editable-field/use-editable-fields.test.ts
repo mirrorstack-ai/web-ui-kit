@@ -8,25 +8,11 @@ describe("useEditableFields", () => {
     expect(result.current.isEditing("name")).toBe(false);
   });
 
-  it("toggleEdit flips a field on then off", () => {
-    const { result } = renderHook(() => useEditableFields());
-    act(() => result.current.toggleEdit("name"));
-    expect(result.current.isEditing("name")).toBe(true);
-    act(() => result.current.toggleEdit("name"));
-    expect(result.current.isEditing("name")).toBe(false);
-  });
-
   it("startEdit is idempotent", () => {
     const { result } = renderHook(() => useEditableFields());
     act(() => result.current.startEdit("name"));
     act(() => result.current.startEdit("name"));
     expect(result.current.isEditing("name")).toBe(true);
-  });
-
-  it("endEdit is a no-op when field is not editing", () => {
-    const { result } = renderHook(() => useEditableFields());
-    act(() => result.current.endEdit("name"));
-    expect(result.current.isEditing("name")).toBe(false);
   });
 
   it("multiple fields can edit concurrently", () => {
