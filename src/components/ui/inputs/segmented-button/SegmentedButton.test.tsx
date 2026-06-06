@@ -111,4 +111,31 @@ describe("SegmentedButton", () => {
       expect(group?.getAttribute("class")).toContain("custom-class");
     });
   });
+
+  describe("boxed variant", () => {
+    it("wraps the options in a bordered track", () => {
+      const { container } = renderSegmented({ variant: "boxed" });
+      const group = container.querySelector("[role='group']");
+      expect(group?.getAttribute("class")).toContain("border-outline-variant/50");
+      expect(group?.getAttribute("class")).toContain("bg-surface-container");
+    });
+
+    it("fills the selected segment and leaves the rest transparent", () => {
+      const { container } = renderSegmented({ variant: "boxed", value: "a" });
+      const buttons = getButtons(container);
+      expect(buttons[0].getAttribute("class")).toContain("bg-primary");
+      expect(buttons[1].getAttribute("class")).not.toContain("bg-primary");
+    });
+
+    it("still calls onChange when a segment is clicked", () => {
+      const handler = vi.fn();
+      const { container } = renderSegmented({
+        variant: "boxed",
+        value: "a",
+        onChange: handler,
+      });
+      fireEvent.click(getButtons(container)[2]);
+      expect(handler).toHaveBeenCalledWith("c");
+    });
+  });
 });

@@ -6,8 +6,11 @@ import type { ComponentMeta } from "@/types/component-meta";
 export const meta: ComponentMeta = {
   name: "SegmentedButton",
   description:
-    "Horizontal group of toggle buttons where exactly one option is selected at a time",
+    "Horizontal group of toggle buttons where exactly one option is selected at a time. Renders as gapped pills (default) or a boxed/connected track with an inset selected pill.",
 };
+
+/** Visual layout: gapped standalone pills, or a boxed connected track. */
+export type SegmentedButtonVariant = "pills" | "boxed";
 
 export type SegmentedButtonOptionTone = "default" | "warning" | "muted";
 
@@ -30,6 +33,12 @@ export interface SegmentedButtonProps<T extends string = string> {
   disabled?: boolean;
   className?: string;
   size?: SegmentedButtonSize;
+  /**
+   * Visual layout. "pills" (default) renders gapped standalone buttons;
+   * "boxed" renders a bordered connected track with an inset selected pill.
+   * Per-option `tone` is honored only in "pills" mode.
+   */
+  variant?: SegmentedButtonVariant;
   /** Use inverse-themed tokens (for placement on inverse surfaces such as
    *  the agent sidebar where the surrounding bg is `on-background`). */
   inverse?: boolean;
@@ -65,6 +74,25 @@ function buttonStyle(
     : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high";
 }
 
+// Boxed variant: segments sit inside a bordered track, so they're tighter
+// than pills and the unselected state is transparent (the track supplies
+// the background) rather than carrying its own surface fill.
+const boxedSizeStyles: Record<SegmentedButtonSize, string> = {
+  sm: "px-3 py-1 rounded-md text-xs",
+  md: "px-4 py-1.5 rounded-md text-sm",
+};
+
+function boxedButtonStyle(selected: boolean, inverse: boolean): string {
+  if (selected) {
+    return inverse
+      ? "bg-inverse-primary text-inverse-surface shadow-sm"
+      : "bg-primary text-on-primary shadow-sm";
+  }
+  return inverse
+    ? "text-inverse-on-surface/70 hover:bg-inverse-on-surface/[0.12] hover:text-inverse-on-surface"
+    : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface";
+}
+
 export function SegmentedButton<T extends string = string>({
   options,
   value,
@@ -73,6 +101,7 @@ export function SegmentedButton<T extends string = string>({
   disabled = false,
   className,
   size = "md",
+  variant = "pills",
   inverse = false,
 }: SegmentedButtonProps<T>) {
   if (isDev) {
@@ -86,11 +115,21 @@ export function SegmentedButton<T extends string = string>({
     }
   }
 
+  const isBoxed = variant === "boxed";
+  const trackClass = isBoxed
+    ? cn(
+        "inline-flex items-center gap-0.5 rounded-lg border p-0.5",
+        inverse
+          ? "border-inverse-on-surface/20 bg-inverse-on-surface/[0.06]"
+          : "border-outline-variant/50 bg-surface-container",
+      )
+    : "flex gap-2";
+
   return (
     <div
       role="group"
       aria-label={ariaLabel}
-      className={cn("flex gap-2", className)}
+      className={cn(trackClass, className)}
     >
       {options.map((opt) => (
         <button
@@ -101,8 +140,10 @@ export function SegmentedButton<T extends string = string>({
           aria-pressed={value === opt.value}
           className={cn(
             "font-medium transition-colors inline-flex items-center justify-center gap-1.5",
-            sizeStyles[size],
-            buttonStyle(value === opt.value, opt.tone, inverse),
+            isBoxed ? boxedSizeStyles[size] : sizeStyles[size],
+            isBoxed
+              ? boxedButtonStyle(value === opt.value, inverse)
+              : buttonStyle(value === opt.value, opt.tone, inverse),
             disabled
               ? "opacity-50 cursor-not-allowed"
               : "cursor-pointer",
