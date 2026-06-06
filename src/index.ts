@@ -25,6 +25,7 @@ export {
 export {
   FloatingLabelInput,
   type FloatingLabelInputProps,
+  type FloatingLabelInputSize,
 } from "./components/ui/inputs/floating-label-input/FloatingLabelInput";
 export {
   SegmentedButton,
@@ -114,6 +115,7 @@ export {
   Combobox,
   type ComboboxProps,
   type ComboboxOption,
+  type ComboboxSize,
 } from "./components/ui/inputs/combobox/Combobox";
 export {
   ImageCarousel,
@@ -310,8 +312,6 @@ export {
   AgentSidebarMessages,
   type AgentSidebarMessage,
   type AgentSidebarMessagesProps,
-  mockAgentHistory,
-  mockAgentMessages,
   type AgentSidebarHistoryGroup,
   type AgentSidebarHistoryItem,
 } from "./components/ui/agent/sidebar/AgentSidebar";

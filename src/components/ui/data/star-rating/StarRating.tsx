@@ -1,5 +1,6 @@
 import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
+import { Icon } from "@/components/ui/media/icon/Icon";
 import type { ComponentMeta } from "@/types/component-meta";
 
 export const meta: ComponentMeta = {
@@ -24,44 +25,28 @@ function normalise(raw: number): number {
   return Math.round(clamped * 2) / 2;
 }
 
-const STAR_COLOR = "var(--color-warning)";
-
 function Stars({ value }: { value: number }) {
   return (
-    <span className="flex items-center gap-0.5">
+    <span aria-hidden className="flex items-center gap-0.5">
       {Array.from({ length: 5 }, (_, i) => {
         const threshold = i + 1;
         if (value >= threshold) {
           return (
-            <span
-              key={i}
-              className="material-symbols-rounded"
-              style={{ fontSize: 16, color: STAR_COLOR, fontVariationSettings: "'FILL' 1" }}
-            >
-              star
-            </span>
+            <Icon key={i} name="star" size={16} fill className="text-warning" />
           );
         }
         if (value >= threshold - 0.5) {
           return (
-            <span
+            <Icon
               key={i}
-              className="material-symbols-rounded"
-              style={{ fontSize: 16, color: STAR_COLOR, fontVariationSettings: "'FILL' 1" }}
-            >
-              star_half
-            </span>
+              name="star_half"
+              size={16}
+              fill
+              className="text-warning"
+            />
           );
         }
-        return (
-          <span
-            key={i}
-            className="material-symbols-rounded opacity-20"
-            style={{ fontSize: 16 }}
-          >
-            star
-          </span>
-        );
+        return <Icon key={i} name="star" size={16} className="opacity-20" />;
       })}
     </span>
   );
@@ -82,7 +67,11 @@ export function StarRating({
   const value = normalise(rawValue);
 
   return (
-    <div className={cn("flex h-full w-full flex-col justify-between p-1", className)}>
+    <div
+      className={cn("flex h-full w-full flex-col justify-between p-1", className)}
+      role="img"
+      aria-label={`${value} out of 5 stars`}
+    >
       {label != null && (
         <span className="truncate text-xs opacity-60">{label}</span>
       )}

@@ -16,6 +16,8 @@ export interface IconProps {
    */
   size?: number | string;
   className?: string;
+  /** Render the filled variant of the icon (Material Symbols `FILL` axis). */
+  fill?: boolean;
   /** Accessible label. If omitted, icon is decorative (aria-hidden). */
   "aria-label"?: string;
 }
@@ -24,12 +26,16 @@ export function Icon({
   name,
   size = 24,
   className,
+  fill,
   "aria-label": ariaLabel,
 }: IconProps) {
   return (
     <span
       className={cn("material-symbols-rounded select-none shrink-0", className)}
-      style={{ fontSize: size }}
+      style={{
+        fontSize: size,
+        ...(fill ? { fontVariationSettings: "'FILL' 1" } : {}),
+      }}
       aria-hidden={ariaLabel ? undefined : true}
       aria-label={ariaLabel}
       role={ariaLabel ? "img" : undefined}
