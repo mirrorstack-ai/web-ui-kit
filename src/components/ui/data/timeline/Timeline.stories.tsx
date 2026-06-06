@@ -43,11 +43,13 @@ export const Activity: Story = {
   ),
 };
 
+// Neutral statuses on purpose — ManyEntries demonstrates volume/scroll; the
+// Activity story shows status coloring. Cycling success/warning/error here just
+// painted benign events (e.g. "Viewed logs") alarming colors.
 const manyEntries: TimelineEntry[] = Array.from({ length: 12 }, (_, i) => ({
   icon: ["sync", "edit", "visibility", "cloud_upload"][i % 4],
   text: `Event #${i + 1} — ${["Synced data", "Edited config", "Viewed logs", "Uploaded asset"][i % 4]}`,
   time: `${i + 1}h ago`,
-  status: (["default", "success", "warning", "error"] as const)[i % 4],
 }));
 
 export const ManyEntries: Story = {
