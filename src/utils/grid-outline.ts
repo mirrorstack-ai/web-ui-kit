@@ -52,14 +52,6 @@ export function maskFromShape(
   return shape.map((row) => row.map((v) => v >= 1 && v <= tier));
 }
 
-/** Max tier referenced by a shape matrix (so callers know how many breakpoints
- *  it defines). Returns 1 for a plain 0/1 matrix. */
-export function maxTier(shape: readonly (readonly number[])[]): number {
-  let m = 1;
-  for (const row of shape) for (const v of row) if (v > m) m = v;
-  return m;
-}
-
 export function gridOutlinePath(
   mask: readonly (readonly boolean[])[],
   { cell, radius = 24, inverseRadius = 32, gap = 0 }: GridOutlineOptions,

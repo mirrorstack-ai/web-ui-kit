@@ -3,7 +3,6 @@ import {
   gridOutlinePath,
   maskCols,
   maskFromShape,
-  maxTier,
 } from "./grid-outline";
 
 /** Count subpaths (each closed loop emits exactly one `M ... Z`). */
@@ -36,15 +35,6 @@ describe("maskFromShape", () => {
       [false, true, true],
       [true, true, true],
     ]);
-  });
-});
-
-describe("maxTier", () => {
-  it("is 1 for a plain 0/1 matrix", () => {
-    expect(maxTier([[0, 1], [1, 1]])).toBe(1);
-  });
-  it("returns the highest tier referenced", () => {
-    expect(maxTier([[1, 2], [3, 0]])).toBe(3);
   });
 });
 
