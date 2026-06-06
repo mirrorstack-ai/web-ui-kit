@@ -259,7 +259,7 @@ function renderField(
   return (
     <div
       role={isMulti ? "group" : "radiogroup"}
-      aria-labelledby={fieldId}
+      aria-label={q.label}
       className="flex flex-col gap-1.5"
     >
       {q.options.map((opt) => {
@@ -467,12 +467,9 @@ export function AgentSidebarMultiQuestion({
                     className="rounded-md border border-outline-variant/20 px-3 py-2.5 flex items-center justify-between gap-3"
                   >
                     <div className="flex-1 min-w-0">
-                      <label
-                        htmlFor={fieldId}
-                        className="text-sm font-medium text-inverse-on-surface block leading-snug"
-                      >
+                      <span className="text-sm font-medium text-inverse-on-surface block leading-snug">
                         {q.label}
-                      </label>
+                      </span>
                       {q.description && (
                         <span className="text-xs text-inverse-on-surface/55 block mt-0.5 leading-relaxed">
                           {q.description}
@@ -490,7 +487,7 @@ export function AgentSidebarMultiQuestion({
                 >
                   <div>
                     <label
-                      htmlFor={fieldId}
+                      htmlFor={q.type === "text" ? fieldId : undefined}
                       className="text-sm font-medium text-inverse-on-surface block leading-snug"
                     >
                       {q.label}

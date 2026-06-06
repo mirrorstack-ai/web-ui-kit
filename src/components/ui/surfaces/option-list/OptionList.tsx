@@ -65,8 +65,8 @@ export function OptionList({
       <ul className="py-1">
         {items.length === 0 ? (
           <li
-            role="option"
-            aria-selected={false}
+            role="status"
+            aria-live="polite"
             className="px-3 py-1.5 text-sm text-on-surface-variant italic"
           >
             No matches

@@ -138,7 +138,7 @@ export function ReauthDialog({
       open={open}
       onClose={handleClose}
       className={className}
-      actions={undefined}
+      title={title}
     >
       {error && (
         <Alert variant="error" onDismiss={() => setError(null)} className="mb-4">
@@ -146,7 +146,6 @@ export function ReauthDialog({
         </Alert>
       )}
 
-      <h3 className="text-lg font-semibold text-on-surface mb-2">{title}</h3>
       <p className="text-sm text-on-surface-variant mb-4">{description}</p>
 
       {!showingEmail && (
