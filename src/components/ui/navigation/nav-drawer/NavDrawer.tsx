@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
 import { cn } from "@/utils/cn";
+import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
-import { NavItem } from "@/components/ui/navigation/nav-item/NavItem";
+import {
+  NavItem,
+  type NavItemVariant,
+} from "@/components/ui/navigation/nav-item/NavItem";
 import { Surface } from "@/components/ui/surfaces/surface/Surface";
 import { SectionLabel } from "@/components/ui/data/section-label/SectionLabel";
 
@@ -15,7 +19,8 @@ export interface NavDrawerItem {
   id: string;
   label: string;
   icon: string;
-  variant?: "default" | "danger";
+  /** `"danger"` is a deprecated alias for `"error"`. */
+  variant?: NavItemVariant;
 }
 
 export interface NavDrawerSection {
@@ -65,17 +70,24 @@ export function NavDrawer({
               </SectionLabel>
             )}
             <ul className="space-y-1">
-              {section.items.map((item) => (
-                <li key={item.id}>
-                  <NavItem
-                    icon={item.icon}
-                    label={item.label}
-                    active={item.id === activeItemId}
-                    variant={item.variant}
-                    onClick={() => onItemClick?.(item)}
-                  />
-                </li>
-              ))}
+              {section.items.map((item) => {
+                if (isDev && item.variant === "danger") {
+                  console.warn(
+                    '[NavDrawer] variant="danger" is deprecated; use "error".',
+                  );
+                }
+                return (
+                  <li key={item.id}>
+                    <NavItem
+                      icon={item.icon}
+                      label={item.label}
+                      active={item.id === activeItemId}
+                      variant={item.variant}
+                      onClick={() => onItemClick?.(item)}
+                    />
+                  </li>
+                );
+              })}
             </ul>
           </Surface>
         ))}

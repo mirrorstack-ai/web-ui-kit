@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/utils/cn";
+import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
@@ -20,14 +21,15 @@ const DD_IR = 10;
 export const meta: ComponentMeta = {
   name: "DropdownMenu",
   description:
-    "Action dropdown menu with keyboard navigation, icon support, and danger variant.",
+    "Action dropdown menu with keyboard navigation, icon support, and error variant.",
 };
 
 export interface DropdownMenuItem {
   id: string;
   label: string;
   icon?: string;
-  variant?: "default" | "danger";
+  /** `"danger"` is a deprecated alias for `"error"`. */
+  variant?: "default" | "error" | "danger";
   disabled?: boolean;
 }
 
@@ -265,7 +267,13 @@ export function DropdownMenu({
 
               const item = entry;
               const isActive = index === activeIndex;
-              const isDanger = item.variant === "danger";
+              if (isDev && item.variant === "danger") {
+                console.warn(
+                  '[DropdownMenu] variant="danger" is deprecated; use "error".',
+                );
+              }
+              const isError =
+                item.variant === "error" || item.variant === "danger";
 
               return (
                 <div
@@ -273,11 +281,11 @@ export function DropdownMenu({
                   role="menuitem"
                   aria-disabled={item.disabled || undefined}
                   className={cn(
-                    "flex cursor-pointer items-baseline gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
-                    item.disabled && "pointer-events-none opacity-38",
-                    isDanger ? "text-error" : "text-on-surface",
+                    "flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
+                    item.disabled && "pointer-events-none opacity-50",
+                    isError ? "text-error" : "text-on-surface",
                     isActive &&
-                      (isDanger
+                      (isError
                         ? "bg-error/8"
                         : "bg-on-surface/8"),
                   )}
@@ -295,8 +303,8 @@ export function DropdownMenu({
                       name={item.icon}
                       size={16}
                       className={cn(
-                        "shrink-0 translate-y-0.5",
-                        isDanger ? "text-error" : "text-on-surface-variant",
+                        "shrink-0",
+                        isError ? "text-error" : "text-on-surface-variant",
                       )}
                     />
                   )}

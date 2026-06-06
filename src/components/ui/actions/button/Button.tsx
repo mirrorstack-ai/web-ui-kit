@@ -10,6 +10,7 @@ import {
   type ButtonSize,
   variantMap,
   iconSizes,
+  buttonBaseClass,
 } from "@/components/ui/actions/shared/button-styles";
 
 export const meta: ComponentMeta = {
@@ -76,7 +77,8 @@ export function Button({
   return (
     <button
       className={cn(
-        "relative inline-flex items-center justify-center font-medium rounded-lg transition-all cursor-pointer active:scale-95 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
+        buttonBaseClass,
+        "font-medium",
         variantMap[variant][color],
         sizeStyles[size],
         fullWidth && "w-full",

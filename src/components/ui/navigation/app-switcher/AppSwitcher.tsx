@@ -117,11 +117,11 @@ export function AppSwitcher({
         ref={triggerRef}
         type="button"
         onClick={() => setOpen(!open)}
-        aria-haspopup="menu"
+        aria-label={`Current app: ${currentApp}`}
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         className={cn(
-          "relative z-10 flex items-center gap-2 cursor-pointer pl-4 pr-6 py-3",
+          "relative z-10 flex items-center gap-2 cursor-pointer pl-4 pr-6 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
           open
             ? "w-fit pr-6 rounded-t-2xl"
             : "rounded-2xl hover:bg-surface-container transition-colors",
@@ -143,27 +143,29 @@ export function AppSwitcher({
 
       {open && filteredApps.length > 0 && (
         <div className="relative z-10 rounded-b-2xl rounded-tr-2xl shadow-lg">
-          <div id={menuId} role="menu" aria-label="Switch application" className="px-2 pb-2">
-            {filteredApps.map((app) => (
-              <a
-                key={app.id}
-                href={app.href}
-                role="menuitem"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-colors hover:bg-surface-container"
-              >
-                <Icon name={app.icon} size={20} className="shrink-0 text-on-surface-variant" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate text-on-surface">{app.label}</p>
-                  {app.description && (
-                    <p className="text-xs text-on-surface-variant mt-0.5 line-clamp-1">
-                      {app.description}
-                    </p>
-                  )}
-                </div>
-              </a>
-            ))}
-          </div>
+          <nav id={menuId} aria-label="Switch application" className="px-2 pb-2">
+            <ul>
+              {filteredApps.map((app) => (
+                <li key={app.id}>
+                  <a
+                    href={app.href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-colors hover:bg-surface-container focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
+                    <Icon name={app.icon} size={20} className="shrink-0 text-on-surface-variant" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate text-on-surface">{app.label}</p>
+                      {app.description && (
+                        <p className="text-xs text-on-surface-variant mt-0.5 line-clamp-1">
+                          {app.description}
+                        </p>
+                      )}
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       )}
 

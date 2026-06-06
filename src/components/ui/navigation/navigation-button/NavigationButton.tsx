@@ -150,8 +150,9 @@ export function NavigationButton({
 
       <button
         aria-label={label}
+        aria-current={selected ? "page" : undefined}
         className={cn(
-          "flex items-center justify-center transition-all duration-200 ease-in-out box-border relative z-10 w-10 h-10 disabled:opacity-50 disabled:cursor-not-allowed",
+          "flex items-center justify-center transition-all duration-200 ease-in-out box-border relative z-10 w-10 h-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
           customIcon ? "p-0 overflow-hidden" : "p-2.5",
           isHovered ? shapeStyles[variant][selKey].hover : shapeStyles[variant][selKey].rest,
           !isHovered && bgStyles[variant][selKey],
