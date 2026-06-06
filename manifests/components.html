@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/71 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">71/71 infos</a><span class="filter-pill ok" aria-disabled="true">262 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/71 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">71/71 infos</a><span class="filter-pill ok" aria-disabled="true">263 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -9890,9 +9890,9 @@ title: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SegmentedButton</h2>
       <div class="badges">
-        <label for="c-53-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">8 prop types</label>
+        <label for="c-53-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">9 prop types</label>
         <label for="c-53-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-53-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-53-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -9924,7 +9924,7 @@ title: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">8 prop types</span>
+              <span class="badge ok">9 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/inputs/segmented-button/SegmentedButton.tsx::SegmentedButton</code></pre>
             <pre><code>Props:</code></pre>
@@ -9946,7 +9946,14 @@ options: unknown
 
 size?: &quot;sm&quot; | &quot;md&quot; = &quot;md&quot;
 
-value: T</code></pre>
+value: T
+
+/**
+ * Visual layout. &quot;pills&quot; (default) renders gapped standalone buttons;
+ * &quot;boxed&quot; renders a bordered connected track with an inset selected pill.
+ * Per-option `tone` is honored only in &quot;pills&quot; mode.
+ */
+variant?: &quot;pills&quot; | &quot;boxed&quot; = &quot;pills&quot;</code></pre>
           </div>
         </div>
     
@@ -10042,6 +10049,30 @@ value: T</code></pre>
               
               <div class="hint">Disabled state</div>
               <pre><code>const Disabled = () =&gt; &lt;SegmentedButton options={sizeOptions} value=&quot;md&quot; aria-label=&quot;Select size&quot; disabled /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Boxed</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Boxed/connected track with an inset selected pill</div>
+              <pre><code>const Boxed = () =&gt; {
+    const [selected, setSelected] = useState(&quot;daily&quot;);
+
+    return (
+        &lt;SegmentedButton
+            disabled={false}
+            variant=&quot;boxed&quot;
+            options={[
+              { value: &quot;hourly&quot;, label: &quot;Hourly&quot; },
+              { value: &quot;daily&quot;, label: &quot;Daily&quot; },
+            ]}
+            value={selected}
+            onChange={setSelected}
+            aria-label=&quot;Granularity&quot; /&gt;
+    );
+};</code></pre>
             </div>
         </div>
     
