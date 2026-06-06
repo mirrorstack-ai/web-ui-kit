@@ -3,6 +3,16 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.2
+
+Additive component variant — adopted to replace chrome the consumer apps were
+hand-rolling (surfaced by the className-duplication audit). **No breaking
+changes**; all defaults unchanged.
+
+- `SegmentedButton`: new `variant="boxed"` — a bordered connected track with an
+  inset selected pill, alongside the default gapped `"pills"`. Exports
+  `SegmentedButtonVariant`. (#257)
+
 ## 0.4.1
 
 Internal cleanup from the structure-review follow-up. **No consumer-facing API
