@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2372,7 +2372,7 @@ onNavigate?: (href: string, event: MouseEvent&lt;HTMLAnchorElement&gt;) =&gt; vo
             </div>
             <pre><code>Component: src/components/ui/actions/button/Button.tsx::Button</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>color?: &quot;primary&quot; | &quot;secondary&quot; | &quot;tertiary&quot; | &quot;error&quot; | &quot;warning&quot; = &quot;primary&quot;
+            <pre><code>color?: Exclude&lt;Tone, &quot;success&quot;&gt; = &quot;primary&quot;
 
 fullWidth?: boolean = false
 
@@ -6297,7 +6297,7 @@ size?: number | string = 24</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>aria-label: string
 
-color?: &quot;primary&quot; | &quot;secondary&quot; | &quot;tertiary&quot; | &quot;error&quot; | &quot;warning&quot; = &quot;primary&quot;
+color?: Exclude&lt;Tone, &quot;success&quot;&gt; = &quot;primary&quot;
 
 icon: string
 
