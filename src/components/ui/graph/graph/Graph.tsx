@@ -259,7 +259,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     height,
     onNodeClick,
     selectedId,
-    nodeSize = 2,
+    nodeSize = 1,
     textSize = 1,
     lineSize = 1,
     showTags = false,
