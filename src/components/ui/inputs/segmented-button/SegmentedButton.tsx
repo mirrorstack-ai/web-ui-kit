@@ -1,5 +1,6 @@
 import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
+import { Icon } from "@/components/ui/media/icon/Icon";
 import type { ComponentMeta } from "@/types/component-meta";
 
 export const meta: ComponentMeta = {
@@ -13,6 +14,8 @@ export type SegmentedButtonOptionTone = "default" | "warning" | "muted";
 export interface SegmentedButtonOption<T extends string = string> {
   readonly value: T;
   readonly label: string;
+  /** Optional leading Material Symbols icon name. */
+  readonly icon?: string;
   /** Visual tone for the unselected state. Defaults to "default". */
   readonly tone?: SegmentedButtonOptionTone;
 }
@@ -97,7 +100,7 @@ export function SegmentedButton<T extends string = string>({
           disabled={disabled}
           aria-pressed={value === opt.value}
           className={cn(
-            "font-medium transition-colors",
+            "font-medium transition-colors inline-flex items-center justify-center gap-1.5",
             sizeStyles[size],
             buttonStyle(value === opt.value, opt.tone, inverse),
             disabled
@@ -105,6 +108,7 @@ export function SegmentedButton<T extends string = string>({
               : "cursor-pointer",
           )}
         >
+          {opt.icon && <Icon name={opt.icon} size={size === "sm" ? 16 : 18} />}
           {opt.label}
         </button>
       ))}

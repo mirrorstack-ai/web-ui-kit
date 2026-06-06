@@ -15,6 +15,7 @@
 //
 // See `mirrorstack-docs/architecture/notch-grid-v2/02-api.md` + `05-sub-drag.md`.
 
+import { defaultPrimitives } from "./primitives";
 import {
   memo,
   useCallback,
@@ -354,7 +355,7 @@ export function NotchGrid({
   blockMin = BLOCK_SIZE,
   gap = 8,
   nest = true,
-  primitives,
+  primitives: customPrimitives,
   onItemError,
   draggable = false,
   onItemMove,
@@ -362,6 +363,10 @@ export function NotchGrid({
   className,
   style,
 }: NotchGridProps) {
+  const primitives = useMemo(
+    () => customPrimitives ? { ...defaultPrimitives, ...customPrimitives } : defaultPrimitives,
+    [customPrimitives],
+  );
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
 

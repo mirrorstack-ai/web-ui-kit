@@ -23,6 +23,7 @@ type Story = StoryObj<typeof GraphSideSetting>;
 const Controlled = () => {
   const [value, setValue] = useState<GraphSideSettingValue>({
     nodeSize: 1,
+    textSize: 1,
     lineSize: 1,
     showTags: false,
     repulsion: 1500,

@@ -153,7 +153,13 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
   // focused/filled the existing peer-focus / peer-not-placeholder-shown
   // classes lift it to the original top-of-border position regardless
   // of icon, so we only override the rest-state left.
-  const baseLabelRestLeft = isXs ? "left-2" : isSmall ? "left-3" : "left-4";
+  // Rest-position left, chosen so the label TEXT aligns with the input text.
+  // The label carries its own px-1 (4px), so its text sits 4px right of `left-N`;
+  // the input text sits at pl-{2,3,4} = {8,12,16}px with no extra inset. To match,
+  // left must be one step less than the input's pl (left-N + 4px(px-1) == pl(N+1)).
+  // Without this the resting placeholder was 4px right of both the value and the
+  // floated label (which is already left-{2,2.5,3}).
+  const baseLabelRestLeft = isXs ? "left-1" : isSmall ? "left-2" : "left-3";
   const iconLabelRestLeft = isXs ? "left-9" : isSmall ? "left-10" : "left-12";
 
   const labelClassName = cn(

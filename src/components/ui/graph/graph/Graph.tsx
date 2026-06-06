@@ -63,6 +63,8 @@ export interface GraphProps {
   selectedId?: string;
   /** Multiplier applied to node radii. Default 1. */
   nodeSize?: number;
+  /** Multiplier applied to label font size. Default 1. */
+  textSize?: number;
   /** Multiplier applied to edge stroke width. Default 1. */
   lineSize?: number;
   /** Render each node's tag below its always-visible label. Default false. */
@@ -85,6 +87,8 @@ export interface GraphProps {
    * resync any "playing" UI state (e.g. a play/stop toolbar button).
    */
   onPlaybackEnd?: () => void;
+  /** Allow scroll/pinch to zoom. Default true. Set false on scrollable pages. */
+  scrollZoom?: boolean;
   className?: string;
 }
 
@@ -210,14 +214,12 @@ const DEFAULT_H = 400;
 // when revealedRef changes.
 const REVEAL_TRANSITION_STYLE = { transition: "opacity 200ms ease" };
 
-// Shared text-style object so we don't allocate a new style literal per
-// node per frame. Includes a CSS opacity transition so labels fade in /
-// out smoothly when the LOD value changes (zoom, hover, focus) rather
-// than popping on/off.
-const LABEL_TEXT_STYLE = {
-  fontSize: 10,
-  transition: "opacity 200ms ease",
-};
+// Base font size for node labels. Multiplied by nodeSize so labels grow
+// in step with circles when the consumer bumps node size — the per-frame
+// style object is memoised below in the component so we still avoid
+// allocating a literal per node per frame.
+const LABEL_BASE_FONT_SIZE = 13;
+const LABEL_TRANSITION = "opacity 200ms ease";
 
 // Per-node LOD: target opacity (0..1) for each label at the current zoom.
 // Anchors (pinned), interaction state (focused/hovered), and synthetic
@@ -257,13 +259,15 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     height,
     onNodeClick,
     selectedId,
-    nodeSize = 1,
+    nodeSize = 2,
+    textSize = 1,
     lineSize = 1,
     showTags = false,
     repulsion = DEFAULT_REPULSION,
     linkDistance = DEFAULT_LINK_DISTANCE,
     colors,
     onPlaybackEnd,
+    scrollZoom = true,
     className,
   },
   ref,
@@ -296,6 +300,9 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
           if (n.pin) {
             n.x = n.pin.x * w;
             n.y = n.pin.y * h;
+          } else {
+            n.x = (n.x / prev.w) * w;
+            n.y = (n.y / prev.h) * h;
           }
         }
         setSize({ w, h });
@@ -419,6 +426,17 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     }
     return out;
   }, [colors]);
+
+  // Memoised once per nodeSize so every <text> element points at the
+  // same object literal — keeps the React reconciler happy across the
+  // RAF redraw cycle.
+  const labelTextStyle = useMemo(
+    () => ({
+      fontSize: LABEL_BASE_FONT_SIZE * textSize,
+      transition: LABEL_TRANSITION,
+    }),
+    [textSize],
+  );
 
   // RAF loop reads edges from a ref so a new array identity from the
   // consumer doesn't tear down and restart the simulation.
@@ -744,6 +762,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     const svg = svgRef.current;
     if (!svg) return;
     const onWheel = (e: WheelEvent) => {
+      if (!scrollZoom) return;
       e.preventDefault();
       const cursor = toView(e.clientX, e.clientY);
       const cur = viewRef.current;
@@ -762,7 +781,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     };
     svg.addEventListener("wheel", onWheel, { passive: false });
     return () => svg.removeEventListener("wheel", onWheel);
-  }, [toView]);
+  }, [toView, scrollZoom]);
 
   const focused = draggingId ?? hoveredId ?? selectedId ?? null;
   const focusedNeighbors = focused
@@ -865,10 +884,10 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                   />
                   <text
                     x={n.x}
-                    y={n.y + r + 12}
+                    y={n.y + r + LABEL_BASE_FONT_SIZE * textSize}
                     textAnchor="middle"
                     className="fill-on-surface-variant pointer-events-none"
-                    style={LABEL_TEXT_STYLE}
+                    style={labelTextStyle}
                     opacity={labelOpacity(
                       n.degree,
                       n.pinned,

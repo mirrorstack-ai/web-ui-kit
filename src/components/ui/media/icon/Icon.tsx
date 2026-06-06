@@ -10,8 +10,11 @@ export const meta: ComponentMeta = {
 export interface IconProps {
   /** Material Symbols Rounded icon name (e.g. "edit", "delete", "settings") */
   name: string;
-  /** Icon size in pixels */
-  size?: number;
+  /**
+   * Icon size. A number is treated as pixels; a string is used as a raw CSS
+   * font-size (e.g. "1em" to match the surrounding text exactly).
+   */
+  size?: number | string;
   className?: string;
   /** Accessible label. If omitted, icon is decorative (aria-hidden). */
   "aria-label"?: string;
