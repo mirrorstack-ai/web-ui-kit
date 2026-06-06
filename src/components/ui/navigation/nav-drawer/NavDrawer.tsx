@@ -7,7 +7,7 @@ import {
   type NavItemVariant,
 } from "@/components/ui/navigation/nav-item/NavItem";
 import { Surface } from "@/components/ui/surfaces/surface/Surface";
-import { SectionLabel } from "@/components/ui/data/section-label/SectionLabel";
+import { SectionLabel } from "@/components/ui/display/section-label/SectionLabel";
 
 export const meta: ComponentMeta = {
   name: "NavDrawer",

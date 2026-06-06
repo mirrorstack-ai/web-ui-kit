@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { DataList, type DataListItem } from "./DataList";
 
 const meta: Meta<typeof DataList> = {
-  title: "UI/Notch/Blocks/List",
+  title: "UI/Blocks/List",
   component: DataList,
   parameters: { layout: "centered" },
 };

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Timeline, type TimelineEntry } from "./Timeline";
 
 const meta: Meta<typeof Timeline> = {
-  title: "UI/Notch/Blocks/Timeline",
+  title: "UI/Blocks/Timeline",
   component: Timeline,
   parameters: { layout: "centered" },
 };

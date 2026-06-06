@@ -18,6 +18,8 @@ export const meta: ComponentMeta = {
   description: "Multi-variant button with icons and loading state",
 };
 
+export type { ButtonVariant, ButtonColor, ButtonSize } from "@/components/ui/actions/shared/button-styles";
+
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   color?: ButtonColor;

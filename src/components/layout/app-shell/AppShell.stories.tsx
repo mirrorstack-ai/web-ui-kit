@@ -4,7 +4,7 @@ import { AppShell } from "./AppShell";
 import { NavigationRail } from "@/components/ui/navigation/navigation-rail/NavigationRail";
 import { NavigationButton } from "@/components/ui/navigation/navigation-button/NavigationButton";
 import { AppSwitcher } from "@/components/ui/navigation/app-switcher/AppSwitcher";
-import { Logo } from "@/components/ui/media/logo-mirrorstack/LogoMirrorStack";
+import { Logo } from "@/components/ui/media/logo/Logo";
 import { NavDrawer, type NavDrawerItem } from "@/components/ui/navigation/nav-drawer/NavDrawer";
 import { Avatar } from "@/components/ui/media/avatar/Avatar";
 import { Button } from "@/components/ui/actions/button/Button";

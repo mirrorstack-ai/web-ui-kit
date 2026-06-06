@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AgentSidebarMultiQuestion } from "./AgentSidebarMultiQuestion";
 
 const meta: Meta = {
-  title: "UI/Agent/Asks",
+  title: "UI/Agent/MultiQuestion",
   decorators: [
     (Story) => (
       <div className="h-[640px] w-[420px] rounded-2xl overflow-hidden flex flex-col bg-on-background p-4 overflow-y-auto">

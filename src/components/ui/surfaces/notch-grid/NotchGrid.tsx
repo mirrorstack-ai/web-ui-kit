@@ -15,7 +15,7 @@
 //
 // See `mirrorstack-docs/architecture/notch-grid-v2/02-api.md` + `05-sub-drag.md`.
 
-import { defaultPrimitives } from "./primitives";
+import type { ItemKey, PrimitiveRegistry } from "./types";
 import {
   memo,
   useCallback,
@@ -53,7 +53,9 @@ export const meta: ComponentMeta = {
 
 // --- Public types ----------------------------------------------------------
 
-export type ItemKey = string;
+// ItemKey + PrimitiveRegistry live in ./types (breaks the NotchGrid<->registry
+// import cycle); imported above and re-exported here for the public barrel.
+export type { ItemKey, PrimitiveRegistry } from "./types";
 
 /** Free-form payload for a renderable primitive. The grid passes the entire
  *  `ui` object to the primitive component as its props — `type` selects which
@@ -87,7 +89,7 @@ export interface NotchSubItem {
   ui: NotchGridUI;
 }
 
-export type PrimitiveRegistry = Record<string, ComponentType<Record<string, unknown>>>;
+// PrimitiveRegistry is defined in ./types and re-exported above.
 
 export interface NotchGridError {
   kind: "unknown-primitive";
@@ -355,7 +357,7 @@ export function NotchGrid({
   blockMin = BLOCK_SIZE,
   gap = 8,
   nest = true,
-  primitives: customPrimitives,
+  primitives = {},
   onItemError,
   draggable = false,
   onItemMove,
@@ -363,10 +365,9 @@ export function NotchGrid({
   className,
   style,
 }: NotchGridProps) {
-  const primitives = useMemo(
-    () => customPrimitives ? { ...defaultPrimitives, ...customPrimitives } : defaultPrimitives,
-    [customPrimitives],
-  );
+  // No batteries-included default: consumers opt in with
+  // `primitives={defaultPrimitives}` (from @/components/registry/notch-primitives)
+  // so grid-only usage doesn't bundle every block component.
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
 

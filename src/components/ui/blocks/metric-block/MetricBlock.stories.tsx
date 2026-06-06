@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { MetricBlock } from "./MetricBlock";
 
 const meta: Meta<typeof MetricBlock> = {
-  title: "UI/Notch/Blocks/Metric",
+  title: "UI/Blocks/Metric",
   component: MetricBlock,
   args: {
     icon: "apps",

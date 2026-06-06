@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Logo } from "./LogoMirrorStack";
+import { Logo } from "./Logo";
 
 const meta: Meta<typeof Logo> = {
   title: "UI/Media/Logo",

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Gauge } from "./Gauge";
 
 const meta: Meta<typeof Gauge> = {
-  title: "UI/Notch/Blocks/Gauge",
+  title: "UI/Blocks/Gauge",
   component: Gauge,
   parameters: { layout: "centered" },
 };

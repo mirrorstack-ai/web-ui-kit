@@ -8,7 +8,7 @@ import { SegmentedButton } from "@/components/ui/inputs/segmented-button/Segment
 import { Switch } from "@/components/ui/inputs/switch/Switch";
 
 export const meta: ComponentMeta = {
-  name: "AgentAsks",
+  name: "AgentSidebarMultiQuestion",
   description:
     "Multi-question prompt block — list or tabs layout, mixes text, choice (segmented/cards), and switch questions with a single submit gate.",
 };

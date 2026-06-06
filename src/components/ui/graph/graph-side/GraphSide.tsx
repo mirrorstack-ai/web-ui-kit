@@ -2,60 +2,17 @@ import { useRef, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { GraphSideHeader } from "./GraphSideHeader";
+import type { GraphSideNode } from "./types";
 
-export { GraphSideHeader, type GraphSideHeaderProps } from "./GraphSideHeader";
-export {
-  GraphSideContent,
-  type GraphSideContentProps,
-  type GraphSideContentItem,
-} from "./GraphSideContent";
-export {
-  GraphSideSetting,
-  type GraphSideSettingProps,
-  type GraphSideSettingValue,
-} from "./GraphSideSetting";
-export {
-  GraphSideGroup,
-  DEFAULT_GROUP_PALETTE,
-  type GraphSideGroupProps,
-  type GraphSideGroupItem,
-} from "./GraphSideGroup";
-export {
-  GraphSideSearch,
-  type GraphSideSearchProps,
-} from "./GraphSideSearch";
-export {
-  GraphSideNodeSummary,
-  type GraphSideNodeSummaryProps,
-} from "./GraphSideNodeSummary";
-export {
-  GraphSideNodeDetail,
-  type GraphSideNodeDetailProps,
-} from "./GraphSideNodeDetail";
-export {
-  GraphSideNodeReferences,
-  type GraphSideNodeReferencesProps,
-  type GraphSideNodeReference,
-} from "./GraphSideNodeReferences";
+// GraphSideNode lives in ./types so siblings can import it without cycling back
+// through GraphSide. Re-exported here for back-compat.
+export type { GraphSideNode } from "./types";
 
 export const meta: ComponentMeta = {
   name: "GraphSide",
   description:
     "Slide-in side panel showing details for a selected Graph node. Renders inside a relative-positioned parent (e.g. GraphLayout's side slot).",
 };
-
-/**
- * Minimal node shape the panel needs. Structurally compatible with
- * Graph's GraphNode so the same value can be passed to both.
- */
-export interface GraphSideNode {
-  id: string;
-  label: string;
-  /** Single tag rendered as a Badge. Combined with `tags` if both are set. */
-  tag?: string;
-  /** Multiple tags rendered as Badges in the header. */
-  tags?: string[];
-}
 
 export interface GraphSideProps<T extends GraphSideNode = GraphSideNode> {
   node: T | null;

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { StatusIndicator, type StatusLevel } from "./StatusIndicator";
 
 const meta: Meta<typeof StatusIndicator> = {
-  title: "UI/Notch/Blocks/Status",
+  title: "UI/Blocks/Status",
   component: StatusIndicator,
   parameters: { layout: "centered" },
 };
