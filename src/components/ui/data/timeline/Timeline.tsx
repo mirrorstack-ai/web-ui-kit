@@ -45,29 +45,25 @@ export function Timeline({ entries, className }: TimelineProps) {
           ? statusColor[entry.status]
           : undefined;
 
+        const isLast = index === entries.length - 1;
+
         return (
-          <div key={index} className="flex">
-            {/* Left gutter */}
-            <div className="relative w-[24px] shrink-0 ml-[7px]">
-              {/* Connector segments drawn ABOVE and BELOW the icon (never over
-                  it) — the icon box spans 7–21px, so the line links the nodes
-                  without crossing the glyphs. */}
-              {index > 0 && (
-                <div className="absolute left-0 top-0 h-[7px] w-px bg-current/10" />
-              )}
-              {index < entries.length - 1 && (
-                <div className="absolute left-0 top-[21px] bottom-0 w-px bg-current/10" />
-              )}
+          <div key={index} className="flex gap-2.5">
+            {/* Rail: node at top, connector flowing down to the next node.
+                items-center keeps the line aligned with the node; the line is
+                drawn only BELOW the node, so it links nodes without ever
+                crossing a glyph. */}
+            <div className="flex w-4 shrink-0 flex-col items-center">
               {entry.icon ? (
                 <span
-                  className="absolute -left-[7px] top-[7px]"
+                  className="leading-none"
                   style={color ? { color } : { opacity: 0.5 }}
                 >
                   <Icon name={entry.icon} size={14} />
                 </span>
               ) : (
-                <div
-                  className="absolute -left-[3px] top-[9px] size-[6px] rounded-full"
+                <span
+                  className="mt-[3px] block size-[7px] rounded-full"
                   style={
                     color
                       ? { backgroundColor: color }
@@ -75,12 +71,13 @@ export function Timeline({ entries, className }: TimelineProps) {
                   }
                 />
               )}
+              {!isLast && <div className="mt-1 w-px flex-1 bg-current/15" />}
             </div>
 
-            {/* Right content */}
-            <div className="flex-1 min-w-0 py-1.5">
-              <p className="text-xs">{entry.text}</p>
-              <p className="text-[10px] opacity-40">{entry.time}</p>
+            {/* Content */}
+            <div className="min-w-0 flex-1 pb-3">
+              <p className="text-xs leading-tight">{entry.text}</p>
+              <p className="mt-0.5 text-[10px] opacity-40">{entry.time}</p>
             </div>
           </div>
         );
