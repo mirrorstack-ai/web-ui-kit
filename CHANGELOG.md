@@ -5,16 +5,13 @@ Notable API additions and breaking changes. For the full commit log, see
 
 ## 0.4.2
 
-Additive component variants — adopted to replace chrome the consumer apps were
+Additive component variant — adopted to replace chrome the consumer apps were
 hand-rolling (surfaced by the className-duplication audit). **No breaking
 changes**; all defaults unchanged.
 
 - `SegmentedButton`: new `variant="boxed"` — a bordered connected track with an
   inset selected pill, alongside the default gapped `"pills"`. Exports
   `SegmentedButtonVariant`. (#257)
-- `SettingRow`: new `surface="muted"` — `bg-surface-container-low` + a faint
-  (`/40`) border for lighter, lower-emphasis rows; a `tone` accent still takes
-  precedence. (#258)
 
 ## 0.4.1
 
