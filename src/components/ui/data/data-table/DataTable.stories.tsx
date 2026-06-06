@@ -28,7 +28,7 @@ const ROUTE_ROWS = [
 /** Six API routes with method, path, and scope columns. */
 export const Routes: Story = {
   render: () => (
-    <div className="h-[300px] w-[400px] rounded-xl border border-outline-variant text-on-surface">
+    <div className="h-[300px] w-[400px] rounded-xl border border-outline-variant text-on-surface px-2 py-4">
       <DataTable columns={[...ROUTE_COLUMNS]} rows={ROUTE_ROWS} />
     </div>
   ),
@@ -37,7 +37,7 @@ export const Routes: Story = {
 /** Four permission rows — name (mono) and description. */
 export const Permissions: Story = {
   render: () => (
-    <div className="h-[200px] w-[400px] rounded-xl border border-outline-variant text-on-surface">
+    <div className="h-[200px] w-[400px] rounded-xl border border-outline-variant text-on-surface px-2 py-4">
       <DataTable
         columns={[
           { key: "name", label: "Name", mono: true },
@@ -57,7 +57,7 @@ export const Permissions: Story = {
 /** Same as Routes but with `compact` enabled for tighter row padding. */
 export const Compact: Story = {
   render: () => (
-    <div className="h-[300px] w-[400px] rounded-xl border border-outline-variant text-on-surface">
+    <div className="h-[300px] w-[400px] rounded-xl border border-outline-variant text-on-surface px-2 py-4">
       <DataTable columns={[...ROUTE_COLUMNS]} rows={ROUTE_ROWS} compact />
     </div>
   ),

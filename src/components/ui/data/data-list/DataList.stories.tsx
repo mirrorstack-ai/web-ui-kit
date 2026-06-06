@@ -52,7 +52,7 @@ export const Issues: Story = {
   args: { items: issueItems },
   decorators: [
     (Story) => (
-      <div className="w-[300px] h-[300px] border border-outline-variant rounded-xl text-on-surface p-2">
+      <div className="w-[300px] h-[300px] border border-outline-variant rounded-xl text-on-surface px-2 py-4">
         <Story />
       </div>
     ),
@@ -90,7 +90,7 @@ export const InstalledApps: Story = {
   args: { items: appItems },
   decorators: [
     (Story) => (
-      <div className="w-[300px] h-[300px] border border-outline-variant rounded-xl text-on-surface p-2">
+      <div className="w-[300px] h-[300px] border border-outline-variant rounded-xl text-on-surface px-2 py-4">
         <Story />
       </div>
     ),
@@ -105,7 +105,7 @@ export const Empty: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[200px] h-[150px] border border-outline-variant rounded-xl text-on-surface p-2">
+      <div className="w-[200px] h-[150px] border border-outline-variant rounded-xl text-on-surface px-2 py-4">
         <Story />
       </div>
     ),
@@ -124,7 +124,7 @@ export const ManyItems: Story = {
   args: { items: manyItems },
   decorators: [
     (Story) => (
-      <div className="w-[300px] h-[300px] border border-outline-variant rounded-xl text-on-surface p-2">
+      <div className="w-[300px] h-[300px] border border-outline-variant rounded-xl text-on-surface px-2 py-4">
         <Story />
       </div>
     ),

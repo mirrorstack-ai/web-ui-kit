@@ -46,8 +46,8 @@ export interface BlockShapeProps {
   strokeWidth?: number;
   /** Content rendered on top of the shape (clipped to the shape's outline). */
   children?: ReactNode;
-  /** Padding (px) on the content layer. Default 16. */
-  pad?: number;
+  /** Padding on the content layer. Default 16px top/bottom, 8px sides. */
+  pad?: number | string;
   /** Skip clipping the content layer to the outline. */
   noClip?: boolean;
   className?: string;
@@ -65,7 +65,7 @@ export function BlockShape({
   stroke = "var(--color-outline-variant)",
   strokeWidth = 1,
   children,
-  pad = 16,
+  pad = "16px 8px",
   noClip = false,
   className,
   style,

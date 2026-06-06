@@ -18,7 +18,7 @@ const Wrapper = ({
   children: React.ReactNode;
 }) => (
   <div
-    className="border border-outline-variant rounded-xl p-2 text-on-surface"
+    className="border border-outline-variant rounded-xl px-2 py-4 text-on-surface"
     style={{ width: size, height: size }}
   >
     {children}

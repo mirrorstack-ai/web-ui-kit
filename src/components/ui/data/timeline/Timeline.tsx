@@ -38,7 +38,10 @@ export function Timeline({ entries, className }: TimelineProps) {
 
   return (
     <div
-      className={cn("h-full w-full overflow-y-auto [scrollbar-width:thin]", className)}
+      className={cn(
+        "h-full w-full overflow-y-auto [scrollbar-width:thin]",
+        className,
+      )}
     >
       {entries.map((entry, index) => {
         const color = entry.status && entry.status !== "default"
@@ -71,7 +74,7 @@ export function Timeline({ entries, className }: TimelineProps) {
                   }
                 />
               )}
-              {!isLast && <div className="mt-1 w-px flex-1 bg-current/15" />}
+              {!isLast && <div className="mb-1 w-px flex-1 bg-current/15" />}
             </div>
 
             {/* Content */}

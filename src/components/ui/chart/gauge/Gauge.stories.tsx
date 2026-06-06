@@ -11,7 +11,7 @@ export default meta;
 type Story = StoryObj<typeof Gauge>;
 
 const wrap = (children: React.ReactNode) => (
-  <div className="h-[200px] w-[200px] rounded-xl border border-outline-variant p-2 text-on-surface">
+  <div className="h-[200px] w-[200px] rounded-xl border border-outline-variant px-2 py-4 text-on-surface">
     {children}
   </div>
 );

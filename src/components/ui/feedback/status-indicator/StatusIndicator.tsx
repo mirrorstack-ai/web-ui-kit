@@ -54,7 +54,7 @@ export function StatusIndicator({
   const shouldPulse = pulse ?? defaultPulse[status];
 
   return (
-    <div className={cn("h-full w-full flex flex-col justify-between p-1", className)}>
+    <div className={cn("h-full w-full flex flex-col justify-between", className)}>
       {/* Top section: dot or icon */}
       <div>
         {icon ? (

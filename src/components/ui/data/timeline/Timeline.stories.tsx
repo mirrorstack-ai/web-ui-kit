@@ -20,7 +20,7 @@ const Wrapper = ({
   height?: number;
 }) => (
   <div
-    className="border border-outline-variant rounded-xl text-on-surface"
+    className="border border-outline-variant rounded-xl text-on-surface px-2 py-4"
     style={{ width, height }}
   >
     {children}

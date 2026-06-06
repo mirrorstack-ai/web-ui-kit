@@ -124,8 +124,8 @@ export interface NotchGridProps {
 
 // --- Internal helpers ------------------------------------------------------
 
-/** Content inset (px) inside a tile / sub-cell. Matches BlockShape's default. */
-const CONTENT_PAD = 16;
+/** Content inset inside a tile / sub-cell (8px sides, 16px top/bottom). Matches BlockShape's default. */
+const CONTENT_PAD = "16px 8px";
 
 /** Pointer capture, tolerant of test envs (jsdom) that lack the API. */
 function safePointerCapture(el: Element, pointerId: number): void {

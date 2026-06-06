@@ -11,7 +11,7 @@ export default meta;
 type Story = StoryObj<typeof StarRating>;
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="border-outline-variant text-on-surface rounded-xl border p-2">
+  <div className="border-outline-variant text-on-surface rounded-xl border px-2 py-4">
     {children}
   </div>
 );

@@ -43,7 +43,7 @@ export function Gauge({ value, label, format, thresholds, className }: GaugeProp
   const displayText = format ?? `${value}%`;
 
   return (
-    <div className={cn("flex h-full w-full flex-col items-center justify-center p-1", className)}>
+    <div className={cn("flex h-full w-full flex-col items-center justify-center", className)}>
       <svg
         className="aspect-square w-full max-w-[80%]"
         viewBox="0 0 100 100"
