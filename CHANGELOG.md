@@ -3,6 +3,19 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.1
+
+Internal cleanup from the structure-review follow-up. **No consumer-facing API
+change** (no export names, props, or behavior changed).
+
+- Re-sectioned the public barrel (`index.ts`) by category (export surface
+  verified identical).
+- `ButtonColor` is now derived from `Tone` (`Exclude<Tone, "success">`) — same
+  five members.
+- graph-side cards compose `Surface` instead of a duplicated class constant.
+- CONTRIBUTING: corrected the component-category list and added the
+  vocabulary + hook-placement conventions.
+
 ## 0.4.0
 
 Minor bump (not patch) because this release contains a breaking **behavior**
