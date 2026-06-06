@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3785,7 +3785,7 @@ rows: Record&lt;string, string | undefined&gt;[]</code></pre>
               
               <div class="hint">Six API routes with method, path, and scope columns.</div>
               <pre><code>const Routes = () =&gt; (
-  &lt;div className=&quot;h-[300px] w-[400px] rounded-xl border border-outline-variant text-on-surface&quot;&gt;
+  &lt;div className=&quot;h-[300px] w-[400px] rounded-xl border border-outline-variant text-on-surface px-2 py-4&quot;&gt;
     &lt;DataTable columns={[...ROUTE_COLUMNS]} rows={ROUTE_ROWS} /&gt;
   &lt;/div&gt;
 );</code></pre>
@@ -3798,7 +3798,7 @@ rows: Record&lt;string, string | undefined&gt;[]</code></pre>
               
               <div class="hint">Four permission rows — name (mono) and description.</div>
               <pre><code>const Permissions = () =&gt; (
-  &lt;div className=&quot;h-[200px] w-[400px] rounded-xl border border-outline-variant text-on-surface&quot;&gt;
+  &lt;div className=&quot;h-[200px] w-[400px] rounded-xl border border-outline-variant text-on-surface px-2 py-4&quot;&gt;
     &lt;DataTable
       columns={[
         { key: &quot;name&quot;, label: &quot;Name&quot;, mono: true },
@@ -3822,7 +3822,7 @@ rows: Record&lt;string, string | undefined&gt;[]</code></pre>
               
               <div class="hint">Same as Routes but with `compact` enabled for tighter row padding.</div>
               <pre><code>const Compact = () =&gt; (
-  &lt;div className=&quot;h-[300px] w-[400px] rounded-xl border border-outline-variant text-on-surface&quot;&gt;
+  &lt;div className=&quot;h-[300px] w-[400px] rounded-xl border border-outline-variant text-on-surface px-2 py-4&quot;&gt;
     &lt;DataTable columns={[...ROUTE_COLUMNS]} rows={ROUTE_ROWS} compact /&gt;
   &lt;/div&gt;
 );</code></pre>
