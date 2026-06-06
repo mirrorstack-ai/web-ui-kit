@@ -169,22 +169,35 @@ export { Button, type ButtonProps } from "./components/ui/actions/button/Button"
 ## Adding a layout
 
 ```
-src/components/layout/<category>/<layout>/
+src/components/layout/<layout>/
   Layout.tsx
   Layout.stories.tsx
 ```
 
 Layouts compose UI components into page-level structures. They get stories (for visual review) but no unit tests — they're covered by app-level E2E tests.
 
-Private subcomponents that only a layout uses live in the same folder:
+Private subcomponents that only a layout uses live in the same folder.
 
-```
-layout/app-shell/app-shell/
-  AppShell.tsx
-  AppShell.stories.tsx
-  AgentSidebarHeader.tsx    # internal, not exported
-  AgentSidebarInput.tsx     # internal, not exported
-```
+## Component vocabulary
+
+Use one consistent prop name per axis so the kit reads predictably:
+
+| Axis | Prop | Values | Notes |
+|------|------|--------|-------|
+| Palette | `tone` / `color` | from `Tone` — `primary` `secondary` `tertiary` `error` `warning` `success` | Derive subsets from `Tone` (`type ButtonColor = Exclude<Tone, "success">`) instead of re-listing members, so a palette change propagates. |
+| Structural style | `variant` | component-specific (`filled` `tonal` `outline` `text`, …) | Shape/emphasis, never color. |
+| Scale | `size` | `xs` `sm` `md` `lg` (subset as needed) | |
+| State | `status` / `level` | domain states (`online`, `offline`, …) | Distinct from palette — don't fold into `tone`. |
+
+Don't reintroduce an `info` variant (dropped in 0.3.9 — use `primary`/`secondary`).
+
+## Hook placement
+
+| Hook kind | Lives in |
+|-----------|----------|
+| Context-bound (uses a provider) | `src/context/<context>/`, next to the provider |
+| Component-bound (1:1 with one component) | the component's own folder (e.g. `use-editable-fields.ts`) |
+| Cross-cutting (shared by unrelated components) | `src/hooks/` (e.g. `useClickOutside`, `useAutoGrowTextarea`) — internal, not exported from `index.ts` |
 
 ## Testing guidelines
 
