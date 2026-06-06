@@ -15,24 +15,24 @@ describe("AppSwitcher", () => {
     expect(screen.getByText("Account")).toBeInTheDocument();
   });
 
-  it("opens menu on click", () => {
+  it("opens the switcher panel on click", () => {
     render(<AppSwitcher currentApp="Account" logo={<span>L</span>} apps={apps} activeAppId="account" />);
-    fireEvent.click(screen.getByRole("button"));
-    expect(screen.getByRole("menu")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Current app/ }));
+    expect(screen.getByRole("navigation", { name: "Switch application" })).toBeInTheDocument();
   });
 
-  it("filters out active app from menu", () => {
+  it("filters out the active app from the panel", () => {
     render(<AppSwitcher currentApp="Account" logo={<span>L</span>} apps={apps} activeAppId="account" />);
-    fireEvent.click(screen.getByRole("button"));
-    expect(screen.queryByRole("menuitem", { name: /Account/ })).not.toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: /Apps/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Current app/ }));
+    expect(screen.queryByRole("link", { name: /Account/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Apps/ })).toBeInTheDocument();
   });
 
   it("closes on Escape", () => {
     render(<AppSwitcher currentApp="Account" logo={<span>L</span>} apps={apps} activeAppId="account" />);
-    fireEvent.click(screen.getByRole("button"));
-    expect(screen.getByRole("menu")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Current app/ }));
+    expect(screen.getByRole("navigation", { name: "Switch application" })).toBeInTheDocument();
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Switch application" })).not.toBeInTheDocument();
   });
 });
