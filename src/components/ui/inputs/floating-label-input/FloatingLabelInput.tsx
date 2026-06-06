@@ -22,8 +22,16 @@ type BaseProps = {
   error?: boolean;
   helperText?: string;
   size?: FloatingLabelInputSize;
-  /** Hide the floating label (useful for compact inline inputs) */
+  /** Hide the floating label (useful for compact inline inputs). When set,
+   *  the field's accessible name falls back to an injected `aria-label`
+   *  derived from `label`. If an external `<label htmlFor>` already names
+   *  the field, use `labelledExternally` instead to avoid double-labelling. */
   hideLabel?: boolean;
+  /** Suppress the floating label WITHOUT injecting an `aria-label`. Use when
+   *  an external `<label htmlFor>` (e.g. from EditableField) already provides
+   *  the accessible name — this keeps a single name source and avoids the
+   *  double-labelling that `hideLabel` would cause. */
+  labelledExternally?: boolean;
   /** Use inverse-themed tokens (for placement on inverse surfaces such as
    *  the agent sidebar where the surrounding bg is `on-background`). */
   inverse?: boolean;
@@ -61,6 +69,7 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     disabled,
     size = "md",
     hideLabel = false,
+    labelledExternally = false,
     inverse = false,
     leadingIcon,
     multiline,
@@ -76,6 +85,12 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     ? ((props as InputModeProps).type ?? "text")
     : undefined;
 
+  // Suppress the floating label in either hide mode; only `hideLabel`
+  // injects an `aria-label` (labelledExternally relies on the external
+  // <label htmlFor> for the accessible name — single name source).
+  const labelHidden = hideLabel || labelledExternally;
+  const injectedAriaLabel = hideLabel ? label : undefined;
+
   const inputType =
     showPasswordToggle && type === "password"
       ? showPassword
@@ -90,7 +105,7 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
 
   const userPlaceholder = (props as { placeholder?: string }).placeholder;
   const hasValue = typeof value === "string" ? value.length > 0 : !!value;
-  const visiblePlaceholder = hideLabel
+  const visiblePlaceholder = labelHidden
     ? (userPlaceholder || label)
     : (focused && !hasValue && userPlaceholder ? userPlaceholder : " ");
 
@@ -202,36 +217,102 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
           </span>
         )}
         {multiline ? (
-          <textarea
-            id={id}
-            disabled={disabled}
-            maxLength={maxLength}
-            value={value as string}
-            onChange={(props as TextareaModeProps).onChange}
-            rows={(props as TextareaModeProps).rows}
-            className={fieldClassName}
-            placeholder={visiblePlaceholder}
-            aria-label={hideLabel ? label : undefined}
-            aria-describedby={counterId}
-            onFocus={handleFocus as React.FocusEventHandler<HTMLTextAreaElement>}
-            onBlur={handleBlur as React.FocusEventHandler<HTMLTextAreaElement>}
-          />
+          (() => {
+            // Destructure OUT the component-managed props so the remaining
+            // `rest` (name, required, readOnly, autoFocus, onKeyDown, onPaste,
+            // aria-describedby, inputMode, etc.) flows straight through.
+            const {
+              value: _value,
+              onChange,
+              onFocus: _onFocus,
+              onBlur: _onBlur,
+              id: _id,
+              disabled: _disabled,
+              maxLength: _maxLength,
+              rows,
+              label: _label,
+              error: _error,
+              helperText: _helperText,
+              size: _size,
+              hideLabel: _hideLabel,
+              labelledExternally: _labelledExternally,
+              inverse: _inverse,
+              leadingIcon: _leadingIcon,
+              containerClassName: _containerClassName,
+              className: _className,
+              multiline: _multiline,
+              "aria-describedby": consumerDescribedBy,
+              ...rest
+            } = props as TextareaModeProps;
+            // Merge the component-managed counter id with any consumer-provided
+            // aria-describedby so neither clobbers the other.
+            const describedBy =
+              [consumerDescribedBy, counterId].filter(Boolean).join(" ") ||
+              undefined;
+            return (
+              <textarea
+                {...rest}
+                id={id}
+                disabled={disabled}
+                maxLength={maxLength}
+                value={value as string}
+                onChange={onChange}
+                rows={rows}
+                className={fieldClassName}
+                placeholder={visiblePlaceholder}
+                aria-label={injectedAriaLabel ?? rest["aria-label"]}
+                aria-describedby={describedBy}
+                onFocus={handleFocus as React.FocusEventHandler<HTMLTextAreaElement>}
+                onBlur={handleBlur as React.FocusEventHandler<HTMLTextAreaElement>}
+              />
+            );
+          })()
         ) : (
-          <input
-            id={id}
-            disabled={disabled}
-            maxLength={maxLength}
-            value={value as string}
-            onChange={(props as InputModeProps).onChange}
-            type={inputType}
-            className={fieldClassName}
-            placeholder={visiblePlaceholder}
-            aria-label={hideLabel ? label : undefined}
-            onFocus={handleFocus as React.FocusEventHandler<HTMLInputElement>}
-            onBlur={handleBlur as React.FocusEventHandler<HTMLInputElement>}
-          />
+          (() => {
+            // Destructure OUT the component-managed props; spread `rest` first
+            // so component-managed attributes below win on any conflict.
+            const {
+              value: _value,
+              onChange,
+              onFocus: _onFocus,
+              onBlur: _onBlur,
+              id: _id,
+              disabled: _disabled,
+              maxLength: _maxLength,
+              type: _type,
+              label: _label,
+              error: _error,
+              helperText: _helperText,
+              size: _size,
+              hideLabel: _hideLabel,
+              labelledExternally: _labelledExternally,
+              inverse: _inverse,
+              leadingIcon: _leadingIcon,
+              containerClassName: _containerClassName,
+              className: _className,
+              multiline: _multiline,
+              showPasswordToggle: _showPasswordToggle,
+              ...rest
+            } = props as InputModeProps;
+            return (
+              <input
+                {...rest}
+                id={id}
+                disabled={disabled}
+                maxLength={maxLength}
+                value={value as string}
+                onChange={onChange}
+                type={inputType}
+                className={fieldClassName}
+                placeholder={visiblePlaceholder}
+                aria-label={injectedAriaLabel ?? rest["aria-label"]}
+                onFocus={handleFocus as React.FocusEventHandler<HTMLInputElement>}
+                onBlur={handleBlur as React.FocusEventHandler<HTMLInputElement>}
+              />
+            );
+          })()
         )}
-        {!hideLabel && (
+        {!labelHidden && (
           <label htmlFor={id} className={labelClassName}>
             {label}
           </label>
