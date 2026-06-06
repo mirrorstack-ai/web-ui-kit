@@ -2,6 +2,11 @@ import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import type { ComponentMeta } from "@/types/component-meta";
+import {
+  type DataStatus,
+  dataStatusVarColor,
+  dataStatusLabel,
+} from "@/types/tone";
 
 export const meta: ComponentMeta = {
   name: "DataList",
@@ -18,7 +23,7 @@ export interface DataListItem {
   description?: string;
   /** Trailing text such as "2d ago" or "#42" */
   trailing?: string;
-  status?: "default" | "success" | "warning" | "error";
+  status?: DataStatus;
 }
 
 export interface DataListProps {
@@ -27,12 +32,6 @@ export interface DataListProps {
   emptyLabel?: string;
   className?: string;
 }
-
-const STATUS_COLORS: Record<string, string> = {
-  success: "var(--color-success)",
-  warning: "var(--color-warning)",
-  error: "var(--color-error)",
-};
 
 export function DataList({
   items,
@@ -92,8 +91,12 @@ export function DataList({
               {item.status && item.status !== "default" && (
                 <span
                   className="shrink-0 inline-block w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: STATUS_COLORS[item.status] }}
-                />
+                  style={{ backgroundColor: dataStatusVarColor[item.status] }}
+                >
+                  <span className="sr-only">
+                    {dataStatusLabel[item.status]}
+                  </span>
+                </span>
               )}
               <span className="text-xs font-medium truncate">{item.title}</span>
             </div>

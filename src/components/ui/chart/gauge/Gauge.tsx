@@ -1,6 +1,7 @@
 import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
+import { dataStatusVarColor } from "@/types/tone";
 
 export const meta: ComponentMeta = {
   name: "Gauge",
@@ -27,9 +28,9 @@ const CIRCUMFERENCE = 2 * Math.PI * 40; // ~251.33
 
 function arcColor(value: number, thresholds?: GaugeProps["thresholds"]): string | undefined {
   if (!thresholds) return undefined;
-  if (value < thresholds.error) return "var(--color-error)";
-  if (value < thresholds.warn) return "var(--color-warning)";
-  return "var(--color-success)";
+  if (value < thresholds.error) return dataStatusVarColor.error;
+  if (value < thresholds.warn) return dataStatusVarColor.warning;
+  return dataStatusVarColor.success;
 }
 
 export function Gauge({ value, label, format, thresholds, className }: GaugeProps) {

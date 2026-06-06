@@ -35,3 +35,32 @@ export const toneTextClass: Record<Tone, string> = {
   warning: "text-warning",
   success: "text-success",
 };
+
+// DataStatus is the severity vocabulary for data-display components
+// (DataList, Timeline, Gauge) that render a status DOT / arc whose color
+// is applied via inline style or SVG stroke. Unlike `toneTextClass`
+// above — which only emits Tailwind class names — these maps carry the
+// raw `var(--color-*)` value so they can feed `style={{ ... }}` and SVG
+// `stroke`. `default` carries no color (rendered subtly via opacity).
+export type DataStatus = "default" | "success" | "warning" | "error";
+
+export const dataStatusVarColor: Record<
+  Exclude<DataStatus, "default">,
+  string
+> = {
+  success: "var(--color-success)",
+  warning: "var(--color-warning)",
+  error: "var(--color-error)",
+};
+
+// Human-readable status words for screen readers, used alongside
+// color-only status dots that would otherwise convey no information to
+// assistive technology.
+export const dataStatusLabel: Record<
+  Exclude<DataStatus, "default">,
+  string
+> = {
+  success: "Success",
+  warning: "Warning",
+  error: "Error",
+};
