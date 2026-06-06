@@ -49,15 +49,14 @@ export function Timeline({ entries, className }: TimelineProps) {
           <div key={index} className="flex">
             {/* Left gutter */}
             <div className="relative w-[24px] shrink-0 ml-[7px]">
-              {entries.length > 1 && (
-                <div
-                  className="absolute left-0 w-px bg-current/10"
-                  style={{
-                    top: index === 0 ? 14 : 0,
-                    bottom: index === entries.length - 1 ? undefined : 0,
-                    height: index === entries.length - 1 ? 14 : undefined,
-                  }}
-                />
+              {/* Connector segments drawn ABOVE and BELOW the icon (never over
+                  it) — the icon box spans 7–21px, so the line links the nodes
+                  without crossing the glyphs. */}
+              {index > 0 && (
+                <div className="absolute left-0 top-0 h-[7px] w-px bg-current/10" />
+              )}
+              {index < entries.length - 1 && (
+                <div className="absolute left-0 top-[21px] bottom-0 w-px bg-current/10" />
               )}
               {entry.icon ? (
                 <span
