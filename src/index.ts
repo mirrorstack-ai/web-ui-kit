@@ -268,6 +268,7 @@ export {
   type SegmentedButtonProps,
   type SegmentedButtonOption,
   type SegmentedButtonSize,
+  type SegmentedButtonVariant,
   type SegmentedButtonOptionTone,
 } from "./components/ui/inputs/segmented-button/SegmentedButton";
 export {

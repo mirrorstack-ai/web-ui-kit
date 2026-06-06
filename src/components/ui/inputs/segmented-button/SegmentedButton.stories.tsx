@@ -81,3 +81,23 @@ export const Disabled: Story = {
     disabled: true,
   },
 };
+
+/** Boxed/connected track with an inset selected pill */
+export const Boxed: Story = {
+  render: (args) => {
+    const [selected, setSelected] = useState("daily");
+    return (
+      <SegmentedButton
+        {...args}
+        variant="boxed"
+        options={[
+          { value: "hourly", label: "Hourly" },
+          { value: "daily", label: "Daily" },
+        ]}
+        value={selected}
+        onChange={setSelected}
+        aria-label="Granularity"
+      />
+    );
+  },
+};
