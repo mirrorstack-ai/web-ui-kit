@@ -68,7 +68,7 @@ src/components/ui/<category>/<component>/
   Component.test.tsx
 ```
 
-Categories: `actions`, `inputs`, `feedback`, `navigation`, `surfaces`, `media`, `data`, `files`, `state`
+Categories: `actions`, `agent`, `blocks`, `dev`, `display`, `feedback`, `graph`, `inputs`, `media`, `navigation`, `surfaces`
 
 ### 2. Write the component
 

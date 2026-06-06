@@ -1,6 +1,19 @@
+import type { Tone } from "@/types/tone";
+
 export type ButtonVariant = "filled" | "tonal" | "outline" | "text";
-export type ButtonColor = "primary" | "secondary" | "tertiary" | "error" | "warning";
+/** The brand/semantic palette minus `success` (no success button in the design
+ *  system). Derived from {@link Tone} so a palette change propagates; the guard
+ *  below makes `tsc` fail if the member set ever drifts from the intended five. */
+export type ButtonColor = Exclude<Tone, "success">;
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
+
+// Compile-time guard: ButtonColor must stay exactly these five members.
+type _Eq<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _buttonColorGuard: _Eq<
+  ButtonColor,
+  "primary" | "secondary" | "tertiary" | "error" | "warning"
+> = true;
+void _buttonColorGuard;
 
 const filledStyles: Record<ButtonColor, string> = {
   primary:
