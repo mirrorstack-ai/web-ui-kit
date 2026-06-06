@@ -2,6 +2,11 @@ import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import type { ComponentMeta } from "@/types/component-meta";
+import {
+  type DataStatus,
+  dataStatusVarColor,
+  dataStatusLabel,
+} from "@/types/tone";
 
 export const meta: ComponentMeta = {
   name: "Timeline",
@@ -13,19 +18,13 @@ export interface TimelineEntry {
   icon?: string;
   text: string;
   time: string;
-  status?: "default" | "success" | "warning" | "error";
+  status?: DataStatus;
 }
 
 export interface TimelineProps {
   entries: TimelineEntry[];
   className?: string;
 }
-
-const statusColor: Record<string, string> = {
-  success: "var(--color-success)",
-  warning: "var(--color-warning)",
-  error: "var(--color-error)",
-};
 
 export function Timeline({ entries, className }: TimelineProps) {
   if (entries.length === 0) return null;
@@ -44,9 +43,9 @@ export function Timeline({ entries, className }: TimelineProps) {
       )}
     >
       {entries.map((entry, index) => {
-        const color = entry.status && entry.status !== "default"
-          ? statusColor[entry.status]
-          : undefined;
+        const status =
+          entry.status && entry.status !== "default" ? entry.status : undefined;
+        const color = status ? dataStatusVarColor[status] : undefined;
 
         const isLast = index === entries.length - 1;
 
@@ -72,7 +71,11 @@ export function Timeline({ entries, className }: TimelineProps) {
                       ? { backgroundColor: color }
                       : { backgroundColor: "currentColor", opacity: 0.4 }
                   }
-                />
+                >
+                  {status && (
+                    <span className="sr-only">{dataStatusLabel[status]}</span>
+                  )}
+                </span>
               )}
               {!isLast && <div className="mb-1 w-px flex-1 bg-current/15" />}
             </div>
