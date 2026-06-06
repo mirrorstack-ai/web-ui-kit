@@ -3,6 +3,49 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.3.11
+
+Internal simplify + structure pass (a 45-finding audit + a structure review).
+**No component public export names were removed**; one behavior change (below).
+
+### Fixed
+
+- **FloatingLabelInput** now forwards native HTML attributes (`autoFocus`,
+  `name`, `required`, `onKeyDown`, `autoComplete`, …) — fixes focus in
+  `EditableField` and `TypeToConfirmDialog`.
+- **Accessibility** — focus-visible rings on Button/IconButton/nav controls,
+  `aria-current` on active nav items, AppSwitcher disclosure semantics,
+  accessible names for StarRating/StatusIndicator/status dots, ReauthDialog
+  title, OptionList empty-row role, disabled Combobox chevron, MultiQuestion.
+- Shared `status → CSS var` helper (`dataStatusVarColor`); deduped Gauge/
+  DataList/Timeline. Doc/comment rot (`info` variant; `Graph` `nodeSize`).
+
+### Added
+
+- **Icon** `fill` prop (Material Symbols FILL axis); StarRating uses it.
+- Exported `ButtonVariant`/`ButtonColor`/`ButtonSize`, `ComboboxSize`,
+  `FloatingLabelInputSize`.
+
+### Changed (structure — internal moves, public export names unchanged)
+
+- New `blocks/` category for the 8 NotchGrid tile primitives; `chart/` dissolved;
+  `data/`→`display/`, `files/drop-zone`→`inputs/`, `state/`→`dev/`;
+  `LogoMirrorStack`→`Logo` (export name unchanged).
+- Removed the `AgentSidebar`/`GraphSide` re-export barrels; extracted
+  `PrimitiveRegistry`/`ItemKey` and `GraphSideNode` into local `types.ts`.
+- Navigation `variant="danger"` deprecated for `"error"` (soft alias, still works).
+
+### ⚠️ Behavior change
+
+- **NotchGrid** `primitives` now defaults to `{}` (previously the built-in
+  eight). Opt in: `<NotchGrid items={…} primitives={defaultPrimitives} />`.
+  Removes the static surface→viz import edge so grid-only consumers don't bundle
+  all eight block components.
+
+### Removed
+
+- Demo-only `mockAgentHistory` / `mockAgentMessages` from the public API.
+
 ## 0.3.10
 
 Keeps the 0.3.9 drop-`info` change (`Alert` and `Badge` have no `info`
