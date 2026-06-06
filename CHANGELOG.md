@@ -9,9 +9,6 @@ Additive component variants — adopted to replace chrome the consumer apps were
 hand-rolling (surfaced by the className-duplication audit). **No breaking
 changes**; all defaults unchanged.
 
-- `Alert`: new `neutral` variant — an untinted resting-state box
-  (`bg-surface-container-low` + outline-variant border + on-surface text) for
-  informational state that isn't a severity. (#256)
 - `SegmentedButton`: new `variant="boxed"` — a bordered connected track with an
   inset selected pill, alongside the default gapped `"pills"`. Exports
   `SegmentedButtonVariant`. (#257)
