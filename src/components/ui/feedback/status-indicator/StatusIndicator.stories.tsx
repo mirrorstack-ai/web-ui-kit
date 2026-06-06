@@ -11,7 +11,7 @@ export default meta;
 type Story = StoryObj<typeof StatusIndicator>;
 
 const Wrapper = ({
-  size = 150,
+  size = 110,
   children,
 }: {
   size?: number;
@@ -29,43 +29,6 @@ export const Online: Story = {
   render: () => (
     <Wrapper>
       <StatusIndicator status="online" label="Tunnel" sub="v0.1.0" />
-    </Wrapper>
-  ),
-};
-
-export const Offline: Story = {
-  render: () => (
-    <Wrapper>
-      <StatusIndicator status="offline" label="Tunnel" sub="last seen 2h ago" />
-    </Wrapper>
-  ),
-};
-
-export const Warning: Story = {
-  render: () => (
-    <Wrapper>
-      <StatusIndicator status="warning" label="CI" sub="flaky test" />
-    </Wrapper>
-  ),
-};
-
-export const Error: Story = {
-  render: () => (
-    <Wrapper>
-      <StatusIndicator status="error" label="Health" sub="3 failures" />
-    </Wrapper>
-  ),
-};
-
-export const WithIcon: Story = {
-  render: () => (
-    <Wrapper>
-      <StatusIndicator
-        status="online"
-        icon="cloud_done"
-        label="Deployed"
-        sub="us-east-1"
-      />
     </Wrapper>
   ),
 };

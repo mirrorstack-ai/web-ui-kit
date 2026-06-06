@@ -48,12 +48,17 @@ export function Timeline({ entries, className }: TimelineProps) {
         return (
           <div key={index} className="flex">
             {/* Left gutter */}
-            <div
-              className={cn(
-                "relative w-[24px] shrink-0 ml-[7px] border-l border-current/10",
-                index === entries.length - 1 && "border-transparent",
+            <div className="relative w-[24px] shrink-0 ml-[7px]">
+              {entries.length > 1 && (
+                <div
+                  className="absolute left-0 w-px bg-current/10"
+                  style={{
+                    top: index === 0 ? 14 : 0,
+                    bottom: index === entries.length - 1 ? undefined : 0,
+                    height: index === entries.length - 1 ? 14 : undefined,
+                  }}
+                />
               )}
-            >
               {entry.icon ? (
                 <span
                   className="absolute -left-[7px] top-[7px]"

@@ -12,8 +12,8 @@ type Story = StoryObj<typeof Timeline>;
 
 const Wrapper = ({
   children,
-  width = 300,
-  height = 300,
+  width = 200,
+  height = 260,
 }: {
   children: React.ReactNode;
   width?: number;
@@ -39,21 +39,6 @@ export const Activity: Story = {
   render: () => (
     <Wrapper>
       <Timeline entries={activityEntries} />
-    </Wrapper>
-  ),
-};
-
-const deployEntries: TimelineEntry[] = [
-  { icon: "rocket_launch", text: "Deployed to production", time: "10m ago", status: "success" },
-  { icon: "build", text: "Build completed", time: "15m ago", status: "success" },
-  { icon: "error", text: "Build failed — retrying", time: "20m ago", status: "error" },
-  { icon: "play_arrow", text: "Deploy triggered", time: "25m ago" },
-];
-
-export const DeployLog: Story = {
-  render: () => (
-    <Wrapper height={250}>
-      <Timeline entries={deployEntries} />
     </Wrapper>
   ),
 };

@@ -36,7 +36,7 @@ function Stars({ value }: { value: number }) {
             <span
               key={i}
               className="material-symbols-rounded"
-              style={{ fontSize: 16, color: STAR_COLOR }}
+              style={{ fontSize: 16, color: STAR_COLOR, fontVariationSettings: "'FILL' 1" }}
             >
               star
             </span>
@@ -47,7 +47,7 @@ function Stars({ value }: { value: number }) {
             <span
               key={i}
               className="material-symbols-rounded"
-              style={{ fontSize: 16, color: STAR_COLOR }}
+              style={{ fontSize: 16, color: STAR_COLOR, fontVariationSettings: "'FILL' 1" }}
             >
               star_half
             </span>

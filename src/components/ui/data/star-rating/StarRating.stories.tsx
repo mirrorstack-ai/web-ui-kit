@@ -19,38 +19,8 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 export const HighRating: Story = {
   render: () => (
     <Wrapper>
-      <div style={{ width: 150, height: 150 }}>
+      <div style={{ width: 220, height: 110 }}>
         <StarRating value={4.5} count={128} label="Rating" />
-      </div>
-    </Wrapper>
-  ),
-};
-
-export const MidRating: Story = {
-  render: () => (
-    <Wrapper>
-      <div style={{ width: 150, height: 150 }}>
-        <StarRating value={3.0} count={42} />
-      </div>
-    </Wrapper>
-  ),
-};
-
-export const LowRating: Story = {
-  render: () => (
-    <Wrapper>
-      <div style={{ width: 150, height: 150 }}>
-        <StarRating value={1.5} count={7} label="Rating" />
-      </div>
-    </Wrapper>
-  ),
-};
-
-export const Perfect: Story = {
-  render: () => (
-    <Wrapper>
-      <div style={{ width: 150, height: 150 }}>
-        <StarRating value={5.0} count={1024} label="Rating" />
       </div>
     </Wrapper>
   ),
@@ -59,7 +29,7 @@ export const Perfect: Story = {
 export const NoReviews: Story = {
   render: () => (
     <Wrapper>
-      <div style={{ width: 150, height: 150 }}>
+      <div style={{ width: 220, height: 110 }}>
         <StarRating value={0} count={0} label="Rating" />
       </div>
     </Wrapper>
