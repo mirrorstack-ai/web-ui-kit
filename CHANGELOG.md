@@ -3,6 +3,31 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.3.10
+
+Keeps the 0.3.9 drop-`info` change (`Alert` and `Badge` have no `info`
+variant; `Alert` gained `primary`/`secondary`). This release layers the
+unreleased component work on top of that baseline.
+
+### Components
+
+- **DataList** — labeled key/value list surface for compact record
+  displays.
+- **DataTable** — column-driven data table with typed `DataTableColumn`
+  definitions.
+- **StarRating** — interactive/read-only star rating control.
+- **Timeline** — vertical event timeline (`TimelineEntry[]`).
+- **StatusIndicator** — status dot/label with `StatusLevel` severities.
+- **Gauge** — radial value gauge.
+- **notch-grid primitives** — `defaultPrimitives` registry wiring the
+  above (plus `MetricBlock`/`Sparkline`) into `NotchGrid` by default.
+
+### Enhancements
+
+- **Sparkline**, **Graph**, **GraphSideSetting**, **Breadcrumb**,
+  **FloatingLabelInput**, **Icon**, **SegmentedButton**, **NotchGrid** —
+  assorted refinements pulled from the unreleased snapshot.
+
 ## 0.3.5
 
 ### Components

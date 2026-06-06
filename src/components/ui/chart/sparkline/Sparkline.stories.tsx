@@ -5,7 +5,10 @@ const meta: Meta<typeof Sparkline> = {
   title: "UI/Chart/Sparkline",
   component: Sparkline,
   args: { data: [38, 62, 50, 78, 55, 70, 90, 60, 75, 95, 85, 100] },
-  argTypes: { data: { control: "object" } },
+  argTypes: {
+    data: { control: "object" },
+    variant: { control: "inline-radio", options: ["bar", "line", "area"] },
+  },
 };
 
 export default meta;
@@ -45,6 +48,56 @@ export const Tones: Story = {
       </div>
       <div className="h-40 w-80 rounded-2xl bg-surface-container p-4">
         <Sparkline data={LABELLED} className="h-full" barClassName="bg-primary/40" barActiveClassName="bg-primary/70" />
+      </div>
+    </div>
+  ),
+};
+
+/** Smooth line — no hover chips, just a stroke that follows the data. */
+export const Line: Story = {
+  args: { variant: "line" },
+  render: (args) => (
+    <div className="bg-background p-6">
+      <div className="h-28 w-64 rounded-2xl border border-outline-variant p-3 text-primary">
+        <Sparkline {...args} className="h-full" />
+      </div>
+    </div>
+  ),
+};
+
+/** Filled area beneath the line for at-a-glance trend weight. */
+export const Area: Story = {
+  args: { variant: "area" },
+  render: (args) => (
+    <div className="bg-background p-6">
+      <div className="h-28 w-64 rounded-2xl border border-outline-variant p-3 text-primary">
+        <Sparkline {...args} className="h-full" />
+      </div>
+    </div>
+  ),
+};
+
+/** All three variants side-by-side for comparison. */
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-start gap-6 bg-background p-6">
+      <div className="space-y-1">
+        <span className="text-xs text-on-surface-variant">Bar</span>
+        <div className="h-24 w-64 rounded-2xl border border-outline-variant p-3">
+          <Sparkline data={LABELLED} variant="bar" className="h-full" />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <span className="text-xs text-on-surface-variant">Line</span>
+        <div className="h-24 w-64 rounded-2xl border border-outline-variant p-3 text-primary">
+          <Sparkline data={LABELLED} variant="line" className="h-full" />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <span className="text-xs text-on-surface-variant">Area</span>
+        <div className="h-24 w-64 rounded-2xl border border-outline-variant p-3 text-primary">
+          <Sparkline data={LABELLED} variant="area" className="h-full" />
+        </div>
       </div>
     </div>
   ),

@@ -6,12 +6,14 @@ import type { ComponentMeta } from "@/types/component-meta";
 export const meta: ComponentMeta = {
   name: "GraphSideSetting",
   description:
-    "Form for the Graph's display settings — node size, line thickness, tag visibility (labels always show), repulsion strength, and link distance.",
+    "Form for the Graph's display settings — node size, text size, line thickness, tag visibility (labels always show), repulsion strength, and link distance.",
 };
 
 export interface GraphSideSettingValue {
   /** Multiplier on node radii. */
   nodeSize: number;
+  /** Multiplier on label font size. Defaults to 1 when omitted. */
+  textSize?: number;
   /** Multiplier on edge stroke width. */
   lineSize: number;
   /** Render each node's tag text below its always-visible label. Default off. */
@@ -27,6 +29,8 @@ export interface GraphSideSettingProps {
   onChange: (next: GraphSideSettingValue) => void;
   /** Range bounds for the node size multiplier slider. Default [0.5, 2]. */
   nodeSizeRange?: [number, number];
+  /** Range bounds for the text size multiplier slider. Default [0.5, 3]. */
+  textSizeRange?: [number, number];
   /** Range bounds for the line size multiplier slider. Default [0.5, 2]. */
   lineSizeRange?: [number, number];
   /** Range bounds for the repulsion slider. Default [500, 3000]. */
@@ -40,6 +44,7 @@ export function GraphSideSetting({
   value,
   onChange,
   nodeSizeRange = [0.5, 2],
+  textSizeRange = [0.5, 3],
   lineSizeRange = [0.5, 2],
   repulsionRange = [500, 3000],
   linkDistanceRange = [30, 150],
@@ -68,6 +73,14 @@ export function GraphSideSetting({
         step={0.1}
         value={value.nodeSize}
         onChange={(v) => set("nodeSize", v)}
+      />
+      <SliderRow
+        label="Text size"
+        min={textSizeRange[0]}
+        max={textSizeRange[1]}
+        step={0.1}
+        value={value.textSize ?? 1}
+        onChange={(v) => set("textSize", v)}
       />
       <SliderRow
         label="Line size"

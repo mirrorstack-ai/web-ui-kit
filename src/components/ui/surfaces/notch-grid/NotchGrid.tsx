@@ -15,6 +15,7 @@
 //
 // See `mirrorstack-docs/architecture/notch-grid-v2/02-api.md` + `05-sub-drag.md`.
 
+import { defaultPrimitives } from "./primitives";
 import {
   memo,
   useCallback,
@@ -123,8 +124,8 @@ export interface NotchGridProps {
 
 // --- Internal helpers ------------------------------------------------------
 
-/** Content inset (px) inside a tile / sub-cell. Matches BlockShape's default. */
-const CONTENT_PAD = 16;
+/** Content inset inside a tile / sub-cell (8px sides, 16px top/bottom). Matches BlockShape's default. */
+const CONTENT_PAD = "16px 8px";
 
 /** Pointer capture, tolerant of test envs (jsdom) that lack the API. */
 function safePointerCapture(el: Element, pointerId: number): void {
@@ -354,7 +355,7 @@ export function NotchGrid({
   blockMin = BLOCK_SIZE,
   gap = 8,
   nest = true,
-  primitives,
+  primitives: customPrimitives,
   onItemError,
   draggable = false,
   onItemMove,
@@ -362,6 +363,10 @@ export function NotchGrid({
   className,
   style,
 }: NotchGridProps) {
+  const primitives = useMemo(
+    () => customPrimitives ? { ...defaultPrimitives, ...customPrimitives } : defaultPrimitives,
+    [customPrimitives],
+  );
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
 

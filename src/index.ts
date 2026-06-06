@@ -259,6 +259,35 @@ export {
   type ThemeType,
   type ThemeVariant,
 } from "./components/ui/surfaces/notch-grid/theme";
+export { defaultPrimitives } from "./components/ui/surfaces/notch-grid/primitives";
+export {
+  DataList,
+  type DataListProps,
+  type DataListItem,
+} from "./components/ui/data/data-list/DataList";
+export {
+  DataTable,
+  type DataTableProps,
+  type DataTableColumn,
+} from "./components/ui/data/data-table/DataTable";
+export {
+  StatusIndicator,
+  type StatusIndicatorProps,
+  type StatusLevel,
+} from "./components/ui/feedback/status-indicator/StatusIndicator";
+export {
+  StarRating,
+  type StarRatingProps,
+} from "./components/ui/data/star-rating/StarRating";
+export {
+  Timeline,
+  type TimelineProps,
+  type TimelineEntry,
+} from "./components/ui/data/timeline/Timeline";
+export {
+  Gauge,
+  type GaugeProps,
+} from "./components/ui/chart/gauge/Gauge";
 export {
   AgentSidebarHeader,
   type AgentSidebarHeaderProps,
