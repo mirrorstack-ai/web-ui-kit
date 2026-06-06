@@ -50,3 +50,11 @@ export const Success: Story = {
 export const NoDescription: Story = {
   args: { description: undefined },
 };
+
+export const Muted: Story = {
+  args: {
+    surface: "muted",
+    title: "Module tunnel",
+    description: "Lighter, lower-emphasis row for list-style settings.",
+  },
+};

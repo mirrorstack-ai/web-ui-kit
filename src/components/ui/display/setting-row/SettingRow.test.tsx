@@ -55,6 +55,23 @@ describe("SettingRow", () => {
     expect(container.firstChild).toHaveClass(expected);
   });
 
+  it("applies the muted surface tokens", () => {
+    const { container } = render(
+      <SettingRow title="X" control={<span />} surface="muted" />,
+    );
+    expect(container.firstChild).toHaveClass("bg-surface-container-low");
+    expect(container.firstChild).toHaveClass("border-outline-variant/40");
+  });
+
+  it("keeps the tone border accent on a muted row", () => {
+    const { container } = render(
+      <SettingRow title="X" control={<span />} surface="muted" tone="warning" />,
+    );
+    expect(container.firstChild).toHaveClass("bg-surface-container-low");
+    expect(container.firstChild).toHaveClass("border-warning/40");
+    expect(container.firstChild).not.toHaveClass("border-outline-variant/40");
+  });
+
   it("forwards the className prop", () => {
     const { container } = render(
       <SettingRow title="X" control={<span />} className="custom-class" />,

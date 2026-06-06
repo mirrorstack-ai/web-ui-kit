@@ -7,7 +7,7 @@ import { toneBorderClass, type Tone } from "@/types/tone";
 export const meta: ComponentMeta = {
   name: "SettingRow",
   description:
-    "Title + optional description on the left, control slot on the right. Used to compose settings forms; supports an optional Tone border accent (primary, secondary, tertiary, error, warning, or success).",
+    "Title + optional description on the left, control slot on the right. Used to compose settings forms; supports an optional Tone border accent (primary, secondary, tertiary, error, warning, or success) and a muted surface variant for lighter, lower-emphasis rows.",
 };
 
 export interface SettingRowProps {
@@ -22,6 +22,13 @@ export interface SettingRowProps {
    * (omitted) renders with the neutral outline-variant border.
    */
   tone?: Tone;
+  /**
+   * Surface emphasis. "default" uses bg-surface-container with a solid
+   * outline-variant border; "muted" uses the lower bg-surface-container-low
+   * with a faint (/40) border for lighter, lower-emphasis rows. A `tone`
+   * border accent still takes precedence over the muted neutral border.
+   */
+  surface?: "default" | "muted";
   className?: string;
 }
 
@@ -30,13 +37,21 @@ export function SettingRow({
   description,
   control,
   tone,
+  surface = "default",
   className,
 }: SettingRowProps) {
-  const border = tone ? toneBorderClass[tone] : "border-outline-variant";
+  const muted = surface === "muted";
+  const bg = muted ? "bg-surface-container-low" : "bg-surface-container";
+  const border = tone
+    ? toneBorderClass[tone]
+    : muted
+      ? "border-outline-variant/40"
+      : "border-outline-variant";
   return (
     <div
       className={cn(
-        "flex items-center gap-4 px-4 py-3 rounded-xl border bg-surface-container",
+        "flex items-center gap-4 px-4 py-3 rounded-xl border",
+        bg,
         border,
         className,
       )}
