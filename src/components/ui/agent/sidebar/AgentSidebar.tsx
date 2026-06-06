@@ -29,4 +29,3 @@ export {
   type AgentSidebarHistoryGroup,
   type AgentSidebarHistoryItem,
 } from "./types";
-export { mockAgentHistory, mockAgentMessages } from "./mock-data";
