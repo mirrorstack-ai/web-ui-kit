@@ -2,7 +2,7 @@ import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Badge } from "@/components/ui/feedback/badge/Badge";
 import type { ComponentMeta } from "@/types/component-meta";
-import type { GraphSideNode } from "./GraphSide";
+import type { GraphSideNode } from "./types";
 import { SIDE_CARD_CLS } from "./styles";
 
 export const meta: ComponentMeta = {

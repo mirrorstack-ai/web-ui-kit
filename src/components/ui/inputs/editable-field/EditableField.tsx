@@ -2,7 +2,7 @@ import { type ChangeEvent } from "react";
 import type { ComponentMeta } from "@/types/component-meta";
 import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
-import { ReadOnlyField } from "@/components/ui/data/read-only-field/ReadOnlyField";
+import { ReadOnlyField } from "@/components/ui/display/read-only-field/ReadOnlyField";
 
 export const meta: ComponentMeta = {
   name: "EditableField",

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/utils/cn";
-import { SectionLabel } from "@/components/ui/data/section-label/SectionLabel";
+import { SectionLabel } from "@/components/ui/display/section-label/SectionLabel";
 import { Surface } from "@/components/ui/surfaces/surface/Surface";
 import type { ComponentMeta } from "@/types/component-meta";
 

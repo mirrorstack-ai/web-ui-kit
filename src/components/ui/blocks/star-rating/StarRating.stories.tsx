@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { StarRating } from "./StarRating";
 
 const meta: Meta<typeof StarRating> = {
-  title: "UI/Notch/Blocks/Rating",
+  title: "UI/Blocks/Rating",
   component: StarRating,
   parameters: { layout: "centered" },
 };

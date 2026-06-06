@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { DataTable } from "./DataTable";
 
 const meta: Meta<typeof DataTable> = {
-  title: "UI/Notch/Blocks/Table",
+  title: "UI/Blocks/Table",
   component: DataTable,
   parameters: { layout: "centered" },
 };

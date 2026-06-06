@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ReadOnlyField } from "@/components/ui/data/read-only-field/ReadOnlyField";
-import { SectionLabel } from "@/components/ui/data/section-label/SectionLabel";
-import { SettingRow } from "@/components/ui/data/setting-row/SettingRow";
+import { ReadOnlyField } from "@/components/ui/display/read-only-field/ReadOnlyField";
+import { SectionLabel } from "@/components/ui/display/section-label/SectionLabel";
+import { SettingRow } from "@/components/ui/display/setting-row/SettingRow";
 import { Switch } from "@/components/ui/inputs/switch/Switch";
 import { Button } from "@/components/ui/actions/button/Button";
 import { SettingsSection } from "./SettingsSection";

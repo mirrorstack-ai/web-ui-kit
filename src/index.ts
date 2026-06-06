@@ -2,7 +2,13 @@ export { cn } from "./utils/cn";
 export { formatDate, formatRelativeDate } from "./utils/date";
 export { Icon, type IconProps } from "./components/ui/media/icon/Icon";
 export { isDev, isProd, isStorybook } from "./utils/env";
-export { Button, type ButtonProps } from "./components/ui/actions/button/Button";
+export {
+  Button,
+  type ButtonProps,
+  type ButtonVariant,
+  type ButtonColor,
+  type ButtonSize,
+} from "./components/ui/actions/button/Button";
 export {
   IconButton,
   type IconButtonProps,
@@ -47,20 +53,20 @@ export {
 export {
   PageHeader,
   type PageHeaderProps,
-} from "./components/ui/data/page-header/PageHeader";
+} from "./components/ui/display/page-header/PageHeader";
 export {
   SectionHeader,
   type SectionHeaderProps,
-} from "./components/ui/data/section-header/SectionHeader";
+} from "./components/ui/display/section-header/SectionHeader";
 export {
   SectionLabel,
   type SectionLabelProps,
-} from "./components/ui/data/section-label/SectionLabel";
+} from "./components/ui/display/section-label/SectionLabel";
 export {
   DevToolbar,
   type DevToolbarProps,
   type DevToolbarItem,
-} from "./components/ui/state/dev-toolbar/DevToolbar";
+} from "./components/ui/dev/dev-toolbar/DevToolbar";
 export {
   Alert,
   type AlertProps,
@@ -110,7 +116,7 @@ export {
   AvatarCropper,
   type AvatarCropperProps,
 } from "./components/ui/media/avatar-cropper/AvatarCropper";
-export { Logo, type LogoProps } from "./components/ui/media/logo-mirrorstack/LogoMirrorStack";
+export { Logo, type LogoProps } from "./components/ui/media/logo/Logo";
 export {
   Combobox,
   type ComboboxProps,
@@ -148,20 +154,20 @@ export {
   ReadOnlyField,
   type ReadOnlyFieldProps,
   type ReadOnlyFieldLayout,
-} from "./components/ui/data/read-only-field/ReadOnlyField";
+} from "./components/ui/display/read-only-field/ReadOnlyField";
 export {
   Step,
   type StepProps,
   type StepStatus,
-} from "./components/ui/data/step/Step";
+} from "./components/ui/display/step/Step";
 export {
   Markdown,
   type MarkdownProps,
-} from "./components/ui/data/markdown/Markdown";
+} from "./components/ui/display/markdown/Markdown";
 export {
   SettingRow,
   type SettingRowProps,
-} from "./components/ui/data/setting-row/SettingRow";
+} from "./components/ui/display/setting-row/SettingRow";
 export { type Tone, toneBorderClass, toneTextClass } from "./types/tone";
 export {
   ThemeProvider,
@@ -189,7 +195,7 @@ export {
   ActivityList,
   type ActivityListProps,
   type ActivityItem,
-} from "./components/ui/data/activity-list/ActivityList";
+} from "./components/ui/display/activity-list/ActivityList";
 export {
   ReauthDialog,
   type ReauthDialogProps,
@@ -261,47 +267,55 @@ export {
   type ThemeType,
   type ThemeVariant,
 } from "./components/ui/surfaces/notch-grid/theme";
-export { defaultPrimitives } from "./components/ui/surfaces/notch-grid/primitives";
+export { defaultPrimitives } from "./components/registry/notch-primitives";
 export {
   DataList,
   type DataListProps,
   type DataListItem,
-} from "./components/ui/data/data-list/DataList";
+} from "./components/ui/blocks/data-list/DataList";
 export {
   DataTable,
   type DataTableProps,
   type DataTableColumn,
-} from "./components/ui/data/data-table/DataTable";
+} from "./components/ui/blocks/data-table/DataTable";
 export {
   StatusIndicator,
   type StatusIndicatorProps,
   type StatusLevel,
-} from "./components/ui/feedback/status-indicator/StatusIndicator";
+} from "./components/ui/blocks/status-indicator/StatusIndicator";
 export {
   StarRating,
   type StarRatingProps,
-} from "./components/ui/data/star-rating/StarRating";
+} from "./components/ui/blocks/star-rating/StarRating";
 export {
   Timeline,
   type TimelineProps,
   type TimelineEntry,
-} from "./components/ui/data/timeline/Timeline";
+} from "./components/ui/blocks/timeline/Timeline";
 export {
   Gauge,
   type GaugeProps,
-} from "./components/ui/chart/gauge/Gauge";
+} from "./components/ui/blocks/gauge/Gauge";
 export {
   AgentSidebarHeader,
   type AgentSidebarHeaderProps,
+} from "./components/ui/agent/sidebar/AgentSidebarHeader";
+export {
   AgentSidebarInput,
   type AgentSidebarInputProps,
+} from "./components/ui/agent/sidebar/AgentSidebarInput";
+export {
   AgentGreeting,
   type AgentGreetingProps,
   type AgentGreetingModel,
+} from "./components/ui/agent/greeting/AgentGreeting";
+export {
   AgentSidebarUserMessage,
   type AgentSidebarUserMessageProps,
   AgentSidebarAgentMessage,
   type AgentSidebarAgentMessageProps,
+} from "./components/ui/agent/messages/AgentSidebarMessage";
+export {
   AgentSidebarMultiQuestion,
   type AgentSidebarMultiQuestionProps,
   type AgentSidebarQuestion,
@@ -309,16 +323,20 @@ export {
   type AgentSidebarMultiQuestionAnswer,
   type AgentSidebarMultiQuestionLayout,
   type AgentSidebarChoiceStyle,
+} from "./components/ui/agent/asks/AgentSidebarMultiQuestion";
+export {
   AgentSidebarMessages,
   type AgentSidebarMessage,
   type AgentSidebarMessagesProps,
+} from "./components/ui/agent/messages/AgentSidebarMessages";
+export {
   type AgentSidebarHistoryGroup,
   type AgentSidebarHistoryItem,
-} from "./components/ui/agent/sidebar/AgentSidebar";
+} from "./components/ui/agent/sidebar/types";
 export {
   DropZone,
   type DropZoneProps,
-} from "./components/ui/files/drop-zone/DropZone";
+} from "./components/ui/inputs/drop-zone/DropZone";
 export {
   EmptyState,
   type EmptyStateProps,
@@ -326,12 +344,12 @@ export {
 export {
   AppShell,
   type AppShellProps,
-} from "./components/layout/app-shell/app-shell/AppShell";
+} from "./components/layout/app-shell/AppShell";
 export {
   Sparkline,
   type SparklineProps,
   type SparklinePoint,
-} from "./components/ui/chart/sparkline/Sparkline";
+} from "./components/ui/blocks/sparkline/Sparkline";
 export {
   MetricBlock,
   type MetricBlockProps,
@@ -339,7 +357,7 @@ export {
   type MetricBlockLayout,
   type MetricTrend,
   type MetricStat,
-} from "./components/ui/data/metric-block/MetricBlock";
+} from "./components/ui/blocks/metric-block/MetricBlock";
 export {
   GraphAction,
   type GraphActionProps,
@@ -347,33 +365,49 @@ export {
 export {
   GraphLayout,
   type GraphLayoutProps,
-} from "./components/layout/graph/graph-layout/GraphLayout";
+} from "./components/layout/graph-layout/GraphLayout";
 export {
   GraphSide,
-  GraphSideHeader,
-  GraphSideContent,
-  GraphSideSetting,
-  GraphSideGroup,
-  DEFAULT_GROUP_PALETTE,
-  GraphSideSearch,
-  GraphSideNodeSummary,
-  GraphSideNodeDetail,
-  GraphSideNodeReferences,
   type GraphSideProps,
-  type GraphSideHeaderProps,
-  type GraphSideContentProps,
-  type GraphSideContentItem,
-  type GraphSideSettingProps,
-  type GraphSideSettingValue,
-  type GraphSideGroupProps,
-  type GraphSideGroupItem,
-  type GraphSideSearchProps,
-  type GraphSideNodeSummaryProps,
-  type GraphSideNodeDetailProps,
-  type GraphSideNodeReferencesProps,
-  type GraphSideNodeReference,
   type GraphSideNode,
 } from "./components/ui/graph/graph-side/GraphSide";
+export {
+  GraphSideHeader,
+  type GraphSideHeaderProps,
+} from "./components/ui/graph/graph-side/GraphSideHeader";
+export {
+  GraphSideContent,
+  type GraphSideContentProps,
+  type GraphSideContentItem,
+} from "./components/ui/graph/graph-side/GraphSideContent";
+export {
+  GraphSideSetting,
+  type GraphSideSettingProps,
+  type GraphSideSettingValue,
+} from "./components/ui/graph/graph-side/GraphSideSetting";
+export {
+  GraphSideGroup,
+  DEFAULT_GROUP_PALETTE,
+  type GraphSideGroupProps,
+  type GraphSideGroupItem,
+} from "./components/ui/graph/graph-side/GraphSideGroup";
+export {
+  GraphSideSearch,
+  type GraphSideSearchProps,
+} from "./components/ui/graph/graph-side/GraphSideSearch";
+export {
+  GraphSideNodeSummary,
+  type GraphSideNodeSummaryProps,
+} from "./components/ui/graph/graph-side/GraphSideNodeSummary";
+export {
+  GraphSideNodeDetail,
+  type GraphSideNodeDetailProps,
+} from "./components/ui/graph/graph-side/GraphSideNodeDetail";
+export {
+  GraphSideNodeReferences,
+  type GraphSideNodeReferencesProps,
+  type GraphSideNodeReference,
+} from "./components/ui/graph/graph-side/GraphSideNodeReferences";
 export {
   Graph,
   type GraphProps,

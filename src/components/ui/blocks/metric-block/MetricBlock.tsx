@@ -3,7 +3,7 @@ import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
-import { Sparkline, type SparklinePoint } from "@/components/ui/chart/sparkline/Sparkline";
+import { Sparkline, type SparklinePoint } from "@/components/ui/blocks/sparkline/Sparkline";
 
 export const meta: ComponentMeta = {
   name: "MetricBlock",

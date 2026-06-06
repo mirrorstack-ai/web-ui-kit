@@ -28,7 +28,7 @@ import { GraphSideNodeReferences } from "@/components/ui/graph/graph-side/GraphS
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 
 const meta: Meta<typeof GraphLayout> = {
-  title: "Layout/Graph",
+  title: "Layout/GraphLayout",
   component: GraphLayout,
   decorators: [
     (Story) => (

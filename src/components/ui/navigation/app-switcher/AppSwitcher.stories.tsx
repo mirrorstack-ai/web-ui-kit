@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AppSwitcher } from "./AppSwitcher";
-import { Logo } from "@/components/ui/media/logo-mirrorstack/LogoMirrorStack";
+import { Logo } from "@/components/ui/media/logo/Logo";
 
 const apps = [
   { id: "account", label: "Account", description: "Profile & security settings", icon: "shield_person", href: "#" },

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Sparkline } from "./Sparkline";
 
 const meta: Meta<typeof Sparkline> = {
-  title: "UI/Chart/Sparkline",
+  title: "UI/Blocks/Sparkline",
   component: Sparkline,
   args: { data: [38, 62, 50, 78, 55, 70, 90, 60, 75, 95, 85, 100] },
   argTypes: {

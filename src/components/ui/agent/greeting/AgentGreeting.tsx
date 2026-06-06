@@ -3,7 +3,7 @@ import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
-import { Logo } from "@/components/ui/media/logo-mirrorstack/LogoMirrorStack";
+import { Logo } from "@/components/ui/media/logo/Logo";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
 import { useAutoGrowTextarea } from "@/hooks/useAutoGrowTextarea";
 import { useComposerSubmit } from "@/hooks/useComposerSubmit";
