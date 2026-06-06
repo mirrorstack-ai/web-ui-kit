@@ -1,17 +1,13 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  useLayoutEffect,
-  type KeyboardEvent,
-  type ChangeEvent,
-} from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Logo } from "@/components/ui/media/logo-mirrorstack/LogoMirrorStack";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
+import { useAutoGrowTextarea } from "@/hooks/useAutoGrowTextarea";
+import { useComposerSubmit } from "@/hooks/useComposerSubmit";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 export const meta: ComponentMeta = {
   name: "AgentGreeting",
@@ -83,7 +79,6 @@ export function AgentGreeting({
   className,
 }: AgentGreetingProps) {
   const [text, setText] = useState("");
-  const [isComposing, setIsComposing] = useState(false);
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const [menuH, setMenuH] = useState(0);
   const [notchX, setNotchX] = useState(0);
@@ -101,12 +96,10 @@ export function AgentGreeting({
   const modelMenuRef = useRef<HTMLDivElement>(null);
   const modelContentRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(Math.max(el.scrollHeight, MIN_TEXTAREA_HEIGHT), MAX_TEXTAREA_HEIGHT)}px`;
-  }, [text]);
+  useAutoGrowTextarea(textareaRef, text, {
+    min: MIN_TEXTAREA_HEIGHT,
+    max: MAX_TEXTAREA_HEIGHT,
+  });
 
   // Measure the trigger pill so the notch tab sits directly under it —
   // mirrors AgentSidebarHeader's overflow-dropdown measurement pattern.
@@ -127,44 +120,16 @@ export function AgentGreeting({
     setMenuH(content.offsetHeight);
   }, [modelMenuOpen, activeModelId, models]);
 
-  useEffect(() => {
-    if (!modelMenuOpen) return;
-    const onMouseDown = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (modelTriggerRef.current?.contains(target)) return;
-      if (modelMenuRef.current?.contains(target)) return;
-      setModelMenuOpen(false);
-    };
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === "Escape") setModelMenuOpen(false);
-    };
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [modelMenuOpen]);
+  useClickOutside({
+    refs: [modelTriggerRef, modelMenuRef],
+    onDismiss: () => setModelMenuOpen(false),
+    enabled: modelMenuOpen,
+  });
 
   const canSend = text.trim().length > 0;
 
-  const send = () => {
-    if (!canSend) return;
-    onSend?.(text.trim());
-    setText("");
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (isComposing || e.nativeEvent.isComposing) return;
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      send();
-    }
-  };
-
-  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setText(e.target.value);
-  };
+  const { send, handleKeyDown, handleChange, onCompositionStart, onCompositionEnd } =
+    useComposerSubmit({ value: text, onSend }, setText);
 
   const activeModel =
     models?.find((m) => m.id === activeModelId) ?? models?.[0];
@@ -206,8 +171,8 @@ export function AgentGreeting({
           value={text}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          onCompositionStart={() => setIsComposing(true)}
-          onCompositionEnd={() => setIsComposing(false)}
+          onCompositionStart={onCompositionStart}
+          onCompositionEnd={onCompositionEnd}
           className="w-full resize-none rounded-lg bg-transparent px-3 py-2 text-base text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none"
           placeholder={placeholder}
           aria-label="Start a conversation with the agent"

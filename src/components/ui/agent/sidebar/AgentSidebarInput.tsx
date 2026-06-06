@@ -1,11 +1,7 @@
-import {
-  useState,
-  useRef,
-  useLayoutEffect,
-  type KeyboardEvent,
-  type ChangeEvent,
-} from "react";
+import { useState, useRef } from "react";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
+import { useAutoGrowTextarea } from "@/hooks/useAutoGrowTextarea";
+import { useComposerSubmit } from "@/hooks/useComposerSubmit";
 
 export interface AgentSidebarInputProps {
   onSend?: (message: string) => void;
@@ -21,33 +17,12 @@ export function AgentSidebarInput({
   placeholder = "Type a message...",
 }: AgentSidebarInputProps) {
   const [text, setText] = useState("");
-  const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useLayoutEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 150)}px`;
-  }, [text]);
+  useAutoGrowTextarea(textareaRef, text, { max: 150 });
 
-  const send = () => {
-    if (!text.trim()) return;
-    onSend?.(text);
-    setText("");
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (isComposing || e.nativeEvent.isComposing) return;
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      send();
-    }
-  };
-
-  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setText(e.target.value);
-  };
+  const { send, handleKeyDown, handleChange, onCompositionStart, onCompositionEnd } =
+    useComposerSubmit({ value: text, onSend }, setText);
 
   const iconBtnCls = "text-inverse-on-surface/60 hover:text-inverse-on-surface";
 
@@ -64,8 +39,8 @@ export function AgentSidebarInput({
           value={text}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          onCompositionStart={() => setIsComposing(true)}
-          onCompositionEnd={() => setIsComposing(false)}
+          onCompositionStart={onCompositionStart}
+          onCompositionEnd={onCompositionEnd}
           className="w-full text-inverse-on-surface placeholder:text-inverse-on-surface/30 rounded-lg px-2 py-1 resize-none focus:outline-none bg-transparent text-sm"
           placeholder={placeholder}
           aria-label="Message to agent"

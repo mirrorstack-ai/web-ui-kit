@@ -4,6 +4,7 @@ import { cn } from "@/utils/cn";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import type { AgentSidebarHistoryGroup } from "./types";
 
 interface ChatTab {
@@ -105,33 +106,17 @@ export function AgentSidebarHeader({
     overflowTabs = swapped.slice(visibleCount);
   }
 
-  useEffect(() => {
-    if (!showOverflow) return;
-    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowOverflow(false); };
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (overflowRef.current?.contains(target)) return;
-      if (dropdownRef.current?.contains(target)) return;
-      setShowOverflow(false);
-    };
-    document.addEventListener("keydown", handleKey);
-    document.addEventListener("mousedown", handleClick);
-    return () => { document.removeEventListener("keydown", handleKey); document.removeEventListener("mousedown", handleClick); };
-  }, [showOverflow]);
+  useClickOutside({
+    refs: [overflowRef, dropdownRef],
+    onDismiss: () => setShowOverflow(false),
+    enabled: showOverflow,
+  });
 
-  useEffect(() => {
-    if (!showHistory) return;
-    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowHistory(false); };
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (historyBtnRef.current?.contains(target)) return;
-      if (historyDropdownRef.current?.contains(target)) return;
-      setShowHistory(false);
-    };
-    document.addEventListener("keydown", handleKey);
-    document.addEventListener("mousedown", handleClick);
-    return () => { document.removeEventListener("keydown", handleKey); document.removeEventListener("mousedown", handleClick); };
-  }, [showHistory]);
+  useClickOutside({
+    refs: [historyBtnRef, historyDropdownRef],
+    onDismiss: () => setShowHistory(false),
+    enabled: showHistory,
+  });
 
   useLayoutEffect(() => {
     if (!showHistory || !histContentRef.current) return;

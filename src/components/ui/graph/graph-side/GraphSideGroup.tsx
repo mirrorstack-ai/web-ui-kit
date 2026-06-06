@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/utils/cn";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import { Button } from "@/components/ui/actions/button/Button";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
@@ -91,17 +92,13 @@ export function GraphSideGroup({
 
   // Close on click outside the editor AND outside the portaled popover.
   // Matches the kit's existing Combobox/DropdownMenu pattern (reliable on
-  // touch devices, no setTimeout race).
-  useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (containerRef.current?.contains(target)) return;
-      if (popoverRef.current?.contains(target)) return;
-      setFocusedRowId(null);
-    };
-    document.addEventListener("mousedown", handle);
-    return () => document.removeEventListener("mousedown", handle);
-  }, []);
+  // touch devices, no setTimeout race). Escape is left to the input itself.
+  useClickOutside({
+    refs: [containerRef, popoverRef],
+    onDismiss: () => setFocusedRowId(null),
+    enabled: true,
+    closeOnEscape: false,
+  });
 
   const update = (id: string, patch: Partial<GraphSideGroupItem>) =>
     onChange(groups.map((g) => (g.id === id ? { ...g, ...patch } : g)));
