@@ -12,8 +12,8 @@ export const meta: ComponentMeta = {
 export interface GraphSideSettingValue {
   /** Multiplier on node radii. */
   nodeSize: number;
-  /** Multiplier on label font size. */
-  textSize: number;
+  /** Multiplier on label font size. Defaults to 1 when omitted. */
+  textSize?: number;
   /** Multiplier on edge stroke width. */
   lineSize: number;
   /** Render each node's tag text below its always-visible label. Default off. */
@@ -79,7 +79,7 @@ export function GraphSideSetting({
         min={textSizeRange[0]}
         max={textSizeRange[1]}
         step={0.1}
-        value={value.textSize}
+        value={value.textSize ?? 1}
         onChange={(v) => set("textSize", v)}
       />
       <SliderRow
