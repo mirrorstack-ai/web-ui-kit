@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -8396,7 +8396,7 @@ width: number</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NotchGrid</h2>
       <div class="badges">
-        <label for="c-45-ui-notch-notchgrid-props" class="badge ok as-toggle">12 prop types</label>
+        <label for="c-45-ui-notch-notchgrid-props" class="badge ok as-toggle">14 prop types</label>
         <label for="c-45-ui-notch-notchgrid-info" class="badge info as-toggle">1 info</label>
         <label for="c-45-ui-notch-notchgrid-stories" class="badge ok as-toggle">3 stories</label>
         
@@ -8430,7 +8430,7 @@ width: number</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">12 prop types</span>
+              <span class="badge ok">14 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/notch-grid/NotchGrid.tsx::NotchGrid</code></pre>
             <pre><code>Props:</code></pre>
@@ -8447,6 +8447,13 @@ className?: string
  *  the gain-1-col rule.
  */
 cols?: number | &quot;auto&quot; = &quot;auto&quot;
+
+/**
+ * CSS padding inset on each tile / sub-cell&#39;s content. Default `&quot;16px 8px&quot;`.
+ *  Lower it (or `0`) for fine-resolution grids where a tile may be only a
+ *  fraction of a block tall — the default would over-pad short cells.
+ */
+contentPad?: number | string = &quot;16px 8px&quot;
 
 /**
  * Enable outer-grid drag-to-place AND sub-item drag + promote.
@@ -8477,6 +8484,14 @@ onItemMove?: (key: ItemKey, pos: Pos) =&gt; void
  *  group member; auto-link re-unions it with adjacent same-group tiles).
  */
 onSubItemPromote?: (parentKey: ItemKey, subIndex: number, pos: Pos) =&gt; void
+
+/**
+ * Expand each panel&#39;s outline OUTWARD by `panelBleed` px so its frame can sit
+ *  beyond the cells — lets the outer frame match the inter-tile gap instead of
+ *  being half of it. Pair with a `contentPad` of the same value for uniform
+ *  spacing. Default 0.
+ */
+panelBleed?: number = 0
 
 /**
  * Map from `ui.type` → React component. Receives the full `ui` object as
