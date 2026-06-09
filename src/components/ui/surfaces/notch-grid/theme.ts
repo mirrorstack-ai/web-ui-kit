@@ -46,6 +46,11 @@ export interface ResolvedTheme {
    *  traces the rendered shape (e.g. Tailwind's `drop-shadow-lg`, which is a
    *  `filter` so it follows the notched SVG outline, not the bounding box). */
   elevated: boolean;
+  /** Whether this chrome is invisible — no fill and no border (the `ghost`
+   *  theme). Renderers can skip clipping content to the outline, since there's
+   *  no visible chrome to define a boundary and clipping would only shave the
+   *  corners of self-shaped children. */
+  noChrome: boolean;
 }
 
 const DEFAULT_VARIANT: Exclude<ThemeVariant, "auto"> = "neutral";
@@ -164,6 +169,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         stroke: "none",
         strokeWidth: 0,
         elevated: false,
+        noChrome: false,
       };
     }
     case "outlined": {
@@ -174,6 +180,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         stroke: OUTLINE_BORDER[variant],
         strokeWidth: 1,
         elevated: false,
+        noChrome: false,
       };
     }
     case "elevated": {
@@ -189,6 +196,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         strokeWidth: 0,
         ...(isAlert ? { accentBar: ACCENT[variant] } : {}),
         elevated: true,
+        noChrome: false,
       };
     }
     case "ghost": {
@@ -199,6 +207,7 @@ export function resolveNotchTheme(theme?: NotchTheme): ResolvedTheme {
         stroke: "none",
         strokeWidth: 0,
         elevated: false,
+        noChrome: true,
       };
     }
   }

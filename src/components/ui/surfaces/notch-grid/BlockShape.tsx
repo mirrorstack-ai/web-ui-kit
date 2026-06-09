@@ -35,6 +35,10 @@ export interface BlockShapeProps {
    *  neighbours / nested items leave a `gap`-px space. Footprint size is
    *  unchanged. Normally set by the parent `NotchGrid`; default 0. */
   gap?: number;
+  /** Expand the outline OUTWARD by `bleed` px (inverse of `gap`) so the frame
+   *  can sit beyond the cells. The SVG grows to avoid clipping; content stays
+   *  in the cell box. Default 0. */
+  bleed?: number;
   /** Convex corner radius (px). Default 24. */
   radius?: number;
   /** Concave / notch corner radius (px). Default 32. */
@@ -59,6 +63,7 @@ export function BlockShape({
   tier = 1,
   block = BLOCK_SIZE,
   gap = 0,
+  bleed = 0,
   radius = 24,
   inverseRadius = 32,
   fill = "var(--color-surface-container-low)",
@@ -83,10 +88,14 @@ export function BlockShape({
   const w = cols * block;
   const h = rows * block;
   const pathD = useMemo(
-    () => gridOutlinePath(mask, { cell: block, gap, radius, inverseRadius }),
-    [mask, block, gap, radius, inverseRadius],
+    () => gridOutlinePath(mask, { cell: block, gap, bleed, radius, inverseRadius }),
+    [mask, block, gap, bleed, radius, inverseRadius],
   );
   const inset = strokeWidth / 2;
+  // When the outline bleeds outward, the SVG must extend past the w×h box so
+  // the dilated path isn't clipped — grow it by `bleed` on every side and offset
+  // it back. The content layer (children) stays at the cell box (0..w).
+  const m = bleed + inset;
 
   return (
     <div
@@ -94,10 +103,11 @@ export function BlockShape({
       style={{ width: w, height: h, ...style }}
     >
       <svg
-        width={w}
-        height={h}
-        viewBox={`${-inset} ${-inset} ${w + strokeWidth} ${h + strokeWidth}`}
-        className="pointer-events-none absolute inset-0"
+        width={w + 2 * bleed}
+        height={h + 2 * bleed}
+        viewBox={`${-m} ${-m} ${w + 2 * m} ${h + 2 * m}`}
+        className="pointer-events-none absolute"
+        style={{ left: -bleed, top: -bleed }}
         aria-hidden="true"
       >
         {!noClip && (

@@ -276,26 +276,36 @@ export function solveLayout<T = unknown>(
     return out;
   };
 
+  /** Mark a candidate's cells occupied and build its `Placement`. Shared by the
+   *  exact/flow placement in `tryPlace` and the nearest-free drop fallback so
+   *  the placement shape is built in one place. */
+  const commitPlacement = (
+    item: SolverItem<T>,
+    cand: Candidate,
+    col: number,
+    row: number,
+  ): Placement<T> => {
+    occupy(cand.mask, col, row);
+    return {
+      key: item.key,
+      item: item.item,
+      col,
+      row,
+      mask: cand.mask,
+      cols: maskCols(cand.mask),
+      rows: cand.mask.length,
+      priorityUsed: { position: cand.posKey, shape: cand.shapeKey },
+      scale: cand.scale,
+      cost: cand.cost,
+    };
+  };
+
   const tryPlace = (item: SolverItem<T>, cand: Candidate): Placement<T> | null => {
     const w = maskCols(cand.mask);
-    const h = cand.mask.length;
     if (w > C) return null;
 
-    const commit = (col: number, row: number): Placement<T> => {
-      occupy(cand.mask, col, row);
-      return {
-        key: item.key,
-        item: item.item,
-        col,
-        row,
-        mask: cand.mask,
-        cols: w,
-        rows: h,
-        priorityUsed: { position: cand.posKey, shape: cand.shapeKey },
-        scale: cand.scale,
-        cost: cand.cost,
-      };
-    };
+    const commit = (col: number, row: number) =>
+      commitPlacement(item, cand, col, row);
 
     if (cand.pos) {
       const [col, row] = cand.pos;
@@ -320,6 +330,32 @@ export function solveLayout<T = unknown>(
     return null;
   };
 
+  /** A fixed-position item whose exact cell is taken: instead of re-flowing it
+   *  from the top-left (which lands it far from the drop), search outward in
+   *  expanding Chebyshev rings from the desired cell and take the NEAREST free
+   *  fit — so a dropped tile lands where the user aimed. */
+  const placeNearestFree = (item: SolverItem<T>): Placement<T> | null => {
+    const p = item.desire.position;
+    if (p === undefined || isPriorityMap(p)) return null;
+    const [dCol, dRow] = p as Pos;
+    const cand = candidatesFor(item)[0];
+    if (!cand) return null;
+    const w = maskCols(cand.mask);
+    if (w > C) return null;
+    for (let radius = 0; radius < MAX_ROWS; radius++) {
+      for (let row = Math.max(0, dRow - radius); row <= dRow + radius; row++) {
+        for (let col = Math.max(0, dCol - radius); col + w <= C; col++) {
+          const ring = Math.max(Math.abs(row - dRow), Math.abs(col - dCol));
+          if (ring !== radius) continue; // only the new outer ring each pass
+          if (!collides(cand.mask, col, row)) {
+            return commitPlacement(item, cand, col, row);
+          }
+        }
+      }
+    }
+    return null;
+  };
+
   const isFixedPos = (item: SolverItem<T>): boolean => {
     const p = item.desire.position;
     return p !== undefined && !isPriorityMap(p);
@@ -333,11 +369,15 @@ export function solveLayout<T = unknown>(
       const placed = place(item);
       if (placed) placements.push(placed);
       else {
-        // Demote: try again with position dropped so the item flows freely.
-        flowQueue.push({
-          ...item,
-          desire: { ...item.desire, position: undefined },
-        });
+        // Exact cell taken — land at the nearest free cell to the drop before
+        // falling back to a free flow.
+        const near = placeNearestFree(item);
+        if (near) placements.push(near);
+        else
+          flowQueue.push({
+            ...item,
+            desire: { ...item.desire, position: undefined },
+          });
       }
     } else {
       flowQueue.push(item);
