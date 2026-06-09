@@ -3,6 +3,23 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.3
+
+Additive `NotchGrid` props for fine-resolution and framed layouts, plus drag
+polish. **No breaking changes**; all defaults unchanged.
+
+- `NotchGrid`: new `contentPad` prop (default `"16px 8px"`) — lower it for
+  fine-resolution grids where a tile may be only a fraction of a block tall and
+  the default would over-pad short cells.
+- `NotchGrid`: new `panelBleed` prop (default `0`) — expands a panel's outline
+  outward so its frame can match the full inter-tile gap instead of half of it.
+- `BlockShape` / `gridOutlinePath`: new `bleed` option (the inverse of `gap`) —
+  dilates the outline outward; the SVG grows so the widened frame isn't clipped.
+- Drag: the drop target now shows a dashed indicator for both outer-tile and
+  sub-item drags; a tile dropped on an occupied cell lands at the nearest free
+  cell to where it was aimed; a window-level backstop guarantees the drag
+  releases even when pointer capture is lost. (#263)
+
 ## 0.4.2
 
 Additive component variant — adopted to replace chrome the consumer apps were

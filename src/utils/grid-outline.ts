@@ -30,6 +30,10 @@ export interface GridOutlineOptions {
    *  this shape and anything flush against it (incl. items in its notches).
    *  Clamped below `cell` so the shape can't collapse. Default 0. */
   gap?: number;
+  /** Expand the boundary OUTWARD by `bleed` px — the inverse of `gap`. Lets a
+   *  panel's outline sit outside its cells so its frame can match the inter-cell
+   *  gap. Applied after erosion (net offset = gap/2 − bleed). Default 0. */
+  bleed?: number;
 }
 
 type Pt = readonly [number, number];
@@ -54,13 +58,15 @@ export function maskFromShape(
 
 export function gridOutlinePath(
   mask: readonly (readonly boolean[])[],
-  { cell, radius = 24, inverseRadius = 32, gap = 0 }: GridOutlineOptions,
+  { cell, radius = 24, inverseRadius = 32, gap = 0, bleed = 0 }: GridOutlineOptions,
 ): string {
   const rows = mask.length;
   const filled = (r: number, c: number): boolean =>
     r >= 0 && r < rows && c >= 0 && c < mask[r].length && !!mask[r][c];
-  // Keep at least a sliver of shape even when gap is set absurdly high.
-  const erosion = Math.max(0, Math.min(gap, cell - 2)) / 2;
+  // Net boundary offset: positive erodes inward (gap), negative dilates outward
+  // (bleed). `gap` is still clamped so the shape can't collapse; `bleed` has no
+  // inward limit (it only grows the shape).
+  const erosion = Math.max(0, Math.min(gap, cell - 2)) / 2 - bleed;
 
   // Directed boundary edges, oriented so the filled cell sits on the *right*
   // of travel — every cell contributes its 4 boundary edges clockwise in
@@ -138,7 +144,7 @@ export function gridOutlinePath(
         ([x, y]) => [x * cell, y * cell] as Pt,
       );
       if (corners.length >= 3) {
-        const offset = erosion > 0 ? erodeRectilinear(corners, erosion) : corners;
+        const offset = erosion !== 0 ? erodeRectilinear(corners, erosion) : corners;
         subpaths.push(roundedRectilinearPath(offset, radius, inverseRadius));
       }
     }

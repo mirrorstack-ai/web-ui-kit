@@ -106,6 +106,15 @@ export interface NotchGridProps {
   blockMin?: number;
   /** Gap between blocks in px (notch erosion). Default 8. */
   gap?: number;
+  /** CSS padding inset on each tile / sub-cell's content. Default `"16px 8px"`.
+   *  Lower it (or `0`) for fine-resolution grids where a tile may be only a
+   *  fraction of a block tall — the default would over-pad short cells. */
+  contentPad?: number | string;
+  /** Expand each panel's outline OUTWARD by `panelBleed` px so its frame can sit
+   *  beyond the cells — lets the outer frame match the inter-tile gap instead of
+   *  being half of it. Pair with a `contentPad` of the same value for uniform
+   *  spacing. Default 0. */
+  panelBleed?: number;
   /** Reserved — already implied by the solver's cell-level collision. */
   nest?: boolean;
   /** Map from `ui.type` → React component. Receives the full `ui` object as
@@ -127,7 +136,7 @@ export interface NotchGridProps {
 // --- Internal helpers ------------------------------------------------------
 
 /** Content inset inside a tile / sub-cell (8px sides, 16px top/bottom). Matches BlockShape's default. */
-const CONTENT_PAD = "16px 8px";
+const DEFAULT_CONTENT_PAD = "16px 8px";
 
 /** Pointer capture, tolerant of test envs (jsdom) that lack the API. */
 function safePointerCapture(el: Element, pointerId: number): void {
@@ -145,11 +154,79 @@ function safePointerRelease(el: Element, pointerId: number): void {
   }
 }
 
+/** The window-level drag backstop receives DOM PointerEvents, but the drag
+ *  handlers are typed for React's synthetic event. They only read fields both
+ *  share (pointerId, clientX/Y, currentTarget), so this bridges the two without
+ *  repeating the cast at every call site. */
+const toReact = (e: PointerEvent): ReactPointerEvent =>
+  e as unknown as ReactPointerEvent;
+
 /** Stable key for a sub-item within its panel. Index-based since sub-items
  *  may omit `key`. */
 type SubKey = string;
 const subKeyOf = (parentKey: ItemKey, index: number): SubKey =>
   `${parentKey}::${index}`;
+
+/** The grid cell a sub-drag will land in: the ghost's top-left (origin + drag
+ *  delta) rounded to the nearest cell. Shared by the drop handler and the drop
+ *  indicator so the preview matches the landing spot. */
+function subDropCell(
+  s: {
+    panelCol: number;
+    subCol: number;
+    panelRow: number;
+    subRow: number;
+    dx: number;
+    dy: number;
+  },
+  blockPx: number,
+): Pos {
+  return [
+    Math.max(0, Math.round(((s.panelCol + s.subCol) * blockPx + s.dx) / blockPx)),
+    Math.max(0, Math.round(((s.panelRow + s.subRow) * blockPx + s.dy) / blockPx)),
+  ];
+}
+
+/** Dashed outline marking the cell a dragged tile will land in. Shared by the
+ *  sub-drag and outer-drag indicators so both read identically — each caller
+ *  computes its own landing geometry (their drop math differs) and this only
+ *  renders it. */
+function DropIndicator({
+  col,
+  row,
+  cols,
+  rows,
+  blockPx,
+  contentPad,
+  color,
+}: {
+  col: number;
+  row: number;
+  cols: number;
+  rows: number;
+  blockPx: number;
+  contentPad: number | string;
+  color: string;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute z-20"
+      style={{
+        left: col * blockPx,
+        top: row * blockPx,
+        width: cols * blockPx,
+        height: rows * blockPx,
+        padding: contentPad,
+      }}
+    >
+      <div
+        className="h-full w-full rounded-[22px] border-2 border-dashed"
+        style={{ borderColor: color, opacity: 0.6 }}
+      />
+    </div>
+  );
+}
 
 /** A sub-item paired with its original index in the panel's `subItems` (kept
  *  through filtering/overriding so drag handlers can identify the cell). */
@@ -305,8 +382,14 @@ interface DragState {
   /** Origin position in block units (where the item sits at drag start). */
   originCol: number;
   originRow: number;
-  /** Footprint width in blocks (to clamp the dropped column). */
+  /** Footprint in blocks (to clamp the dropped column + size the drop
+   *  indicator). Captured at drag-start so the indicator needs no placement
+   *  lookup mid-drag. */
   originCols: number;
+  originRows: number;
+  /** Resolved theme color, captured at drag-start to tint the drop indicator
+   *  without re-resolving the theme on every pointer move. */
+  color: string;
   /** Live pointer delta in px. */
   dx: number;
   dy: number;
@@ -356,6 +439,8 @@ export function NotchGrid({
   cols = "auto",
   blockMin = BLOCK_SIZE,
   gap = 8,
+  contentPad = DEFAULT_CONTENT_PAD,
+  panelBleed = 0,
   nest = true,
   primitives = {},
   onItemError,
@@ -420,6 +505,8 @@ export function NotchGrid({
         originCol: p.col,
         originRow: p.row,
         originCols: p.cols,
+        originRows: p.rows,
+        color: resolveNotchTheme(p.item?.theme ?? {}).color,
         dx: 0,
         dy: 0,
       });
@@ -442,6 +529,8 @@ export function NotchGrid({
         originCol: lead.col,
         originRow: lead.row,
         originCols: lead.cols,
+        originRows: lead.rows,
+        color: resolveNotchTheme(lead.item?.theme ?? {}).color,
         dx: 0,
         dy: 0,
         members: members.map((m) => ({
@@ -504,6 +593,9 @@ export function NotchGrid({
     (e: ReactPointerEvent) => {
       const d = dragRef.current;
       if (!d || e.pointerId !== d.pointerId) return;
+      // Clear synchronously so the element + window backstop firing in the same
+      // tick can't run this twice.
+      dragRef.current = null;
       safePointerRelease(e.currentTarget, e.pointerId);
       setDrag(null);
       const blockPx = block || blockMin;
@@ -551,21 +643,19 @@ export function NotchGrid({
     (e: ReactPointerEvent) => {
       const s = subDragRef.current;
       if (!s || e.pointerId !== s.pointerId) return;
+      // Clear synchronously so the element + window backstop firing in the same
+      // tick can't run this twice (which would double-promote the sub-item).
+      subDragRef.current = null;
       safePointerRelease(e.currentTarget, e.pointerId);
       setSubDrag(null);
       // Unified drop: the sub lands at the cursor's outer-grid cell as a
       // group member. Render-time auto-link re-unions it with same-group
       // tiles it's adjacent to (so a drop next to the panel reads as "stayed
       // in the panel"); dropped far, it stands alone.
-      const blockPx = block || blockMin;
-      const rect = wrapperRef.current?.getBoundingClientRect();
-      const dropCol = rect
-        ? Math.max(0, Math.floor((e.clientX - rect.left) / blockPx))
-        : s.panelCol + s.subCol;
-      const dropRow = rect
-        ? Math.max(0, Math.floor((e.clientY - rect.top) / blockPx))
-        : s.panelRow + s.subRow;
-      const pos: Pos = [dropCol, dropRow];
+      // Drop where the ghost visually sits (origin + drag delta, rounded to the
+      // nearest cell) so the landing spot matches both the ghost and the drop
+      // indicator the user was aiming with.
+      const pos = subDropCell(s, block || blockMin);
       const sk = subKeyOf(s.parentKey, s.subIndex);
       const parent = keyedItems.find((it) => it.key === s.parentKey);
       const sub = parent?.subItems?.[s.subIndex];
@@ -596,6 +686,40 @@ export function NotchGrid({
     },
     [block, blockMin, keyedItems, onSubItemPromote],
   );
+
+  // Window-level drag backstop: the element handlers rely on pointer capture,
+  // but capture can be lost (capture failed, or the captured cell detached mid
+  // re-render) — then the element never sees pointerup and the tile sticks to
+  // the cursor. Listening on window guarantees the drag ALWAYS ends on release,
+  // wherever the pointer is. Element handlers still fire first when capture
+  // works; these handlers are idempotent (they no-op once the drag is cleared),
+  // so the double path is harmless.
+  const dragging = drag !== null || subDrag !== null;
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e: PointerEvent) => {
+      if (subDragRef.current) handleSubPointerMove(toReact(e));
+      else if (dragRef.current) handlePointerMove(toReact(e));
+    };
+    const onEnd = (e: PointerEvent) => {
+      if (subDragRef.current) handleSubPointerEnd(toReact(e));
+      else if (dragRef.current) handlePointerEnd(toReact(e));
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onEnd);
+    window.addEventListener("pointercancel", onEnd);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onEnd);
+      window.removeEventListener("pointercancel", onEnd);
+    };
+  }, [
+    dragging,
+    handlePointerMove,
+    handlePointerEnd,
+    handleSubPointerMove,
+    handleSubPointerEnd,
+  ]);
 
   // Solve: panels get their desire.shape replaced by the union of their
   // *effective* sub-item footprints; promoted subs are appended as top-level
@@ -691,6 +815,8 @@ export function NotchGrid({
             members={members}
             block={block}
             gap={gap}
+            contentPad={contentPad}
+            panelBleed={panelBleed}
             primitives={primitives}
             onItemError={onItemError}
             draggable={draggable}
@@ -711,6 +837,54 @@ export function NotchGrid({
         );
       })}
 
+      {/* Drop indicator — a dashed outline at the cell the dragged sub-item
+          will land in (same `subDropCell` the drop uses), so the user can aim. */}
+      {subDrag &&
+        (() => {
+          const blockPx = block || blockMin;
+          const [tCol, tRow] = subDropCell(subDrag, blockPx);
+          return (
+            <DropIndicator
+              col={tCol}
+              row={tRow}
+              cols={subDrag.ghostShape[0]?.length ?? 1}
+              rows={subDrag.ghostShape.length}
+              blockPx={blockPx}
+              contentPad={contentPad}
+              color={subDrag.ghostColor}
+            />
+          );
+        })()}
+
+      {/* Drop indicator for an OUTER drag (a top-level tile / promoted sub) —
+          after a sub-item is dragged out it becomes top-level, so the SECOND
+          drag is an outer drag and needs its own indicator. Footprint + color
+          are captured in `drag` at drag-start, so no placement lookup is needed.
+          Single-tile drags only (a whole-component move keeps members together). */}
+      {drag &&
+        !drag.members &&
+        (() => {
+          const blockPx = block || blockMin;
+          const colCount = resolvedCols ?? 1;
+          const maxCol = Math.max(0, colCount - drag.originCols);
+          const tCol = Math.min(
+            maxCol,
+            Math.max(0, drag.originCol + Math.round(drag.dx / blockPx)),
+          );
+          const tRow = Math.max(0, drag.originRow + Math.round(drag.dy / blockPx));
+          return (
+            <DropIndicator
+              col={tCol}
+              row={tRow}
+              cols={drag.originCols}
+              rows={drag.originRows}
+              blockPx={blockPx}
+              contentPad={contentPad}
+              color={drag.color}
+            />
+          );
+        })()}
+
       {/* Cursor-follow ghost for the sub-item being dragged — carries the
           sub's own content so it reads as the real cell, not a blank chrome. */}
       {subDrag &&
@@ -730,6 +904,8 @@ export function NotchGrid({
                 shape={subDrag.ghostShape}
                 block={block}
                 gap={gap}
+                bleed={panelBleed}
+                pad={contentPad}
                 fill={subDrag.ghostFill}
                 stroke={subDrag.ghostStroke}
                 strokeWidth={subDrag.ghostStrokeWidth}
@@ -755,6 +931,8 @@ interface NotchComponentProps {
   members: Placement<NotchGridItem>[];
   block: number;
   gap: number;
+  contentPad: number | string;
+  panelBleed: number;
   primitives?: PrimitiveRegistry;
   onItemError?: (key: ItemKey, error: NotchGridError) => void;
   draggable?: boolean;
@@ -793,6 +971,8 @@ const NotchComponent = memo(function NotchComponent({
   members,
   block,
   gap,
+  contentPad,
+  panelBleed,
   primitives,
   onItemError,
   draggable = false,
@@ -841,17 +1021,22 @@ const NotchComponent = memo(function NotchComponent({
     return grid;
   }, [members, compCols, compRows, minCol, minRow]);
 
+  const isPlainSingleton =
+    members.length === 1 && !panelSubLayouts.has(members[0].key);
+
   // Outline of the chrome (same path BlockShape draws). Used to hit-clip the
   // wrapper so its bounding-box rectangle doesn't intercept pointer events over
   // empty notch cells — otherwise an overlapping neighbour's rectangle would
-  // steal clicks meant for this component (and vice-versa).
+  // steal clicks meant for this component (and vice-versa). Every component
+  // (incl. a dragged-out singleton) bleeds by `panelBleed` so frames stay
+  // consistent.
   const chromePath = useMemo(
     () =>
       gridOutlinePath(
         unionShape.map((row) => row.map(Boolean)),
-        { cell: block, gap, radius: 24, inverseRadius: 32 },
+        { cell: block, gap, bleed: panelBleed, radius: 24, inverseRadius: 32 },
       ),
-    [unionShape, block, gap],
+    [unionShape, block, gap, panelBleed],
   );
 
   // Theme from the lead member — same-group members share their theme.
@@ -876,8 +1061,6 @@ const NotchComponent = memo(function NotchComponent({
   // A lone non-panel tile drags as a whole (chrome + content move together);
   // panels & multi-member chromes drag per sub-cell / per content tile, OR as
   // a whole unit when the chrome (connection area) itself is grabbed.
-  const isPlainSingleton =
-    members.length === 1 && !panelSubLayouts.has(lead.key);
   // The whole wrapper moves as a unit — for a plain singleton always, or for a
   // panel/linked chrome when the chrome itself (not a cell) is being dragged.
   const wrapperMoves = (isPlainSingleton || wholeDrag) && dragKey === lead.key;
@@ -885,6 +1068,12 @@ const NotchComponent = memo(function NotchComponent({
   // (multi-member outer drag). A unit move keeps its clip so notched content
   // stays inside the outline; a sub-drag uses a separate ghost.
   const memberEscaping = dragKey != null && !isPlainSingleton && !wholeDrag;
+  // A chromeless (ghost) panel draws no fill and no border, so clipping its
+  // content to the rounded outline only shaves the corners of self-shaped
+  // children (e.g. bordered cards). Skip the clip entirely for ghost — the
+  // children define their own shape. (`noChrome` is resolved by the theme, not
+  // re-inferred from CSS strings here.)
+  const skipClip = memberEscaping || resolved.noChrome;
 
   const wrapperStyle: CSSProperties = {
     position: "absolute",
@@ -905,7 +1094,7 @@ const NotchComponent = memo(function NotchComponent({
   // Hit-clip the wrapper rectangle to the chrome outline so it only catches
   // pointers over the actual shape — except while a member is escaping (then
   // the un-clipped tile needs to render past the bounds).
-  if (!memberEscaping) {
+  if (!skipClip) {
     wrapperStyle.clipPath = `path('${chromePath}')`;
   }
 
@@ -975,7 +1164,7 @@ const NotchComponent = memo(function NotchComponent({
               top: (offRow + sp.row) * block,
               width: sp.cols * block,
               height: sp.rows * block,
-              padding: CONTENT_PAD,
+              padding: contentPad,
               opacity: beingDragged ? 0 : undefined,
             }}
           >
@@ -1029,7 +1218,7 @@ const NotchComponent = memo(function NotchComponent({
             top: offRow * block,
             width: m.cols * block,
             height: m.rows * block,
-            padding: CONTENT_PAD,
+            padding: contentPad,
             // Follow the cursor while this member is outer-dragged so it reads
             // as picked up (the sub-drag has its own ghost; standalone members
             // move their own tile). The themed background + rounded corners
@@ -1076,11 +1265,12 @@ const NotchComponent = memo(function NotchComponent({
         shape={unionShape}
         block={block}
         gap={gap}
+        bleed={panelBleed}
         fill={resolved.fill}
         stroke={resolved.stroke}
         strokeWidth={resolved.strokeWidth}
         pad={0}
-        noClip={memberEscaping}
+        noClip={skipClip}
       >
         {resolved.accentBar && (
           <div
