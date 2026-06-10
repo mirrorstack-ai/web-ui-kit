@@ -24,12 +24,19 @@ const PADDING = 20;
 export interface AppShellProps {
   children: ReactNode;
   /** Navigation slot — inject a NavigationRail, NavDrawer, or custom nav.
-   *  Shown on the side at lg+, hidden below it (use bottomNavigation for mobile). */
+   *  Shown on the side at lg+, hidden below it (use mobileNavigation for mobile). */
   navigation?: ReactNode;
-  /** Mobile navigation slot — pinned to the bottom of the content area below lg
-   *  and hidden at lg+ (where `navigation` takes over). Inject a horizontal
-   *  NavigationRail to mirror the side rail as a bottom-nav pill. */
-  bottomNavigation?: ReactNode;
+  /** Mobile navigation slot — how `navigation` translates below lg (it's
+   *  hidden there). With the "bottom" variant, inject a horizontal
+   *  NavigationRail to mirror the side rail as a bottom-nav pill. With
+   *  "drawer", this is the drawer's content — omit it to reuse `navigation`. */
+  mobileNavigation?: ReactNode;
+  /** How mobile navigation is hosted below lg:
+   *  - `"bottom"` (default) — mobileNavigation pinned to the content area's
+   *    bottom edge as a bar.
+   *  - `"drawer"` — a menu button opens mobileNavigation (or `navigation`
+   *    when not set) as a modal slide-in drawer. */
+  mobileNavigationVariant?: "bottom" | "drawer";
   /** App switcher slot — positioned top-left after nav area */
   appSwitcher?: ReactNode;
   /** Class for the outer shell */
@@ -63,6 +70,61 @@ export function AppShell(props: AppShellProps) {
         <AppShellInner {...props} />
       </SnackbarProvider>
     </SidebarProvider>
+  );
+}
+
+/** Hosts mobile navigation as a modal drawer below lg: a floating menu button
+ *  opens the content in a slide-in panel over a scrim. Closes on scrim tap,
+ *  Escape, or any link/button activation inside (a nav selection). */
+function MobileNavDrawerRegion({ children }: { children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    panelRef.current?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
+  return (
+    <div className="lg:!hidden">
+      <IconButton
+        icon="menu"
+        variant="tonal"
+        size="md"
+        className="absolute bottom-2 left-2 z-20"
+        onClick={() => setOpen(true)}
+        aria-label="Open navigation"
+        aria-expanded={open}
+      />
+
+      {open && (
+        <div className="fixed inset-0 z-40">
+          <div className="absolute inset-0 bg-black/20" onClick={() => setOpen(false)} />
+          <div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
+            tabIndex={-1}
+            // `starting:` holds the panel off-canvas on mount so transition-all
+            // slides it in — same pattern as the agent sidebar's starting:!w-0.
+            className="absolute inset-y-0 left-0 w-fit max-w-[85vw] overflow-y-auto overscroll-contain bg-background shadow-2xl outline-none transition-transform duration-300 starting:-translate-x-full"
+            // A tap that activates a link or button inside is a navigation
+            // selection — dismiss the drawer with it (M3 modal drawer behavior).
+            onClickCapture={(e) => {
+              if ((e.target as HTMLElement).closest("a, button")) setOpen(false);
+            }}
+          >
+            {children}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -101,7 +163,8 @@ function BottomNavRegion({ children }: { children: ReactNode }) {
 function AppShellInner({
   children,
   navigation,
-  bottomNavigation,
+  mobileNavigation,
+  mobileNavigationVariant = "bottom",
   appSwitcher,
   className,
   appSwitcherClassName = "max-w-7xl",
@@ -218,13 +281,16 @@ function AppShellInner({
               <main className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
                 <div
                   className={cn(
-                    // Responsive gutters — tighter on phones / laptops, full on
-                    // wide desktops. Pages must NOT add their own horizontal
+                    // Responsive gutters — tight on phones, roomier as the
+                    // viewport grows. Pages must NOT add their own horizontal
                     // padding (it would double up); they own max-width only.
-                    "mx-auto w-full px-4 md:px-5 xl:px-6 pt-12",
+                    "mx-auto w-full px-4 md:px-8 xl:px-12 pt-12",
                     // Clear the pinned mobile bottom nav so content isn't hidden
-                    // behind it. No-op at lg+ and when no bottomNavigation is set.
-                    bottomNavigation ? "pb-28 lg:pb-16" : "pb-16",
+                    // behind it. No-op at lg+, with no mobile navigation, and
+                    // for the drawer variant (an overlay, not a pinned bar).
+                    mobileNavigation && mobileNavigationVariant === "bottom"
+                      ? "pb-28 lg:pb-16"
+                      : "pb-16",
                     contentClassName,
                   )}
                 >
@@ -233,7 +299,15 @@ function AppShellInner({
               </main>
               <SnackbarOutlet className={snackbarClassName} />
 
-              {bottomNavigation && <BottomNavRegion>{bottomNavigation}</BottomNavRegion>}
+              {mobileNavigationVariant === "drawer"
+                ? (mobileNavigation ?? navigation) && (
+                    <MobileNavDrawerRegion>
+                      {mobileNavigation ?? navigation}
+                    </MobileNavDrawerRegion>
+                  )
+                : mobileNavigation && (
+                    <BottomNavRegion>{mobileNavigation}</BottomNavRegion>
+                  )}
             </div>
           </div>
         </div>

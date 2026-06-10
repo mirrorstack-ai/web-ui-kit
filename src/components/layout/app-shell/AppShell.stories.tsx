@@ -178,6 +178,40 @@ export const WithNavDrawer: Story = {
   },
 };
 
+export const WithMobileNavDrawer: Story = {
+  parameters: {
+    viewport: { defaultViewport: "mobile2" },
+  },
+  render: () => {
+    const [active, setActive] = useState("profile");
+    return (
+      <AppShell
+        // Below lg the side nav hides and the menu button (bottom-left)
+        // opens the same NavDrawer as a modal slide-in. Resize the viewport
+        // under 1024px to see it.
+        mobileNavigationVariant="drawer"
+        navigation={
+          <NavDrawer
+            sections={navSections}
+            activeItemId={active}
+            onItemClick={(item: NavDrawerItem) => setActive(item.id)}
+          />
+        }
+        appSwitcher={
+          <AppSwitcher
+            currentApp="Account"
+            logo={<div className="w-8 h-8"><Logo /></div>}
+            apps={apps}
+            activeAppId="account"
+          />
+        }
+      >
+        <DemoContent />
+      </AppShell>
+    );
+  },
+};
+
 function SnackbarDemoContent() {
   const { showSnackbar } = useSnackbar();
   return (
