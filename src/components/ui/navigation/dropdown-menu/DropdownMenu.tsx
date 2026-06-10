@@ -15,8 +15,14 @@ import { Notch } from "@/components/ui/surfaces/notch/Notch";
 
 const DD_NOTCH_W = 52;
 const DD_NOTCH_H = 46;
-const DD_R = 12;
+const DD_R = 16;
 const DD_IR = 10;
+
+// Item density tokens per `size` — "lg" pads up to comfortable touch targets.
+const SIZES = {
+  md: { item: "gap-2 px-2 py-1.5", icon: 16, minW: "min-w-[180px]", sep: "mx-1.5" },
+  lg: { item: "gap-2.5 px-3 py-2.5", icon: 18, minW: "min-w-[200px]", sep: "mx-2" },
+} as const;
 
 export const meta: ComponentMeta = {
   name: "DropdownMenu",
@@ -52,6 +58,18 @@ export interface DropdownMenuProps {
   /** Render the kit's signature notch wrapping the trigger. Default `true`. Set
    *  to `false` for a plain floating menu (e.g. selects, period pickers). */
   useNotch?: boolean;
+  /** Which side of the trigger the menu opens toward. `"top"` opens upward —
+   *  use it for triggers anchored to the bottom of the viewport (e.g. a mobile
+   *  bottom nav), where a downward menu would fall off-screen. Default `"bottom"`. */
+  placement?: "top" | "bottom";
+  /** Item density. `"lg"` enlarges padding, text, and icons to comfortable
+   *  touch targets — use it for menus opened on touch surfaces (e.g. a mobile
+   *  bottom nav). `"md"` is the default desktop density. */
+  size?: "md" | "lg";
+  /** Class applied to the floating menu element (the notched card) — use it to
+   *  fine-tune the menu's position relative to the trigger, e.g. a translate
+   *  to nudge the whole notched card off the auto-aligned anchor. */
+  menuClassName?: string;
   className?: string;
 }
 
@@ -71,9 +89,14 @@ export function DropdownMenu({
   notchWidth = DD_NOTCH_W,
   notchHeight = DD_NOTCH_H,
   useNotch = true,
+  placement = "bottom",
+  size = "md",
+  menuClassName,
   className,
 }: DropdownMenuProps) {
   const fromEnd = offset < 0 || Object.is(offset, -0);
+  const openUp = placement === "top";
+  const sz = SIZES[size];
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -218,12 +241,13 @@ export function DropdownMenu({
           role="menu"
           tabIndex={-1}
           onKeyDown={handleKeyDown}
-          className="absolute z-50 overflow-visible outline-none"
+          className={cn("absolute z-50 overflow-visible outline-none", menuClassName)}
           style={{
-            top: useNotch ? -7 : "calc(100% + 8px)",
             // Notch mode adds extra -5/-7 to compensate for the curve
             // overlapping the trigger; no-notch mode anchors flush to
-            // the trigger edge.
+            // the trigger edge. `openUp` anchors to the trigger's bottom
+            // so the menu grows upward instead of down.
+            [openUp ? "bottom" : "top"]: useNotch ? -7 : "calc(100% + 8px)",
             [fromEnd ? "right" : "left"]: useNotch
               ? (fromEnd ? -5 : -7) - Math.abs(offset)
               : -Math.abs(offset),
@@ -236,23 +260,24 @@ export function DropdownMenu({
               height={contentH}
               notchWidth={notchWidth}
               notchHeight={notchHeight}
-              notchSide="bottom"
+              notchSide={openUp ? "top" : "bottom"}
               notchOffset={offset}
               radius={DD_R}
               inverseRadius={DD_IR}
               stroke="var(--color-primary)"
               strokeWidth={1.5}
-              className="absolute top-0 left-0"
+              className={cn("absolute left-0", openUp ? "bottom-0" : "top-0")}
             />
           )}
           <div
             ref={contentRef}
             className={cn(
-              "relative z-10 flex flex-col gap-1 min-w-[180px] p-2",
+              "relative z-10 flex flex-col gap-1 p-2",
+              sz.minW,
               !useNotch &&
                 "rounded-lg border border-outline-variant bg-surface-container-low",
             )}
-            style={{ marginTop: useNotch ? notchHeight : 0 }}
+            style={{ [openUp ? "marginBottom" : "marginTop"]: useNotch ? notchHeight : 0 }}
           >
             {items.map((entry, index) => {
               if (isSeparator(entry)) {
@@ -260,7 +285,7 @@ export function DropdownMenu({
                   <div
                     key={`sep-${index}`}
                     role="separator"
-                    className="my-1 h-px bg-outline-variant mx-1.5"
+                    className={cn("my-1 h-px bg-outline-variant", sz.sep)}
                   />
                 );
               }
@@ -281,7 +306,8 @@ export function DropdownMenu({
                   role="menuitem"
                   aria-disabled={item.disabled || undefined}
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
+                    "flex cursor-pointer items-center rounded-lg text-left text-sm transition-colors",
+                    sz.item,
                     item.disabled && "pointer-events-none opacity-50",
                     isError ? "text-error" : "text-on-surface",
                     isActive &&
@@ -301,7 +327,7 @@ export function DropdownMenu({
                   {item.icon && (
                     <Icon
                       name={item.icon}
-                      size={16}
+                      size={sz.icon}
                       className={cn(
                         "shrink-0",
                         isError ? "text-error" : "text-on-surface-variant",
