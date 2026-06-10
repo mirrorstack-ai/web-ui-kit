@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/72 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">72/72 infos</a><span class="filter-pill ok" aria-disabled="true">267 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/72 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">72/72 infos</a><span class="filter-pill ok" aria-disabled="true">268 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1110,9 +1110,9 @@ variant: | &quot;error&quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppShell</h2>
       <div class="badges">
-        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">16 prop types</label>
+        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">17 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -1144,7 +1144,7 @@ variant: | &quot;error&quot;
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">16 prop types</span>
+              <span class="badge ok">17 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/app-shell/AppShell.tsx::AppShell</code></pre>
             <pre><code>Props:</code></pre>
@@ -1175,13 +1175,6 @@ appSwitcher?: ReactNode
  */
 appSwitcherClassName?: string
 
-/**
- * Mobile navigation slot — pinned to the bottom of the content area below lg
- *  and hidden at lg+ (where `navigation` takes over). Inject a horizontal
- *  NavigationRail to mirror the side rail as a bottom-nav pill.
- */
-bottomNavigation?: ReactNode
-
 children: ReactNode
 
 /**
@@ -1195,13 +1188,30 @@ className?: string
 contentClassName?: string
 
 /**
+ * Mobile navigation slot — how `navigation` translates below lg (it&#39;s
+ *  hidden there). With the &quot;bottom&quot; variant, inject a horizontal
+ *  NavigationRail to mirror the side rail as a bottom-nav pill. With
+ *  &quot;drawer&quot;, this is the drawer&#39;s content — omit it to reuse `navigation`.
+ */
+mobileNavigation?: ReactNode
+
+/**
+ * How mobile navigation is hosted below lg:
+ *  - `&quot;bottom&quot;` (default) — mobileNavigation pinned to the content area&#39;s
+ *    bottom edge as a bar.
+ *  - `&quot;drawer&quot;` — a menu button opens mobileNavigation (or `navigation`
+ *    when not set) as a modal slide-in drawer.
+ */
+mobileNavigationVariant?: &quot;bottom&quot; | &quot;drawer&quot;
+
+/**
  * Class for the navigation wrapper (override responsive visibility)
  */
 navClassName?: string
 
 /**
  * Navigation slot — inject a NavigationRail, NavDrawer, or custom nav.
- *  Shown on the side at lg+, hidden below it (use bottomNavigation for mobile).
+ *  Shown on the side at lg+, hidden below it (use mobileNavigation for mobile).
  */
 navigation?: ReactNode
 
@@ -1367,6 +1377,42 @@ snackbarClassName?: string</code></pre>
         &lt;/div&gt;
       }
       onAgentSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+    &gt;
+      &lt;DemoContent /&gt;
+    &lt;/AppShell&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Mobile Nav Drawer</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithMobileNavDrawer = () =&gt; {
+  const [active, setActive] = useState(&quot;profile&quot;);
+  return (
+    &lt;AppShell
+      // Below lg the side nav hides and the menu button (bottom-left)
+      // opens the same NavDrawer as a modal slide-in. Resize the viewport
+      // under 1024px to see it.
+      mobileNavigationVariant=&quot;drawer&quot;
+      navigation={
+        &lt;NavDrawer
+          sections={navSections}
+          activeItemId={active}
+          onItemClick={(item: NavDrawerItem) =&gt; setActive(item.id)}
+        /&gt;
+      }
+      appSwitcher={
+        &lt;AppSwitcher
+          currentApp=&quot;Account&quot;
+          logo={&lt;div className=&quot;w-8 h-8&quot;&gt;&lt;Logo /&gt;&lt;/div&gt;}
+          apps={apps}
+          activeAppId=&quot;account&quot;
+        /&gt;
+      }
     &gt;
       &lt;DemoContent /&gt;
     &lt;/AppShell&gt;
