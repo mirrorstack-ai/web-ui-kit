@@ -1484,7 +1484,7 @@ logo: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Avatar</h2>
       <div class="badges">
-        <label for="c-5-ui-media-avatar-props" class="badge ok as-toggle">9 prop types</label>
+        <label for="c-5-ui-media-avatar-props" class="badge ok as-toggle">10 prop types</label>
         <label for="c-5-ui-media-avatar-info" class="badge info as-toggle">1 info</label>
         <label for="c-5-ui-media-avatar-stories" class="badge ok as-toggle">9 stories</label>
         
@@ -1518,7 +1518,7 @@ logo: ReactNode</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">9 prop types</span>
+              <span class="badge ok">10 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/media/avatar/Avatar.tsx::Avatar</code></pre>
             <pre><code>Props:</code></pre>
@@ -1531,6 +1531,13 @@ editable?: boolean = false
 fallback?: string = &quot;U&quot;
 
 onFileSelect?: (file: File) =&gt; void
+
+/**
+ * Paint an opaque surface backdrop behind the avatar. The initials
+ * fallback is a translucent primary tint, so overlapped avatars (e.g. in
+ * an AvatarStack) need this to fully occlude what&#39;s beneath them.
+ */
+opaque?: boolean = false
 
 overlay?: ReactNode
 
@@ -2000,7 +2007,6 @@ trailing?: AvatarStackItem</code></pre>
         key={size}
         size={size}
         items={people}
-        max={4}
         trailing={{ fallback: &quot;KP&quot;, square: true }}
       /&gt;
     ))}
@@ -2015,21 +2021,15 @@ trailing?: AvatarStackItem</code></pre>
               
               <div class="hint">Over a cover image (the /apps and /orgs tile context) the stack sits on the scrim; each Avatar&#39;s built-in 2px primary border doubles as the overlap separator and picks up scoped `brandVars` accents.</div>
               <pre><code>const OverCover = () =&gt; (
-  &lt;div className=&quot;relative aspect-video w-80 overflow-hidden rounded-2xl&quot;&gt;
-    &lt;div
-      className=&quot;absolute inset-0&quot;
-      style={{
-        background:
-          &quot;linear-gradient(140deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 55%, #04121a) 100%)&quot;,
-      }}
-    /&gt;
-    &lt;div className=&quot;absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent&quot; /&gt;
+  &lt;div
+    className=&quot;relative aspect-video w-80 overflow-hidden rounded-2xl&quot;
+    style={{
+      background:
+        &quot;linear-gradient(140deg, var(--color-primary) 0%, #04121a 100%)&quot;,
+    }}
+  &gt;
     &lt;div className=&quot;absolute inset-x-0 bottom-0 flex items-end justify-end p-4&quot;&gt;
-      &lt;AvatarStack
-        items={people}
-        max={4}
-        trailing={{ fallback: &quot;KP&quot;, square: true }}
-      /&gt;
+      &lt;AvatarStack items={people} trailing={{ fallback: &quot;KP&quot;, square: true }} /&gt;
     &lt;/div&gt;
   &lt;/div&gt;
 );</code></pre>
