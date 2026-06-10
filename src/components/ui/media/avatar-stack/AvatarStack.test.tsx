@@ -27,6 +27,19 @@ describe("AvatarStack", () => {
     expect(screen.getByText("99+")).toBeInTheDocument();
   });
 
+  it("derives the chip from total when items are a server-capped preview", () => {
+    render(<AvatarStack items={items(4)} max={4} total={10} />);
+    expect(screen.getByText("P2")).toBeInTheDocument();
+    expect(screen.queryByText("P3")).not.toBeInTheDocument();
+    expect(screen.getByText("+7")).toBeInTheDocument();
+  });
+
+  it("ignores a total below items.length", () => {
+    render(<AvatarStack items={items(3)} max={4} total={1} />);
+    expect(screen.getByText("P2")).toBeInTheDocument();
+    expect(screen.queryByText(/^\+/)).not.toBeInTheDocument();
+  });
+
   it("renders the trailing avatar square and uncollapsed, even when overflowing", () => {
     const { container } = render(
       <AvatarStack items={items(6)} max={4} trailing={{ fallback: "ORG", square: true }} />,
