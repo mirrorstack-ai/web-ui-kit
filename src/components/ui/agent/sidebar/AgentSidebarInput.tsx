@@ -7,6 +7,8 @@ import { Notch } from "@/components/ui/surfaces/notch/Notch";
 import { useAutoGrowTextarea } from "@/hooks/useAutoGrowTextarea";
 import { useComposerSubmit } from "@/hooks/useComposerSubmit";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useMenuKeyNav } from "@/hooks/useMenuKeyNav";
+import { useModelSelection } from "@/hooks/useModelSelection";
 
 export interface AgentSidebarInputModel {
   id: string;
@@ -55,16 +57,9 @@ export function AgentSidebarInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
   const [menuH, setMenuH] = useState(0);
   const [tabW, setTabW] = useState(0);
   const [tabH, setTabH] = useState(0);
-  // Controlled if parent wires `onSelectModel`; otherwise the component owns
-  // the selection and `selectedModelId` acts as the initial value (same
-  // contract as AgentGreeting's picker).
-  const isControlledModel = onSelectModel !== undefined;
-  const [internalModelId, setInternalModelId] = useState(selectedModelId);
-  const activeModelId = isControlledModel ? selectedModelId : internalModelId;
   const modelTriggerRef = useRef<HTMLButtonElement>(null);
   const modelMenuRef = useRef<HTMLDivElement>(null);
   const modelContentRef = useRef<HTMLDivElement>(null);
@@ -76,10 +71,14 @@ export function AgentSidebarInput({
   const { send, handleKeyDown, handleChange, onCompositionStart, onCompositionEnd } =
     useComposerSubmit({ value: text, onSend }, setText);
 
-  const activeModel =
-    models?.find((m) => m.id === activeModelId) ??
-    models?.find((m) => !m.disabled) ??
-    models?.[0];
+  // Controlled if parent wires `onSelectModel`; otherwise the hook owns the
+  // selection and `selectedModelId` acts as the initial value (same contract
+  // as AgentGreeting's picker).
+  const { activeModel, activeModelId, selectModel } = useModelSelection({
+    models,
+    selectedModelId,
+    onSelectModel,
+  });
   const showModels = !!models?.length && !!activeModel;
 
   if (isDev && models?.length && selectedModelId && !models.some((m) => m.id === selectedModelId)) {
@@ -127,54 +126,28 @@ export function AgentSidebarInput({
   };
 
   const handleSelectModel = (id: string) => {
-    if (!isControlledModel) setInternalModelId(id);
-    onSelectModel?.(id);
+    selectModel(id);
     closeModelMenu(true);
   };
 
   // Arrows traverse ALL entries — disabled ones stay reachable so their hint
   // is revealed on keyboard focus — but Enter/Space only activates enabled.
-  const handleModelMenuKeyDown = (e: React.KeyboardEvent) => {
-    if (!models?.length) return;
-    switch (e.key) {
-      case "ArrowDown": {
-        e.preventDefault();
-        setActiveIndex((i) => (i + 1) % models.length);
-        break;
-      }
-      case "ArrowUp": {
-        e.preventDefault();
-        setActiveIndex((i) => (i <= 0 ? models.length - 1 : i - 1));
-        break;
-      }
-      case "Home": {
-        e.preventDefault();
-        setActiveIndex(0);
-        break;
-      }
-      case "End": {
-        e.preventDefault();
-        setActiveIndex(models.length - 1);
-        break;
-      }
-      case "Enter":
-      case " ": {
-        e.preventDefault();
-        const model = models[activeIndex];
-        if (model && !model.disabled) handleSelectModel(model.id);
-        break;
-      }
-      case "Escape": {
-        e.preventDefault();
-        closeModelMenu(true);
-        break;
-      }
-      case "Tab": {
-        closeModelMenu();
-        break;
-      }
-    }
-  };
+  const {
+    activeIndex,
+    setActiveIndex,
+    handleKeyDown: handleModelMenuKeyDown,
+  } = useMenuKeyNav({
+    itemCount: models?.length ?? 0,
+    canActivate: (index) => {
+      const model = models?.[index];
+      return !!model && !model.disabled;
+    },
+    onActivate: (index) => {
+      const model = models?.[index];
+      if (model) handleSelectModel(model.id);
+    },
+    onClose: closeModelMenu,
+  });
 
   const iconBtnCls = "text-inverse-on-surface/60 hover:text-inverse-on-surface";
 
@@ -215,7 +188,7 @@ export function AgentSidebarInput({
             onClick={onMic}
             aria-label="Voice input"
           />
-          {showModels && activeModel && (
+          {showModels && (
             <div className="relative">
               <button
                 ref={modelTriggerRef}

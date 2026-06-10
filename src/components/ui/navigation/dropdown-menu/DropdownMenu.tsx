@@ -12,6 +12,7 @@ import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
+import { useMenuKeyNav } from "@/hooks/useMenuKeyNav";
 
 const DD_NOTCH_W = 52;
 const DD_NOTCH_H = 46;
@@ -98,7 +99,6 @@ export function DropdownMenu({
   const openUp = placement === "top";
   const sz = SIZES[size];
   const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -110,38 +110,34 @@ export function DropdownMenu({
     .map((entry, i) => (isActionable(entry) ? i : -1))
     .filter((i) => i !== -1);
 
-  const findNext = useCallback(
-    (current: number) => {
-      const pos = actionableIndices.indexOf(current);
-      if (pos === -1) return actionableIndices[0] ?? -1;
-      return actionableIndices[(pos + 1) % actionableIndices.length] ?? -1;
+  const { activeIndex, setActiveIndex, handleKeyDown } = useMenuKeyNav({
+    itemCount: items.length,
+    traversableIndices: actionableIndices,
+    canActivate: (index) => {
+      const entry = items[index];
+      return !!entry && isActionable(entry);
     },
-    [actionableIndices],
-  );
-
-  const findPrev = useCallback(
-    (current: number) => {
-      const pos = actionableIndices.indexOf(current);
-      if (pos === -1)
-        return actionableIndices[actionableIndices.length - 1] ?? -1;
-      return (
-        actionableIndices[
-          (pos - 1 + actionableIndices.length) % actionableIndices.length
-        ] ?? -1
-      );
+    onActivate: (index) => {
+      const entry = items[index];
+      if (entry && isActionable(entry)) {
+        onSelect(entry);
+        closeMenu();
+      }
     },
-    [actionableIndices],
-  );
+    // DropdownMenu never moves focus on close (the trigger node is
+    // caller-owned), so `returnFocus` is ignored.
+    onClose: () => closeMenu(),
+  });
 
   const openMenu = useCallback(() => {
     setOpen(true);
     setActiveIndex(actionableIndices[0] ?? -1);
-  }, [actionableIndices]);
+  }, [actionableIndices, setActiveIndex]);
 
   const closeMenu = useCallback(() => {
     setOpen(false);
     setActiveIndex(-1);
-  }, []);
+  }, [setActiveIndex]);
 
   useEffect(() => {
     if (!open) return;
@@ -167,57 +163,6 @@ export function DropdownMenu({
     setContentH(contentRef.current.offsetHeight);
     setMenuW(contentRef.current.offsetWidth);
   }, [open, items.length]);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      switch (e.key) {
-        case "ArrowDown": {
-          e.preventDefault();
-          setActiveIndex((prev) => findNext(prev));
-          break;
-        }
-        case "ArrowUp": {
-          e.preventDefault();
-          setActiveIndex((prev) => findPrev(prev));
-          break;
-        }
-        case "Home": {
-          e.preventDefault();
-          setActiveIndex(actionableIndices[0] ?? -1);
-          break;
-        }
-        case "End": {
-          e.preventDefault();
-          setActiveIndex(
-            actionableIndices[actionableIndices.length - 1] ?? -1,
-          );
-          break;
-        }
-        case "Enter":
-        case " ": {
-          e.preventDefault();
-          if (activeIndex >= 0) {
-            const entry = items[activeIndex];
-            if (entry && isActionable(entry)) {
-              onSelect(entry);
-              closeMenu();
-            }
-          }
-          break;
-        }
-        case "Escape": {
-          e.preventDefault();
-          closeMenu();
-          break;
-        }
-        case "Tab": {
-          closeMenu();
-          break;
-        }
-      }
-    },
-    [findNext, findPrev, actionableIndices, activeIndex, items, onSelect, closeMenu],
-  );
 
   return (
     <div ref={containerRef} className={cn("relative inline-block", className)}>

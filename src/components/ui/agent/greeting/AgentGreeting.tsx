@@ -8,6 +8,7 @@ import { Notch } from "@/components/ui/surfaces/notch/Notch";
 import { useAutoGrowTextarea } from "@/hooks/useAutoGrowTextarea";
 import { useComposerSubmit } from "@/hooks/useComposerSubmit";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useModelSelection } from "@/hooks/useModelSelection";
 
 export const meta: ComponentMeta = {
   name: "AgentGreeting",
@@ -93,13 +94,13 @@ export function AgentGreeting({
   const [notchX, setNotchX] = useState(0);
   const [notchTabWidth, setNotchTabWidth] = useState(0);
   const [notchTabHeight, setNotchTabHeight] = useState(0);
-  // Controlled if parent wires `onSelectModel`; otherwise the component
-  // owns the selection and `selectedModelId` acts as the initial value.
-  // This lets the trigger update on click even when the consumer doesn't
-  // bother with state plumbing.
-  const isControlledModel = onSelectModel !== undefined;
-  const [internalModelId, setInternalModelId] = useState(selectedModelId);
-  const activeModelId = isControlledModel ? selectedModelId : internalModelId;
+  // Controlled if parent wires `onSelectModel`; otherwise the hook owns the
+  // selection and `selectedModelId` acts as the initial value.
+  const { activeModel, activeModelId, selectModel } = useModelSelection({
+    models,
+    selectedModelId,
+    onSelectModel,
+  });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const modelTriggerRef = useRef<HTMLButtonElement>(null);
   const modelMenuRef = useRef<HTMLDivElement>(null);
@@ -137,13 +138,10 @@ export function AgentGreeting({
   const { send, handleKeyDown, handleChange, onCompositionStart, onCompositionEnd } =
     useComposerSubmit({ value: text, onSend }, setText);
 
-  const activeModel =
-    models?.find((m) => m.id === activeModelId) ?? models?.[0];
   const showModels = !!models?.length && !!activeModel;
 
   const handleSelectModel = (id: string) => {
-    if (!isControlledModel) setInternalModelId(id);
-    onSelectModel?.(id);
+    selectModel(id);
     setModelMenuOpen(false);
   };
 
