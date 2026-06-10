@@ -38,7 +38,6 @@ export const Playground: Story = {};
 export const Overflow: Story = {
   args: {
     items: people,
-    max: 4,
   },
 };
 
@@ -50,7 +49,6 @@ export const Overflow: Story = {
 export const TrailingOrg: Story = {
   args: {
     items: people,
-    max: 4,
     trailing: { fallback: "KP", square: true },
   },
 };
@@ -63,7 +61,6 @@ export const Sizes: Story = {
           key={size}
           size={size}
           items={people}
-          max={4}
           trailing={{ fallback: "KP", square: true }}
         />
       ))}
@@ -78,21 +75,15 @@ export const Sizes: Story = {
  */
 export const OverCover: Story = {
   render: () => (
-    <div className="relative aspect-video w-80 overflow-hidden rounded-2xl">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(140deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 55%, #04121a) 100%)",
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+    <div
+      className="relative aspect-video w-80 overflow-hidden rounded-2xl"
+      style={{
+        background:
+          "linear-gradient(140deg, var(--color-primary) 0%, #04121a 100%)",
+      }}
+    >
       <div className="absolute inset-x-0 bottom-0 flex items-end justify-end p-4">
-        <AvatarStack
-          items={people}
-          max={4}
-          trailing={{ fallback: "KP", square: true }}
-        />
+        <AvatarStack items={people} trailing={{ fallback: "KP", square: true }} />
       </div>
     </div>
   ),

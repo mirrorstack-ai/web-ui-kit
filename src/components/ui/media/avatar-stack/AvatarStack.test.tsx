@@ -8,16 +8,9 @@ const items = (n: number) =>
   Array.from({ length: n }, (_, i) => ({ fallback: `P${i}` }));
 
 describe("AvatarStack", () => {
-  it("renders all items when within max", () => {
-    render(<AvatarStack items={items(3)} max={4} />);
-    expect(screen.getByText("P0")).toBeInTheDocument();
-    expect(screen.getByText("P1")).toBeInTheDocument();
-    expect(screen.getByText("P2")).toBeInTheDocument();
-    expect(screen.queryByText(/^\+/)).not.toBeInTheDocument();
-  });
-
-  it("renders exactly max items without a chip at the boundary", () => {
+  it("renders all items without a chip up to exactly max", () => {
     render(<AvatarStack items={items(4)} max={4} />);
+    expect(screen.getByText("P0")).toBeInTheDocument();
     expect(screen.getByText("P3")).toBeInTheDocument();
     expect(screen.queryByText(/^\+/)).not.toBeInTheDocument();
   });
@@ -34,19 +27,14 @@ describe("AvatarStack", () => {
     expect(screen.getByText("99+")).toBeInTheDocument();
   });
 
-  it("always renders the trailing avatar, even when overflowing", () => {
-    render(
+  it("renders the trailing avatar square and uncollapsed, even when overflowing", () => {
+    const { container } = render(
       <AvatarStack items={items(6)} max={4} trailing={{ fallback: "ORG", square: true }} />,
     );
     expect(screen.getByText("+3")).toBeInTheDocument();
     expect(screen.getByText("ORG")).toBeInTheDocument();
-  });
-
-  it("renders the trailing avatar square", () => {
-    const { container } = render(
-      <AvatarStack items={items(1)} trailing={{ fallback: "ORG", square: true }} />,
-    );
-    // sm square radius from the Avatar size map
+    // All list items are circles, so the only sm square radius source is the
+    // trailing avatar.
     expect(container.querySelector(".rounded-lg")).toBeInTheDocument();
   });
 
@@ -66,7 +54,7 @@ describe("AvatarStack", () => {
     expect(container.querySelectorAll(".-ml-2")).toHaveLength(2);
   });
 
-  it("gives every avatar an opaque surface backdrop so overlaps occlude", () => {
+  it("renders every avatar opaque so overlaps occlude", () => {
     const { container } = render(
       <AvatarStack items={items(2)} trailing={{ fallback: "ORG", square: true }} />,
     );

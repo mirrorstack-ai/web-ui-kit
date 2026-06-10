@@ -77,6 +77,19 @@ describe("Avatar", () => {
     expect(screen.queryByText("U")).not.toBeInTheDocument();
   });
 
+  it("paints an opaque surface backdrop only when opaque is set", () => {
+    const plain = render(<Avatar fallback="A" />);
+    expect(plain.container.querySelector(".bg-surface")).not.toBeInTheDocument();
+    plain.unmount();
+
+    const { container } = render(<Avatar opaque square size="sm" fallback="A" />);
+    const backdrop = container.querySelector(".bg-surface");
+    expect(backdrop).toBeInTheDocument();
+    // The backdrop radius follows the avatar's own (sm square → rounded-lg)
+    // so it hugs the tile instead of squaring its corners.
+    expect(backdrop).toHaveClass("rounded-lg");
+  });
+
   it("non-editable square avoids the badge-accommodating bottom-right radius", () => {
     const { container } = render(<Avatar square size="xl" fallback="S" />);
     expect(container.querySelector(".rounded-3xl")).toBeInTheDocument();

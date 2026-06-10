@@ -10,6 +10,9 @@ Notable API additions and breaking changes. For the full commit log, see
   per-size overlap, and an always-visible `trailing` avatar that never
   collapses (e.g. the owning org rendered square at the end of a member
   stack). **No breaking changes.** (#269)
+- `Avatar`: new opt-in `opaque` prop — paints a surface backdrop behind the
+  translucent initials fallback so overlapped avatars fully occlude. Default
+  rendering unchanged. (#269)
 
 ## 0.4.5
 

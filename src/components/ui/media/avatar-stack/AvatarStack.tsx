@@ -10,6 +10,8 @@ export const meta: ComponentMeta = {
 };
 
 export interface AvatarStackItem {
+  /** Stable identity for list reconciliation; falls back to the index. */
+  id?: string;
   src?: string | null;
   fallback?: string;
   square?: boolean;
@@ -41,14 +43,6 @@ const overlapMap: Record<AvatarSize, string> = {
   xl: "-ml-6",
 };
 
-/** Mirrors Avatar's square radius scale so the opaque backdrop hugs the tile. */
-const squareRadiusMap: Record<AvatarSize, string> = {
-  sm: "rounded-lg",
-  md: "rounded-xl",
-  lg: "rounded-2xl",
-  xl: "rounded-3xl",
-};
-
 export function AvatarStack({
   items,
   max = 4,
@@ -67,47 +61,30 @@ export function AvatarStack({
   const hidden = items.length - visible.length;
   const overlap = overlapMap[size];
 
-  if (visible.length === 0 && !trailing) return null;
+  const rendered: AvatarStackItem[] = [
+    ...visible,
+    ...(overflowing ? [{ fallback: hidden > 99 ? "99+" : `+${hidden}` }] : []),
+    ...(trailing ? [trailing] : []),
+  ];
 
-  // Avatar's initials fallback is a translucent primary tint, so an
-  // overlapped fallback would show the avatar beneath it; an opaque surface
-  // backdrop makes every avatar occlude its left neighbor.
-  const backdrop = (square?: boolean) =>
-    cn("bg-surface", square ? squareRadiusMap[size] : "rounded-full");
+  if (rendered.length === 0) return null;
 
-  // Later siblings paint on top, so the stack reads left-under-right and the
-  // trailing avatar always sits on top at the edge.
+  // `opaque` makes each avatar occlude its left neighbor (the initials
+  // fallback is translucent). Later siblings paint on top, so the stack
+  // reads left-under-right and the trailing avatar sits on top at the edge.
   return (
     <div className={cn("flex items-center", className)}>
-      {visible.map((item, i) => (
+      {rendered.map((item, i) => (
         <Avatar
-          key={i}
+          key={item.id ?? i}
           src={item.src}
           fallback={item.fallback}
           square={item.square}
           size={size}
-          className={cn(backdrop(item.square), i > 0 && overlap)}
+          opaque
+          className={cn(i > 0 && overlap)}
         />
       ))}
-      {overflowing && (
-        <Avatar
-          fallback={hidden > 99 ? "99+" : `+${hidden}`}
-          size={size}
-          className={cn(backdrop(), visible.length > 0 && overlap)}
-        />
-      )}
-      {trailing && (
-        <Avatar
-          src={trailing.src}
-          fallback={trailing.fallback}
-          square={trailing.square}
-          size={size}
-          className={cn(
-            backdrop(trailing.square),
-            (visible.length > 0 || overflowing) && overlap,
-          )}
-        />
-      )}
     </div>
   );
 }

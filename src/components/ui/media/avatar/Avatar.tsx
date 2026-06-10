@@ -64,6 +64,12 @@ export interface AvatarProps {
   onFileSelect?: (file: File) => void;
   accept?: string;
   square?: boolean;
+  /**
+   * Paint an opaque surface backdrop behind the avatar. The initials
+   * fallback is a translucent primary tint, so overlapped avatars (e.g. in
+   * an AvatarStack) need this to fully occlude what's beneath them.
+   */
+  opaque?: boolean;
   overlay?: ReactNode;
   className?: string;
 }
@@ -76,6 +82,7 @@ export function Avatar({
   onFileSelect,
   accept = "image/jpeg,image/png,image/gif,image/webp",
   square = false,
+  opaque = false,
   overlay,
   className,
 }: AvatarProps) {
@@ -140,7 +147,13 @@ export function Avatar({
   ) : null;
 
   return (
-    <div className={cn("relative inline-flex shrink-0", className)}>
+    <div
+      className={cn(
+        "relative inline-flex shrink-0",
+        opaque && cn("bg-surface", radius),
+        className,
+      )}
+    >
       {editable ? (
         <button
           type="button"
