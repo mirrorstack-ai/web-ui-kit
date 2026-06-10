@@ -312,6 +312,11 @@ export {
   AvatarCropper,
   type AvatarCropperProps,
 } from "./components/ui/media/avatar-cropper/AvatarCropper";
+export {
+  AvatarStack,
+  type AvatarStackProps,
+  type AvatarStackItem,
+} from "./components/ui/media/avatar-stack/AvatarStack";
 export { Logo, type LogoProps } from "./components/ui/media/logo/Logo";
 export {
   ImageCarousel,

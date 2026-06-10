@@ -3,6 +3,17 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.6
+
+- `AvatarStack` (new): overlapping row of `Avatar`s for member previews —
+  `max` total visible slots with a `+N` overflow chip (capped at `99+`),
+  per-size overlap, and an always-visible `trailing` avatar that never
+  collapses (e.g. the owning org rendered square at the end of a member
+  stack). **No breaking changes.** (#269)
+- `Avatar`: new opt-in `opaque` prop — paints a surface backdrop behind the
+  translucent initials fallback so overlapped avatars fully occlude. Default
+  rendering unchanged. (#269)
+
 ## 0.4.5
 
 - `AgentGreeting`: new `size` prop (`"hero"` default | `"compact"`). Compact
