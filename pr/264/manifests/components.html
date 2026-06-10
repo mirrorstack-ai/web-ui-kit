@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/72 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">72/72 infos</a><span class="filter-pill ok" aria-disabled="true">268 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/72 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">72/72 infos</a><span class="filter-pill ok" aria-disabled="true">269 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1112,7 +1112,7 @@ variant: | &quot;error&quot;
       <div class="badges">
         <label for="c-3-layout-appshell-props" class="badge ok as-toggle">17 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -1242,6 +1242,7 @@ snackbarClassName?: string</code></pre>
     AppShell,
     AppSwitcher,
     Avatar,
+    BottomNavItem,
     Button,
     Logo,
     NavDrawer,
@@ -1258,83 +1259,11 @@ snackbarClassName?: string</code></pre>
               </div>
               
               
-              <pre><code>const WithNavigationRail = () =&gt; {
-  const [selected, setSelected] = useState(&quot;apps&quot;);
-  return (
-    &lt;AppShell
-      navigation={
-        &lt;NavigationRail
-          logo={
-            &lt;NavigationButton
-              customIcon={
-                &lt;div className=&quot;w-full h-full bg-primary/20 flex items-center justify-center&quot;&gt;
-                  &lt;span className=&quot;text-primary font-semibold text-lg&quot;&gt;M&lt;/span&gt;
-                &lt;/div&gt;
-              }
-              label=&quot;My App&quot;
-              variant=&quot;secondary&quot;
-              disableHoverExpand
-              className=&quot;border border-primary&quot;
-            /&gt;
-          }
-        &gt;
-          &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
-            &lt;NavigationButton
-              icon=&quot;space_dashboard&quot;
-              label=&quot;Dashboard&quot;
-              variant=&quot;primary&quot;
-              selected={selected === &quot;dashboard&quot;}
-              onClick={() =&gt; setSelected(&quot;dashboard&quot;)}
-            /&gt;
-            &lt;NavigationButton
-              icon=&quot;data_table&quot;
-              label=&quot;Your Apps&quot;
-              selected={selected === &quot;apps&quot;}
-              onClick={() =&gt; setSelected(&quot;apps&quot;)}
-            /&gt;
-          &lt;/div&gt;
-          &lt;div className=&quot;h-px rounded-full w-full bg-outline&quot; /&gt;
-          &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
-            &lt;NavigationButton
-              icon=&quot;extension&quot;
-              label=&quot;Add-ons&quot;
-              selected={selected === &quot;addons&quot;}
-              onClick={() =&gt; setSelected(&quot;addons&quot;)}
-            /&gt;
-            &lt;NavigationButton
-              icon=&quot;rocket_launch&quot;
-              label=&quot;Deployment&quot;
-              selected={selected === &quot;deployment&quot;}
-              onClick={() =&gt; setSelected(&quot;deployment&quot;)}
-            /&gt;
-            &lt;NavigationButton
-              icon=&quot;settings&quot;
-              label=&quot;Settings&quot;
-              selected={selected === &quot;settings&quot;}
-              onClick={() =&gt; setSelected(&quot;settings&quot;)}
-            /&gt;
-          &lt;/div&gt;
-        &lt;/NavigationRail&gt;
-      }
-      appSwitcher={
-        &lt;AppSwitcher
-          currentApp=&quot;Account&quot;
-          logo={&lt;div className=&quot;w-8 h-8&quot;&gt;&lt;Logo /&gt;&lt;/div&gt;}
-          apps={apps}
-          activeAppId=&quot;account&quot;
-        /&gt;
-      }
-      agentSidebarContent={
-        &lt;div className=&quot;text-inverse-on-surface text-sm&quot;&gt;
-          Chat messages would appear here...
-        &lt;/div&gt;
-      }
-      onAgentSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-    &gt;
-      &lt;DemoContent /&gt;
-    &lt;/AppShell&gt;
-  );
-};</code></pre>
+              <pre><code>const WithNavigationRail = () =&gt; (
+  &lt;AppShell navigation={&lt;DemoRail /&gt;} appSwitcher={appSwitcher} {...agentProps}&gt;
+    &lt;DemoContent /&gt;
+  &lt;/AppShell&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1343,45 +1272,28 @@ snackbarClassName?: string</code></pre>
               </div>
               
               
-              <pre><code>const WithNavDrawer = () =&gt; {
-  const [active, setActive] = useState(&quot;profile&quot;);
-  return (
-    &lt;AppShell
-      navigation={
-        &lt;NavDrawer
-          contextSwitcher={
-            &lt;div className=&quot;flex items-center gap-3 p-3 rounded-xl&quot;&gt;
-              &lt;Avatar size=&quot;md&quot; fallback=&quot;J&quot; /&gt;
-              &lt;div className=&quot;min-w-0 flex-1 space-y-0.5&quot;&gt;
-                &lt;p className=&quot;text-sm font-medium text-on-surface truncate&quot;&gt;John Doe&lt;/p&gt;
-                &lt;p className=&quot;text-xs text-on-surface-variant&quot;&gt;Personal Account&lt;/p&gt;
-              &lt;/div&gt;
-            &lt;/div&gt;
-          }
-          sections={navSections}
-          activeItemId={active}
-          onItemClick={(item: NavDrawerItem) =&gt; setActive(item.id)}
-        /&gt;
-      }
-      appSwitcher={
-        &lt;AppSwitcher
-          currentApp=&quot;Account&quot;
-          logo={&lt;div className=&quot;w-8 h-8&quot;&gt;&lt;Logo /&gt;&lt;/div&gt;}
-          apps={apps}
-          activeAppId=&quot;account&quot;
-        /&gt;
-      }
-      agentSidebarContent={
-        &lt;div className=&quot;text-inverse-on-surface text-sm&quot;&gt;
-          Chat messages would appear here...
-        &lt;/div&gt;
-      }
-      onAgentSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-    &gt;
-      &lt;DemoContent /&gt;
-    &lt;/AppShell&gt;
-  );
-};</code></pre>
+              <pre><code>const WithNavDrawer = () =&gt; (
+  &lt;AppShell navigation={&lt;DemoNavDrawer /&gt;} appSwitcher={appSwitcher} {...agentProps}&gt;
+    &lt;DemoContent /&gt;
+  &lt;/AppShell&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Mobile Bottom Nav</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithMobileBottomNav = () =&gt; (
+  &lt;AppShell
+    navigation={&lt;DemoRail /&gt;}
+    mobileNavigation={&lt;DemoBottomNav /&gt;}
+    appSwitcher={appSwitcher}
+  &gt;
+    &lt;DemoContent /&gt;
+  &lt;/AppShell&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1390,34 +1302,15 @@ snackbarClassName?: string</code></pre>
               </div>
               
               
-              <pre><code>const WithMobileNavDrawer = () =&gt; {
-  const [active, setActive] = useState(&quot;profile&quot;);
-  return (
-    &lt;AppShell
-      // Below lg the side nav hides and the menu button (bottom-left)
-      // opens the same NavDrawer as a modal slide-in. Resize the viewport
-      // under 1024px to see it.
-      mobileNavigationVariant=&quot;drawer&quot;
-      navigation={
-        &lt;NavDrawer
-          sections={navSections}
-          activeItemId={active}
-          onItemClick={(item: NavDrawerItem) =&gt; setActive(item.id)}
-        /&gt;
-      }
-      appSwitcher={
-        &lt;AppSwitcher
-          currentApp=&quot;Account&quot;
-          logo={&lt;div className=&quot;w-8 h-8&quot;&gt;&lt;Logo /&gt;&lt;/div&gt;}
-          apps={apps}
-          activeAppId=&quot;account&quot;
-        /&gt;
-      }
-    &gt;
-      &lt;DemoContent /&gt;
-    &lt;/AppShell&gt;
-  );
-};</code></pre>
+              <pre><code>const WithMobileNavDrawer = () =&gt; (
+  &lt;AppShell
+    mobileNavigationVariant=&quot;drawer&quot;
+    navigation={&lt;DemoNavDrawer /&gt;}
+    appSwitcher={appSwitcher}
+  &gt;
+    &lt;DemoContent /&gt;
+  &lt;/AppShell&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1426,56 +1319,15 @@ snackbarClassName?: string</code></pre>
               </div>
               
               
-              <pre><code>const WithSnackbar = () =&gt; {
-  const [selected, setSelected] = useState(&quot;apps&quot;);
-  return (
-    &lt;AppShell
-      navigation={
-        &lt;NavigationRail
-          logo={
-            &lt;NavigationButton
-              customIcon={
-                &lt;div className=&quot;w-full h-full bg-primary/20 flex items-center justify-center&quot;&gt;
-                  &lt;span className=&quot;text-primary font-semibold text-lg&quot;&gt;M&lt;/span&gt;
-                &lt;/div&gt;
-              }
-              label=&quot;My App&quot;
-              variant=&quot;secondary&quot;
-              disableHoverExpand
-              className=&quot;border border-primary&quot;
-            /&gt;
-          }
-        &gt;
-          &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
-            &lt;NavigationButton
-              icon=&quot;space_dashboard&quot;
-              label=&quot;Dashboard&quot;
-              variant=&quot;primary&quot;
-              selected={selected === &quot;dashboard&quot;}
-              onClick={() =&gt; setSelected(&quot;dashboard&quot;)}
-            /&gt;
-            &lt;NavigationButton
-              icon=&quot;data_table&quot;
-              label=&quot;Your Apps&quot;
-              selected={selected === &quot;apps&quot;}
-              onClick={() =&gt; setSelected(&quot;apps&quot;)}
-            /&gt;
-          &lt;/div&gt;
-        &lt;/NavigationRail&gt;
-      }
-      appSwitcher={
-        &lt;AppSwitcher
-          currentApp=&quot;Account&quot;
-          logo={&lt;div className=&quot;w-8 h-8&quot;&gt;&lt;Logo /&gt;&lt;/div&gt;}
-          apps={apps}
-          activeAppId=&quot;account&quot;
-        /&gt;
-      }
-    &gt;
-      &lt;SnackbarDemoContent /&gt;
-    &lt;/AppShell&gt;
-  );
-};</code></pre>
+              <pre><code>const WithSnackbar = () =&gt; (
+  &lt;AppShell
+    navigation={&lt;DemoRail /&gt;}
+    mobileNavigation={&lt;DemoBottomNav /&gt;}
+    appSwitcher={appSwitcher}
+  &gt;
+    &lt;SnackbarDemoContent /&gt;
+  &lt;/AppShell&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1484,56 +1336,11 @@ snackbarClassName?: string</code></pre>
               </div>
               
               
-              <pre><code>const SnackbarWithScrollableContent = () =&gt; {
-  const [selected, setSelected] = useState(&quot;apps&quot;);
-  return (
-    &lt;AppShell
-      navigation={
-        &lt;NavigationRail
-          logo={
-            &lt;NavigationButton
-              customIcon={
-                &lt;div className=&quot;w-full h-full bg-primary/20 flex items-center justify-center&quot;&gt;
-                  &lt;span className=&quot;text-primary font-semibold text-lg&quot;&gt;M&lt;/span&gt;
-                &lt;/div&gt;
-              }
-              label=&quot;My App&quot;
-              variant=&quot;secondary&quot;
-              disableHoverExpand
-              className=&quot;border border-primary&quot;
-            /&gt;
-          }
-        &gt;
-          &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
-            &lt;NavigationButton
-              icon=&quot;space_dashboard&quot;
-              label=&quot;Dashboard&quot;
-              variant=&quot;primary&quot;
-              selected={selected === &quot;dashboard&quot;}
-              onClick={() =&gt; setSelected(&quot;dashboard&quot;)}
-            /&gt;
-            &lt;NavigationButton
-              icon=&quot;data_table&quot;
-              label=&quot;Your Apps&quot;
-              selected={selected === &quot;apps&quot;}
-              onClick={() =&gt; setSelected(&quot;apps&quot;)}
-            /&gt;
-          &lt;/div&gt;
-        &lt;/NavigationRail&gt;
-      }
-      appSwitcher={
-        &lt;AppSwitcher
-          currentApp=&quot;Account&quot;
-          logo={&lt;div className=&quot;w-8 h-8&quot;&gt;&lt;Logo /&gt;&lt;/div&gt;}
-          apps={apps}
-          activeAppId=&quot;account&quot;
-        /&gt;
-      }
-    &gt;
-      &lt;SnackbarScrollableDemoContent /&gt;
-    &lt;/AppShell&gt;
-  );
-};</code></pre>
+              <pre><code>const SnackbarWithScrollableContent = () =&gt; (
+  &lt;AppShell navigation={&lt;DemoRail /&gt;} appSwitcher={appSwitcher}&gt;
+    &lt;SnackbarScrollableDemoContent /&gt;
+  &lt;/AppShell&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1542,63 +1349,11 @@ snackbarClassName?: string</code></pre>
               </div>
               
               
-              <pre><code>const Playground = () =&gt; {
-  const [selected, setSelected] = useState(&quot;apps&quot;);
-  return (
-    &lt;AppShell
-      navigation={
-        &lt;NavigationRail
-          logo={
-            &lt;NavigationButton
-              customIcon={
-                &lt;div className=&quot;w-full h-full bg-primary/20 flex items-center justify-center&quot;&gt;
-                  &lt;span className=&quot;text-primary font-semibold text-lg&quot;&gt;M&lt;/span&gt;
-                &lt;/div&gt;
-              }
-              label=&quot;My App&quot;
-              variant=&quot;secondary&quot;
-              disableHoverExpand
-              className=&quot;border border-primary&quot;
-            /&gt;
-          }
-        &gt;
-          &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
-            &lt;NavigationButton
-              icon=&quot;space_dashboard&quot;
-              label=&quot;Dashboard&quot;
-              variant=&quot;primary&quot;
-              selected={selected === &quot;dashboard&quot;}
-              onClick={() =&gt; setSelected(&quot;dashboard&quot;)}
-            /&gt;
-            &lt;NavigationButton
-              icon=&quot;data_table&quot;
-              label=&quot;Your Apps&quot;
-              selected={selected === &quot;apps&quot;}
-              onClick={() =&gt; setSelected(&quot;apps&quot;)}
-            /&gt;
-          &lt;/div&gt;
-          &lt;div className=&quot;h-px rounded-full w-full bg-outline&quot; /&gt;
-          &lt;div className=&quot;w-full gap-2 flex flex-col&quot;&gt;
-            &lt;NavigationButton
-              icon=&quot;settings&quot;
-              label=&quot;Settings&quot;
-              selected={selected === &quot;settings&quot;}
-              onClick={() =&gt; setSelected(&quot;settings&quot;)}
-            /&gt;
-          &lt;/div&gt;
-        &lt;/NavigationRail&gt;
-      }
-      agentSidebarContent={
-        &lt;div className=&quot;text-inverse-on-surface text-sm&quot;&gt;
-          Chat messages would appear here...
-        &lt;/div&gt;
-      }
-      onAgentSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-    &gt;
-      &lt;DemoContent /&gt;
-    &lt;/AppShell&gt;
-  );
-};</code></pre>
+              <pre><code>const Playground = () =&gt; (
+  &lt;AppShell navigation={&lt;DemoRail /&gt;} {...agentProps}&gt;
+    &lt;DemoContent /&gt;
+  &lt;/AppShell&gt;
+);</code></pre>
             </div>
         </div>
     
