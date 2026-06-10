@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AppShell } from "./AppShell";
 import { NavigationRail } from "@/components/ui/navigation/navigation-rail/NavigationRail";
 import { NavigationButton } from "@/components/ui/navigation/navigation-button/NavigationButton";
+import { BottomNavItem } from "@/components/ui/navigation/bottom-nav-item/BottomNavItem";
 import { AppSwitcher } from "@/components/ui/navigation/app-switcher/AppSwitcher";
 import { Logo } from "@/components/ui/media/logo/Logo";
 import { NavDrawer, type NavDrawerItem } from "@/components/ui/navigation/nav-drawer/NavDrawer";
@@ -21,99 +22,23 @@ const meta: Meta<typeof AppShell> = {
 export default meta;
 type Story = StoryObj<typeof AppShell>;
 
+// --- Shared demo fixtures ---------------------------------------------------
+
 const apps = [
   { id: "account", label: "Account", description: "Profile & security settings", icon: "shield_person", href: "#" },
   { id: "apps", label: "Apps", description: "Manage your applications", icon: "data_table", href: "#" },
 ];
 
-const DemoContent = () => (
-  <div className="max-w-4xl mx-auto">
-    <h1 className="text-2xl font-bold text-on-surface mb-4">Dashboard</h1>
-    <p className="text-on-surface-variant">
-      Main content area. The agent sidebar can be toggled with the floating button.
-    </p>
-  </div>
-);
-
-export const WithNavigationRail: Story = {
-  render: () => {
-    const [selected, setSelected] = useState("apps");
-    return (
-      <AppShell
-        navigation={
-          <NavigationRail
-            logo={
-              <NavigationButton
-                customIcon={
-                  <div className="w-full h-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-primary font-semibold text-lg">M</span>
-                  </div>
-                }
-                label="My App"
-                variant="secondary"
-                disableHoverExpand
-                className="border border-primary"
-              />
-            }
-          >
-            <div className="w-full gap-2 flex flex-col">
-              <NavigationButton
-                icon="space_dashboard"
-                label="Dashboard"
-                variant="primary"
-                selected={selected === "dashboard"}
-                onClick={() => setSelected("dashboard")}
-              />
-              <NavigationButton
-                icon="data_table"
-                label="Your Apps"
-                selected={selected === "apps"}
-                onClick={() => setSelected("apps")}
-              />
-            </div>
-            <div className="h-px rounded-full w-full bg-outline" />
-            <div className="w-full gap-2 flex flex-col">
-              <NavigationButton
-                icon="extension"
-                label="Add-ons"
-                selected={selected === "addons"}
-                onClick={() => setSelected("addons")}
-              />
-              <NavigationButton
-                icon="rocket_launch"
-                label="Deployment"
-                selected={selected === "deployment"}
-                onClick={() => setSelected("deployment")}
-              />
-              <NavigationButton
-                icon="settings"
-                label="Settings"
-                selected={selected === "settings"}
-                onClick={() => setSelected("settings")}
-              />
-            </div>
-          </NavigationRail>
-        }
-        appSwitcher={
-          <AppSwitcher
-            currentApp="Account"
-            logo={<div className="w-8 h-8"><Logo /></div>}
-            apps={apps}
-            activeAppId="account"
-          />
-        }
-        agentSidebarContent={
-          <div className="text-inverse-on-surface text-sm">
-            Chat messages would appear here...
-          </div>
-        }
-        onAgentSend={(msg) => console.log("Send:", msg)}
-      >
-        <DemoContent />
-      </AppShell>
-    );
-  },
-};
+const railGroups = [
+  [
+    { id: "dashboard", icon: "space_dashboard", label: "Dashboard" },
+    { id: "apps", icon: "data_table", label: "Your Apps" },
+  ],
+  [
+    { id: "addons", icon: "extension", label: "Add-ons" },
+    { id: "settings", icon: "settings", label: "Settings" },
+  ],
+];
 
 const navSections = [
   {
@@ -136,80 +61,168 @@ const navSections = [
   },
 ];
 
-export const WithNavDrawer: Story = {
-  render: () => {
-    const [active, setActive] = useState("profile");
-    return (
-      <AppShell
-        navigation={
-          <NavDrawer
-            contextSwitcher={
-              <div className="flex items-center gap-3 p-3 rounded-xl">
-                <Avatar size="md" fallback="J" />
-                <div className="min-w-0 flex-1 space-y-0.5">
-                  <p className="text-sm font-medium text-on-surface truncate">John Doe</p>
-                  <p className="text-xs text-on-surface-variant">Personal Account</p>
-                </div>
-              </div>
-            }
-            sections={navSections}
-            activeItemId={active}
-            onItemClick={(item: NavDrawerItem) => setActive(item.id)}
-          />
-        }
-        appSwitcher={
-          <AppSwitcher
-            currentApp="Account"
-            logo={<div className="w-8 h-8"><Logo /></div>}
-            apps={apps}
-            activeAppId="account"
-          />
-        }
-        agentSidebarContent={
-          <div className="text-inverse-on-surface text-sm">
-            Chat messages would appear here...
-          </div>
-        }
-        onAgentSend={(msg) => console.log("Send:", msg)}
-      >
-        <DemoContent />
-      </AppShell>
-    );
-  },
+const logoGlyph = (
+  <div className="w-full h-full bg-primary/20 flex items-center justify-center">
+    <span className="text-primary font-semibold text-lg">M</span>
+  </div>
+);
+
+const appSwitcher = (
+  <AppSwitcher
+    currentApp="Account"
+    logo={<div className="w-8 h-8"><Logo /></div>}
+    apps={apps}
+    activeAppId="account"
+  />
+);
+
+const agentProps = {
+  agentSidebarContent: (
+    <div className="text-inverse-on-surface text-sm">
+      Chat messages would appear here...
+    </div>
+  ),
+  onAgentSend: (msg: string) => console.log("Send:", msg),
 };
 
+/** The vertical side rail used by the desktop-nav stories. */
+function DemoRail() {
+  const [selected, setSelected] = useState("apps");
+  return (
+    <NavigationRail
+      logo={
+        <NavigationButton
+          customIcon={logoGlyph}
+          label="My App"
+          variant="secondary"
+          disableHoverExpand
+          className="border border-primary"
+        />
+      }
+    >
+      {railGroups.map((group, gi) => (
+        <div key={gi} className="contents">
+          {gi > 0 && <div className="h-px rounded-full w-full bg-outline" />}
+          <div className="w-full gap-2 flex flex-col">
+            {group.map((item) => (
+              <NavigationButton
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                selected={selected === item.id}
+                onClick={() => setSelected(item.id)}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </NavigationRail>
+  );
+}
+
+/** The same destinations as DemoRail, as a mobile bottom-nav pill. */
+function DemoBottomNav() {
+  const [selected, setSelected] = useState("apps");
+  return (
+    <NavigationRail orientation="horizontal" containerClassName="gap-0 px-3 py-2">
+      <BottomNavItem
+        customIcon={logoGlyph}
+        label="My App"
+        showTitle={false}
+        onClick={() => setSelected("dashboard")}
+      />
+      {railGroups.flat().map((item) => (
+        <BottomNavItem
+          key={item.id}
+          icon={item.icon}
+          label={item.label}
+          selected={selected === item.id}
+          onClick={() => setSelected(item.id)}
+        />
+      ))}
+    </NavigationRail>
+  );
+}
+
+function DemoNavDrawer() {
+  const [active, setActive] = useState("profile");
+  return (
+    <NavDrawer
+      contextSwitcher={
+        <div className="flex items-center gap-3 p-3 rounded-xl">
+          <Avatar size="md" fallback="J" />
+          <div className="min-w-0 flex-1 space-y-0.5">
+            <p className="text-sm font-medium text-on-surface truncate">John Doe</p>
+            <p className="text-xs text-on-surface-variant">Personal Account</p>
+          </div>
+        </div>
+      }
+      sections={navSections}
+      activeItemId={active}
+      onItemClick={(item: NavDrawerItem) => setActive(item.id)}
+    />
+  );
+}
+
+const DemoContent = () => (
+  <div className="max-w-4xl mx-auto">
+    <h1 className="text-2xl font-bold text-on-surface mb-4">Dashboard</h1>
+    <p className="text-on-surface-variant">
+      Main content area. The agent sidebar can be toggled with the floating button.
+    </p>
+  </div>
+);
+
+// --- Stories -----------------------------------------------------------------
+
+export const WithNavigationRail: Story = {
+  render: () => (
+    <AppShell navigation={<DemoRail />} appSwitcher={appSwitcher} {...agentProps}>
+      <DemoContent />
+    </AppShell>
+  ),
+};
+
+export const WithNavDrawer: Story = {
+  render: () => (
+    <AppShell navigation={<DemoNavDrawer />} appSwitcher={appSwitcher} {...agentProps}>
+      <DemoContent />
+    </AppShell>
+  ),
+};
+
+// Below lg the side rail hides and the pill pins to the content area's bottom
+// edge; at lg+ the rail takes over. Resize the viewport to see the handoff.
+export const WithMobileBottomNav: Story = {
+  parameters: {
+    viewport: { defaultViewport: "mobile2" },
+  },
+  render: () => (
+    <AppShell
+      navigation={<DemoRail />}
+      mobileNavigation={<DemoBottomNav />}
+      appSwitcher={appSwitcher}
+    >
+      <DemoContent />
+    </AppShell>
+  ),
+};
+
+// Below lg the menu button (bottom-left) opens `navigation` as a modal
+// slide-in drawer — no separate mobile tree needed.
 export const WithMobileNavDrawer: Story = {
   parameters: {
     viewport: { defaultViewport: "mobile2" },
   },
-  render: () => {
-    const [active, setActive] = useState("profile");
-    return (
-      <AppShell
-        // Below lg the side nav hides and the menu button (bottom-left)
-        // opens the same NavDrawer as a modal slide-in. Resize the viewport
-        // under 1024px to see it.
-        mobileNavigationVariant="drawer"
-        navigation={
-          <NavDrawer
-            sections={navSections}
-            activeItemId={active}
-            onItemClick={(item: NavDrawerItem) => setActive(item.id)}
-          />
-        }
-        appSwitcher={
-          <AppSwitcher
-            currentApp="Account"
-            logo={<div className="w-8 h-8"><Logo /></div>}
-            apps={apps}
-            activeAppId="account"
-          />
-        }
-      >
-        <DemoContent />
-      </AppShell>
-    );
-  },
+  render: () => (
+    <AppShell
+      mobileNavigationVariant="drawer"
+      navigation={<DemoNavDrawer />}
+      appSwitcher={appSwitcher}
+    >
+      <DemoContent />
+    </AppShell>
+  ),
 };
 
 function SnackbarDemoContent() {
@@ -218,7 +231,9 @@ function SnackbarDemoContent() {
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-on-surface mb-4">Dashboard</h1>
       <p className="text-on-surface-variant mb-6">
-        The snackbar outlet centers over the content area, not the full viewport. Click the button to see it.
+        The snackbar outlet centers over the content area, not the full viewport.
+        Click the button to see it — at mobile widths the bottom nav steps aside
+        while the snackbar is up.
       </p>
       <div className="flex gap-3">
         <Button
@@ -246,56 +261,15 @@ function SnackbarDemoContent() {
 }
 
 export const WithSnackbar: Story = {
-  render: () => {
-    const [selected, setSelected] = useState("apps");
-    return (
-      <AppShell
-        navigation={
-          <NavigationRail
-            logo={
-              <NavigationButton
-                customIcon={
-                  <div className="w-full h-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-primary font-semibold text-lg">M</span>
-                  </div>
-                }
-                label="My App"
-                variant="secondary"
-                disableHoverExpand
-                className="border border-primary"
-              />
-            }
-          >
-            <div className="w-full gap-2 flex flex-col">
-              <NavigationButton
-                icon="space_dashboard"
-                label="Dashboard"
-                variant="primary"
-                selected={selected === "dashboard"}
-                onClick={() => setSelected("dashboard")}
-              />
-              <NavigationButton
-                icon="data_table"
-                label="Your Apps"
-                selected={selected === "apps"}
-                onClick={() => setSelected("apps")}
-              />
-            </div>
-          </NavigationRail>
-        }
-        appSwitcher={
-          <AppSwitcher
-            currentApp="Account"
-            logo={<div className="w-8 h-8"><Logo /></div>}
-            apps={apps}
-            activeAppId="account"
-          />
-        }
-      >
-        <SnackbarDemoContent />
-      </AppShell>
-    );
-  },
+  render: () => (
+    <AppShell
+      navigation={<DemoRail />}
+      mobileNavigation={<DemoBottomNav />}
+      appSwitcher={appSwitcher}
+    >
+      <SnackbarDemoContent />
+    </AppShell>
+  ),
 };
 
 function SnackbarScrollableDemoContent() {
@@ -343,114 +317,17 @@ export const SnackbarWithScrollableContent: Story = {
       },
     },
   },
-  render: () => {
-    const [selected, setSelected] = useState("apps");
-    return (
-      <AppShell
-        navigation={
-          <NavigationRail
-            logo={
-              <NavigationButton
-                customIcon={
-                  <div className="w-full h-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-primary font-semibold text-lg">M</span>
-                  </div>
-                }
-                label="My App"
-                variant="secondary"
-                disableHoverExpand
-                className="border border-primary"
-              />
-            }
-          >
-            <div className="w-full gap-2 flex flex-col">
-              <NavigationButton
-                icon="space_dashboard"
-                label="Dashboard"
-                variant="primary"
-                selected={selected === "dashboard"}
-                onClick={() => setSelected("dashboard")}
-              />
-              <NavigationButton
-                icon="data_table"
-                label="Your Apps"
-                selected={selected === "apps"}
-                onClick={() => setSelected("apps")}
-              />
-            </div>
-          </NavigationRail>
-        }
-        appSwitcher={
-          <AppSwitcher
-            currentApp="Account"
-            logo={<div className="w-8 h-8"><Logo /></div>}
-            apps={apps}
-            activeAppId="account"
-          />
-        }
-      >
-        <SnackbarScrollableDemoContent />
-      </AppShell>
-    );
-  },
+  render: () => (
+    <AppShell navigation={<DemoRail />} appSwitcher={appSwitcher}>
+      <SnackbarScrollableDemoContent />
+    </AppShell>
+  ),
 };
 
 export const Playground: Story = {
-  render: () => {
-    const [selected, setSelected] = useState("apps");
-    return (
-      <AppShell
-        navigation={
-          <NavigationRail
-            logo={
-              <NavigationButton
-                customIcon={
-                  <div className="w-full h-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-primary font-semibold text-lg">M</span>
-                  </div>
-                }
-                label="My App"
-                variant="secondary"
-                disableHoverExpand
-                className="border border-primary"
-              />
-            }
-          >
-            <div className="w-full gap-2 flex flex-col">
-              <NavigationButton
-                icon="space_dashboard"
-                label="Dashboard"
-                variant="primary"
-                selected={selected === "dashboard"}
-                onClick={() => setSelected("dashboard")}
-              />
-              <NavigationButton
-                icon="data_table"
-                label="Your Apps"
-                selected={selected === "apps"}
-                onClick={() => setSelected("apps")}
-              />
-            </div>
-            <div className="h-px rounded-full w-full bg-outline" />
-            <div className="w-full gap-2 flex flex-col">
-              <NavigationButton
-                icon="settings"
-                label="Settings"
-                selected={selected === "settings"}
-                onClick={() => setSelected("settings")}
-              />
-            </div>
-          </NavigationRail>
-        }
-        agentSidebarContent={
-          <div className="text-inverse-on-surface text-sm">
-            Chat messages would appear here...
-          </div>
-        }
-        onAgentSend={(msg) => console.log("Send:", msg)}
-      >
-        <DemoContent />
-      </AppShell>
-    );
-  },
+  render: () => (
+    <AppShell navigation={<DemoRail />} {...agentProps}>
+      <DemoContent />
+    </AppShell>
+  ),
 };
