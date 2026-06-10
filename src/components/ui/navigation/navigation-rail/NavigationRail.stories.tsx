@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { NavigationRail } from "./NavigationRail";
 import { NavigationButton } from "@/components/ui/navigation/navigation-button/NavigationButton";
+import { BottomNavItem } from "@/components/ui/navigation/bottom-nav-item/BottomNavItem";
 
 const meta: Meta<typeof NavigationRail> = {
   title: "UI/Navigation/NavigationRail",
@@ -17,6 +18,48 @@ const meta: Meta<typeof NavigationRail> = {
 
 export default meta;
 type Story = StoryObj<typeof NavigationRail>;
+
+export const Horizontal: Story = {
+  decorators: [
+    (Story) => (
+      <div className="h-[600px] w-[500px] flex items-end justify-center">
+        <Story />
+      </div>
+    ),
+  ],
+  render: () => {
+    const [selected, setSelected] = useState("apps");
+    const items = [
+      { id: "dashboard", icon: "space_dashboard", label: "Dashboard" },
+      { id: "apps", icon: "apps", label: "Your Apps" },
+      { id: "addons", icon: "extension", label: "Add-ons" },
+      { id: "settings", icon: "settings", label: "Settings" },
+    ];
+    return (
+      <NavigationRail orientation="horizontal" containerClassName="gap-0 px-3 py-2">
+        <BottomNavItem
+          customIcon={
+            <div className="w-full h-full bg-primary/20 flex items-center justify-center">
+              <span className="text-primary font-semibold text-lg">M</span>
+            </div>
+          }
+          label="My App"
+          showTitle={false}
+          onClick={() => setSelected("dashboard")}
+        />
+        {items.map((item) => (
+          <BottomNavItem
+            key={item.id}
+            icon={item.icon}
+            label={item.label}
+            selected={selected === item.id}
+            onClick={() => setSelected(item.id)}
+          />
+        ))}
+      </NavigationRail>
+    );
+  },
+};
 
 export const Playground: Story = {
   render: () => {

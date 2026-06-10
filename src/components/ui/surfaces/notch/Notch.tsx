@@ -111,8 +111,13 @@ function buildHeadPath(nw: number, nh: number, r: number, ir: number, atStart: b
 
 // --- Shared helpers ---
 
-function resolveOffset(offset: number, edge: number, notch: number) {
-  return offset >= 0 ? offset : edge - notch + offset;
+function resolveOffset(offset: number, edge: number, notch: number, side: NotchSide) {
+  const resolved = offset >= 0 ? offset : edge - notch + offset;
+  // Paths are built notch-on-right and rotated into place. The top edge's
+  // rotate(90) mirrors the build axis (build-y runs right-to-left after the
+  // turn), so flip the resolved offset to keep the documented semantics —
+  // positive = from left — true on every side.
+  return side === "top" ? edge - notch - resolved : resolved;
 }
 
 function resolveEdgeParams(side: NotchSide, width: number, height: number, nw: number, nh: number) {
@@ -175,7 +180,7 @@ export function Notch({
   const minGap = radius + ir;
 
   if (headOnly) {
-    const resolvedOff = resolveOffset(notchOffset, edge, notchLen);
+    const resolvedOff = resolveOffset(notchOffset, edge, notchLen, notchSide);
     const atStart = resolvedOff < minGap;
     const atEnd = (edge - notchLen - resolvedOff) < minGap;
 
@@ -208,7 +213,7 @@ export function Notch({
   const bh = horiz ? height : width;
   const bnw = horiz ? notchWidth : notchHeight;
   const bnh = horiz ? notchHeight : notchWidth;
-  const rawNy = resolveOffset(notchOffset, edge, notchLen);
+  const rawNy = resolveOffset(notchOffset, edge, notchLen, notchSide);
   const ny = clampOffset(rawNy, edge, notchLen, minGap, notchOffset);
 
   const path = buildPath(bw, bh, bnw, bnh, ny, radius, ir);

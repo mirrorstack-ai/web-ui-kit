@@ -125,6 +125,13 @@ export function useSnackbar() {
   };
 }
 
+/** Whether a snackbar is currently visible — true from show until dismiss
+ *  starts the exit animation. Safe outside a SnackbarProvider (always false).
+ *  AppShell uses it to slide the mobile bottom nav out of the snackbar's way. */
+export function useSnackbarVisible() {
+  return useContext(SnackbarContext)?._internal.open ?? false;
+}
+
 export interface UseUnsavedSnackbarOptions {
   snapshot: string;
   message?: string;

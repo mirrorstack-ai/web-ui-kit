@@ -339,12 +339,17 @@ export {
 export {
   NavigationRail,
   type NavigationRailProps,
+  type NavigationRailOrientation,
 } from "./components/ui/navigation/navigation-rail/NavigationRail";
 export {
   NavigationButton,
   type NavigationButtonProps,
   type NavigationButtonVariant,
 } from "./components/ui/navigation/navigation-button/NavigationButton";
+export {
+  BottomNavItem,
+  type BottomNavItemProps,
+} from "./components/ui/navigation/bottom-nav-item/BottomNavItem";
 export {
   AppSwitcher,
   type AppSwitcherProps,
@@ -446,6 +451,7 @@ export {
   SnackbarProvider,
   SnackbarOutlet,
   useSnackbar,
+  useSnackbarVisible,
   useUnsavedSnackbar,
   type SnackbarProviderProps,
   type SnackbarOptions,
