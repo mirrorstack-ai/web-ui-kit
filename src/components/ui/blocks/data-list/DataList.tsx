@@ -70,7 +70,7 @@ export function DataList({
         <div
           key={index}
           className={cn(
-            "flex items-center gap-2 px-1 py-1.5 border-b border-current/5",
+            "flex items-center gap-2.5 px-1 py-1.5 border-b border-current/5",
             index === items.length - 1 && "border-b-0",
           )}
         >
