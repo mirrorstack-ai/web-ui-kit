@@ -3,6 +3,25 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.4
+
+Mobile navigation support for the app shell. **No breaking changes**; all
+defaults unchanged. (#264)
+
+- `AppShell`: new `mobileNavigation` slot + `mobileNavigationVariant`
+  (`"bottom"` pins it to the content area's bottom edge below `lg`, stepping
+  aside while a snackbar shows; `"drawer"` opens it — or `navigation` — from a
+  floating menu button as a modal slide-in).
+- `BottomNavItem` (new): M3-style bottom-nav destination — stadium active
+  indicator, label only while selected, square/circle `customIcon` frame.
+- `NavigationRail`: new `orientation="horizontal"` for bottom-nav pills.
+  Exports `NavigationRailOrientation`.
+- `DropdownMenu`: new `placement="top"`, `size="lg"` touch density, and
+  `menuClassName` escape hatch; rounder card.
+- `SnackbarProvider`: new `useSnackbarVisible()` read-only probe.
+- `Notch`: `notchOffset` now honors its documented semantics (positive = from
+  left) on the top edge too; consumers no longer pre-mirror it.
+
 ## 0.4.3
 
 Additive `NotchGrid` props for fine-resolution and framed layouts, plus drag
