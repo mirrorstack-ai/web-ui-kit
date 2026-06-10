@@ -40,4 +40,22 @@ describe("NavigationRail", () => {
     );
     expect(screen.getByText("Footer")).toBeInTheDocument();
   });
+
+  it("lays out as a column by default", () => {
+    const { container } = render(
+      <NavigationRail logo={<span>Logo</span>}><span>Nav</span></NavigationRail>,
+    );
+    expect(container.querySelector(".flex-col")).toBeInTheDocument();
+    expect(container.querySelector(".bg-outline")).toHaveClass("w-full");
+  });
+
+  it("lays out as a row with a vertical divider when horizontal", () => {
+    const { container } = render(
+      <NavigationRail orientation="horizontal" logo={<span>Logo</span>}>
+        <span>Nav</span>
+      </NavigationRail>,
+    );
+    expect(container.querySelector(".flex-row")).toBeInTheDocument();
+    expect(container.querySelector(".bg-outline")).toHaveClass("w-px");
+  });
 });

@@ -61,4 +61,37 @@ describe("Notch", () => {
     const path = container.querySelector("path");
     expect(path).toHaveAttribute("fill", "none");
   });
+
+  // notchOffset semantics: positive = from left, on the top AND bottom edges.
+  // The top edge renders via rotate(90), which mirrors the build axis — these
+  // pin the internal flip that compensates, so a given offset lands the tab at
+  // the same visual spot whichever edge it's on.
+  describe("notchOffset edge semantics", () => {
+    const pathD = (notchSide: "top" | "bottom", notchOffset: number) => {
+      const { container } = render(
+        <Notch
+          width={200}
+          height={150}
+          notchWidth={52}
+          notchHeight={46}
+          notchSide={notchSide}
+          notchOffset={notchOffset}
+        />,
+      );
+      const d = container.querySelector("path")?.getAttribute("d");
+      cleanup();
+      return d;
+    };
+
+    it("mirrors the build-space offset on the top edge", () => {
+      // Same visual spot (30px from the left) requires mirrored build paths:
+      // top(30) must match bottom's tab placed 30px from the RIGHT (-30).
+      expect(pathD("top", 30)).toBe(pathD("bottom", -30));
+      expect(pathD("top", -30)).toBe(pathD("bottom", 30));
+    });
+
+    it("keeps top and bottom build paths distinct for an uncentered offset", () => {
+      expect(pathD("top", 30)).not.toBe(pathD("bottom", 30));
+    });
+  });
 });
