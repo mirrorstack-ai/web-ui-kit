@@ -41,11 +41,18 @@ export interface AgentGreetingProps {
   hideLogo?: boolean;
   /** Hide the chat input row — render greeting + logo only. */
   hideInput?: boolean;
+  /** `"hero"` (default) is the full-page welcome surface — centered, large
+   *  type, tall input. `"compact"` scales everything down and left-aligns to
+   *  fit inside dashboard tiles and other dense containers. */
+  size?: "hero" | "compact";
   className?: string;
 }
 
-const MIN_TEXTAREA_HEIGHT = 80;
-const MAX_TEXTAREA_HEIGHT = 200;
+/** Auto-grow bounds for the message textarea, per size. */
+const TEXTAREA_BOUNDS = {
+  hero: { min: 80, max: 200 },
+  compact: { min: 40, max: 112 },
+} as const;
 const MENU_W = 220;
 const MENU_R = 14;
 const MENU_IR = 8;
@@ -76,8 +83,10 @@ export function AgentGreeting({
   onSelectModel,
   hideLogo = false,
   hideInput = false,
+  size = "hero",
   className,
 }: AgentGreetingProps) {
+  const compact = size === "compact";
   const [text, setText] = useState("");
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const [menuH, setMenuH] = useState(0);
@@ -96,10 +105,7 @@ export function AgentGreeting({
   const modelMenuRef = useRef<HTMLDivElement>(null);
   const modelContentRef = useRef<HTMLDivElement>(null);
 
-  useAutoGrowTextarea(textareaRef, text, {
-    min: MIN_TEXTAREA_HEIGHT,
-    max: MAX_TEXTAREA_HEIGHT,
-  });
+  useAutoGrowTextarea(textareaRef, text, TEXTAREA_BOUNDS[size]);
 
   // Measure the trigger pill so the notch tab sits directly under it —
   // mirrors AgentSidebarHeader's overflow-dropdown measurement pattern.
@@ -144,28 +150,54 @@ export function AgentGreeting({
   return (
     <div
       className={cn(
-        "w-full max-w-2xl mx-auto flex flex-col items-center gap-10",
+        "w-full flex flex-col",
+        compact
+          ? "items-stretch gap-3"
+          : "max-w-2xl mx-auto items-center gap-10",
         className,
       )}
     >
       <div className="flex items-start gap-2">
         {!hideLogo && (
-          <div className={cn("size-14 shrink-0", subtitle ? "-mt-2" : "-mt-4")}>
+          <div
+            className={cn(
+              "shrink-0",
+              compact ? "size-9" : "size-14",
+              !compact && (subtitle ? "-mt-2" : "-mt-4"),
+            )}
+          >
             <Logo />
           </div>
         )}
         <div className="flex flex-col">
-          <h1 className="text-3xl font-medium tracking-tight text-on-surface">
+          <h1
+            className={cn(
+              "font-medium tracking-tight text-on-surface",
+              compact ? "text-lg" : "text-3xl",
+            )}
+          >
             {greeting}
           </h1>
           {subtitle && (
-            <p className="text-base text-on-surface-variant">{subtitle}</p>
+            <p
+              className={cn(
+                "text-on-surface-variant",
+                compact ? "text-sm" : "text-base",
+              )}
+            >
+              {subtitle}
+            </p>
           )}
         </div>
       </div>
 
       {!hideInput && (
-      <div className="flex w-full flex-col rounded-2xl border border-outline-variant bg-surface-container-low p-3 transition-colors focus-within:border-primary">
+      <div
+        className={cn(
+          "flex w-full flex-col rounded-2xl border border-outline-variant bg-surface-container-low transition-colors focus-within:border-primary",
+          compact ? "p-2" : "p-3",
+        )}
+      >
         <textarea
           ref={textareaRef}
           value={text}
@@ -173,7 +205,10 @@ export function AgentGreeting({
           onKeyDown={handleKeyDown}
           onCompositionStart={onCompositionStart}
           onCompositionEnd={onCompositionEnd}
-          className="w-full resize-none rounded-lg bg-transparent px-3 py-2 text-base text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none"
+          className={cn(
+            "w-full resize-none rounded-lg bg-transparent text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none",
+            compact ? "px-2.5 py-1.5 text-sm" : "px-3 py-2 text-base",
+          )}
           placeholder={placeholder}
           aria-label="Start a conversation with the agent"
           rows={1}
@@ -182,7 +217,7 @@ export function AgentGreeting({
           <IconButton
             icon="attach_file_add"
             variant="text"
-            size="md"
+            size={compact ? "sm" : "md"}
             className="text-on-surface-variant hover:text-on-surface"
             onClick={onAttachFile}
             aria-label="Attach file"
@@ -190,7 +225,7 @@ export function AgentGreeting({
           <IconButton
             icon="mic"
             variant="text"
-            size="md"
+            size={compact ? "sm" : "md"}
             className="text-on-surface-variant hover:text-on-surface"
             onClick={onMic}
             aria-label="Voice input"
@@ -202,7 +237,10 @@ export function AgentGreeting({
                 ref={modelTriggerRef}
                 type="button"
                 onClick={() => setModelMenuOpen((open) => !open)}
-                className="relative z-[51] flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-4 text-sm text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface"
+                className={cn(
+                  "relative z-[51] flex cursor-pointer items-center gap-1.5 rounded-full text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface",
+                  compact ? "h-8 px-3 text-xs" : "h-9 px-4 text-sm",
+                )}
                 aria-label={`Model: ${activeModel.label}`}
                 aria-haspopup="listbox"
                 aria-expanded={modelMenuOpen}
@@ -291,8 +329,8 @@ export function AgentGreeting({
             icon="arrow_upward"
             variant="filled"
             color="primary"
-            size="md"
-            className="rounded-xl"
+            size={compact ? "sm" : "md"}
+            className={compact ? "rounded-lg" : "rounded-xl"}
             onClick={send}
             disabled={!canSend}
             aria-label="Send message"

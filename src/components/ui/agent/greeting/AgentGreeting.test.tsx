@@ -244,4 +244,11 @@ describe("AgentGreeting", () => {
     fireEvent.click(screen.getByRole("option", { name: /balanced/i }));
     expect(screen.getByLabelText("Model: Balanced")).toBeInTheDocument();
   });
+
+  it("scales typography down in compact size", () => {
+    render(<AgentGreeting greeting="Welcome" size="compact" />);
+    const heading = screen.getByRole("heading", { name: /welcome/i });
+    expect(heading.className).toContain("text-lg");
+    expect(heading.className).not.toContain("text-3xl");
+  });
 });
