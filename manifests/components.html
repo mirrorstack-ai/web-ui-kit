@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/72 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">72/72 infos</a><span class="filter-pill ok" aria-disabled="true">269 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/72 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">72/72 infos</a><span class="filter-pill ok" aria-disabled="true">270 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -742,9 +742,9 @@ onLoadMore?: () =&gt; void</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AgentGreeting</h2>
       <div class="badges">
-        <label for="c-1-ui-agent-greeting-props" class="badge ok as-toggle">12 prop types</label>
+        <label for="c-1-ui-agent-greeting-props" class="badge ok as-toggle">13 prop types</label>
         <label for="c-1-ui-agent-greeting-info" class="badge info as-toggle">1 info</label>
-        <label for="c-1-ui-agent-greeting-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-1-ui-agent-greeting-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -776,7 +776,7 @@ onLoadMore?: () =&gt; void</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">12 prop types</span>
+              <span class="badge ok">13 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/agent/greeting/AgentGreeting.tsx::AgentGreeting</code></pre>
             <pre><code>Props:</code></pre>
@@ -816,6 +816,13 @@ placeholder?: string = &quot;plan something?&quot;
  * Selected model id. Falls back to the first model when omitted.
  */
 selectedModelId?: string
+
+/**
+ * `&quot;hero&quot;` (default) is the full-page welcome surface — centered, large
+ *  type, tall input. `&quot;compact&quot;` scales everything down and left-aligns to
+ *  fit inside dashboard tiles and other dense containers.
+ */
+size?: &quot;hero&quot; | &quot;compact&quot; = &quot;hero&quot;
 
 /**
  * Optional secondary line beneath the greeting.
@@ -933,6 +940,19 @@ subtitle?: string</code></pre>
     placeholder=&quot;plan something?&quot;
     models={MODELS}
     hideLogo /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Compact</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Dashboard-tile fit: compact size inside a constrained card, the way the app overview embeds it.</div>
+              <pre><code>const Compact = () =&gt; &lt;AgentGreeting
+    greeting=&quot;Good afternoon, Nothing Chang&quot;
+    placeholder=&quot;ask the agent anything about this app…&quot;
+    hideLogo
+    size=&quot;compact&quot; /&gt;;</code></pre>
             </div>
         </div>
     
