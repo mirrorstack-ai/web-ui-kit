@@ -102,3 +102,21 @@ export const NoLogo: Story = {
     hideLogo: true,
   },
 };
+
+/** Dashboard-tile fit: compact size inside a constrained card, the way the
+ *  app overview embeds it. */
+export const Compact: Story = {
+  decorators: [
+    (Story) => (
+      <div className="max-w-xl rounded-[22px] border border-outline-variant bg-surface-container-low p-4">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    greeting: "Good afternoon, Nothing Chang",
+    placeholder: "ask the agent anything about this app…",
+    hideLogo: true,
+    size: "compact",
+  },
+};

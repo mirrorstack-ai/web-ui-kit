@@ -3,6 +3,13 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.5
+
+- `AgentGreeting`: new `size` prop (`"hero"` default | `"compact"`). Compact
+  scales the surface for dashboard tiles and other dense containers:
+  left-aligned, `text-lg` heading, 40–112px auto-grow input, `sm` action
+  buttons. **No breaking changes**; the default rendering is unchanged. (#265)
+
 ## 0.4.4
 
 Mobile navigation support for the app shell. **No breaking changes**; all
