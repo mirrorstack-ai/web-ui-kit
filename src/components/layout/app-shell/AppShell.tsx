@@ -10,6 +10,7 @@ import {
 } from "@/context/snackbar/SnackbarProvider";
 import { AgentSidebarHeader } from "@/components/ui/agent/sidebar/AgentSidebarHeader";
 import { AgentSidebarInput } from "@/components/ui/agent/sidebar/AgentSidebarInput";
+import type { AgentSidebarInputModel } from "@/components/ui/agent/sidebar/AgentSidebarInput";
 import type { AgentSidebarHistoryGroup } from "@/components/ui/agent/sidebar/types";
 
 export const meta: ComponentMeta = {
@@ -61,6 +62,10 @@ export interface AppShellProps {
    *  sent while the agent was still responding (queued input). Stays in view
    *  with the input even when the messages list scrolls. */
   agentPendingContent?: ReactNode;
+  /** Model roster for the agent input's model selector — omitted = no selector. */
+  agentModels?: AgentSidebarInputModel[];
+  selectedAgentModelId?: string;
+  onSelectAgentModel?: (id: string) => void;
 }
 
 export function AppShell(props: AppShellProps) {
@@ -178,6 +183,9 @@ function AppShellInner({
   agentHistory,
   onSelectAgentHistoryItem,
   agentPendingContent,
+  agentModels,
+  selectedAgentModelId,
+  onSelectAgentModel,
 }: AppShellProps) {
   const { sidebarWidth, setSidebarWidth } = useSidebarWidth();
   const [isResizing, setIsResizing] = useState(false);
@@ -369,6 +377,9 @@ function AppShellInner({
                   onSend={onAgentSend}
                   onAttachFile={onAgentAttachFile}
                   onMic={onAgentMic}
+                  models={agentModels}
+                  selectedModelId={selectedAgentModelId}
+                  onSelectModel={onSelectAgentModel}
                 />
               </div>
             </div>

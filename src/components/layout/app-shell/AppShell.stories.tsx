@@ -10,6 +10,7 @@ import { NavDrawer, type NavDrawerItem } from "@/components/ui/navigation/nav-dr
 import { Avatar } from "@/components/ui/media/avatar/Avatar";
 import { Button } from "@/components/ui/actions/button/Button";
 import { useSnackbar } from "@/context/snackbar/SnackbarProvider";
+import { mockAgentModels } from "@/components/ui/agent/sidebar/mock-data";
 
 const meta: Meta<typeof AppShell> = {
   title: "Layout/AppShell",
@@ -83,6 +84,9 @@ const agentProps = {
     </div>
   ),
   onAgentSend: (msg: string) => console.log("Send:", msg),
+  agentModels: mockAgentModels,
+  selectedAgentModelId: mockAgentModels.find((m) => !m.disabled)?.id,
+  onSelectAgentModel: (id: string) => console.log("Select model:", id),
 };
 
 /** The vertical side rail used by the desktop-nav stories. */
