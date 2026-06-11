@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
 import { Icon } from "@/components/ui/media/icon/Icon";
+import { Logo } from "@/components/ui/media/logo/Logo";
 import {
   AgentSidebarUserMessage,
   AgentSidebarAgentMessage,
+  type AgentSidebarMessageFeedback,
+  type AgentSidebarMessageActionLabels,
 } from "./AgentSidebarMessage";
 import {
   AgentSidebarMultiQuestion,
@@ -24,6 +27,7 @@ export type AgentSidebarMessage =
       role: "agent";
       content: string;
       streaming?: boolean;
+      feedback?: AgentSidebarMessageFeedback;
     }
   | {
       id: string;
@@ -43,6 +47,22 @@ export interface AgentSidebarMessagesProps {
     messageId: string,
     answers: Record<string, AgentSidebarMultiQuestionAnswer>,
   ) => void;
+  /** Copy was clicked on a finished agent message. The kit only flashes the
+   *  icon — the consumer performs the actual clipboard write. Return `false`
+   *  (sync or resolved), or reject, to suppress the success flash. */
+  onCopyMessage?: (messageId: string) => void | boolean | Promise<void | boolean>;
+  /** Fired with the next rating: clicking the selected thumb yields null,
+   *  clicking the other thumb switches. */
+  onRateMessage?: (
+    messageId: string,
+    rating: AgentSidebarMessageFeedback,
+  ) => void;
+  onRerunMessage?: (messageId: string) => void;
+  /** Localizable aria-labels for the action buttons (English defaults). */
+  actionLabels?: AgentSidebarMessageActionLabels;
+  /** Render the brand logo once below the list when the last message is a
+   *  finished agent message — a clear platform signature, never per-message. */
+  showLogo?: boolean;
   /** Auto-scroll to the latest message. Default: true. */
   autoScroll?: boolean;
   className?: string;
@@ -63,6 +83,11 @@ function findScrollParent(el: HTMLElement | null): HTMLElement | null {
 export function AgentSidebarMessages({
   messages,
   onSubmitMultiQuestion,
+  onCopyMessage,
+  onRateMessage,
+  onRerunMessage,
+  actionLabels,
+  showLogo = false,
   autoScroll = true,
   className,
 }: AgentSidebarMessagesProps) {
@@ -101,6 +126,14 @@ export function AgentSidebarMessages({
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   };
 
+  const lastMessage = messages[messages.length - 1];
+  const showBrandLogo =
+    showLogo &&
+    !!lastMessage &&
+    lastMessage.role === "agent" &&
+    !("kind" in lastMessage) &&
+    !lastMessage.streaming;
+
   return (
     <div className={cn("flex flex-col gap-4", className)}>
       {messages.map((m) => {
@@ -126,9 +159,22 @@ export function AgentSidebarMessages({
             key={m.id}
             content={m.content}
             streaming={m.streaming}
+            feedback={m.feedback}
+            onCopy={onCopyMessage && (() => onCopyMessage(m.id))}
+            onFeedback={
+              onRateMessage && ((rating) => onRateMessage(m.id, rating))
+            }
+            onRerun={onRerunMessage && (() => onRerunMessage(m.id))}
+            actionLabels={actionLabels}
           />
         );
       })}
+      {showBrandLogo && (
+        // Decorative signature only — hidden from the accessibility tree.
+        <div aria-hidden className="flex justify-start">
+          <Logo className="h-10 w-10 bg-inverse-primary" />
+        </div>
+      )}
       <div ref={endRef} />
       {!isAtBottom && (
         // -mt-4 cancels the parent's gap-4 so the sticky pill sits flush

@@ -3,6 +3,10 @@ import {
   AgentSidebarUserMessage,
   AgentSidebarAgentMessage,
 } from "./AgentSidebarMessage";
+import {
+  AgentSidebarMessages,
+  type AgentSidebarMessage,
+} from "./AgentSidebarMessages";
 
 const meta: Meta = {
   title: "UI/Agent/Messages",
@@ -38,5 +42,71 @@ export const AgentStreaming: StoryObj = {
         streaming
       />
     </div>
+  ),
+};
+
+const noop = () => {};
+
+const actionCallbacks = {
+  onCopyMessage: noop,
+  onRateMessage: noop,
+  onRerunMessage: noop,
+};
+
+const finishedAgentMsg = {
+  id: "m-2",
+  role: "agent",
+  content:
+    "You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.",
+} satisfies AgentSidebarMessage;
+
+const finishedThread: AgentSidebarMessage[] = [
+  {
+    id: "m-1",
+    role: "user",
+    content: "Summarize my account changes this week.",
+  },
+  finishedAgentMsg,
+];
+
+/** Copy / thumbs / rerun appear under finished agent messages only. */
+export const FinishedWithActions: StoryObj = {
+  render: () => (
+    <AgentSidebarMessages messages={finishedThread} {...actionCallbacks} />
+  ),
+};
+
+/** A previously-recorded rating renders the thumb filled at full ink. */
+export const FeedbackSelected: StoryObj = {
+  render: () => (
+    <AgentSidebarMessages
+      messages={[finishedThread[0], { ...finishedAgentMsg, feedback: "up" }]}
+      {...actionCallbacks}
+    />
+  ),
+};
+
+/** The action row stays hidden while the agent is still streaming. */
+export const StreamingHidesActions: StoryObj = {
+  render: () => (
+    <AgentSidebarMessages
+      messages={[
+        finishedThread[0],
+        {
+          id: "m-2",
+          role: "agent",
+          content: "Pulling your audit log",
+          streaming: true,
+        },
+      ]}
+      {...actionCallbacks}
+    />
+  ),
+};
+
+/** Brand mark in the sidebar accent below the list when the last message is finished. */
+export const WithLogo: StoryObj = {
+  render: () => (
+    <AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo />
   ),
 };
