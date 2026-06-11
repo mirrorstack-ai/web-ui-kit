@@ -215,6 +215,99 @@ describe("AgentGreeting", () => {
     expect(screen.getByText("Adaptive")).toBeInTheDocument();
   });
 
+  it("renders the price detail inside dropdown rows but not the trigger", () => {
+    render(
+      <AgentGreeting
+        greeting="Welcome"
+        models={[
+          { id: "sonnet", label: "Claude Sonnet 4.6", detail: "$3/$15" },
+          { id: "haiku", label: "Claude Haiku 4.5", detail: "$1/$5" },
+        ]}
+      />,
+    );
+    expect(screen.queryByText("$3/$15")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Model: Claude Sonnet 4.6"));
+    expect(screen.getByText("$3/$15")).toBeInTheDocument();
+    expect(screen.getByText("$1/$5")).toBeInTheDocument();
+  });
+
+  it("marks disabled models aria-disabled with an accessible hint", () => {
+    render(
+      <AgentGreeting
+        greeting="Welcome"
+        models={[
+          { id: "sonnet", label: "Claude Sonnet 4.6" },
+          {
+            id: "gemini",
+            label: "Gemini 3.5 Flash",
+            disabled: true,
+            disabledHint: "Supported in the future",
+          },
+        ]}
+      />,
+    );
+    fireEvent.click(screen.getByLabelText("Model: Claude Sonnet 4.6"));
+    const option = screen.getByRole("option", { name: "Gemini 3.5 Flash" });
+    expect(option).toHaveAttribute("aria-disabled", "true");
+    const hintId = option.getAttribute("aria-describedby");
+    expect(hintId).toBeTruthy();
+    expect(document.getElementById(hintId!)).toHaveTextContent(
+      "Supported in the future",
+    );
+  });
+
+  it("does not select a disabled model on click", () => {
+    const onSelectModel = vi.fn();
+    render(
+      <AgentGreeting
+        greeting="Welcome"
+        models={[
+          { id: "sonnet", label: "Claude Sonnet 4.6" },
+          { id: "gemini", label: "Gemini 3.5 Flash", disabled: true },
+        ]}
+        selectedModelId="sonnet"
+        onSelectModel={onSelectModel}
+      />,
+    );
+    fireEvent.click(screen.getByLabelText("Model: Claude Sonnet 4.6"));
+    fireEvent.click(screen.getByRole("option", { name: "Gemini 3.5 Flash" }));
+    expect(onSelectModel).not.toHaveBeenCalled();
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+  });
+
+  it("keyboard: arrows reach disabled entries but Enter does not activate them", () => {
+    const onSelectModel = vi.fn();
+    render(
+      <AgentGreeting
+        greeting="Welcome"
+        models={[
+          { id: "sonnet", label: "Claude Sonnet 4.6" },
+          {
+            id: "gemini",
+            label: "Gemini 3.5 Flash",
+            disabled: true,
+            disabledHint: "Supported in the future",
+          },
+        ]}
+        selectedModelId="sonnet"
+        onSelectModel={onSelectModel}
+      />,
+    );
+    fireEvent.click(screen.getByLabelText("Model: Claude Sonnet 4.6"));
+    const listbox = screen.getByRole("listbox", { name: "Model" });
+    // Opens with the selected model (sonnet, index 0) active; down → gemini.
+    fireEvent.keyDown(listbox, { key: "ArrowDown" });
+    const gemini = screen.getByRole("option", { name: "Gemini 3.5 Flash" });
+    expect(listbox).toHaveAttribute("aria-activedescendant", gemini.id);
+    fireEvent.keyDown(listbox, { key: "Enter" });
+    expect(onSelectModel).not.toHaveBeenCalled();
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+    // Back up to sonnet and select it.
+    fireEvent.keyDown(listbox, { key: "ArrowUp" });
+    fireEvent.keyDown(listbox, { key: "Enter" });
+    expect(onSelectModel).toHaveBeenCalledWith("sonnet");
+  });
+
   it("does not render description in the trigger pill", () => {
     render(
       <AgentGreeting
