@@ -154,7 +154,7 @@ function AgentMessageActions({
   return (
     // -ml-1.5 cancels the icon button's inner padding so the first icon
     // optically aligns with the message text's left edge.
-    <div className="mt-1 -ml-1.5 flex items-center gap-0.5">
+    <div className="pt-2 -ml-1.5 flex items-center gap-0.5">
       {onCopy && (
         <IconButton
           icon={copied ? "check" : "content_copy"}
