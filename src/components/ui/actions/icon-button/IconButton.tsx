@@ -27,6 +27,8 @@ export interface IconButtonProps
   size?: ButtonSize;
   loading?: boolean;
   tooltip?: string;
+  /** Render the filled variant of the icon (Material Symbols `FILL` axis). */
+  fill?: boolean;
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -43,6 +45,7 @@ export function IconButton({
   size = "md",
   loading = false,
   tooltip,
+  fill,
   className,
   disabled,
   // Default to "button" — prevents implicit submit inside <form>.
@@ -77,7 +80,7 @@ export function IconButton({
           style={{ width: iconSizes[size], height: iconSizes[size] }}
         />
       ) : (
-        <Icon name={icon} size={iconSizes[size]} />
+        <Icon name={icon} size={iconSizes[size]} fill={fill} />
       )}
     </button>
   );
