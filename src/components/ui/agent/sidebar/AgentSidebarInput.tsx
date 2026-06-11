@@ -34,7 +34,7 @@ export interface AgentSidebarInputProps {
 
 // Model menu geometry — mirrors AgentGreeting's selector, flipped upward:
 // the input is pinned to the sidebar's bottom edge, so the menu opens up.
-const MENU_W = 200;
+const MENU_W = 240;
 const MENU_R = 12;
 const MENU_IR = 8;
 // The notch tab bleeds this far past the trigger pill on each side…
@@ -45,7 +45,7 @@ const TAB_BLEED_TOP = 6;
 const MENU_SHIFT_DOWN = 4;
 // Inset the tab from the card's left corner (double inverse-curve look).
 // Must be >= radius + inverseRadius or Notch clamps it back to the edge.
-const TAB_INSET = 24;
+const TAB_INSET = 20;
 
 export function AgentSidebarInput({
   onSend,
