@@ -1,0 +1,28 @@
+import{j as e,r as a}from"./iframe-9PWzn_30.js";import{F as h}from"./FloatingLabelInput-BZSgAWfj.js";import{I as b}from"./IconButton-CeACrCVn.js";import{R as v}from"./ReadOnlyField-DRH3DF8k.js";import"./preload-helper-PPVm8Dsz.js";import"./cn-IyxL_b2c.js";import"./Icon-BPP6Rky_.js";import"./Progress-BU9JOsbn.js";import"./button-styles-CZHSjrxJ.js";function u({id:n,label:t,value:s,editing:r,onEdit:o,onChange:i,mono:l,error:x,className:y}){return r?e.jsxs("div",{className:y,children:[e.jsx("label",{htmlFor:n,className:"block text-sm font-medium text-on-surface mb-2",children:t}),e.jsx(h,{id:n,label:t,size:"sm",labelledExternally:!0,value:s,onChange:f=>i(f.target.value),error:!!x,autoFocus:!0}),x&&e.jsx("p",{className:"text-xs text-error mt-1",children:x})]}):e.jsx(v,{className:y,label:t,value:s||"—",mono:l,suffix:e.jsx(b,{icon:"edit","aria-label":`Edit ${t}`,variant:"text",size:"sm",onClick:o})})}u.__docgenInfo={description:"",methods:[],displayName:"EditableField",props:{id:{required:!0,tsType:{name:"string"},description:"Stable id used by `useEditableFields().isEditing(id)`."},label:{required:!0,tsType:{name:"string"},description:"Field label, shown in both read and edit modes."},value:{required:!0,tsType:{name:"string"},description:"Current value."},editing:{required:!0,tsType:{name:"boolean"},description:"Whether the field is currently in edit mode (controlled)."},onEdit:{required:!0,tsType:{name:"signature",type:"function",raw:"() => void",signature:{arguments:[],return:{name:"void"}}},description:"Called when the read-mode edit pencil is clicked — flips into edit mode."},onChange:{required:!0,tsType:{name:"signature",type:"function",raw:"(value: string) => void",signature:{arguments:[{type:{name:"string"},name:"value"}],return:{name:"void"}}},description:"Update the value while in edit mode."},mono:{required:!1,tsType:{name:"boolean"},description:"Show value as monospace in read mode."},error:{required:!1,tsType:{name:"union",raw:"string | null",elements:[{name:"string"},{name:"null"}]},description:"Validation error to surface below the input in edit mode."},className:{required:!1,tsType:{name:"string"},description:"Class on the outer wrapper."}}};function S(){const[n,t]=a.useState(new Set),s=a.useCallback(i=>n.has(i),[n]),r=a.useCallback(i=>{t(l=>l.has(i)?l:new Set(l).add(i))},[]),o=a.useCallback(()=>{t(new Set)},[]);return{isEditing:s,startEdit:r,reset:o}}const k={title:"UI/Inputs/EditableField",component:u};function E({initialValue:n,initialEditing:t=!1,initialError:s}){const[r,o]=a.useState(n),[i,l]=a.useState(t);return e.jsx("div",{className:"max-w-sm",children:e.jsx(u,{id:"name",label:"Module name",value:r,editing:i,onEdit:()=>l(!0),onChange:o,error:s})})}const c={render:()=>e.jsx(E,{initialValue:"Analytics"})},m={render:()=>e.jsx(E,{initialValue:"Analytics",initialEditing:!0})},p={render:()=>e.jsx(E,{initialValue:""})},g={render:()=>e.jsx(E,{initialValue:"",initialEditing:!0,initialError:"Module name is required."})},d={render:()=>{function n(){const t=S(),[s,r]=a.useState("Analytics"),[o,i]=a.useState("analytics");return e.jsxs("div",{className:"space-y-4 max-w-sm",children:[e.jsx(u,{id:"name",label:"Module name",value:s,editing:t.isEditing("name"),onEdit:()=>t.startEdit("name"),onChange:r}),e.jsx(u,{id:"slug",label:"Slug",value:o,editing:t.isEditing("slug"),onEdit:()=>t.startEdit("slug"),onChange:i,mono:!0}),e.jsx("button",{type:"button",className:"text-xs text-on-surface-variant",onClick:t.reset,children:"(simulated save → reset all)"})]})}return e.jsx(n,{})}};c.parameters={...c.parameters,docs:{...c.parameters?.docs,source:{originalSource:`{
+  render: () => <ControlledStory initialValue="Analytics" />
+}`,...c.parameters?.docs?.source}}};m.parameters={...m.parameters,docs:{...m.parameters?.docs,source:{originalSource:`{
+  render: () => <ControlledStory initialValue="Analytics" initialEditing />
+}`,...m.parameters?.docs?.source}}};p.parameters={...p.parameters,docs:{...p.parameters?.docs,source:{originalSource:`{
+  render: () => <ControlledStory initialValue="" />
+}`,...p.parameters?.docs?.source}}};g.parameters={...g.parameters,docs:{...g.parameters?.docs,source:{originalSource:`{
+  render: () => <ControlledStory initialValue="" initialEditing initialError="Module name is required." />
+}`,...g.parameters?.docs?.source}}};d.parameters={...d.parameters,docs:{...d.parameters?.docs,source:{originalSource:`{
+  render: () => {
+    function Demo() {
+      const fields = useEditableFields();
+      const [name, setName] = useState("Analytics");
+      const [slug, setSlug] = useState("analytics");
+      return <div className="space-y-4 max-w-sm">
+          <EditableField id="name" label="Module name" value={name} editing={fields.isEditing("name")} onEdit={() => fields.startEdit("name")} onChange={setName} />
+          <EditableField id="slug" label="Slug" value={slug} editing={fields.isEditing("slug")} onEdit={() => fields.startEdit("slug")} onChange={setSlug} mono />
+          <button type="button" className="text-xs text-on-surface-variant" onClick={fields.reset}>
+            (simulated save → reset all)
+          </button>
+        </div>;
+    }
+    return <Demo />;
+  }
+}`,...d.parameters?.docs?.source},description:{story:`Real consumer pattern: edit pencil flips into edit mode; the user
+types; the parent form's unsaved-changes snackbar handles save and
+calls fields.reset() on commit. The component itself never renders
+a "save" button.`,...d.parameters?.docs?.description}}};const A=["ReadMode","EditMode","Empty","WithError","MultipleFields"];export{m as EditMode,p as Empty,d as MultipleFields,c as ReadMode,g as WithError,A as __namedExportsOrder,k as default};
