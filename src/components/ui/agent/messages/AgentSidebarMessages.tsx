@@ -5,8 +5,8 @@ import { Logo } from "@/components/ui/media/logo/Logo";
 import {
   AgentSidebarUserMessage,
   AgentSidebarAgentMessage,
-  type AgentMessageFeedback,
-  type AgentMessageActionLabels,
+  type AgentSidebarMessageFeedback,
+  type AgentSidebarMessageActionLabels,
 } from "./AgentSidebarMessage";
 import {
   AgentSidebarMultiQuestion,
@@ -27,7 +27,7 @@ export type AgentSidebarMessage =
       role: "agent";
       content: string;
       streaming?: boolean;
-      feedback?: AgentMessageFeedback;
+      feedback?: AgentSidebarMessageFeedback;
     }
   | {
       id: string;
@@ -48,14 +48,18 @@ export interface AgentSidebarMessagesProps {
     answers: Record<string, AgentSidebarMultiQuestionAnswer>,
   ) => void;
   /** Copy was clicked on a finished agent message. The kit only flashes the
-   *  icon — the consumer performs the actual clipboard write. */
-  onMessageCopy?: (messageId: string) => void;
+   *  icon — the consumer performs the actual clipboard write. Return `false`
+   *  (sync or resolved), or reject, to suppress the success flash. */
+  onCopyMessage?: (messageId: string) => void | boolean | Promise<void | boolean>;
   /** Fired with the next rating: clicking the selected thumb yields null,
    *  clicking the other thumb switches. */
-  onMessageFeedback?: (messageId: string, rating: AgentMessageFeedback) => void;
-  onMessageRerun?: (messageId: string) => void;
+  onRateMessage?: (
+    messageId: string,
+    rating: AgentSidebarMessageFeedback,
+  ) => void;
+  onRerunMessage?: (messageId: string) => void;
   /** Localizable aria-labels for the action buttons (English defaults). */
-  actionLabels?: AgentMessageActionLabels;
+  actionLabels?: AgentSidebarMessageActionLabels;
   /** Render the brand logo once below the list when the last message is a
    *  finished agent message — a subdued platform signature, never per-message. */
   showLogo?: boolean;
@@ -79,9 +83,9 @@ function findScrollParent(el: HTMLElement | null): HTMLElement | null {
 export function AgentSidebarMessages({
   messages,
   onSubmitMultiQuestion,
-  onMessageCopy,
-  onMessageFeedback,
-  onMessageRerun,
+  onCopyMessage,
+  onRateMessage,
+  onRerunMessage,
   actionLabels,
   showLogo = false,
   autoScroll = true,
@@ -156,19 +160,18 @@ export function AgentSidebarMessages({
             content={m.content}
             streaming={m.streaming}
             feedback={m.feedback}
-            onCopy={onMessageCopy && (() => onMessageCopy(m.id))}
+            onCopy={onCopyMessage && (() => onCopyMessage(m.id))}
             onFeedback={
-              onMessageFeedback && ((rating) => onMessageFeedback(m.id, rating))
+              onRateMessage && ((rating) => onRateMessage(m.id, rating))
             }
-            onRerun={onMessageRerun && (() => onMessageRerun(m.id))}
+            onRerun={onRerunMessage && (() => onRerunMessage(m.id))}
             actionLabels={actionLabels}
           />
         );
       })}
       {showBrandLogo && (
-        // Single subdued brand mark "signing" the finished response —
-        // rendered once below the list, never per-message.
-        <div className="-mt-2 flex justify-start">
+        // Decorative signature only — hidden from the accessibility tree.
+        <div aria-hidden className="-mt-2 flex justify-start">
           <Logo className="h-4 w-4 bg-inverse-on-surface/40" />
         </div>
       )}

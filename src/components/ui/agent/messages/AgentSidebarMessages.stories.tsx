@@ -48,10 +48,17 @@ export const AgentStreaming: StoryObj = {
 const noop = () => {};
 
 const actionCallbacks = {
-  onMessageCopy: noop,
-  onMessageFeedback: noop,
-  onMessageRerun: noop,
+  onCopyMessage: noop,
+  onRateMessage: noop,
+  onRerunMessage: noop,
 };
+
+const finishedAgentMsg = {
+  id: "m-2",
+  role: "agent",
+  content:
+    "You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.",
+} satisfies AgentSidebarMessage;
 
 const finishedThread: AgentSidebarMessage[] = [
   {
@@ -59,12 +66,7 @@ const finishedThread: AgentSidebarMessage[] = [
     role: "user",
     content: "Summarize my account changes this week.",
   },
-  {
-    id: "m-2",
-    role: "agent",
-    content:
-      "You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.",
-  },
+  finishedAgentMsg,
 ];
 
 /** Copy / thumbs / rerun appear under finished agent messages only. */
@@ -78,16 +80,7 @@ export const FinishedWithActions: StoryObj = {
 export const FeedbackSelected: StoryObj = {
   render: () => (
     <AgentSidebarMessages
-      messages={[
-        finishedThread[0],
-        {
-          id: "m-2",
-          role: "agent",
-          content:
-            "You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.",
-          feedback: "up",
-        },
-      ]}
+      messages={[finishedThread[0], { ...finishedAgentMsg, feedback: "up" }]}
       {...actionCallbacks}
     />
   ),

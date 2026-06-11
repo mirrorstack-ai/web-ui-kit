@@ -21,10 +21,10 @@ export function AgentSidebarUserMessage({
 }
 
 /** Feedback rating on an agent message. `null` clears a previous rating. */
-export type AgentMessageFeedback = "up" | "down" | null;
+export type AgentSidebarMessageFeedback = "up" | "down" | null;
 
 /** Localizable aria-labels for the message action buttons (English defaults). */
-export interface AgentMessageActionLabels {
+export interface AgentSidebarMessageActionLabels {
   copy?: string;
   copied?: string;
   good?: string;
@@ -37,15 +37,16 @@ export interface AgentSidebarAgentMessageProps {
   /** When true, renders typing indicator (if no content) or blinking cursor (if content). */
   streaming?: boolean;
   /** Current feedback rating reflected on the thumbs. */
-  feedback?: AgentMessageFeedback;
+  feedback?: AgentSidebarMessageFeedback;
   /** Copy was clicked. The kit only flashes the icon to a check — the
-   *  consumer performs the actual clipboard write. */
-  onCopy?: () => void;
+   *  consumer performs the actual clipboard write. Return `false` (sync or
+   *  resolved), or reject, to suppress the success flash. */
+  onCopy?: () => void | boolean | Promise<void | boolean>;
   /** Fired with the next rating: clicking the selected thumb yields null,
    *  clicking the other thumb switches. */
-  onFeedback?: (rating: AgentMessageFeedback) => void;
+  onFeedback?: (rating: AgentSidebarMessageFeedback) => void;
   onRerun?: () => void;
-  actionLabels?: AgentMessageActionLabels;
+  actionLabels?: AgentSidebarMessageActionLabels;
   className?: string;
 }
 
@@ -99,31 +100,42 @@ function AgentMessageActions({
   onRerun,
   labels,
 }: {
-  feedback: AgentMessageFeedback;
-  onCopy?: () => void;
-  onFeedback?: (rating: AgentMessageFeedback) => void;
+  feedback: AgentSidebarMessageFeedback;
+  onCopy?: () => void | boolean | Promise<void | boolean>;
+  onFeedback?: (rating: AgentSidebarMessageFeedback) => void;
   onRerun?: () => void;
-  labels?: AgentMessageActionLabels;
+  labels?: AgentSidebarMessageActionLabels;
 }) {
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
+  const unmountedRef = useRef(false);
 
-  useEffect(() => () => clearTimeout(copyTimerRef.current), []);
+  useEffect(
+    () => () => {
+      unmountedRef.current = true;
+      clearTimeout(copyTimerRef.current);
+    },
+    [],
+  );
 
-  const handleCopy = () => {
-    onCopy?.();
+  const handleCopy = async () => {
+    try {
+      // A `false` return (sync or resolved) or a rejection means the
+      // consumer's clipboard write failed — don't flash success.
+      if ((await onCopy?.()) === false) return;
+    } catch {
+      return;
+    }
+    if (unmountedRef.current) return;
     setCopied(true);
     clearTimeout(copyTimerRef.current);
     copyTimerRef.current = setTimeout(() => setCopied(false), COPY_FLASH_MS);
   };
 
-  // Clicking the selected thumb toggles it off; the other thumb switches.
-  const rate = (rating: "up" | "down") =>
-    onFeedback?.(feedback === rating ? null : rating);
-
   const thumb = (rating: "up" | "down", icon: string, label: string) => {
+    // Clicking the selected thumb toggles it off; the other thumb switches.
     const selected = feedback === rating;
     return (
       <IconButton
@@ -132,7 +144,7 @@ function AgentMessageActions({
         variant="text"
         size="sm"
         className={selected ? "text-inverse-on-surface" : MUTED_INK}
-        onClick={() => rate(rating)}
+        onClick={() => onFeedback?.(selected ? null : rating)}
         aria-label={label}
         aria-pressed={selected}
       />

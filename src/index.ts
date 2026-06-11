@@ -56,8 +56,8 @@ export {
   type AgentSidebarUserMessageProps,
   AgentSidebarAgentMessage,
   type AgentSidebarAgentMessageProps,
-  type AgentMessageFeedback,
-  type AgentMessageActionLabels,
+  type AgentSidebarMessageFeedback,
+  type AgentSidebarMessageActionLabels,
 } from "./components/ui/agent/messages/AgentSidebarMessage";
 export {
   AgentSidebarMultiQuestion,

@@ -25,9 +25,9 @@ const agentMsg = (over: Partial<AgentTextMessage> = {}): AgentSidebarMessage => 
 });
 
 const allCallbacks = () => ({
-  onMessageCopy: vi.fn(),
-  onMessageFeedback: vi.fn(),
-  onMessageRerun: vi.fn(),
+  onCopyMessage: vi.fn(),
+  onRateMessage: vi.fn(),
+  onRerunMessage: vi.fn(),
 });
 
 describe("AgentSidebarMessages action row", () => {
@@ -69,20 +69,21 @@ describe("AgentSidebarMessages action row", () => {
 
   it("renders only the buttons whose callbacks are provided", () => {
     render(
-      <AgentSidebarMessages messages={[agentMsg()]} onMessageRerun={vi.fn()} />,
+      <AgentSidebarMessages messages={[agentMsg()]} onRerunMessage={vi.fn()} />,
     );
     expect(screen.getByLabelText("Rerun")).toBeInTheDocument();
     expect(screen.queryByLabelText("Copy")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Good response")).not.toBeInTheDocument();
   });
 
-  it("copy fires onMessageCopy and flashes a check for 1.5s", () => {
+  it("copy fires onCopyMessage and flashes a check for 1.5s", async () => {
     vi.useFakeTimers();
     try {
       const callbacks = allCallbacks();
       render(<AgentSidebarMessages messages={[agentMsg()]} {...callbacks} />);
       fireEvent.click(screen.getByLabelText("Copy"));
-      expect(callbacks.onMessageCopy).toHaveBeenCalledWith("a-1");
+      expect(callbacks.onCopyMessage).toHaveBeenCalledWith("a-1");
+      await act(async () => {}); // flush the async success gate
       expect(screen.getByLabelText("Copied")).toHaveTextContent("check");
       act(() => {
         vi.advanceTimersByTime(1500);
@@ -93,13 +94,26 @@ describe("AgentSidebarMessages action row", () => {
     }
   });
 
+  it("does not flash success when onCopyMessage returns false", async () => {
+    render(
+      <AgentSidebarMessages
+        messages={[agentMsg()]}
+        onCopyMessage={vi.fn(() => false)}
+      />,
+    );
+    fireEvent.click(screen.getByLabelText("Copy"));
+    await act(async () => {});
+    expect(screen.queryByLabelText("Copied")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Copy")).toBeInTheDocument();
+  });
+
   it("clicking a thumb reports the rating with the message id", () => {
     const callbacks = allCallbacks();
     render(<AgentSidebarMessages messages={[agentMsg()]} {...callbacks} />);
     fireEvent.click(screen.getByLabelText("Good response"));
-    expect(callbacks.onMessageFeedback).toHaveBeenCalledWith("a-1", "up");
+    expect(callbacks.onRateMessage).toHaveBeenCalledWith("a-1", "up");
     fireEvent.click(screen.getByLabelText("Bad response"));
-    expect(callbacks.onMessageFeedback).toHaveBeenCalledWith("a-1", "down");
+    expect(callbacks.onRateMessage).toHaveBeenCalledWith("a-1", "down");
   });
 
   it("clicking the selected thumb toggles it off; the other switches", () => {
@@ -113,23 +127,23 @@ describe("AgentSidebarMessages action row", () => {
     const up = screen.getByLabelText("Good response");
     expect(up).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(up);
-    expect(callbacks.onMessageFeedback).toHaveBeenCalledWith("a-1", null);
+    expect(callbacks.onRateMessage).toHaveBeenCalledWith("a-1", null);
     fireEvent.click(screen.getByLabelText("Bad response"));
-    expect(callbacks.onMessageFeedback).toHaveBeenCalledWith("a-1", "down");
+    expect(callbacks.onRateMessage).toHaveBeenCalledWith("a-1", "down");
   });
 
-  it("rerun fires onMessageRerun with the message id", () => {
+  it("rerun fires onRerunMessage with the message id", () => {
     const callbacks = allCallbacks();
     render(<AgentSidebarMessages messages={[agentMsg()]} {...callbacks} />);
     fireEvent.click(screen.getByLabelText("Rerun"));
-    expect(callbacks.onMessageRerun).toHaveBeenCalledWith("a-1");
+    expect(callbacks.onRerunMessage).toHaveBeenCalledWith("a-1");
   });
 
   it("uses provided actionLabels", () => {
     render(
       <AgentSidebarMessages
         messages={[agentMsg()]}
-        onMessageCopy={vi.fn()}
+        onCopyMessage={vi.fn()}
         actionLabels={{ copy: "複製" }}
       />,
     );
@@ -138,7 +152,9 @@ describe("AgentSidebarMessages action row", () => {
 });
 
 describe("AgentSidebarMessages showLogo", () => {
-  const logo = () => screen.queryAllByRole("img", { name: "MirrorStack Logo" });
+  // The logo wrapper is aria-hidden (decorative), so opt into hidden elements.
+  const logo = () =>
+    screen.queryAllByRole("img", { name: "MirrorStack Logo", hidden: true });
 
   it("renders exactly one logo when the last message is a finished agent message", () => {
     render(
