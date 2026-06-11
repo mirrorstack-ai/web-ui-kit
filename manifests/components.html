@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/73 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">73/73 infos</a><span class="filter-pill ok" aria-disabled="true">275 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/73 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">73/73 infos</a><span class="filter-pill ok" aria-disabled="true">276 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1890,9 +1890,9 @@ title?: string = &quot;Adjust avatar&quot;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AvatarStack</h2>
       <div class="badges">
-        <label for="c-7-ui-media-avatarstack-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-7-ui-media-avatarstack-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-7-ui-media-avatarstack-info" class="badge info as-toggle">1 info</label>
-        <label for="c-7-ui-media-avatarstack-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-7-ui-media-avatarstack-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -1924,7 +1924,7 @@ title?: string = &quot;Adjust avatar&quot;</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">5 prop types</span>
+              <span class="badge ok">6 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/media/avatar-stack/AvatarStack.tsx::AvatarStack</code></pre>
             <pre><code>Props:</code></pre>
@@ -1940,6 +1940,14 @@ items: AvatarStackItem[]
 max?: number = 4
 
 size?: &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot; | &quot;xl&quot; = &quot;sm&quot;
+
+/**
+ * Total items the stack represents when `items` is a server-capped
+ * preview — the overflow chip then shows `total - visible` instead of
+ * `items.length - visible`. Defaults to `items.length`; values below it
+ * are clamped up.
+ */
+total?: number
 
 /**
  * Always rendered last and never collapsed — for a distinguished principal
@@ -1979,6 +1987,15 @@ trailing?: AvatarStackItem</code></pre>
               
               <div class="hint">`max` is the total visible slots including the overflow chip. Six items with `max={4}` render three avatars + a `+3` chip; the chip reuses the Avatar initials fallback so it inherits theme and size for free.</div>
               <pre><code>const Overflow = () =&gt; &lt;AvatarStack items={people} max={4} size=&quot;sm&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Capped Preview</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">When `items` is a server-capped preview, pass `total` and the chip reports the real remainder — here a 4-item preview of a 12-member list renders three avatars + `+9`.</div>
+              <pre><code>const CappedPreview = () =&gt; &lt;AvatarStack items={people.slice(0, 4)} max={4} size=&quot;sm&quot; total={12} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
