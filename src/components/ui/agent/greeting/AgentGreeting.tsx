@@ -56,8 +56,9 @@ const TEXTAREA_BOUNDS = {
   hero: { min: 80, max: 200 },
   compact: { min: 40, max: 112 },
 } as const;
-// 200 (pinned by #273): long labels truncate; price detail stays fully visible.
-const MENU_W = 200;
+// Matches AgentSidebarInput's menu width: long labels truncate; price
+// detail stays fully visible (user widened from #273's 200 for parity).
+const MENU_W = 240;
 const MENU_R = 12;
 const MENU_IR = 8;
 // Extra breathing room INSIDE the notch on the left of the trigger pill.
