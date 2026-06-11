@@ -43,6 +43,9 @@ const TAB_BLEED_X = 6;
 const TAB_BLEED_TOP = 6;
 // Drop the whole card so the tab wraps around the trigger pill.
 const MENU_SHIFT_DOWN = 4;
+// Inset the tab from the card's left corner (double inverse-curve look).
+// Must be >= radius + inverseRadius or Notch clamps it back to the edge.
+const TAB_INSET = 24;
 
 export function AgentSidebarInput({
   onSend,
@@ -88,9 +91,9 @@ export function AgentSidebarInput({
   }
 
   // Measure the trigger pill so the notch tab wraps it — mirrors
-  // AgentGreeting's measurement, minus the horizontal offset: the menu
-  // wrapper is anchored at the trigger's left edge minus TAB_BLEED_X, so the
-  // tab sits at notchOffset 0 (the card's left edge) by construction.
+  // AgentGreeting's measurement: the menu wrapper is anchored TAB_INSET +
+  // TAB_BLEED_X left of the trigger, so the tab lands back over the trigger
+  // at notchOffset TAB_INSET.
   useLayoutEffect(() => {
     if (!modelMenuOpen) return;
     const trigger = modelTriggerRef.current;
@@ -219,7 +222,7 @@ export function AgentSidebarInput({
                   ref={modelMenuRef}
                   className="absolute z-50 overflow-visible"
                   style={{
-                    left: -TAB_BLEED_X,
+                    left: -(TAB_BLEED_X + TAB_INSET),
                     bottom: -MENU_SHIFT_DOWN,
                     filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
                   }}
@@ -231,7 +234,7 @@ export function AgentSidebarInput({
                       notchWidth={tabW}
                       notchHeight={tabH}
                       notchSide="top"
-                      notchOffset={0}
+                      notchOffset={TAB_INSET}
                       radius={MENU_R}
                       inverseRadius={MENU_IR}
                       fill="var(--color-inverse-surface)"
