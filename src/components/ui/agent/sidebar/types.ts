@@ -22,7 +22,8 @@ export interface AgentSidebarHeaderLabels {
   historyButtonLabel?: string;
   /** Shown when history is empty. Default: "No previous conversations" */
   historyEmpty?: string;
-  /** aria-label on the rename icon button + rename input in a history row. Default: "Rename conversation" */
+  /** aria-label on the rename icon button in a history row; the rename input
+   *  uses it as a prefix ("<label>: <title>"). Default: "Rename conversation" */
   renameConversationLabel?: string;
   /** aria-label on the cancel-rename button. Default: "Cancel rename" */
   cancelRenameLabel?: string;

@@ -138,11 +138,13 @@ describe("AgentSidebarHeader history rename", () => {
     expect(screen.queryByLabelText("Rename conversation")).not.toBeInTheDocument();
   });
 
-  it("entering edit mode swaps the row to an input", () => {
+  it("entering edit mode swaps the row to an input labeled with the title", () => {
     renderHistory(() => {});
     openHistory();
     fireEvent.click(screen.getByLabelText("Rename conversation"));
-    expect(screen.getByLabelText("Rename conversation")).toBeInstanceOf(HTMLInputElement);
+    expect(screen.getByLabelText("Rename conversation: My conversation")).toBeInstanceOf(
+      HTMLInputElement,
+    );
   });
 
   it("Enter commits the trimmed rename", () => {
@@ -150,7 +152,7 @@ describe("AgentSidebarHeader history rename", () => {
     renderHistory(onRename);
     openHistory();
     fireEvent.click(screen.getByLabelText("Rename conversation"));
-    const input = screen.getByLabelText("Rename conversation");
+    const input = screen.getByLabelText(/^Rename conversation:/);
     fireEvent.change(input, { target: { value: "  New title  " } });
     fireEvent.keyDown(input, { key: "Enter" });
     expect(onRename).toHaveBeenCalledWith("h-1", "New title");
@@ -161,7 +163,7 @@ describe("AgentSidebarHeader history rename", () => {
     renderHistory(onRename);
     openHistory();
     fireEvent.click(screen.getByLabelText("Rename conversation"));
-    fireEvent.keyDown(screen.getByLabelText("Rename conversation"), { key: "Escape" });
+    fireEvent.keyDown(screen.getByLabelText(/^Rename conversation:/), { key: "Escape" });
     expect(onRename).not.toHaveBeenCalled();
     expect(screen.getByText("My conversation")).toBeInTheDocument();
   });
@@ -171,10 +173,24 @@ describe("AgentSidebarHeader history rename", () => {
     renderHistory(onRename);
     openHistory();
     fireEvent.click(screen.getByLabelText("Rename conversation"));
-    const input = screen.getByLabelText("Rename conversation");
+    const input = screen.getByLabelText(/^Rename conversation:/);
     fireEvent.change(input, { target: { value: "   " } });
     fireEvent.keyDown(input, { key: "Enter" });
     expect(onRename).not.toHaveBeenCalled();
+  });
+
+  it("exits edit mode when the dropdown is dismissed while renaming", () => {
+    renderHistory(() => {});
+    openHistory();
+    fireEvent.click(screen.getByLabelText("Rename conversation"));
+    fireEvent.change(screen.getByLabelText(/^Rename conversation:/), {
+      target: { value: "half-typed" },
+    });
+    // Click-outside dismissal while the rename is in progress.
+    fireEvent.mouseDown(document.body);
+    openHistory();
+    expect(screen.getByText("My conversation")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
   it("does not open the conversation when entering edit mode", () => {

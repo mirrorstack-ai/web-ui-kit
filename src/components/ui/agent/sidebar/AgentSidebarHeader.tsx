@@ -165,6 +165,12 @@ export function AgentSidebarHeader({
     enabled: showHistory,
   });
 
+  // Every close path (toggle button, item select, click-outside, Escape)
+  // also exits inline-rename, so reopening never resumes a stale edit.
+  useEffect(() => {
+    if (!showHistory) setEditingId(null);
+  }, [showHistory]);
+
   useLayoutEffect(() => {
     if (!showHistory || !histContentRef.current) return;
     setHistContentH(histContentRef.current.offsetHeight);
@@ -336,7 +342,8 @@ export function AgentSidebarHeader({
                         className="group/item flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors text-on-surface hover:bg-on-surface/10"
                         onClick={select}
                         onKeyDown={(e) => {
-                          if (!isEditing && (e.key === "Enter" || e.key === " ")) {
+                          // target check: nested rename/cancel buttons handle their own keys.
+                          if (e.target === e.currentTarget && !isEditing && (e.key === "Enter" || e.key === " ")) {
                             e.preventDefault();
                             select();
                           }
@@ -360,45 +367,30 @@ export function AgentSidebarHeader({
                               onClick={(e) => e.stopPropagation()}
                               maxLength={200}
                               className="flex-1 min-w-0 text-sm bg-transparent border-b border-outline focus:outline-none text-on-surface"
-                              aria-label={labels?.renameConversationLabel ?? "Rename conversation"}
+                              aria-label={`${labels?.renameConversationLabel ?? "Rename conversation"}: ${item.title}`}
                             />
-                            <div
-                              role="button"
-                              tabIndex={0}
-                              className="w-5 h-5 flex items-center justify-center rounded-full text-on-surface hover:bg-on-surface/10 shrink-0"
+                            <button
+                              type="button"
+                              className="w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-on-surface hover:bg-on-surface/10 shrink-0"
                               onClick={(e) => { e.stopPropagation(); cancelEdit(); }}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  cancelEdit();
-                                }
-                              }}
                               aria-label={labels?.cancelRenameLabel ?? "Cancel rename"}
                             >
                               <Icon name="close" size={12} />
-                            </div>
+                            </button>
                           </>
                         ) : (
                           <>
                             <Icon name="chat_bubble_outline" size={14} className="text-on-surface-variant shrink-0" />
                             <span className="text-sm truncate flex-1">{item.title}</span>
                             {onRenameConversation && (
-                              <div
-                                role="button"
-                                tabIndex={0}
-                                className="w-5 h-5 flex items-center justify-center rounded-full text-on-surface hover:bg-on-surface/10 shrink-0 opacity-0 group-hover/item:opacity-70 group-hover/item:hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                              <button
+                                type="button"
+                                className="w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-on-surface hover:bg-on-surface/10 shrink-0 opacity-0 group-hover/item:opacity-70 group-hover/item:hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                                 onClick={startEdit}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === " ") {
-                                    e.preventDefault();
-                                    startEdit(e);
-                                  }
-                                }}
                                 aria-label={labels?.renameConversationLabel ?? "Rename conversation"}
                               >
                                 <Icon name="edit" size={12} />
-                              </div>
+                              </button>
                             )}
                           </>
                         )}
