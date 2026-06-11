@@ -53,8 +53,8 @@ const TEXTAREA_BOUNDS = {
   hero: { min: 80, max: 200 },
   compact: { min: 40, max: 112 },
 } as const;
-const MENU_W = 220;
-const MENU_R = 14;
+const MENU_W = 200;
+const MENU_R = 12;
 const MENU_IR = 8;
 // Extra breathing room INSIDE the notch on the left of the trigger pill.
 // Right side stays flush — the send button sits there, so we don't intrude.
@@ -238,8 +238,8 @@ export function AgentGreeting({
                 type="button"
                 onClick={() => setModelMenuOpen((open) => !open)}
                 className={cn(
-                  "relative z-[51] flex cursor-pointer items-center gap-1.5 rounded-full text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface",
-                  compact ? "h-8 px-3 text-xs" : "h-9 px-4 text-sm",
+                  "relative z-[51] flex cursor-pointer items-center gap-1 rounded-full text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface",
+                  compact ? "h-7 px-2.5 text-xs" : "h-8 px-3 text-[13px]",
                 )}
                 aria-label={`Model: ${activeModel.label}`}
                 aria-haspopup="listbox"
@@ -248,7 +248,7 @@ export function AgentGreeting({
                 <span className="max-w-[140px] truncate">
                   {activeModel.label}
                 </span>
-                <Icon name="expand_more" size={16} />
+                <Icon name="expand_more" size={14} />
               </button>
               {modelMenuOpen && (
                 <div
@@ -279,7 +279,7 @@ export function AgentGreeting({
                     ref={modelContentRef}
                     role="listbox"
                     aria-label="Model"
-                    className="relative z-10 flex flex-col gap-1 p-2"
+                    className="relative z-10 flex flex-col gap-0.5 p-1.5"
                     style={{
                       marginTop: notchTabHeight || 32,
                       width: MENU_W,
@@ -295,7 +295,7 @@ export function AgentGreeting({
                           aria-selected={selected}
                           onClick={() => handleSelectModel(m.id)}
                           className={cn(
-                            "flex items-baseline gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
+                            "flex items-baseline gap-1.5 rounded-lg px-2 py-1 text-left text-[13px] transition-colors",
                             selected
                               ? "bg-on-surface/8 text-on-surface"
                               : "text-on-surface hover:bg-on-surface/8",
@@ -303,7 +303,7 @@ export function AgentGreeting({
                         >
                           <Icon
                             name="check"
-                            size={16}
+                            size={14}
                             className={cn(
                               "shrink-0 translate-y-0.5",
                               selected ? "text-on-surface" : "text-transparent",
@@ -313,7 +313,7 @@ export function AgentGreeting({
                             {m.label}
                           </span>
                           {m.description && (
-                            <span className="text-xs text-on-surface-variant">
+                            <span className="text-[11px] text-on-surface-variant">
                               {m.description}
                             </span>
                           )}

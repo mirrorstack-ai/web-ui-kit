@@ -3,6 +3,12 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.8
+
+- `AgentGreeting`: model picker densified — smaller trigger pill
+  (`h-8`/13px hero, `h-7` compact), 200px menu, tighter rows and 14px
+  icons. **No breaking changes**; API unchanged. (#274)
+
 ## 0.4.7
 
 - `AvatarStack`: new `total` prop — when `items` is a server-capped preview,
