@@ -80,6 +80,27 @@ export interface AgentSidebarMessagesProps {
   className?: string;
 }
 
+type ToolMessage = Extract<AgentSidebarMessage, { role: "tool" }>;
+
+/** Collapse runs of consecutive tool rows so they can render in one gap-1
+ *  group — the spec caps tool-stack spacing at gap-1 ("a 16-row stack stays
+ *  calm") while regular messages keep the list's gap-4. */
+function groupToolRuns(
+  messages: AgentSidebarMessage[],
+): (Exclude<AgentSidebarMessage, ToolMessage> | ToolMessage[])[] {
+  const out: (Exclude<AgentSidebarMessage, ToolMessage> | ToolMessage[])[] = [];
+  for (const m of messages) {
+    if (m.role === "tool") {
+      const last = out[out.length - 1];
+      if (Array.isArray(last)) last.push(m);
+      else out.push([m]);
+    } else {
+      out.push(m);
+    }
+  }
+  return out;
+}
+
 const NEAR_BOTTOM_PX = 80;
 
 function findScrollParent(el: HTMLElement | null): HTMLElement | null {
@@ -149,14 +170,19 @@ export function AgentSidebarMessages({
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      {messages.map((m) => {
+      {groupToolRuns(messages).map((entry) => {
+        if (Array.isArray(entry)) {
+          return (
+            <div key={entry[0].id} className="flex flex-col gap-1">
+              {entry.map((m) => (
+                <AgentSidebarToolCall key={m.id} tool={m.tool} toolLabels={toolLabels} />
+              ))}
+            </div>
+          );
+        }
+        const m = entry;
         if (m.role === "user") {
           return <AgentSidebarUserMessage key={m.id} content={m.content} />;
-        }
-        if (m.role === "tool") {
-          return (
-            <AgentSidebarToolCall key={m.id} tool={m.tool} toolLabels={toolLabels} />
-          );
         }
         if ("kind" in m) {
           return (

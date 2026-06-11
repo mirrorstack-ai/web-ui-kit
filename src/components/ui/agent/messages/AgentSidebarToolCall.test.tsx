@@ -131,6 +131,18 @@ describe("AgentSidebarToolCall", () => {
     expect(screen.getByText("result")).toBeInTheDocument();
   });
 
+  it("announces a non-expandable error row as an alert, not a status", () => {
+    render(
+      <AgentSidebarToolCall
+        tool={{ moduleSlug: "cms", tool: "create_post", status: "error" }}
+      />,
+    );
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert").getAttribute("aria-label")).toContain(
+      "Failed",
+    );
+  });
+
   it("uses custom toolLabels for the status aria text", () => {
     render(
       <AgentSidebarToolCall
@@ -161,6 +173,34 @@ describe("AgentSidebarMessages tool rows", () => {
     );
     expect(screen.getByText("cms · publish_post")).toBeInTheDocument();
     expect(screen.getByText("120ms")).toBeInTheDocument();
+  });
+
+  it("collapses consecutive tool rows into a single gap-1 group", () => {
+    const { container } = render(
+      <AgentSidebarMessages
+        autoScroll={false}
+        messages={[
+          {
+            id: "t1",
+            role: "tool",
+            tool: { moduleSlug: "cms", tool: "get_page", status: "done" },
+          },
+          {
+            id: "t2",
+            role: "tool",
+            tool: { moduleSlug: "cms", tool: "publish_post", status: "done" },
+          },
+          { id: "a1", role: "agent", content: "Done." },
+        ]}
+      />,
+    );
+    // One gap-1 group + the agent bubble + the scroll anchor — the two tool
+    // rows must NOT be direct children of the gap-4 list.
+    const list = container.firstElementChild!;
+    expect(list.children).toHaveLength(3);
+    const group = list.children[0]!;
+    expect(group.className).toContain("gap-1");
+    expect(group.children).toHaveLength(2);
   });
 
   it("passes the list-level toolLabels down to tool rows", () => {

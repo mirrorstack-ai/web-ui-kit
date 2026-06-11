@@ -140,7 +140,8 @@ export function AgentSidebarToolCall({
       ) : (
         <div
           className="flex items-center gap-1.5 min-h-[24px]"
-          role="status"
+          // Errors are assertive (alert); anything else is an advisory status.
+          role={isError ? "alert" : "status"}
           aria-label={`${statusLabel}: ${label}`}
         >
           {rowContent}
