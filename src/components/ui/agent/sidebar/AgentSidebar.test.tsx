@@ -1,7 +1,8 @@
 import { cleanup, render, screen, fireEvent } from "@testing-library/react";
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { describe, expect, it, vi, afterEach, beforeAll, afterAll } from "vitest";
 import { AgentSidebarHeader } from "./AgentSidebarHeader";
 import { AgentSidebarInput } from "./AgentSidebarInput";
+import type { AgentSidebarHistoryGroup, ChatTab } from "./types";
 
 afterEach(cleanup);
 
@@ -28,6 +29,169 @@ describe("AgentSidebarHeader", () => {
     );
     fireEvent.click(screen.getByLabelText("Close sidebar"));
     expect(onClose).toHaveBeenCalledOnce();
+  });
+});
+
+describe("AgentSidebarHeader controlled tabs", () => {
+  // jsdom reports clientWidth 0, which would collapse the strip to a single
+  // visible tab and swap the + button for the overflow trigger. Report a
+  // real width so both tabs render inline.
+  beforeAll(() => {
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      value: 400,
+    });
+  });
+  afterAll(() => {
+    Reflect.deleteProperty(HTMLElement.prototype, "clientWidth");
+  });
+
+  const makeTabs = (): ChatTab[] => [
+    { id: "a", title: "New chat" },
+    { id: "b", title: "Settings help" },
+  ];
+
+  const renderControlled = (overrides: Partial<Parameters<typeof AgentSidebarHeader>[0]> = {}) =>
+    render(
+      <AgentSidebarHeader
+        sidebarWidth={400}
+        onToggleCollapse={() => {}}
+        onClose={() => {}}
+        tabs={makeTabs()}
+        activeTabId="a"
+        onSelectTab={() => {}}
+        onCloseTab={() => {}}
+        onNewTab={() => {}}
+        {...overrides}
+      />,
+    );
+
+  it("renders supplied tab titles instead of internal labels", () => {
+    renderControlled();
+    expect(screen.getByText("New chat")).toBeInTheDocument();
+    expect(screen.getByText("Settings help")).toBeInTheDocument();
+    expect(screen.queryByText("Chat 1")).not.toBeInTheDocument();
+  });
+
+  it("calls onNewTab when + is clicked instead of adding an internal tab", () => {
+    const onNewTab = vi.fn();
+    renderControlled({ onNewTab });
+    fireEvent.click(screen.getByLabelText("New chat"));
+    expect(onNewTab).toHaveBeenCalledOnce();
+    expect(screen.getAllByRole("tab")).toHaveLength(2);
+  });
+
+  it("calls onSelectTab with the clicked tab id", () => {
+    const onSelectTab = vi.fn();
+    renderControlled({ onSelectTab });
+    fireEvent.click(screen.getByText("Settings help"));
+    expect(onSelectTab).toHaveBeenCalledWith("b");
+  });
+
+  it("calls onCloseTab with the closed tab id", () => {
+    const onCloseTab = vi.fn();
+    renderControlled({ onCloseTab });
+    fireEvent.click(screen.getByLabelText("Close Settings help"));
+    expect(onCloseTab).toHaveBeenCalledWith("b");
+  });
+
+  it("marks the controlled active tab as selected", () => {
+    renderControlled({ activeTabId: "b" });
+    expect(screen.getByRole("tab", { name: /Settings help/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+});
+
+describe("AgentSidebarHeader history rename", () => {
+  const historyData: AgentSidebarHistoryGroup[] = [
+    {
+      label: "Today",
+      items: [{ id: "h-1", title: "My conversation", updatedAt: "2026-06-12T10:00:00Z" }],
+    },
+  ];
+
+  const renderHistory = (onRename?: (id: string, title: string) => void) =>
+    render(
+      <AgentSidebarHeader
+        sidebarWidth={400}
+        onToggleCollapse={() => {}}
+        onClose={() => {}}
+        history={historyData}
+        onSelectHistoryItem={() => {}}
+        onRenameConversation={onRename}
+      />,
+    );
+
+  const openHistory = () => fireEvent.click(screen.getByLabelText("Chat history"));
+
+  it("shows the rename button when onRenameConversation is provided", () => {
+    renderHistory(() => {});
+    openHistory();
+    expect(screen.getByLabelText("Rename conversation")).toBeInTheDocument();
+  });
+
+  it("hides the rename button when onRenameConversation is absent", () => {
+    renderHistory();
+    openHistory();
+    expect(screen.queryByLabelText("Rename conversation")).not.toBeInTheDocument();
+  });
+
+  it("entering edit mode swaps the row to an input", () => {
+    renderHistory(() => {});
+    openHistory();
+    fireEvent.click(screen.getByLabelText("Rename conversation"));
+    expect(screen.getByLabelText("Rename conversation")).toBeInstanceOf(HTMLInputElement);
+  });
+
+  it("Enter commits the trimmed rename", () => {
+    const onRename = vi.fn();
+    renderHistory(onRename);
+    openHistory();
+    fireEvent.click(screen.getByLabelText("Rename conversation"));
+    const input = screen.getByLabelText("Rename conversation");
+    fireEvent.change(input, { target: { value: "  New title  " } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onRename).toHaveBeenCalledWith("h-1", "New title");
+  });
+
+  it("Esc cancels without calling onRenameConversation", () => {
+    const onRename = vi.fn();
+    renderHistory(onRename);
+    openHistory();
+    fireEvent.click(screen.getByLabelText("Rename conversation"));
+    fireEvent.keyDown(screen.getByLabelText("Rename conversation"), { key: "Escape" });
+    expect(onRename).not.toHaveBeenCalled();
+    expect(screen.getByText("My conversation")).toBeInTheDocument();
+  });
+
+  it("does not commit an empty rename", () => {
+    const onRename = vi.fn();
+    renderHistory(onRename);
+    openHistory();
+    fireEvent.click(screen.getByLabelText("Rename conversation"));
+    const input = screen.getByLabelText("Rename conversation");
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onRename).not.toHaveBeenCalled();
+  });
+
+  it("does not open the conversation when entering edit mode", () => {
+    const onSelect = vi.fn();
+    render(
+      <AgentSidebarHeader
+        sidebarWidth={400}
+        onToggleCollapse={() => {}}
+        onClose={() => {}}
+        history={historyData}
+        onSelectHistoryItem={onSelect}
+        onRenameConversation={() => {}}
+      />,
+    );
+    openHistory();
+    fireEvent.click(screen.getByLabelText("Rename conversation"));
+    expect(onSelect).not.toHaveBeenCalled();
   });
 });
 
@@ -60,6 +224,46 @@ describe("AgentSidebarInput", () => {
     render(<AgentSidebarInput onSend={onSend} />);
     fireEvent.click(screen.getByLabelText("Send message"));
     expect(onSend).not.toHaveBeenCalled();
+  });
+});
+
+describe("AgentSidebarInput queued message", () => {
+  it("renders the chip with full text in the title attr", () => {
+    render(<AgentSidebarInput queuedMessage="Summarize the logs" />);
+    expect(screen.getByTitle("Summarize the logs")).toBeInTheDocument();
+  });
+
+  it("does not render the chip when queuedMessage is absent", () => {
+    render(<AgentSidebarInput />);
+    expect(screen.queryByLabelText("Cancel queued message")).not.toBeInTheDocument();
+  });
+
+  it("calls onCancelQueued when X is clicked", () => {
+    const onCancel = vi.fn();
+    render(<AgentSidebarInput queuedMessage="Summarize the logs" onCancelQueued={onCancel} />);
+    fireEvent.click(screen.getByLabelText("Cancel queued message"));
+    expect(onCancel).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the textarea usable while the chip is shown", () => {
+    const onSend = vi.fn();
+    render(<AgentSidebarInput queuedMessage="A queued message" onSend={onSend} />);
+    const textarea = screen.getByLabelText("Message to agent");
+    fireEvent.change(textarea, { target: { value: "hello" } });
+    fireEvent.keyDown(textarea, { key: "Enter" });
+    expect(onSend).toHaveBeenCalledWith("hello");
+  });
+
+  it("uses custom labels overrides", () => {
+    render(
+      <AgentSidebarInput
+        queuedMessage="Something"
+        onCancelQueued={() => {}}
+        labels={{ cancelQueuedLabel: "Remove queued", queuedPrefix: "Next up" }}
+      />,
+    );
+    expect(screen.getByLabelText("Remove queued")).toBeInTheDocument();
+    expect(screen.getByText("Next up")).toBeInTheDocument();
   });
 });
 

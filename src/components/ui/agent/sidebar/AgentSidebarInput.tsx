@@ -9,6 +9,7 @@ import { useComposerSubmit } from "@/hooks/useComposerSubmit";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useMenuKeyNav } from "@/hooks/useMenuKeyNav";
 import { useModelSelection } from "@/hooks/useModelSelection";
+import type { AgentSidebarInputLabels } from "./types";
 
 export interface AgentSidebarInputModel {
   id: string;
@@ -33,6 +34,13 @@ export interface AgentSidebarInputProps {
   /** Selected model id. Falls back to the first enabled model when omitted. */
   selectedModelId?: string;
   onSelectModel?: (modelId: string) => void;
+  /** When set, renders a cancellable queued-message chip above the textarea.
+   *  Display-only — queueing logic lives in the consumer. */
+  queuedMessage?: string;
+  /** Called when the user clicks the X on the queued-message chip. */
+  onCancelQueued?: () => void;
+  /** Label overrides. All have EN defaults. */
+  labels?: AgentSidebarInputLabels;
 }
 
 // Model menu geometry — mirrors AgentGreeting's selector, flipped upward:
@@ -58,6 +66,9 @@ export function AgentSidebarInput({
   models,
   selectedModelId,
   onSelectModel,
+  queuedMessage,
+  onCancelQueued,
+  labels,
 }: AgentSidebarInputProps) {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -165,6 +176,27 @@ export function AgentSidebarInput({
         </span>
       </div>
       <div className="flex flex-col w-full border border-outline-variant/30 rounded-xl bg-inverse-on-surface/8 p-1 pt-1.5 gap-0.5">
+        {queuedMessage && (
+          <div className="flex items-center gap-1.5 px-2 py-1 border-b border-outline-variant/20 mb-0.5">
+            <span className="text-[11px] font-medium text-inverse-on-surface/50 shrink-0">
+              {labels?.queuedPrefix ?? "Queued"}
+            </span>
+            <span
+              className="flex-1 text-xs text-inverse-on-surface/70 truncate"
+              title={queuedMessage}
+            >
+              {queuedMessage}
+            </span>
+            <IconButton
+              icon="close"
+              variant="text"
+              size="sm"
+              className="text-inverse-on-surface/50 hover:text-inverse-on-surface shrink-0 -mr-0.5"
+              onClick={onCancelQueued}
+              aria-label={labels?.cancelQueuedLabel ?? "Cancel queued message"}
+            />
+          </div>
+        )}
         <textarea
           ref={textareaRef}
           value={text}

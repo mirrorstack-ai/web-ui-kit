@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AgentSidebarHeader } from "./AgentSidebarHeader";
 import { AgentSidebarInput } from "./AgentSidebarInput";
@@ -7,6 +7,7 @@ import {
   type AgentSidebarMessage,
 } from "../messages/AgentSidebarMessages";
 import { mockAgentHistory, mockAgentMessages, mockAgentModels } from "./mock-data";
+import type { AgentSidebarHistoryGroup, ChatTab } from "./types";
 
 const meta: Meta = {
   title: "UI/Agent/Sidebar",
@@ -38,6 +39,76 @@ export const Header: StoryObj = {
   },
 };
 
+export const ControlledTabs: StoryObj = {
+  render: () => {
+    const [tabs, setTabs] = useState<ChatTab[]>([
+      { id: "conv-1", title: "New chat" },
+      { id: "conv-2", title: "Update display name" },
+    ]);
+    const [activeTabId, setActiveTabId] = useState("conv-1");
+    const nextIdRef = useRef(3);
+    const openTab = (title: string) => {
+      const tab = { id: `conv-${nextIdRef.current++}`, title };
+      setTabs((prev) => [...prev, tab]);
+      setActiveTabId(tab.id);
+    };
+    return (
+      <div className="bg-surface-container">
+        <AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() => {}}
+          onClose={() => {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) => {
+            // Consumer opens a history entry as a NEW tab.
+            const item = mockAgentHistory
+              .flatMap((g) => g.items)
+              .find((i) => i.id === id);
+            openTab(item?.title ?? "New chat");
+          }}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelectTab={setActiveTabId}
+          onCloseTab={(id) => {
+            const next = tabs.filter((t) => t.id !== id);
+            if (!next.length) return;
+            setTabs(next);
+            if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+          }}
+          onNewTab={() => openTab("New chat")}
+        />
+      </div>
+    );
+  },
+};
+
+export const HistoryRename: StoryObj = {
+  render: () => {
+    const [history, setHistory] = useState<AgentSidebarHistoryGroup[]>(mockAgentHistory);
+    return (
+      <div className="bg-surface-container">
+        <AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() => {}}
+          onClose={() => {}}
+          history={history}
+          onSelectHistoryItem={(id) => console.log("open", id)}
+          onRenameConversation={(id, title) => {
+            setHistory((prev) =>
+              prev.map((g) => ({
+                ...g,
+                items: g.items.map((item) =>
+                  item.id === id ? { ...item, title } : item,
+                ),
+              })),
+            );
+          }}
+        />
+      </div>
+    );
+  },
+};
+
 export const Input: StoryObj = {
   render: () => (
     <div className="mt-auto bg-on-background rounded-b-2xl">
@@ -62,6 +133,46 @@ export const InputWithModelSelector: StoryObj = {
           models={mockAgentModels}
           selectedModelId={modelId}
           onSelectModel={setModelId}
+        />
+      </div>
+    );
+  },
+};
+
+export const QueuedMessage: StoryObj = {
+  render: () => {
+    const [queued, setQueued] = useState<string | undefined>(
+      "Summarize the last 3 deployments and show me any failures",
+    );
+    return (
+      <div className="mt-auto bg-on-background rounded-b-2xl">
+        <AgentSidebarInput
+          onSend={(msg) => console.log("Send:", msg)}
+          queuedMessage={queued}
+          onCancelQueued={() => setQueued(undefined)}
+        />
+      </div>
+    );
+  },
+};
+
+export const QueuedMessageWithModelSelector: StoryObj = {
+  render: () => {
+    const [queued, setQueued] = useState<string | undefined>(
+      "Summarize the last 3 deployments",
+    );
+    const [modelId, setModelId] = useState(
+      "anthropic.claude-haiku-4-5-20251001-v1:0",
+    );
+    return (
+      <div className="mt-auto bg-on-background rounded-b-2xl">
+        <AgentSidebarInput
+          onSend={(msg) => console.log("Send:", msg)}
+          models={mockAgentModels}
+          selectedModelId={modelId}
+          onSelectModel={setModelId}
+          queuedMessage={queued}
+          onCancelQueued={() => setQueued(undefined)}
         />
       </div>
     );

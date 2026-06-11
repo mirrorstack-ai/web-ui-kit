@@ -1,16 +1,12 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
 import { flushSync } from "react-dom";
 import { cn } from "@/utils/cn";
+import { isDev } from "@/utils/env";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import type { AgentSidebarHistoryGroup } from "./types";
-
-interface ChatTab {
-  id: string;
-  title: string;
-}
+import type { AgentSidebarHeaderLabels, AgentSidebarHistoryGroup, ChatTab } from "./types";
 
 export interface AgentSidebarHeaderProps {
   sidebarWidth: number;
@@ -19,6 +15,22 @@ export interface AgentSidebarHeaderProps {
   /** Past conversations grouped by date — shown in the arrow-down dropdown. */
   history?: AgentSidebarHistoryGroup[];
   onSelectHistoryItem?: (id: string) => void;
+  /** Controlled tab list. Provide together with activeTabId/onSelectTab/onCloseTab/onNewTab;
+   *  omit all five to keep the internal uncontrolled tab state. */
+  tabs?: ChatTab[];
+  /** Controlled active tab id. */
+  activeTabId?: string;
+  /** Called when the user clicks a tab. Consumer updates activeTabId. */
+  onSelectTab?: (id: string) => void;
+  /** Called when the user clicks the X on a tab. Consumer removes it from tabs. */
+  onCloseTab?: (id: string) => void;
+  /** Called when the user clicks + or the overflow "New chat" entry. Consumer appends a tab. */
+  onNewTab?: () => void;
+  /** Enables the hover rename affordance on history rows.
+   *  Called with the trimmed title (1-200 chars) when the user commits an inline rename. */
+  onRenameConversation?: (id: string, title: string) => void;
+  /** Label overrides. All have EN defaults. */
+  labels?: AgentSidebarHeaderLabels;
 }
 
 const TAB_WIDTH = 100;
@@ -47,11 +59,41 @@ export function AgentSidebarHeader({
   onClose,
   history,
   onSelectHistoryItem,
+  tabs: propTabs,
+  activeTabId: propActiveTabId,
+  onSelectTab,
+  onCloseTab,
+  onNewTab,
+  onRenameConversation,
+  labels,
 }: AgentSidebarHeaderProps) {
   const isCollapsed = sidebarWidth <= 350;
 
-  const [tabs, setTabs] = useState<ChatTab[]>([{ id: "1", title: "Chat 1" }]);
-  const [activeTabId, setActiveTabId] = useState("1");
+  const isControlled =
+    propTabs !== undefined &&
+    propActiveTabId !== undefined &&
+    onSelectTab !== undefined &&
+    onCloseTab !== undefined &&
+    onNewTab !== undefined;
+
+  if (isDev && !isControlled) {
+    const wired = [propTabs, propActiveTabId, onSelectTab, onCloseTab, onNewTab].filter(
+      (p) => p !== undefined,
+    ).length;
+    if (wired > 0) {
+      console.warn(
+        "[AgentSidebarHeader] Partial controlled-tabs wiring detected — falling back to uncontrolled. Provide all five of: tabs, activeTabId, onSelectTab, onCloseTab, onNewTab.",
+      );
+    }
+  }
+
+  // Internal state — used only in uncontrolled mode.
+  const [internalTabs, setInternalTabs] = useState<ChatTab[]>([{ id: "1", title: "Chat 1" }]);
+  const [internalActiveTabId, setInternalActiveTabId] = useState("1");
+
+  const tabs = isControlled ? propTabs! : internalTabs;
+  const activeTabId = isControlled ? propActiveTabId! : internalActiveTabId;
+
   const [visibleCount, setVisibleCount] = useState(tabs.length);
   const [showOverflow, setShowOverflow] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -70,6 +112,11 @@ export function AgentSidebarHeader({
   const [ddNotchX, setDdNotchX] = useState(0);
   const histContentRef = useRef<HTMLDivElement>(null);
   const [histContentH, setHistContentH] = useState(0);
+
+  // Inline history-row rename.
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const editInputRef = useRef<HTMLInputElement>(null);
 
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
@@ -163,19 +210,32 @@ export function AgentSidebarHeader({
   }, [showOverflow, overflowTabs.length]);
 
   const handleAddTab = () => {
+    if (isControlled) {
+      onNewTab!();
+      return;
+    }
     const id = String(nextIdRef.current++);
-    setTabs((prev) => [...prev, { id, title: `Chat ${id}` }]);
-    setActiveTabId(id);
+    setInternalTabs((prev) => [...prev, { id, title: `Chat ${id}` }]);
+    setInternalActiveTabId(id);
   };
 
-  const removeTab = (tabId: string) => {
-    if (tabs.length === 1) return;
-    const idx = tabs.findIndex((t) => t.id === tabId);
-    const newTabs = tabs.filter((t) => t.id !== tabId);
-    setTabs(newTabs);
-    if (tabId === activeTabId) {
+  const handleSelectTab = (id: string) => {
+    if (isControlled) onSelectTab!(id);
+    else setInternalActiveTabId(id);
+  };
+
+  const handleCloseTab = (tabId: string) => {
+    if (isControlled) {
+      onCloseTab!(tabId);
+      return;
+    }
+    if (internalTabs.length === 1) return;
+    const idx = internalTabs.findIndex((t) => t.id === tabId);
+    const newTabs = internalTabs.filter((t) => t.id !== tabId);
+    setInternalTabs(newTabs);
+    if (tabId === internalActiveTabId) {
       const next = newTabs[Math.min(idx, newTabs.length - 1)];
-      if (next) setActiveTabId(next.id);
+      if (next) setInternalActiveTabId(next.id);
     }
   };
 
@@ -206,7 +266,7 @@ export function AgentSidebarHeader({
 
       {/* History */}
       <div ref={historyBtnRef} className="absolute left-0 top-0 z-[51] w-10 h-10 flex justify-center">
-        <IconButton icon="expand_more" variant="text" size="sm" className="m-auto text-on-surface" onClick={() => setShowHistory(!showHistory)} aria-label="Chat history" />
+        <IconButton icon="expand_more" variant="text" size="sm" className="m-auto text-on-surface" onClick={() => setShowHistory(!showHistory)} aria-label={labels?.historyButtonLabel ?? "Chat history"} />
       </div>
 
       {/* History dropdown */}
@@ -238,7 +298,7 @@ export function AgentSidebarHeader({
           >
             {!history || history.length === 0 ? (
               <div className="px-2 py-3 text-xs text-on-surface-variant text-center">
-                No previous conversations
+                {labels?.historyEmpty ?? "No previous conversations"}
               </div>
             ) : (
               history.map((group) => (
@@ -247,26 +307,101 @@ export function AgentSidebarHeader({
                     {group.label}
                   </div>
                   {group.items.map((item) => {
+                    const isEditing = editingId === item.id;
                     const select = () => {
+                      if (isEditing) return;
                       onSelectHistoryItem?.(item.id);
                       setShowHistory(false);
                     };
+                    const startEdit = (e: React.SyntheticEvent) => {
+                      e.stopPropagation();
+                      setEditingId(item.id);
+                      setEditValue(item.title);
+                      // Focus once the input has rendered.
+                      requestAnimationFrame(() => editInputRef.current?.focus());
+                    };
+                    const commitEdit = () => {
+                      const trimmed = editValue.trim();
+                      if (trimmed.length >= 1 && trimmed.length <= 200) {
+                        onRenameConversation?.(item.id, trimmed);
+                      }
+                      setEditingId(null);
+                    };
+                    const cancelEdit = () => setEditingId(null);
                     return (
                       <div
                         key={item.id}
-                        role="button"
-                        tabIndex={0}
+                        role={isEditing ? undefined : "button"}
+                        tabIndex={isEditing ? undefined : 0}
                         className="group/item flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors text-on-surface hover:bg-on-surface/10"
                         onClick={select}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
+                          if (!isEditing && (e.key === "Enter" || e.key === " ")) {
                             e.preventDefault();
                             select();
                           }
                         }}
                       >
-                        <Icon name="chat_bubble_outline" size={14} className="text-on-surface-variant shrink-0" />
-                        <span className="text-sm truncate flex-1">{item.title}</span>
+                        {isEditing ? (
+                          <>
+                            <input
+                              ref={editInputRef}
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") { e.preventDefault(); commitEdit(); }
+                                if (e.key === "Escape") {
+                                  e.preventDefault();
+                                  // Keep the dropdown's Escape-to-dismiss from also firing.
+                                  e.stopPropagation();
+                                  cancelEdit();
+                                }
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              maxLength={200}
+                              className="flex-1 min-w-0 text-sm bg-transparent border-b border-outline focus:outline-none text-on-surface"
+                              aria-label={labels?.renameConversationLabel ?? "Rename conversation"}
+                            />
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              className="w-5 h-5 flex items-center justify-center rounded-full text-on-surface hover:bg-on-surface/10 shrink-0"
+                              onClick={(e) => { e.stopPropagation(); cancelEdit(); }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  cancelEdit();
+                                }
+                              }}
+                              aria-label={labels?.cancelRenameLabel ?? "Cancel rename"}
+                            >
+                              <Icon name="close" size={12} />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <Icon name="chat_bubble_outline" size={14} className="text-on-surface-variant shrink-0" />
+                            <span className="text-sm truncate flex-1">{item.title}</span>
+                            {onRenameConversation && (
+                              <div
+                                role="button"
+                                tabIndex={0}
+                                className="w-5 h-5 flex items-center justify-center rounded-full text-on-surface hover:bg-on-surface/10 shrink-0 opacity-0 group-hover/item:opacity-70 group-hover/item:hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                                onClick={startEdit}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    startEdit(e);
+                                  }
+                                }}
+                                aria-label={labels?.renameConversationLabel ?? "Rename conversation"}
+                              >
+                                <Icon name="edit" size={12} />
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     );
                   })}
@@ -291,8 +426,8 @@ export function AgentSidebarHeader({
                 ref={isActive ? activeTabRef : undefined}
                 aria-selected={isActive}
                 tabIndex={isActive ? 0 : -1}
-                onClick={() => setActiveTabId(tab.id)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTabId(tab.id); } }}
+                onClick={() => handleSelectTab(tab.id)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelectTab(tab.id); } }}
                 className="group relative h-full flex flex-1 !transition-none"
               >
                 <div
@@ -315,7 +450,7 @@ export function AgentSidebarHeader({
                         ? "text-inverse-on-surface hover:bg-inverse-on-surface/20 opacity-70 hover:opacity-100"
                         : "text-on-surface hover:bg-on-surface/10 opacity-0 group-hover:opacity-70 group-hover:hover:opacity-100",
                     )}
-                    onClick={(e) => { e.stopPropagation(); removeTab(tab.id); }}
+                    onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }}
                     aria-label={`Close ${tab.title}`}
                   >
                     <Icon name="close" size={14} />
@@ -334,7 +469,7 @@ export function AgentSidebarHeader({
             <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
           </div>
         ) : (
-          <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label="New chat" />
+          <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label={labels?.newChatLabel ?? "New chat"} />
         )}
         <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
         <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
@@ -374,7 +509,7 @@ export function AgentSidebarHeader({
                   "w-full px-2 py-1 text-left text-sm rounded-md transition-colors flex items-center gap-1.5",
                   tab.id === activeTabId ? "bg-primary/10 text-primary font-medium" : "text-on-surface hover:bg-on-surface/10",
                 )}
-                onClick={() => { setActiveTabId(tab.id); setShowOverflow(false); }}
+                onClick={() => { handleSelectTab(tab.id); setShowOverflow(false); }}
               >
                 <span className="truncate">{tab.title}</span>
               </button>
@@ -385,7 +520,7 @@ export function AgentSidebarHeader({
               onClick={() => { handleAddTab(); setShowOverflow(false); }}
             >
               <Icon name="add" size={12} />
-              <span>New chat</span>
+              <span>{labels?.newChatLabel ?? "New chat"}</span>
             </button>
           </div>
         </div>
