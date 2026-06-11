@@ -42,7 +42,7 @@ const TAB_BLEED_X = 6;
 // …and extends this far above it, hooking into the dropdown body.
 const TAB_BLEED_TOP = 6;
 // Drop the whole card so the tab wraps around the trigger pill.
-const MENU_SHIFT_DOWN = 8;
+const MENU_SHIFT_DOWN = 4;
 
 export function AgentSidebarInput({
   onSend,
@@ -189,14 +189,18 @@ export function AgentSidebarInput({
             aria-label="Voice input"
           />
           {showModels && (
-            <div className="relative">
+            <div className="relative ml-1">
               <button
                 ref={modelTriggerRef}
                 type="button"
                 onClick={() => (modelMenuOpen ? closeModelMenu() : openModelMenu())}
                 className={cn(
                   "relative z-[51] flex h-7 cursor-pointer items-center gap-1 rounded-full px-2 text-xs transition-colors",
-                  "text-inverse-on-surface/60 hover:bg-inverse-on-surface/8 hover:text-inverse-on-surface",
+                  // Open: the notch tab wraps the trigger with the inverse
+                  // card surface — go full-opacity so it reads as part of it.
+                  modelMenuOpen
+                    ? "text-inverse-on-surface"
+                    : "text-inverse-on-surface/60 hover:bg-inverse-on-surface/8 hover:text-inverse-on-surface",
                 )}
                 aria-label={`Model: ${activeModel.label}`}
                 aria-haspopup="listbox"
@@ -230,6 +234,7 @@ export function AgentSidebarInput({
                       notchOffset={0}
                       radius={MENU_R}
                       inverseRadius={MENU_IR}
+                      fill="var(--color-inverse-surface)"
                       stroke="var(--color-primary)"
                       strokeWidth={1.5}
                       className="absolute bottom-0 left-0"
@@ -272,10 +277,10 @@ export function AgentSidebarInput({
                           className={cn(
                             "relative flex items-center gap-2 rounded-lg px-2 py-1 text-left text-[13px] transition-colors",
                             m.disabled
-                              ? "cursor-default text-on-surface/40"
-                              : "cursor-pointer text-on-surface",
-                            isActive && (m.disabled ? "bg-on-surface/5" : "bg-on-surface/8"),
-                            !isActive && selected && "bg-on-surface/8",
+                              ? "cursor-default text-inverse-on-surface/40"
+                              : "cursor-pointer text-inverse-on-surface",
+                            isActive && (m.disabled ? "bg-inverse-on-surface/5" : "bg-inverse-on-surface/8"),
+                            !isActive && selected && "bg-inverse-on-surface/8",
                           )}
                         >
                           {/* Hidden from name-from-contents, but aria-describedby
@@ -285,7 +290,7 @@ export function AgentSidebarInput({
                               id={hintId}
                               aria-hidden="true"
                               className={cn(
-                                "pointer-events-none absolute bottom-full left-0 mb-1 w-max max-w-56 rounded-md bg-inverse-surface px-2 py-1 text-[11px] text-inverse-on-surface transition-opacity",
+                                "pointer-events-none absolute bottom-full left-0 mb-1 w-max max-w-56 rounded-md bg-surface-container-high px-2 py-1 text-[11px] text-on-surface transition-opacity",
                                 isActive ? "opacity-100" : "opacity-0",
                               )}
                             >
@@ -304,7 +309,7 @@ export function AgentSidebarInput({
                             <Icon
                               name="info"
                               size={14}
-                              className="shrink-0 text-on-surface-variant/70"
+                              className="shrink-0 text-inverse-on-surface/50"
                             />
                           )}
                         </div>
