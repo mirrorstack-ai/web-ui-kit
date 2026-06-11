@@ -74,6 +74,12 @@ export {
   type AgentSidebarMessagesProps,
 } from "./components/ui/agent/messages/AgentSidebarMessages";
 export {
+  AgentSidebarToolCall,
+  type AgentSidebarToolCallProps,
+  type AgentToolCall,
+  type AgentToolCallLabels,
+} from "./components/ui/agent/messages/AgentSidebarToolCall";
+export {
   type AgentSidebarHistoryGroup,
   type AgentSidebarHistoryItem,
 } from "./components/ui/agent/sidebar/types";

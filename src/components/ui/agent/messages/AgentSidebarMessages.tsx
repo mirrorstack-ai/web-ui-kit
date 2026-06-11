@@ -15,6 +15,11 @@ import {
   type AgentSidebarMultiQuestionAnswer,
   type AgentSidebarMultiQuestionLayout,
 } from "../asks/AgentSidebarMultiQuestion";
+import {
+  AgentSidebarToolCall,
+  type AgentToolCall,
+  type AgentToolCallLabels,
+} from "./AgentSidebarToolCall";
 
 export type AgentSidebarMessage =
   | {
@@ -39,6 +44,11 @@ export type AgentSidebarMessage =
       submitLabel?: string;
       status?: AgentSidebarMultiQuestionStatus;
       layout?: AgentSidebarMultiQuestionLayout;
+    }
+  | {
+      id: string;
+      role: "tool";
+      tool: AgentToolCall;
     };
 
 export interface AgentSidebarMessagesProps {
@@ -60,6 +70,8 @@ export interface AgentSidebarMessagesProps {
   onRerunMessage?: (messageId: string) => void;
   /** Localizable aria-labels for the action buttons (English defaults). */
   actionLabels?: AgentSidebarMessageActionLabels;
+  /** Localizable status/aria text for tool-call rows (English defaults). */
+  toolLabels?: AgentToolCallLabels;
   /** Render the brand logo once below the list when the last message is a
    *  finished agent message — a clear platform signature, never per-message. */
   showLogo?: boolean;
@@ -87,6 +99,7 @@ export function AgentSidebarMessages({
   onRateMessage,
   onRerunMessage,
   actionLabels,
+  toolLabels,
   showLogo = false,
   autoScroll = true,
   className,
@@ -139,6 +152,11 @@ export function AgentSidebarMessages({
       {messages.map((m) => {
         if (m.role === "user") {
           return <AgentSidebarUserMessage key={m.id} content={m.content} />;
+        }
+        if (m.role === "tool") {
+          return (
+            <AgentSidebarToolCall key={m.id} tool={m.tool} toolLabels={toolLabels} />
+          );
         }
         if ("kind" in m) {
           return (
