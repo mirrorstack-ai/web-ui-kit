@@ -243,7 +243,7 @@ export function AgentGreeting({
                 aria-haspopup="listbox"
                 aria-expanded={modelMenuOpen}
               >
-                <span className="max-w-[140px] truncate">
+                <span className="max-w-[120px] truncate">
                   {activeModel.label}
                 </span>
                 <Icon name="expand_more" size={14} />
