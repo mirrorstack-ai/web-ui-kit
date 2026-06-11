@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7126,10 +7126,17 @@ export const AgentStreaming: StoryObj = {
 const noop = () =&gt; {};
 
 const actionCallbacks = {
-  onMessageCopy: noop,
-  onMessageFeedback: noop,
-  onMessageRerun: noop,
+  onCopyMessage: noop,
+  onRateMessage: noop,
+  onRerunMessage: noop,
 };
+
+const finishedAgentMsg = {
+  id: &quot;m-2&quot;,
+  role: &quot;agent&quot;,
+  content:
+    &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
+} satisfies AgentSidebarMessage;
 
 const finishedThread: AgentSidebarMessage[] = [
   {
@@ -7137,12 +7144,7 @@ const finishedThread: AgentSidebarMessage[] = [
     role: &quot;user&quot;,
     content: &quot;Summarize my account changes this week.&quot;,
   },
-  {
-    id: &quot;m-2&quot;,
-    role: &quot;agent&quot;,
-    content:
-      &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
-  },
+  finishedAgentMsg,
 ];
 
 /** Copy / thumbs / rerun appear under finished agent messages only. */
@@ -7156,16 +7158,7 @@ export const FinishedWithActions: StoryObj = {
 export const FeedbackSelected: StoryObj = {
   render: () =&gt; (
     &lt;AgentSidebarMessages
-      messages={[
-        finishedThread[0],
-        {
-          id: &quot;m-2&quot;,
-          role: &quot;agent&quot;,
-          content:
-            &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
-          feedback: &quot;up&quot;,
-        },
-      ]}
+      messages={[finishedThread[0], { ...finishedAgentMsg, feedback: &quot;up&quot; }]}
       {...actionCallbacks}
     /&gt;
   ),
@@ -7279,16 +7272,7 @@ export const WithLogo: StoryObj = {
               <div class="hint">A previously-recorded rating renders the thumb filled at full ink.</div>
               <pre><code>const FeedbackSelected = () =&gt; (
   &lt;AgentSidebarMessages
-    messages={[
-      finishedThread[0],
-      {
-        id: &quot;m-2&quot;,
-        role: &quot;agent&quot;,
-        content:
-          &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
-        feedback: &quot;up&quot;,
-      },
-    ]}
+    messages={[finishedThread[0], { ...finishedAgentMsg, feedback: &quot;up&quot; }]}
     {...actionCallbacks}
   /&gt;
 );</code></pre>
@@ -13400,10 +13384,17 @@ export const AgentStreaming: StoryObj = {
 const noop = () =&gt; {};
 
 const actionCallbacks = {
-  onMessageCopy: noop,
-  onMessageFeedback: noop,
-  onMessageRerun: noop,
+  onCopyMessage: noop,
+  onRateMessage: noop,
+  onRerunMessage: noop,
 };
+
+const finishedAgentMsg = {
+  id: &quot;m-2&quot;,
+  role: &quot;agent&quot;,
+  content:
+    &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
+} satisfies AgentSidebarMessage;
 
 const finishedThread: AgentSidebarMessage[] = [
   {
@@ -13411,12 +13402,7 @@ const finishedThread: AgentSidebarMessage[] = [
     role: &quot;user&quot;,
     content: &quot;Summarize my account changes this week.&quot;,
   },
-  {
-    id: &quot;m-2&quot;,
-    role: &quot;agent&quot;,
-    content:
-      &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
-  },
+  finishedAgentMsg,
 ];
 
 /** Copy / thumbs / rerun appear under finished agent messages only. */
@@ -13430,16 +13416,7 @@ export const FinishedWithActions: StoryObj = {
 export const FeedbackSelected: StoryObj = {
   render: () =&gt; (
     &lt;AgentSidebarMessages
-      messages={[
-        finishedThread[0],
-        {
-          id: &quot;m-2&quot;,
-          role: &quot;agent&quot;,
-          content:
-            &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
-          feedback: &quot;up&quot;,
-        },
-      ]}
+      messages={[finishedThread[0], { ...finishedAgentMsg, feedback: &quot;up&quot; }]}
       {...actionCallbacks}
     /&gt;
   ),
@@ -13553,16 +13530,7 @@ export const WithLogo: StoryObj = {
               <div class="hint">A previously-recorded rating renders the thumb filled at full ink.</div>
               <pre><code>const FeedbackSelected = () =&gt; (
   &lt;AgentSidebarMessages
-    messages={[
-      finishedThread[0],
-      {
-        id: &quot;m-2&quot;,
-        role: &quot;agent&quot;,
-        content:
-          &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
-        feedback: &quot;up&quot;,
-      },
-    ]}
+    messages={[finishedThread[0], { ...finishedAgentMsg, feedback: &quot;up&quot; }]}
     {...actionCallbacks}
   /&gt;
 );</code></pre>
