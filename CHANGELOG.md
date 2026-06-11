@@ -3,6 +3,12 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.9
+
+- `AgentSidebarInput`: new optional `detail` field on `AgentSidebarInputModel` —
+  right-aligned secondary text at the end of each model row, before the info
+  icon (e.g. `"$3/$15"` per-MTok pricing). **No breaking changes.**
+
 ## 0.4.7
 
 - `AvatarStack`: new `total` prop — when `items` is a server-capped preview,

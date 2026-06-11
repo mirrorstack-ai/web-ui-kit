@@ -18,6 +18,9 @@ export interface AgentSidebarInputModel {
   /** One-liner revealed when a disabled entry is hovered or keyboard-focused.
    *  Also exposed to assistive tech via aria-describedby. */
   disabledHint?: string;
+  /** Right-aligned secondary text at the end of the row, before the info
+   *  icon — e.g. "$3/$15" per-MTok pricing. */
+  detail?: string;
 }
 
 export interface AgentSidebarInputProps {
@@ -34,7 +37,7 @@ export interface AgentSidebarInputProps {
 
 // Model menu geometry — mirrors AgentGreeting's selector, flipped upward:
 // the input is pinned to the sidebar's bottom edge, so the menu opens up.
-const MENU_W = 240;
+const MENU_W = 240; // long labels truncate; price detail stays fully visible
 const MENU_R = 12;
 const MENU_IR = 8;
 // The notch tab bleeds this far past the trigger pill on each side…
@@ -161,7 +164,7 @@ export function AgentSidebarInput({
           Tip — ctrl + c to interrupt
         </span>
       </div>
-      <div className="flex flex-col w-full border border-outline-variant/30 rounded-xl bg-inverse-on-surface/8 p-1">
+      <div className="flex flex-col w-full border border-outline-variant/30 rounded-xl bg-inverse-on-surface/8 p-1 pt-1.5 gap-0.5">
         <textarea
           ref={textareaRef}
           value={text}
@@ -308,6 +311,11 @@ export function AgentSidebarInput({
                           <span className={cn("flex-1 truncate", selected && "font-medium")}>
                             {m.label}
                           </span>
+                          {m.detail && (
+                            <span className="shrink-0 text-[9px] tabular-nums opacity-60">
+                              {m.detail}
+                            </span>
+                          )}
                           {m.disabled && (
                             <Icon
                               name="info"
