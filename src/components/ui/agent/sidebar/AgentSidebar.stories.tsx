@@ -6,7 +6,7 @@ import {
   AgentSidebarMessages,
   type AgentSidebarMessage,
 } from "../messages/AgentSidebarMessages";
-import { mockAgentHistory, mockAgentMessages } from "./mock-data";
+import { mockAgentHistory, mockAgentMessages, mockAgentModels } from "./mock-data";
 
 const meta: Meta = {
   title: "UI/Agent/Sidebar",
@@ -48,6 +48,24 @@ export const Input: StoryObj = {
       />
     </div>
   ),
+};
+
+export const InputWithModelSelector: StoryObj = {
+  render: () => {
+    const [modelId, setModelId] = useState(
+      "anthropic.claude-haiku-4-5-20251001-v1:0",
+    );
+    return (
+      <div className="mt-auto bg-on-background rounded-b-2xl">
+        <AgentSidebarInput
+          onSend={(msg) => console.log("Send:", msg)}
+          models={mockAgentModels}
+          selectedModelId={modelId}
+          onSelectModel={setModelId}
+        />
+      </div>
+    );
+  },
 };
 
 export const Playground: StoryObj = {
@@ -97,6 +115,8 @@ export const Playground: StoryObj = {
             onSend={handleSend}
             onAttachFile={() => console.log("attach")}
             onMic={() => console.log("mic")}
+            models={mockAgentModels}
+            selectedModelId="anthropic.claude-haiku-4-5-20251001-v1:0"
           />
         </div>
       </>

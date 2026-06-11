@@ -1,5 +1,37 @@
 import type { AgentSidebarMessage } from "../messages/AgentSidebarMessages";
+import type { AgentSidebarInputModel } from "./AgentSidebarInput";
 import type { AgentSidebarHistoryGroup } from "./types";
+
+// Milestone-A roster: Claude pair enabled; Gemini/GPT pairs visible but
+// disabled until their adapters ship.
+export const mockAgentModels: AgentSidebarInputModel[] = Object.freeze([
+  { id: "anthropic.claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
+  {
+    id: "gemini-3.5-flash",
+    label: "Gemini 3.5 Flash",
+    disabled: true,
+    disabledHint: "Supported in the future",
+  },
+  { id: "anthropic.claude-haiku-4-5-20251001-v1:0", label: "Claude Haiku 4.5" },
+  {
+    id: "gpt-5.4-mini",
+    label: "GPT-5.4 mini",
+    disabled: true,
+    disabledHint: "Supported in the future",
+  },
+  {
+    id: "gemini-3.1-flash-lite",
+    label: "Gemini 3.1 Flash-Lite",
+    disabled: true,
+    disabledHint: "Supported in the future",
+  },
+  {
+    id: "gpt-5.4-nano",
+    label: "GPT-5.4 nano",
+    disabled: true,
+    disabledHint: "Supported in the future",
+  },
+]) as AgentSidebarInputModel[];
 
 export const mockAgentHistory: AgentSidebarHistoryGroup[] = Object.freeze([
   {

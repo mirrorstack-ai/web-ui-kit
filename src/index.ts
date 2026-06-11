@@ -44,6 +44,7 @@ export {
 export {
   AgentSidebarInput,
   type AgentSidebarInputProps,
+  type AgentSidebarInputModel,
 } from "./components/ui/agent/sidebar/AgentSidebarInput";
 export {
   AgentGreeting,
