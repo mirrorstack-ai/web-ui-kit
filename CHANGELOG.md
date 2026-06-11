@@ -3,6 +3,12 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.7
+
+- `AvatarStack`: new `total` prop — when `items` is a server-capped preview,
+  the `+N` overflow chip reports `total - visible` instead of deriving from
+  `items.length`. Defaults to `items.length`. **No breaking changes.** (#271)
+
 ## 0.4.6
 
 - `AvatarStack` (new): overlapping row of `Avatar`s for member previews —

@@ -32,6 +32,13 @@ export interface AvatarStackProps {
    * member stack.
    */
   trailing?: AvatarStackItem;
+  /**
+   * Total items the stack represents when `items` is a server-capped
+   * preview — the overflow chip then shows `total - visible` instead of
+   * `items.length - visible`. Defaults to `items.length`; values below it
+   * are clamped up.
+   */
+  total?: number;
   className?: string;
 }
 
@@ -48,6 +55,7 @@ export function AvatarStack({
   max = 4,
   size = "sm",
   trailing,
+  total,
   className,
 }: AvatarStackProps) {
   if (isDev && max < 2) {
@@ -56,9 +64,10 @@ export function AvatarStack({
     );
   }
   const cap = Math.max(max, 2);
-  const overflowing = items.length > cap;
+  const represented = Math.max(total ?? 0, items.length);
+  const overflowing = represented > cap;
   const visible = overflowing ? items.slice(0, cap - 1) : items;
-  const hidden = items.length - visible.length;
+  const hidden = represented - visible.length;
   const overlap = overlapMap[size];
 
   const rendered: AvatarStackItem[] = [

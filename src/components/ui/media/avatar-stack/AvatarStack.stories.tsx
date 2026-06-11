@@ -42,6 +42,18 @@ export const Overflow: Story = {
 };
 
 /**
+ * When `items` is a server-capped preview, pass `total` and the chip reports
+ * the real remainder — here a 4-item preview of a 12-member list renders
+ * three avatars + `+9`.
+ */
+export const CappedPreview: Story = {
+  args: {
+    items: people.slice(0, 4),
+    total: 12,
+  },
+};
+
+/**
  * `trailing` always renders last and never collapses into the chip — here a
  * square org avatar pinned after the member stack, the /apps tile layout
  * (members + owning org).
