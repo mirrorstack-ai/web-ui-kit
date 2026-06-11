@@ -172,7 +172,7 @@ export function AgentSidebarMessages({
       {showBrandLogo && (
         // Decorative signature only — hidden from the accessibility tree.
         <div aria-hidden className="flex justify-start">
-          <Logo className="h-7 w-7 bg-inverse-primary" />
+          <Logo className="h-10 w-10 bg-inverse-primary" />
         </div>
       )}
       <div ref={endRef} />
