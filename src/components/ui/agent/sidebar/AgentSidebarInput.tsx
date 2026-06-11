@@ -34,8 +34,8 @@ export interface AgentSidebarInputProps {
 
 // Model menu geometry — mirrors AgentGreeting's selector, flipped upward:
 // the input is pinned to the sidebar's bottom edge, so the menu opens up.
-const MENU_W = 240;
-const MENU_R = 14;
+const MENU_W = 200;
+const MENU_R = 12;
 const MENU_IR = 8;
 // The notch tab bleeds this far past the trigger pill on each side…
 const TAB_BLEED_X = 6;
@@ -243,7 +243,7 @@ export function AgentSidebarInput({
                     tabIndex={-1}
                     aria-activedescendant={activeIndex >= 0 ? optionId(activeIndex) : undefined}
                     onKeyDown={handleModelMenuKeyDown}
-                    className="relative z-10 flex flex-col gap-1 p-2 outline-none"
+                    className="relative z-10 flex flex-col gap-0.5 p-1.5 outline-none"
                     style={{
                       marginBottom: tabH || 34,
                       width: MENU_W,
@@ -270,7 +270,7 @@ export function AgentSidebarInput({
                             setActiveIndex((i) => (i === index ? -1 : i))
                           }
                           className={cn(
-                            "relative flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
+                            "relative flex items-center gap-2 rounded-lg px-2 py-1 text-left text-[13px] transition-colors",
                             m.disabled
                               ? "cursor-default text-on-surface/40"
                               : "cursor-pointer text-on-surface",
@@ -285,7 +285,7 @@ export function AgentSidebarInput({
                               id={hintId}
                               aria-hidden="true"
                               className={cn(
-                                "pointer-events-none absolute bottom-full left-0 mb-1 w-max max-w-56 rounded-md bg-inverse-surface px-2 py-1 text-xs text-inverse-on-surface transition-opacity",
+                                "pointer-events-none absolute bottom-full left-0 mb-1 w-max max-w-56 rounded-md bg-inverse-surface px-2 py-1 text-[11px] text-inverse-on-surface transition-opacity",
                                 isActive ? "opacity-100" : "opacity-0",
                               )}
                             >
@@ -294,7 +294,7 @@ export function AgentSidebarInput({
                           )}
                           <Icon
                             name="check"
-                            size={16}
+                            size={14}
                             className={cn("shrink-0", !selected && "text-transparent")}
                           />
                           <span className={cn("flex-1 truncate", selected && "font-medium")}>
@@ -303,7 +303,7 @@ export function AgentSidebarInput({
                           {m.disabled && (
                             <Icon
                               name="info"
-                              size={16}
+                              size={14}
                               className="shrink-0 text-on-surface-variant/70"
                             />
                           )}
