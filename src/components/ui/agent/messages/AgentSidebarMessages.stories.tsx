@@ -104,7 +104,7 @@ export const StreamingHidesActions: StoryObj = {
   ),
 };
 
-/** Subdued brand mark below the list when the last message is finished. */
+/** Brand mark in the sidebar accent below the list when the last message is finished. */
 export const WithLogo: StoryObj = {
   render: () => (
     <AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo />

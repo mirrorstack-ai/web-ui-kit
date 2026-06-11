@@ -61,7 +61,7 @@ export interface AgentSidebarMessagesProps {
   /** Localizable aria-labels for the action buttons (English defaults). */
   actionLabels?: AgentSidebarMessageActionLabels;
   /** Render the brand logo once below the list when the last message is a
-   *  finished agent message — a subdued platform signature, never per-message. */
+   *  finished agent message — a clear platform signature, never per-message. */
   showLogo?: boolean;
   /** Auto-scroll to the latest message. Default: true. */
   autoScroll?: boolean;
@@ -171,8 +171,8 @@ export function AgentSidebarMessages({
       })}
       {showBrandLogo && (
         // Decorative signature only — hidden from the accessibility tree.
-        <div aria-hidden className="-mt-2 flex justify-start">
-          <Logo className="h-4 w-4 bg-inverse-on-surface/40" />
+        <div aria-hidden className="flex justify-start">
+          <Logo className="h-7 w-7 bg-inverse-primary" />
         </div>
       )}
       <div ref={endRef} />
