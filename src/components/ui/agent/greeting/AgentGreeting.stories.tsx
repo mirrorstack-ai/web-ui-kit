@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { AgentGreeting, type AgentGreetingModel } from "./AgentGreeting";
+import { AgentGreeting } from "./AgentGreeting";
+import { mockAgentModels } from "../sidebar/mock-data";
 
 const meta: Meta<typeof AgentGreeting> = {
   title: "UI/Agent/Greeting",
@@ -17,11 +18,11 @@ const meta: Meta<typeof AgentGreeting> = {
 export default meta;
 type Story = StoryObj<typeof AgentGreeting>;
 
-const MODELS: AgentGreetingModel[] = [
-  { id: "claude-sonnet-4-6", label: "Sonnet 4.6", description: "Balanced" },
-  { id: "claude-opus-4-7", label: "Opus 4.7", description: "Adaptive" },
-  { id: "claude-haiku-4-5", label: "Haiku 4.5", description: "Fast" },
-];
+// Same roster as the sidebar selector (vendor-grouped, small → powerful,
+// $/MTok detail, disabled future models) so both pickers render identically.
+const MODELS = mockAgentModels;
+const SONNET = "anthropic.claude-sonnet-4-6";
+const HAIKU = "anthropic.claude-haiku-4-5-20251001-v1:0";
 
 export const WelcomeBack: Story = {
   render: (args) => {
@@ -54,7 +55,7 @@ export const WelcomeBack: Story = {
     greeting: "Welcome Back, Nothing Chang",
     placeholder: "plan something?",
     models: MODELS,
-    selectedModelId: "claude-sonnet-4-6",
+    selectedModelId: SONNET,
   },
 };
 
@@ -64,7 +65,7 @@ export const FirstTime: Story = {
     subtitle: "Tell the agent what you want to build.",
     placeholder: "what do you want to build?",
     models: MODELS,
-    selectedModelId: "claude-sonnet-4-6",
+    selectedModelId: SONNET,
   },
 };
 
@@ -75,7 +76,7 @@ export const AppCreation: Story = {
       "Describe the app — modules, data, surfaces — and the agent will scaffold it.",
     placeholder: "describe your app...",
     models: MODELS,
-    selectedModelId: "claude-opus-4-7",
+    selectedModelId: HAIKU,
   },
 };
 

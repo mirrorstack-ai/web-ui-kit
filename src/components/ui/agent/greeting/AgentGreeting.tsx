@@ -1,6 +1,7 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
+import type { AgentSidebarInputModel } from "@/components/ui/agent/sidebar/AgentSidebarInput";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Logo } from "@/components/ui/media/logo/Logo";
@@ -8,6 +9,7 @@ import { Notch } from "@/components/ui/surfaces/notch/Notch";
 import { useAutoGrowTextarea } from "@/hooks/useAutoGrowTextarea";
 import { useComposerSubmit } from "@/hooks/useComposerSubmit";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useMenuKeyNav } from "@/hooks/useMenuKeyNav";
 import { useModelSelection } from "@/hooks/useModelSelection";
 
 export const meta: ComponentMeta = {
@@ -16,10 +18,10 @@ export const meta: ComponentMeta = {
     "Hero greeting plus chat input used to open a fresh agent conversation. Drop it on init, return, app-creation, and overview surfaces.",
 };
 
-export interface AgentGreetingModel {
-  id: string;
-  label: string;
-  /** Optional one-line tagline shown under the label inside the dropdown
+/** Shares the sidebar selector's row contract (label, `detail` pricing,
+ *  `disabled` + `disabledHint`) so both pickers render identical rows. */
+export interface AgentGreetingModel extends AgentSidebarInputModel {
+  /** Optional one-line tagline shown after the label inside the dropdown
    *  (e.g. "Adaptive" for "Opus 4.7"). The trigger pill only shows label. */
   description?: string;
 }
@@ -54,8 +56,10 @@ const TEXTAREA_BOUNDS = {
   hero: { min: 80, max: 200 },
   compact: { min: 40, max: 112 },
 } as const;
-const MENU_W = 220;
-const MENU_R = 14;
+// Matches AgentSidebarInput's menu width: long labels truncate; price
+// detail stays fully visible (user widened from #273's 200 for parity).
+const MENU_W = 240;
+const MENU_R = 12;
 const MENU_IR = 8;
 // Extra breathing room INSIDE the notch on the left of the trigger pill.
 // Right side stays flush — the send button sits there, so we don't intrude.
@@ -105,6 +109,8 @@ export function AgentGreeting({
   const modelTriggerRef = useRef<HTMLButtonElement>(null);
   const modelMenuRef = useRef<HTMLDivElement>(null);
   const modelContentRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
+  const optionId = (index: number) => `${listboxId}-opt-${index}`;
 
   useAutoGrowTextarea(textareaRef, text, TEXTAREA_BOUNDS[size]);
 
@@ -133,6 +139,12 @@ export function AgentGreeting({
     enabled: modelMenuOpen,
   });
 
+  useEffect(() => {
+    if (!modelMenuOpen) return;
+    const raf = requestAnimationFrame(() => modelContentRef.current?.focus());
+    return () => cancelAnimationFrame(raf);
+  }, [modelMenuOpen]);
+
   const canSend = text.trim().length > 0;
 
   const { send, handleKeyDown, handleChange, onCompositionStart, onCompositionEnd } =
@@ -140,10 +152,41 @@ export function AgentGreeting({
 
   const showModels = !!models?.length && !!activeModel;
 
+  const openModelMenu = () => {
+    setActiveIndex(models?.findIndex((m) => m.id === activeModel?.id) ?? -1);
+    setModelMenuOpen(true);
+  };
+
+  const closeModelMenu = (returnFocus = false) => {
+    setModelMenuOpen(false);
+    setActiveIndex(-1);
+    if (returnFocus) modelTriggerRef.current?.focus();
+  };
+
   const handleSelectModel = (id: string) => {
     selectModel(id);
-    setModelMenuOpen(false);
+    closeModelMenu(true);
   };
+
+  // Arrows traverse ALL entries — disabled ones stay reachable so their hint
+  // is revealed on keyboard focus — but Enter/Space only activates enabled.
+  // Same contract as AgentSidebarInput's model listbox.
+  const {
+    activeIndex,
+    setActiveIndex,
+    handleKeyDown: handleModelMenuKeyDown,
+  } = useMenuKeyNav({
+    itemCount: models?.length ?? 0,
+    canActivate: (index) => {
+      const model = models?.[index];
+      return !!model && !model.disabled;
+    },
+    onActivate: (index) => {
+      const model = models?.[index];
+      if (model) handleSelectModel(model.id);
+    },
+    onClose: closeModelMenu,
+  });
 
   return (
     <div
@@ -234,19 +277,20 @@ export function AgentGreeting({
               <button
                 ref={modelTriggerRef}
                 type="button"
-                onClick={() => setModelMenuOpen((open) => !open)}
+                onClick={() => (modelMenuOpen ? closeModelMenu() : openModelMenu())}
                 className={cn(
                   "relative z-[51] flex cursor-pointer items-center gap-1.5 rounded-full text-on-surface-variant transition-colors hover:bg-on-surface/8 hover:text-on-surface",
-                  compact ? "h-8 px-3 text-xs" : "h-9 px-4 text-sm",
+                  compact ? "h-7 px-2.5 text-xs" : "h-8 px-3 text-[13px]",
                 )}
                 aria-label={`Model: ${activeModel.label}`}
                 aria-haspopup="listbox"
                 aria-expanded={modelMenuOpen}
+                aria-controls={modelMenuOpen ? listboxId : undefined}
               >
-                <span className="max-w-[140px] truncate">
+                <span className="max-w-[120px] truncate">
                   {activeModel.label}
                 </span>
-                <Icon name="expand_more" size={16} />
+                <Icon name="expand_more" size={14} />
               </button>
               {modelMenuOpen && (
                 <div
@@ -275,47 +319,87 @@ export function AgentGreeting({
                   )}
                   <div
                     ref={modelContentRef}
+                    id={listboxId}
                     role="listbox"
                     aria-label="Model"
-                    className="relative z-10 flex flex-col gap-1 p-2"
+                    tabIndex={-1}
+                    aria-activedescendant={activeIndex >= 0 ? optionId(activeIndex) : undefined}
+                    onKeyDown={handleModelMenuKeyDown}
+                    className="relative z-10 flex flex-col gap-0.5 p-1.5 outline-none"
                     style={{
                       marginTop: notchTabHeight || 32,
                       width: MENU_W,
                     }}
                   >
-                    {models.map((m) => {
+                    {models.map((m, index) => {
                       const selected = m.id === activeModel.id;
+                      const isActive = index === activeIndex;
+                      const hintId =
+                        m.disabled && m.disabledHint ? `${listboxId}-hint-${index}` : undefined;
                       return (
-                        <button
+                        <div
                           key={m.id}
-                          type="button"
+                          id={optionId(index)}
                           role="option"
                           aria-selected={selected}
-                          onClick={() => handleSelectModel(m.id)}
+                          aria-disabled={m.disabled || undefined}
+                          aria-describedby={hintId}
+                          onClick={() => {
+                            if (!m.disabled) handleSelectModel(m.id);
+                          }}
+                          onMouseEnter={() => setActiveIndex(index)}
+                          onMouseLeave={() =>
+                            setActiveIndex((i) => (i === index ? -1 : i))
+                          }
                           className={cn(
-                            "flex items-baseline gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
-                            selected
-                              ? "bg-on-surface/8 text-on-surface"
-                              : "text-on-surface hover:bg-on-surface/8",
+                            "relative flex items-center gap-2 rounded-lg px-2 py-1 text-left text-[13px] transition-colors",
+                            m.disabled
+                              ? "cursor-default text-on-surface/40"
+                              : "cursor-pointer text-on-surface",
+                            isActive && (m.disabled ? "bg-on-surface/5" : "bg-on-surface/8"),
+                            !isActive && selected && "bg-on-surface/8",
                           )}
                         >
+                          {/* Hidden from name-from-contents, but aria-describedby
+                              still computes the description from it. */}
+                          {hintId && (
+                            <div
+                              id={hintId}
+                              aria-hidden="true"
+                              className={cn(
+                                "pointer-events-none absolute bottom-full left-0 mb-1 w-max max-w-56 rounded-md bg-surface-container-high px-2 py-1 text-[11px] text-on-surface transition-opacity",
+                                isActive ? "opacity-100" : "opacity-0",
+                              )}
+                            >
+                              {m.disabledHint}
+                            </div>
+                          )}
                           <Icon
                             name="check"
-                            size={16}
-                            className={cn(
-                              "shrink-0 translate-y-0.5",
-                              selected ? "text-on-surface" : "text-transparent",
-                            )}
+                            size={14}
+                            className={cn("shrink-0", !selected && "text-transparent")}
                           />
-                          <span className={cn(selected && "font-medium")}>
+                          <span className={cn("flex-1 truncate", selected && "font-medium")}>
                             {m.label}
+                            {m.description && (
+                              <span className="ml-2 text-[11px] text-on-surface-variant">
+                                {m.description}
+                              </span>
+                            )}
                           </span>
-                          {m.description && (
-                            <span className="text-xs text-on-surface-variant">
-                              {m.description}
+                          {m.detail && (
+                            <span className="shrink-0 text-[9px] tabular-nums opacity-60">
+                              {m.detail}
                             </span>
                           )}
-                        </button>
+                          {m.disabled && (
+                            <Icon
+                              name="info"
+                              size={14}
+                              className="shrink-0 text-on-surface/50"
+                            />
+                          )}
+                        </div>
                       );
                     })}
                   </div>
