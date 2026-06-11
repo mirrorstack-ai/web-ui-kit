@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/73 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">73/73 infos</a><span class="filter-pill ok" aria-disabled="true">277 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/73 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">73/73 infos</a><span class="filter-pill ok" aria-disabled="true">281 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -891,7 +891,7 @@ subtitle?: string</code></pre>
     subtitle=&quot;Tell the agent what you want to build.&quot;
     placeholder=&quot;what do you want to build?&quot;
     models={MODELS}
-    selectedModelId=&quot;claude-sonnet-4-6&quot; /&gt;;</code></pre>
+    selectedModelId={SONNET} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -905,7 +905,7 @@ subtitle?: string</code></pre>
     subtitle=&quot;Describe the app — modules, data, surfaces — and the agent will scaffold it.&quot;
     placeholder=&quot;describe your app...&quot;
     models={MODELS}
-    selectedModelId=&quot;claude-opus-4-7&quot; /&gt;;</code></pre>
+    selectedModelId={HAIKU} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -6465,7 +6465,7 @@ size?: number | string = 24</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> IconButton</h2>
       <div class="badges">
-        <label for="c-37-ui-actions-iconbutton-props" class="badge ok as-toggle">8 prop types</label>
+        <label for="c-37-ui-actions-iconbutton-props" class="badge ok as-toggle">9 prop types</label>
         <label for="c-37-ui-actions-iconbutton-info" class="badge info as-toggle">1 info</label>
         <label for="c-37-ui-actions-iconbutton-stories" class="badge ok as-toggle">5 stories</label>
         
@@ -6499,13 +6499,18 @@ size?: number | string = 24</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">8 prop types</span>
+              <span class="badge ok">9 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/actions/icon-button/IconButton.tsx::IconButton</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>aria-label: string
 
 color?: Exclude&lt;Tone, &quot;success&quot;&gt; = &quot;primary&quot;
+
+/**
+ * Render the filled variant of the icon (Material Symbols `FILL` axis).
+ */
+fill?: boolean
 
 icon: string
 
@@ -7038,7 +7043,7 @@ function greet(name: string): string {
       <div class="badges">
         <label for="c-41-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-41-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-ui-agent-messages-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-41-ui-agent-messages-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -7062,13 +7067,13 @@ function greet(name: string): string {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
-   5 | } from &quot;./AgentSidebarMessage&quot;;
-   6 |
-&gt;  7 | const meta: Meta = {
+   9 | } from &quot;./AgentSidebarMessages&quot;;
+  10 |
+&gt; 11 | const meta: Meta = {
      | ^
-   8 |   title: &quot;UI/Agent/Messages&quot;,
-   9 |   decorators: [
-  10 |     (Story) =&gt; (
+  12 |   title: &quot;UI/Agent/Messages&quot;,
+  13 |   decorators: [
+  14 |     (Story) =&gt; (
 
 ./src/components/ui/agent/messages/AgentSidebarMessages.stories.tsx:
 import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
@@ -7076,6 +7081,10 @@ import {
   AgentSidebarUserMessage,
   AgentSidebarAgentMessage,
 } from &quot;./AgentSidebarMessage&quot;;
+import {
+  AgentSidebarMessages,
+  type AgentSidebarMessage,
+} from &quot;./AgentSidebarMessages&quot;;
 
 const meta: Meta = {
   title: &quot;UI/Agent/Messages&quot;,
@@ -7113,6 +7122,72 @@ export const AgentStreaming: StoryObj = {
     &lt;/div&gt;
   ),
 };
+
+const noop = () =&gt; {};
+
+const actionCallbacks = {
+  onCopyMessage: noop,
+  onRateMessage: noop,
+  onRerunMessage: noop,
+};
+
+const finishedAgentMsg = {
+  id: &quot;m-2&quot;,
+  role: &quot;agent&quot;,
+  content:
+    &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
+} satisfies AgentSidebarMessage;
+
+const finishedThread: AgentSidebarMessage[] = [
+  {
+    id: &quot;m-1&quot;,
+    role: &quot;user&quot;,
+    content: &quot;Summarize my account changes this week.&quot;,
+  },
+  finishedAgentMsg,
+];
+
+/** Copy / thumbs / rerun appear under finished agent messages only. */
+export const FinishedWithActions: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} /&gt;
+  ),
+};
+
+/** A previously-recorded rating renders the thumb filled at full ink. */
+export const FeedbackSelected: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages
+      messages={[finishedThread[0], { ...finishedAgentMsg, feedback: &quot;up&quot; }]}
+      {...actionCallbacks}
+    /&gt;
+  ),
+};
+
+/** The action row stays hidden while the agent is still streaming. */
+export const StreamingHidesActions: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages
+      messages={[
+        finishedThread[0],
+        {
+          id: &quot;m-2&quot;,
+          role: &quot;agent&quot;,
+          content: &quot;Pulling your audit log&quot;,
+          streaming: true,
+        },
+      ]}
+      {...actionCallbacks}
+    /&gt;
+  ),
+};
+
+/** Brand mark in the sidebar accent below the list when the last message is finished. */
+export const WithLogo: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo /&gt;
+  ),
+};
 </code></pre></div>
     </div>
         </div>
@@ -7134,7 +7209,7 @@ export const AgentStreaming: StoryObj = {
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { AgentSidebarAgentMessage, AgentSidebarUserMessage } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { AgentSidebarAgentMessage, AgentSidebarMessages, AgentSidebarUserMessage } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -7175,6 +7250,64 @@ export const AgentStreaming: StoryObj = {
       streaming
     /&gt;
   &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Finished With Actions</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Copy / thumbs / rerun appear under finished agent messages only.</div>
+              <pre><code>const FinishedWithActions = () =&gt; (
+  &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Feedback Selected</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A previously-recorded rating renders the thumb filled at full ink.</div>
+              <pre><code>const FeedbackSelected = () =&gt; (
+  &lt;AgentSidebarMessages
+    messages={[finishedThread[0], { ...finishedAgentMsg, feedback: &quot;up&quot; }]}
+    {...actionCallbacks}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Streaming Hides Actions</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">The action row stays hidden while the agent is still streaming.</div>
+              <pre><code>const StreamingHidesActions = () =&gt; (
+  &lt;AgentSidebarMessages
+    messages={[
+      finishedThread[0],
+      {
+        id: &quot;m-2&quot;,
+        role: &quot;agent&quot;,
+        content: &quot;Pulling your audit log&quot;,
+        streaming: true,
+      },
+    ]}
+    {...actionCallbacks}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Logo</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Brand mark in the sidebar accent below the list when the last message is finished.</div>
+              <pre><code>const WithLogo = () =&gt; (
+  &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo /&gt;
 );</code></pre>
             </div>
         </div>
@@ -13168,7 +13301,7 @@ value: string</code></pre>
       <div class="badges">
         <label for="c-error-0-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-0-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -13192,13 +13325,13 @@ value: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
-   5 | } from &quot;./AgentSidebarMessage&quot;;
-   6 |
-&gt;  7 | const meta: Meta = {
+   9 | } from &quot;./AgentSidebarMessages&quot;;
+  10 |
+&gt; 11 | const meta: Meta = {
      | ^
-   8 |   title: &quot;UI/Agent/Messages&quot;,
-   9 |   decorators: [
-  10 |     (Story) =&gt; (
+  12 |   title: &quot;UI/Agent/Messages&quot;,
+  13 |   decorators: [
+  14 |     (Story) =&gt; (
 
 ./src/components/ui/agent/messages/AgentSidebarMessages.stories.tsx:
 import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
@@ -13206,6 +13339,10 @@ import {
   AgentSidebarUserMessage,
   AgentSidebarAgentMessage,
 } from &quot;./AgentSidebarMessage&quot;;
+import {
+  AgentSidebarMessages,
+  type AgentSidebarMessage,
+} from &quot;./AgentSidebarMessages&quot;;
 
 const meta: Meta = {
   title: &quot;UI/Agent/Messages&quot;,
@@ -13243,6 +13380,72 @@ export const AgentStreaming: StoryObj = {
     &lt;/div&gt;
   ),
 };
+
+const noop = () =&gt; {};
+
+const actionCallbacks = {
+  onCopyMessage: noop,
+  onRateMessage: noop,
+  onRerunMessage: noop,
+};
+
+const finishedAgentMsg = {
+  id: &quot;m-2&quot;,
+  role: &quot;agent&quot;,
+  content:
+    &quot;You changed your username to alice2, enabled dark mode, and added a passkey from your MacBook.&quot;,
+} satisfies AgentSidebarMessage;
+
+const finishedThread: AgentSidebarMessage[] = [
+  {
+    id: &quot;m-1&quot;,
+    role: &quot;user&quot;,
+    content: &quot;Summarize my account changes this week.&quot;,
+  },
+  finishedAgentMsg,
+];
+
+/** Copy / thumbs / rerun appear under finished agent messages only. */
+export const FinishedWithActions: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} /&gt;
+  ),
+};
+
+/** A previously-recorded rating renders the thumb filled at full ink. */
+export const FeedbackSelected: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages
+      messages={[finishedThread[0], { ...finishedAgentMsg, feedback: &quot;up&quot; }]}
+      {...actionCallbacks}
+    /&gt;
+  ),
+};
+
+/** The action row stays hidden while the agent is still streaming. */
+export const StreamingHidesActions: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages
+      messages={[
+        finishedThread[0],
+        {
+          id: &quot;m-2&quot;,
+          role: &quot;agent&quot;,
+          content: &quot;Pulling your audit log&quot;,
+          streaming: true,
+        },
+      ]}
+      {...actionCallbacks}
+    /&gt;
+  ),
+};
+
+/** Brand mark in the sidebar accent below the list when the last message is finished. */
+export const WithLogo: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo /&gt;
+  ),
+};
 </code></pre></div>
     </div>
         </div>
@@ -13264,7 +13467,7 @@ export const AgentStreaming: StoryObj = {
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { AgentSidebarAgentMessage, AgentSidebarUserMessage } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { AgentSidebarAgentMessage, AgentSidebarMessages, AgentSidebarUserMessage } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -13305,6 +13508,64 @@ export const AgentStreaming: StoryObj = {
       streaming
     /&gt;
   &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Finished With Actions</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Copy / thumbs / rerun appear under finished agent messages only.</div>
+              <pre><code>const FinishedWithActions = () =&gt; (
+  &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Feedback Selected</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A previously-recorded rating renders the thumb filled at full ink.</div>
+              <pre><code>const FeedbackSelected = () =&gt; (
+  &lt;AgentSidebarMessages
+    messages={[finishedThread[0], { ...finishedAgentMsg, feedback: &quot;up&quot; }]}
+    {...actionCallbacks}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Streaming Hides Actions</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">The action row stays hidden while the agent is still streaming.</div>
+              <pre><code>const StreamingHidesActions = () =&gt; (
+  &lt;AgentSidebarMessages
+    messages={[
+      finishedThread[0],
+      {
+        id: &quot;m-2&quot;,
+        role: &quot;agent&quot;,
+        content: &quot;Pulling your audit log&quot;,
+        streaming: true,
+      },
+    ]}
+    {...actionCallbacks}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Logo</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Brand mark in the sidebar accent below the list when the last message is finished.</div>
+              <pre><code>const WithLogo = () =&gt; (
+  &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo /&gt;
 );</code></pre>
             </div>
         </div>
