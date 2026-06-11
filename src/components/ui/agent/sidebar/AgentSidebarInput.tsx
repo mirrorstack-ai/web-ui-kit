@@ -37,7 +37,7 @@ export interface AgentSidebarInputProps {
 
 // Model menu geometry — mirrors AgentGreeting's selector, flipped upward:
 // the input is pinned to the sidebar's bottom edge, so the menu opens up.
-const MENU_W = 288; // fits the longest label + price detail without truncation
+const MENU_W = 240; // long labels truncate; price detail stays fully visible
 const MENU_R = 12;
 const MENU_IR = 8;
 // The notch tab bleeds this far past the trigger pill on each side…
@@ -164,7 +164,7 @@ export function AgentSidebarInput({
           Tip — ctrl + c to interrupt
         </span>
       </div>
-      <div className="flex flex-col w-full border border-outline-variant/30 rounded-xl bg-inverse-on-surface/8 p-1">
+      <div className="flex flex-col w-full border border-outline-variant/30 rounded-xl bg-inverse-on-surface/8 p-1 pt-1.5 gap-0.5">
         <textarea
           ref={textareaRef}
           value={text}
@@ -312,7 +312,7 @@ export function AgentSidebarInput({
                             {m.label}
                           </span>
                           {m.detail && (
-                            <span className="shrink-0 text-[11px] tabular-nums opacity-60">
+                            <span className="shrink-0 text-[9px] tabular-nums opacity-60">
                               {m.detail}
                             </span>
                           )}
