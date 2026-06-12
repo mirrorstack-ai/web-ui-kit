@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">294 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">296 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7043,7 +7043,7 @@ function greet(name: string): string {
       <div class="badges">
         <label for="c-41-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-41-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-ui-agent-messages-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-41-ui-agent-messages-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -7108,6 +7108,40 @@ export const User: StoryObj = {
 export const Agent: StoryObj = {
   render: () =&gt; (
     &lt;AgentSidebarAgentMessage content=&quot;Sure — I&#39;ll update your username and your appearance preference. Please confirm the changes below.&quot; /&gt;
+  ),
+};
+
+const markdownReply = `## Account changes
+
+This week you made **three** changes:
+
+1. Renamed your username to \`alice2\`
+2. Enabled *dark mode*
+3. Added a passkey
+
+Run this to verify from the CLI:
+
+\`\`\`bash
+mirrorstack account audit --since 7d
+\`\`\`
+
+See the [audit log docs](https://docs.mirrorstack.ai/audit) for details.`;
+
+/** Agent replies render Markdown: headings, lists, inline + fenced code, links. */
+export const AgentMarkdown: StoryObj = {
+  render: () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;,
+};
+
+/** Mid-stream markdown — note the unterminated code fence renders calmly
+ *  as a code block until the closing fence arrives. */
+export const AgentMarkdownStreaming: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarAgentMessage
+      content={
+        &quot;Here&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au&quot;
+      }
+      streaming
+    /&gt;
   ),
 };
 
@@ -7233,6 +7267,31 @@ export const WithLogo: StoryObj = {
               
               <pre><code>const Agent = () =&gt; (
   &lt;AgentSidebarAgentMessage content=&quot;Sure — I&#39;ll update your username and your appearance preference. Please confirm the changes below.&quot; /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Markdown</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Agent replies render Markdown: headings, lists, inline + fenced code, links.</div>
+              <pre><code>const AgentMarkdown = () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Markdown Streaming</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Mid-stream markdown — note the unterminated code fence renders calmly as a code block until the closing fence arrives.</div>
+              <pre><code>const AgentMarkdownStreaming = () =&gt; (
+  &lt;AgentSidebarAgentMessage
+    content={
+      &quot;Here&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au&quot;
+    }
+    streaming
+  /&gt;
 );</code></pre>
             </div>
             <div class="note ok">
@@ -14102,7 +14161,7 @@ value: string</code></pre>
       <div class="badges">
         <label for="c-error-0-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-0-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -14167,6 +14226,40 @@ export const User: StoryObj = {
 export const Agent: StoryObj = {
   render: () =&gt; (
     &lt;AgentSidebarAgentMessage content=&quot;Sure — I&#39;ll update your username and your appearance preference. Please confirm the changes below.&quot; /&gt;
+  ),
+};
+
+const markdownReply = `## Account changes
+
+This week you made **three** changes:
+
+1. Renamed your username to \`alice2\`
+2. Enabled *dark mode*
+3. Added a passkey
+
+Run this to verify from the CLI:
+
+\`\`\`bash
+mirrorstack account audit --since 7d
+\`\`\`
+
+See the [audit log docs](https://docs.mirrorstack.ai/audit) for details.`;
+
+/** Agent replies render Markdown: headings, lists, inline + fenced code, links. */
+export const AgentMarkdown: StoryObj = {
+  render: () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;,
+};
+
+/** Mid-stream markdown — note the unterminated code fence renders calmly
+ *  as a code block until the closing fence arrives. */
+export const AgentMarkdownStreaming: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarAgentMessage
+      content={
+        &quot;Here&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au&quot;
+      }
+      streaming
+    /&gt;
   ),
 };
 
@@ -14292,6 +14385,31 @@ export const WithLogo: StoryObj = {
               
               <pre><code>const Agent = () =&gt; (
   &lt;AgentSidebarAgentMessage content=&quot;Sure — I&#39;ll update your username and your appearance preference. Please confirm the changes below.&quot; /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Markdown</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Agent replies render Markdown: headings, lists, inline + fenced code, links.</div>
+              <pre><code>const AgentMarkdown = () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Markdown Streaming</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Mid-stream markdown — note the unterminated code fence renders calmly as a code block until the closing fence arrives.</div>
+              <pre><code>const AgentMarkdownStreaming = () =&gt; (
+  &lt;AgentSidebarAgentMessage
+    content={
+      &quot;Here&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au&quot;
+    }
+    streaming
+  /&gt;
 );</code></pre>
             </div>
             <div class="note ok">
