@@ -39,7 +39,7 @@ export interface AgentSidebarHeaderProps {
 const TAB_WIDTH = 100;
 const GAP = 6;
 const ADD_BTN = 40;
-const TABS_PAD = 46; // strip's pl-10 (40) + pr-1.5 (6) — clientWidth includes padding
+const TABS_PAD = 52; // strip's pl-10 (40) + pr-3 (12) — clientWidth includes padding
 
 // Active tab notch (headOnly)
 const TAB_R = 12;
@@ -125,8 +125,8 @@ export function AgentSidebarHeader({
 
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
-    // clientWidth includes the strip's own pl-10 + pr-1.5 padding — subtract
-    // it, or the math overestimates by 46px and tabs squeeze (min-w-0 lets
+    // clientWidth includes the strip's own pl-10 + pr-3 padding — subtract
+    // it, or the math overestimates by 52px and tabs squeeze (min-w-0 lets
     // them shrink) instead of collapsing into the overflow dropdown.
     const available = tabsContainerRef.current.clientWidth - TABS_PAD;
     const spaceForAll = tabs.length * TAB_WIDTH + (tabs.length - 1) * GAP;
@@ -272,6 +272,10 @@ export function AgentSidebarHeader({
           inverseRadius={TAB_IR}
           fill="var(--color-on-background)"
           stroke="none"
+          // The default strokeWidth (1) pads the SVG half a pixel past the
+          // shape on each side — with no stroke that pad is pure overhang,
+          // so zero it and keep the overlay exactly tabWidth + 2×TAB_IR wide.
+          strokeWidth={0}
           headOnly
           className="absolute z-[5] !transition-none"
           style={{ left: activeTabRect.left - TAB_IR, top: 0 }}
@@ -432,8 +436,14 @@ export function AgentSidebarHeader({
 
       {/* Tabs — !transition-none on the tab + its inner box so flex-1
           width changes snap during a live sidebar drag instead of easing
-          through whatever transition class the ancestor chain inherits. */}
-      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 pr-1.5 gap-1.5 !transition-none">
+          through whatever transition class the ancestor chain inherits.
+          pr-3 (12px) reserves the active-tab notch's trailing inverse-radius
+          curl (TAB_IR): tabs are flex-1, so when the active tab is LAST its
+          right edge sits flush at the strip's content edge and the curl
+          bleeds TAB_IR past it — anything less than 12px of padding paints
+          the dark curl under the header action icons. (pl-10 covers the
+          leading curl.) Keep TABS_PAD in sync. */}
+      <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 pr-3 gap-1.5 !transition-none">
         {/* min-w-0 here too: without it a long tab title inflates the
             tablist's min-width:auto past the strip's content area and the
             last tab gets clipped flat by overflow-hidden. */}

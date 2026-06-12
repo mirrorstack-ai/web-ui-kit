@@ -74,7 +74,7 @@ describe("AgentSidebarHeader controlled tabs", () => {
   });
 
   it("collapses tabs into the overflow dropdown when the strip is narrow", () => {
-    // 280 clientWidth − 46 strip padding = 234 available; three 100px tabs
+    // 280 clientWidth − 52 strip padding = 228 available; three 100px tabs
     // (312 with gaps) don't fit → 1 visible + 2 in the ⋯ dropdown. Before the
     // padding fix the math compared against the raw 280 and squeezed tabs
     // inline instead of overflowing.
