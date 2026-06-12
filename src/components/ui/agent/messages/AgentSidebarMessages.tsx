@@ -15,6 +15,11 @@ import {
   type AgentSidebarMultiQuestionAnswer,
   type AgentSidebarMultiQuestionLayout,
 } from "../asks/AgentSidebarMultiQuestion";
+import {
+  AgentSidebarToolCall,
+  type AgentToolCall,
+  type AgentToolCallLabels,
+} from "./AgentSidebarToolCall";
 
 export type AgentSidebarMessage =
   | {
@@ -39,6 +44,11 @@ export type AgentSidebarMessage =
       submitLabel?: string;
       status?: AgentSidebarMultiQuestionStatus;
       layout?: AgentSidebarMultiQuestionLayout;
+    }
+  | {
+      id: string;
+      role: "tool";
+      tool: AgentToolCall;
     };
 
 export interface AgentSidebarMessagesProps {
@@ -60,12 +70,35 @@ export interface AgentSidebarMessagesProps {
   onRerunMessage?: (messageId: string) => void;
   /** Localizable aria-labels for the action buttons (English defaults). */
   actionLabels?: AgentSidebarMessageActionLabels;
+  /** Localizable status/aria text for tool-call rows (English defaults). */
+  toolLabels?: AgentToolCallLabels;
   /** Render the brand logo once below the list when the last message is a
    *  finished agent message — a clear platform signature, never per-message. */
   showLogo?: boolean;
   /** Auto-scroll to the latest message. Default: true. */
   autoScroll?: boolean;
   className?: string;
+}
+
+type ToolMessage = Extract<AgentSidebarMessage, { role: "tool" }>;
+
+/** Collapse runs of consecutive tool rows so they can render in one gap-1
+ *  group — the spec caps tool-stack spacing at gap-1 ("a 16-row stack stays
+ *  calm") while regular messages keep the list's gap-4. */
+function groupToolRuns(
+  messages: AgentSidebarMessage[],
+): (Exclude<AgentSidebarMessage, ToolMessage> | ToolMessage[])[] {
+  const out: (Exclude<AgentSidebarMessage, ToolMessage> | ToolMessage[])[] = [];
+  for (const m of messages) {
+    if (m.role === "tool") {
+      const last = out[out.length - 1];
+      if (Array.isArray(last)) last.push(m);
+      else out.push([m]);
+    } else {
+      out.push(m);
+    }
+  }
+  return out;
 }
 
 const NEAR_BOTTOM_PX = 80;
@@ -87,6 +120,7 @@ export function AgentSidebarMessages({
   onRateMessage,
   onRerunMessage,
   actionLabels,
+  toolLabels,
   showLogo = false,
   autoScroll = true,
   className,
@@ -136,7 +170,17 @@ export function AgentSidebarMessages({
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      {messages.map((m) => {
+      {groupToolRuns(messages).map((entry) => {
+        if (Array.isArray(entry)) {
+          return (
+            <div key={entry[0].id} className="flex flex-col gap-1">
+              {entry.map((m) => (
+                <AgentSidebarToolCall key={m.id} tool={m.tool} toolLabels={toolLabels} />
+              ))}
+            </div>
+          );
+        }
+        const m = entry;
         if (m.role === "user") {
           return <AgentSidebarUserMessage key={m.id} content={m.content} />;
         }
