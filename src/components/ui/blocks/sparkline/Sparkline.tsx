@@ -30,6 +30,11 @@ export interface SparklineProps {
   barActiveClassName?: string;
   /** Classes for the floating hover chip. Default `"bg-on-surface text-surface"`. Only used by `"bar"` variant. */
   chipClassName?: string;
+  /** Stroke width of the line, in px (non-scaling). Default `1.5`. Only used by `"line"` / `"area"` variants. */
+  strokeWidth?: number;
+  /** Opacity of the line stroke, `0–1`. Defaults to `0.6` for `"line"`, `0.5` for `"area"`.
+   *  The area fill keeps its fixed `0.15` opacity. Only used by `"line"` / `"area"` variants. */
+  opacity?: number;
   className?: string;
 }
 
@@ -61,6 +66,8 @@ export function Sparkline({
   barClassName = "bg-primary/30",
   barActiveClassName,
   chipClassName,
+  strokeWidth = 1.5,
+  opacity,
   className,
 }: SparklineProps) {
   // The chip is portaled to <body> so a clipping/overflow-hidden ancestor
@@ -89,8 +96,8 @@ export function Sparkline({
           d={linePath}
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.5"
-          opacity={variant === "area" ? "0.5" : "0.6"}
+          strokeWidth={strokeWidth}
+          opacity={opacity ?? (variant === "area" ? 0.5 : 0.6)}
           vectorEffect="non-scaling-stroke"
         />
       </svg>
