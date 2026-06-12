@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">290 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">292 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -10800,7 +10800,7 @@ title: ReactNode</code></pre>
       <div class="badges">
         <label for="c-58-ui-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
         <label for="c-58-ui-agent-sidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-58-ui-agent-sidebar-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-58-ui-agent-sidebar-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -10824,24 +10824,27 @@ title: ReactNode</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
-   9 | import { mockAgentHistory, mockAgentMessages, mockAgentModels } from &quot;./mock-data&quot;;
-  10 |
-&gt; 11 | const meta: Meta = {
+  12 | const DEFAULT_MODEL_ID = &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;;
+  13 |
+&gt; 14 | const meta: Meta = {
      | ^
-  12 |   title: &quot;UI/Agent/Sidebar&quot;,
-  13 |   decorators: [
-  14 |     (Story) =&gt; (
+  15 |   title: &quot;UI/Agent/Sidebar&quot;,
+  16 |   decorators: [
+  17 |     (Story) =&gt; (
 
 ./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx:
-import { useState } from &quot;react&quot;;
+import { useEffect, useRef, useState } from &quot;react&quot;;
 import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
 import { AgentSidebarHeader } from &quot;./AgentSidebarHeader&quot;;
-import { AgentSidebarInput } from &quot;./AgentSidebarInput&quot;;
+import { AgentSidebarInput, type AgentQueuedMessage } from &quot;./AgentSidebarInput&quot;;
 import {
   AgentSidebarMessages,
   type AgentSidebarMessage,
 } from &quot;../messages/AgentSidebarMessages&quot;;
 import { mockAgentHistory, mockAgentMessages, mockAgentModels } from &quot;./mock-data&quot;;
+import type { AgentSidebarHistoryGroup, ChatTab } from &quot;./types&quot;;
+
+const DEFAULT_MODEL_ID = &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;;
 
 const meta: Meta = {
   title: &quot;UI/Agent/Sidebar&quot;,
@@ -10856,6 +10859,7 @@ const meta: Meta = {
 
 export default meta;
 
+/** Uncontrolled header: internal tab state, history open/select only. */
 export const Header: StoryObj = {
   render: () =&gt; {
     const [width, setWidth] = useState(420);
@@ -10873,27 +10877,95 @@ export const Header: StoryObj = {
   },
 };
 
-export const Input: StoryObj = {
-  render: () =&gt; (
-    &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-        onMic={() =&gt; console.log(&quot;mic&quot;)}
-      /&gt;
-    &lt;/div&gt;
-  ),
+/** Controlled tabs: titles from the consumer, history opens as a NEW tab,
+ *  long titles ellipsize within the strip&#39;s allotment. */
+export const ControlledTabs: StoryObj = {
+  render: () =&gt; {
+    const [tabs, setTabs] = useState&lt;ChatTab[]&gt;([
+      { id: &quot;conv-1&quot;, title: &quot;New chat&quot; },
+      { id: &quot;conv-2&quot;, title: &quot;Update display name&quot; },
+    ]);
+    const [activeTabId, setActiveTabId] = useState(&quot;conv-1&quot;);
+    const nextIdRef = useRef(3);
+    const openTab = (title: string) =&gt; {
+      const tab = { id: `conv-${nextIdRef.current++}`, title };
+      setTabs((prev) =&gt; [...prev, tab]);
+      setActiveTabId(tab.id);
+    };
+    return (
+      &lt;div className=&quot;bg-surface-container&quot;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; {
+            const item = mockAgentHistory
+              .flatMap((g) =&gt; g.items)
+              .find((i) =&gt; i.id === id);
+            openTab(item?.title ?? &quot;New chat&quot;);
+          }}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelectTab={setActiveTabId}
+          onCloseTab={(id) =&gt; {
+            const next = tabs.filter((t) =&gt; t.id !== id);
+            if (!next.length) return;
+            setTabs(next);
+            if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+          }}
+          onNewTab={() =&gt; openTab(&quot;New chat&quot;)}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
 };
 
-export const InputWithModelSelector: StoryObj = {
+/** History row actions: hover edit (inline rename) + hover delete. */
+export const History: StoryObj = {
   render: () =&gt; {
-    const [modelId, setModelId] = useState(
-      &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;,
+    const [history, setHistory] = useState&lt;AgentSidebarHistoryGroup[]&gt;(mockAgentHistory);
+    return (
+      &lt;div className=&quot;bg-surface-container&quot;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={history}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;open&quot;, id)}
+          onRenameConversation={(id, title) =&gt; {
+            setHistory((prev) =&gt;
+              prev.map((g) =&gt; ({
+                ...g,
+                items: g.items.map((item) =&gt;
+                  item.id === id ? { ...item, title } : item,
+                ),
+              })),
+            );
+          }}
+          onDeleteConversation={(id) =&gt; {
+            setHistory((prev) =&gt;
+              prev
+                .map((g) =&gt; ({ ...g, items: g.items.filter((item) =&gt; item.id !== id) }))
+                .filter((g) =&gt; g.items.length &gt; 0),
+            );
+          }}
+        /&gt;
+      &lt;/div&gt;
     );
+  },
+};
+
+/** Composer with the model selector — the realistic host configuration. */
+export const Input: StoryObj = {
+  render: () =&gt; {
+    const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
     return (
       &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
         &lt;AgentSidebarInput
           onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+          onMic={() =&gt; console.log(&quot;mic&quot;)}
           models={mockAgentModels}
           selectedModelId={modelId}
           onSelectModel={setModelId}
@@ -10903,10 +10975,43 @@ export const InputWithModelSelector: StoryObj = {
   },
 };
 
+/** Queued messages pinned above the textarea while a reply streams —
+ *  several stack in send order, each individually cancellable. */
+export const QueuedMessage: StoryObj = {
+  render: () =&gt; {
+    const [queued, setQueued] = useState&lt;AgentQueuedMessage[]&gt;([
+      { id: &quot;q-1&quot;, text: &quot;Summarize the last 3 deployments and show me any failures&quot; },
+      { id: &quot;q-2&quot;, text: &quot;Then list members who joined this week&quot; },
+      { id: &quot;q-3&quot;, text: &quot;And draft a release note from the changelog&quot; },
+    ]);
+    const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
+    return (
+      &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
+        &lt;AgentSidebarInput
+          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+          models={mockAgentModels}
+          selectedModelId={modelId}
+          onSelectModel={setModelId}
+          queuedMessages={queued}
+          onCancelQueued={(id) =&gt; setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
+};
+
+/** Full sidebar with live queue behavior: sending while the agent is still
+ *  replying queues the message above the input; queued messages auto-send
+ *  in order as each reply finishes. */
 export const Playground: StoryObj = {
   render: () =&gt; {
     const [messages, setMessages] = useState&lt;AgentSidebarMessage[]&gt;(
       mockAgentMessages,
+    );
+    const [queued, setQueued] = useState&lt;AgentQueuedMessage[]&gt;([]);
+    const nextQueueId = useRef(1);
+    const isStreaming = messages.some(
+      (m) =&gt; m.role === &quot;agent&quot; &amp;&amp; &quot;streaming&quot; in m &amp;&amp; m.streaming,
     );
 
     const patchMessage = (id: string, patch: Record&lt;string, unknown&gt;) =&gt; {
@@ -10917,7 +11022,7 @@ export const Playground: StoryObj = {
       );
     };
 
-    const handleSend = (content: string) =&gt; {
+    const reallySend = (content: string) =&gt; {
       const userId = `u-${Date.now()}`;
       const agentId = `a-${Date.now()}`;
       setMessages((prev) =&gt; [
@@ -10930,8 +11035,30 @@ export const Playground: StoryObj = {
           content: &quot;Got it — let me look into that.&quot;,
           streaming: false,
         });
-      }, 1500);
+      }, 2500);
     };
+
+    // Send while a reply is streaming → queue instead (the consumer contract
+    // the kit&#39;s queuedMessages slot is designed for).
+    const handleSend = (content: string) =&gt; {
+      if (isStreaming) {
+        setQueued((q) =&gt; [
+          ...q,
+          { id: `q-${nextQueueId.current++}`, text: content },
+        ]);
+        return;
+      }
+      reallySend(content);
+    };
+
+    // Reply finished → flush the next queued message.
+    useEffect(() =&gt; {
+      if (isStreaming || queued.length === 0) return;
+      const [next, ...rest] = queued;
+      setQueued(rest);
+      reallySend(next.text);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isStreaming, queued.length]);
 
     return (
       &lt;&gt;
@@ -10951,7 +11078,11 @@ export const Playground: StoryObj = {
             onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
             onMic={() =&gt; console.log(&quot;mic&quot;)}
             models={mockAgentModels}
-            selectedModelId=&quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;
+            selectedModelId={DEFAULT_MODEL_ID}
+            queuedMessages={queued}
+            onCancelQueued={(id) =&gt;
+              setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
+            }
           /&gt;
         &lt;/div&gt;
       &lt;/&gt;
@@ -10989,7 +11120,7 @@ export const Playground: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              
+              <div class="hint">Uncontrolled header: internal tab state, history open/select only.</div>
               <pre><code>const Header = () =&gt; {
   const [width, setWidth] = useState(420);
   return (
@@ -11007,32 +11138,127 @@ export const Playground: StoryObj = {
             </div>
             <div class="note ok">
               <div class="row">
+                <span class="ex-name">Controlled Tabs</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Controlled tabs: titles from the consumer, history opens as a NEW tab, long titles ellipsize within the strip&#39;s allotment.</div>
+              <pre><code>const ControlledTabs = () =&gt; {
+  const [tabs, setTabs] = useState&lt;ChatTab[]&gt;([
+    { id: &quot;conv-1&quot;, title: &quot;New chat&quot; },
+    { id: &quot;conv-2&quot;, title: &quot;Update display name&quot; },
+  ]);
+  const [activeTabId, setActiveTabId] = useState(&quot;conv-1&quot;);
+  const nextIdRef = useRef(3);
+  const openTab = (title: string) =&gt; {
+    const tab = { id: `conv-${nextIdRef.current++}`, title };
+    setTabs((prev) =&gt; [...prev, tab]);
+    setActiveTabId(tab.id);
+  };
+  return (
+    &lt;div className=&quot;bg-surface-container&quot;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; {
+          const item = mockAgentHistory
+            .flatMap((g) =&gt; g.items)
+            .find((i) =&gt; i.id === id);
+          openTab(item?.title ?? &quot;New chat&quot;);
+        }}
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onSelectTab={setActiveTabId}
+        onCloseTab={(id) =&gt; {
+          const next = tabs.filter((t) =&gt; t.id !== id);
+          if (!next.length) return;
+          setTabs(next);
+          if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+        }}
+        onNewTab={() =&gt; openTab(&quot;New chat&quot;)}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">History</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">History row actions: hover edit (inline rename) + hover delete.</div>
+              <pre><code>const History = () =&gt; {
+  const [history, setHistory] = useState&lt;AgentSidebarHistoryGroup[]&gt;(mockAgentHistory);
+  return (
+    &lt;div className=&quot;bg-surface-container&quot;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={history}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;open&quot;, id)}
+        onRenameConversation={(id, title) =&gt; {
+          setHistory((prev) =&gt;
+            prev.map((g) =&gt; ({
+              ...g,
+              items: g.items.map((item) =&gt;
+                item.id === id ? { ...item, title } : item,
+              ),
+            })),
+          );
+        }}
+        onDeleteConversation={(id) =&gt; {
+          setHistory((prev) =&gt;
+            prev
+              .map((g) =&gt; ({ ...g, items: g.items.filter((item) =&gt; item.id !== id) }))
+              .filter((g) =&gt; g.items.length &gt; 0),
+          );
+        }}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
                 <span class="ex-name">Input</span>
                 <span class="badge ok">story ok</span>
               </div>
               
-              
-              <pre><code>const Input = () =&gt; (
-  &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
-    &lt;AgentSidebarInput
-      onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-      onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-      onMic={() =&gt; console.log(&quot;mic&quot;)}
-    /&gt;
-  &lt;/div&gt;
-);</code></pre>
+              <div class="hint">Composer with the model selector — the realistic host configuration.</div>
+              <pre><code>const Input = () =&gt; {
+  const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
+  return (
+    &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+        onMic={() =&gt; console.log(&quot;mic&quot;)}
+        models={mockAgentModels}
+        selectedModelId={modelId}
+        onSelectModel={setModelId}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Input With Model Selector</span>
+                <span class="ex-name">Queued Message</span>
                 <span class="badge ok">story ok</span>
               </div>
               
-              
-              <pre><code>const InputWithModelSelector = () =&gt; {
-  const [modelId, setModelId] = useState(
-    &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;,
-  );
+              <div class="hint">Queued messages pinned above the textarea while a reply streams — several stack in send order, each individually cancellable.</div>
+              <pre><code>const QueuedMessage = () =&gt; {
+  const [queued, setQueued] = useState&lt;AgentQueuedMessage[]&gt;([
+    { id: &quot;q-1&quot;, text: &quot;Summarize the last 3 deployments and show me any failures&quot; },
+    { id: &quot;q-2&quot;, text: &quot;Then list members who joined this week&quot; },
+    { id: &quot;q-3&quot;, text: &quot;And draft a release note from the changelog&quot; },
+  ]);
+  const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
   return (
     &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
       &lt;AgentSidebarInput
@@ -11040,6 +11266,8 @@ export const Playground: StoryObj = {
         models={mockAgentModels}
         selectedModelId={modelId}
         onSelectModel={setModelId}
+        queuedMessages={queued}
+        onCancelQueued={(id) =&gt; setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))}
       /&gt;
     &lt;/div&gt;
   );
@@ -11051,10 +11279,15 @@ export const Playground: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              
+              <div class="hint">Full sidebar with live queue behavior: sending while the agent is still replying queues the message above the input; queued messages auto-send in order as each reply finishes.</div>
               <pre><code>const Playground = () =&gt; {
   const [messages, setMessages] = useState&lt;AgentSidebarMessage[]&gt;(
     mockAgentMessages,
+  );
+  const [queued, setQueued] = useState&lt;AgentQueuedMessage[]&gt;([]);
+  const nextQueueId = useRef(1);
+  const isStreaming = messages.some(
+    (m) =&gt; m.role === &quot;agent&quot; &amp;&amp; &quot;streaming&quot; in m &amp;&amp; m.streaming,
   );
 
   const patchMessage = (id: string, patch: Record&lt;string, unknown&gt;) =&gt; {
@@ -11065,7 +11298,7 @@ export const Playground: StoryObj = {
     );
   };
 
-  const handleSend = (content: string) =&gt; {
+  const reallySend = (content: string) =&gt; {
     const userId = `u-${Date.now()}`;
     const agentId = `a-${Date.now()}`;
     setMessages((prev) =&gt; [
@@ -11078,8 +11311,30 @@ export const Playground: StoryObj = {
         content: &quot;Got it — let me look into that.&quot;,
         streaming: false,
       });
-    }, 1500);
+    }, 2500);
   };
+
+  // Send while a reply is streaming → queue instead (the consumer contract
+  // the kit&#39;s queuedMessages slot is designed for).
+  const handleSend = (content: string) =&gt; {
+    if (isStreaming) {
+      setQueued((q) =&gt; [
+        ...q,
+        { id: `q-${nextQueueId.current++}`, text: content },
+      ]);
+      return;
+    }
+    reallySend(content);
+  };
+
+  // Reply finished → flush the next queued message.
+  useEffect(() =&gt; {
+    if (isStreaming || queued.length === 0) return;
+    const [next, ...rest] = queued;
+    setQueued(rest);
+    reallySend(next.text);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isStreaming, queued.length]);
 
   return (
     &lt;&gt;
@@ -11099,7 +11354,11 @@ export const Playground: StoryObj = {
           onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
           onMic={() =&gt; console.log(&quot;mic&quot;)}
           models={mockAgentModels}
-          selectedModelId=&quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;
+          selectedModelId={DEFAULT_MODEL_ID}
+          queuedMessages={queued}
+          onCancelQueued={(id) =&gt;
+            setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
+          }
         /&gt;
       &lt;/div&gt;
     &lt;/&gt;
@@ -14500,7 +14759,7 @@ export const MultiQuestionList: StoryObj = {
       <div class="badges">
         <label for="c-error-2-ui-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-2-ui-agent-sidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-2-ui-agent-sidebar-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-2-ui-agent-sidebar-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -14524,24 +14783,27 @@ export const MultiQuestionList: StoryObj = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
-   9 | import { mockAgentHistory, mockAgentMessages, mockAgentModels } from &quot;./mock-data&quot;;
-  10 |
-&gt; 11 | const meta: Meta = {
+  12 | const DEFAULT_MODEL_ID = &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;;
+  13 |
+&gt; 14 | const meta: Meta = {
      | ^
-  12 |   title: &quot;UI/Agent/Sidebar&quot;,
-  13 |   decorators: [
-  14 |     (Story) =&gt; (
+  15 |   title: &quot;UI/Agent/Sidebar&quot;,
+  16 |   decorators: [
+  17 |     (Story) =&gt; (
 
 ./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx:
-import { useState } from &quot;react&quot;;
+import { useEffect, useRef, useState } from &quot;react&quot;;
 import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
 import { AgentSidebarHeader } from &quot;./AgentSidebarHeader&quot;;
-import { AgentSidebarInput } from &quot;./AgentSidebarInput&quot;;
+import { AgentSidebarInput, type AgentQueuedMessage } from &quot;./AgentSidebarInput&quot;;
 import {
   AgentSidebarMessages,
   type AgentSidebarMessage,
 } from &quot;../messages/AgentSidebarMessages&quot;;
 import { mockAgentHistory, mockAgentMessages, mockAgentModels } from &quot;./mock-data&quot;;
+import type { AgentSidebarHistoryGroup, ChatTab } from &quot;./types&quot;;
+
+const DEFAULT_MODEL_ID = &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;;
 
 const meta: Meta = {
   title: &quot;UI/Agent/Sidebar&quot;,
@@ -14556,6 +14818,7 @@ const meta: Meta = {
 
 export default meta;
 
+/** Uncontrolled header: internal tab state, history open/select only. */
 export const Header: StoryObj = {
   render: () =&gt; {
     const [width, setWidth] = useState(420);
@@ -14573,27 +14836,95 @@ export const Header: StoryObj = {
   },
 };
 
-export const Input: StoryObj = {
-  render: () =&gt; (
-    &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-        onMic={() =&gt; console.log(&quot;mic&quot;)}
-      /&gt;
-    &lt;/div&gt;
-  ),
+/** Controlled tabs: titles from the consumer, history opens as a NEW tab,
+ *  long titles ellipsize within the strip&#39;s allotment. */
+export const ControlledTabs: StoryObj = {
+  render: () =&gt; {
+    const [tabs, setTabs] = useState&lt;ChatTab[]&gt;([
+      { id: &quot;conv-1&quot;, title: &quot;New chat&quot; },
+      { id: &quot;conv-2&quot;, title: &quot;Update display name&quot; },
+    ]);
+    const [activeTabId, setActiveTabId] = useState(&quot;conv-1&quot;);
+    const nextIdRef = useRef(3);
+    const openTab = (title: string) =&gt; {
+      const tab = { id: `conv-${nextIdRef.current++}`, title };
+      setTabs((prev) =&gt; [...prev, tab]);
+      setActiveTabId(tab.id);
+    };
+    return (
+      &lt;div className=&quot;bg-surface-container&quot;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; {
+            const item = mockAgentHistory
+              .flatMap((g) =&gt; g.items)
+              .find((i) =&gt; i.id === id);
+            openTab(item?.title ?? &quot;New chat&quot;);
+          }}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelectTab={setActiveTabId}
+          onCloseTab={(id) =&gt; {
+            const next = tabs.filter((t) =&gt; t.id !== id);
+            if (!next.length) return;
+            setTabs(next);
+            if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+          }}
+          onNewTab={() =&gt; openTab(&quot;New chat&quot;)}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
 };
 
-export const InputWithModelSelector: StoryObj = {
+/** History row actions: hover edit (inline rename) + hover delete. */
+export const History: StoryObj = {
   render: () =&gt; {
-    const [modelId, setModelId] = useState(
-      &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;,
+    const [history, setHistory] = useState&lt;AgentSidebarHistoryGroup[]&gt;(mockAgentHistory);
+    return (
+      &lt;div className=&quot;bg-surface-container&quot;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={history}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;open&quot;, id)}
+          onRenameConversation={(id, title) =&gt; {
+            setHistory((prev) =&gt;
+              prev.map((g) =&gt; ({
+                ...g,
+                items: g.items.map((item) =&gt;
+                  item.id === id ? { ...item, title } : item,
+                ),
+              })),
+            );
+          }}
+          onDeleteConversation={(id) =&gt; {
+            setHistory((prev) =&gt;
+              prev
+                .map((g) =&gt; ({ ...g, items: g.items.filter((item) =&gt; item.id !== id) }))
+                .filter((g) =&gt; g.items.length &gt; 0),
+            );
+          }}
+        /&gt;
+      &lt;/div&gt;
     );
+  },
+};
+
+/** Composer with the model selector — the realistic host configuration. */
+export const Input: StoryObj = {
+  render: () =&gt; {
+    const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
     return (
       &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
         &lt;AgentSidebarInput
           onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+          onMic={() =&gt; console.log(&quot;mic&quot;)}
           models={mockAgentModels}
           selectedModelId={modelId}
           onSelectModel={setModelId}
@@ -14603,10 +14934,43 @@ export const InputWithModelSelector: StoryObj = {
   },
 };
 
+/** Queued messages pinned above the textarea while a reply streams —
+ *  several stack in send order, each individually cancellable. */
+export const QueuedMessage: StoryObj = {
+  render: () =&gt; {
+    const [queued, setQueued] = useState&lt;AgentQueuedMessage[]&gt;([
+      { id: &quot;q-1&quot;, text: &quot;Summarize the last 3 deployments and show me any failures&quot; },
+      { id: &quot;q-2&quot;, text: &quot;Then list members who joined this week&quot; },
+      { id: &quot;q-3&quot;, text: &quot;And draft a release note from the changelog&quot; },
+    ]);
+    const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
+    return (
+      &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
+        &lt;AgentSidebarInput
+          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+          models={mockAgentModels}
+          selectedModelId={modelId}
+          onSelectModel={setModelId}
+          queuedMessages={queued}
+          onCancelQueued={(id) =&gt; setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
+};
+
+/** Full sidebar with live queue behavior: sending while the agent is still
+ *  replying queues the message above the input; queued messages auto-send
+ *  in order as each reply finishes. */
 export const Playground: StoryObj = {
   render: () =&gt; {
     const [messages, setMessages] = useState&lt;AgentSidebarMessage[]&gt;(
       mockAgentMessages,
+    );
+    const [queued, setQueued] = useState&lt;AgentQueuedMessage[]&gt;([]);
+    const nextQueueId = useRef(1);
+    const isStreaming = messages.some(
+      (m) =&gt; m.role === &quot;agent&quot; &amp;&amp; &quot;streaming&quot; in m &amp;&amp; m.streaming,
     );
 
     const patchMessage = (id: string, patch: Record&lt;string, unknown&gt;) =&gt; {
@@ -14617,7 +14981,7 @@ export const Playground: StoryObj = {
       );
     };
 
-    const handleSend = (content: string) =&gt; {
+    const reallySend = (content: string) =&gt; {
       const userId = `u-${Date.now()}`;
       const agentId = `a-${Date.now()}`;
       setMessages((prev) =&gt; [
@@ -14630,8 +14994,30 @@ export const Playground: StoryObj = {
           content: &quot;Got it — let me look into that.&quot;,
           streaming: false,
         });
-      }, 1500);
+      }, 2500);
     };
+
+    // Send while a reply is streaming → queue instead (the consumer contract
+    // the kit&#39;s queuedMessages slot is designed for).
+    const handleSend = (content: string) =&gt; {
+      if (isStreaming) {
+        setQueued((q) =&gt; [
+          ...q,
+          { id: `q-${nextQueueId.current++}`, text: content },
+        ]);
+        return;
+      }
+      reallySend(content);
+    };
+
+    // Reply finished → flush the next queued message.
+    useEffect(() =&gt; {
+      if (isStreaming || queued.length === 0) return;
+      const [next, ...rest] = queued;
+      setQueued(rest);
+      reallySend(next.text);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isStreaming, queued.length]);
 
     return (
       &lt;&gt;
@@ -14651,7 +15037,11 @@ export const Playground: StoryObj = {
             onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
             onMic={() =&gt; console.log(&quot;mic&quot;)}
             models={mockAgentModels}
-            selectedModelId=&quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;
+            selectedModelId={DEFAULT_MODEL_ID}
+            queuedMessages={queued}
+            onCancelQueued={(id) =&gt;
+              setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
+            }
           /&gt;
         &lt;/div&gt;
       &lt;/&gt;
@@ -14689,7 +15079,7 @@ export const Playground: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              
+              <div class="hint">Uncontrolled header: internal tab state, history open/select only.</div>
               <pre><code>const Header = () =&gt; {
   const [width, setWidth] = useState(420);
   return (
@@ -14707,32 +15097,127 @@ export const Playground: StoryObj = {
             </div>
             <div class="note ok">
               <div class="row">
+                <span class="ex-name">Controlled Tabs</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Controlled tabs: titles from the consumer, history opens as a NEW tab, long titles ellipsize within the strip&#39;s allotment.</div>
+              <pre><code>const ControlledTabs = () =&gt; {
+  const [tabs, setTabs] = useState&lt;ChatTab[]&gt;([
+    { id: &quot;conv-1&quot;, title: &quot;New chat&quot; },
+    { id: &quot;conv-2&quot;, title: &quot;Update display name&quot; },
+  ]);
+  const [activeTabId, setActiveTabId] = useState(&quot;conv-1&quot;);
+  const nextIdRef = useRef(3);
+  const openTab = (title: string) =&gt; {
+    const tab = { id: `conv-${nextIdRef.current++}`, title };
+    setTabs((prev) =&gt; [...prev, tab]);
+    setActiveTabId(tab.id);
+  };
+  return (
+    &lt;div className=&quot;bg-surface-container&quot;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; {
+          const item = mockAgentHistory
+            .flatMap((g) =&gt; g.items)
+            .find((i) =&gt; i.id === id);
+          openTab(item?.title ?? &quot;New chat&quot;);
+        }}
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onSelectTab={setActiveTabId}
+        onCloseTab={(id) =&gt; {
+          const next = tabs.filter((t) =&gt; t.id !== id);
+          if (!next.length) return;
+          setTabs(next);
+          if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+        }}
+        onNewTab={() =&gt; openTab(&quot;New chat&quot;)}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">History</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">History row actions: hover edit (inline rename) + hover delete.</div>
+              <pre><code>const History = () =&gt; {
+  const [history, setHistory] = useState&lt;AgentSidebarHistoryGroup[]&gt;(mockAgentHistory);
+  return (
+    &lt;div className=&quot;bg-surface-container&quot;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={history}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;open&quot;, id)}
+        onRenameConversation={(id, title) =&gt; {
+          setHistory((prev) =&gt;
+            prev.map((g) =&gt; ({
+              ...g,
+              items: g.items.map((item) =&gt;
+                item.id === id ? { ...item, title } : item,
+              ),
+            })),
+          );
+        }}
+        onDeleteConversation={(id) =&gt; {
+          setHistory((prev) =&gt;
+            prev
+              .map((g) =&gt; ({ ...g, items: g.items.filter((item) =&gt; item.id !== id) }))
+              .filter((g) =&gt; g.items.length &gt; 0),
+          );
+        }}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
                 <span class="ex-name">Input</span>
                 <span class="badge ok">story ok</span>
               </div>
               
-              
-              <pre><code>const Input = () =&gt; (
-  &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
-    &lt;AgentSidebarInput
-      onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-      onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-      onMic={() =&gt; console.log(&quot;mic&quot;)}
-    /&gt;
-  &lt;/div&gt;
-);</code></pre>
+              <div class="hint">Composer with the model selector — the realistic host configuration.</div>
+              <pre><code>const Input = () =&gt; {
+  const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
+  return (
+    &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+        onMic={() =&gt; console.log(&quot;mic&quot;)}
+        models={mockAgentModels}
+        selectedModelId={modelId}
+        onSelectModel={setModelId}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Input With Model Selector</span>
+                <span class="ex-name">Queued Message</span>
                 <span class="badge ok">story ok</span>
               </div>
               
-              
-              <pre><code>const InputWithModelSelector = () =&gt; {
-  const [modelId, setModelId] = useState(
-    &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;,
-  );
+              <div class="hint">Queued messages pinned above the textarea while a reply streams — several stack in send order, each individually cancellable.</div>
+              <pre><code>const QueuedMessage = () =&gt; {
+  const [queued, setQueued] = useState&lt;AgentQueuedMessage[]&gt;([
+    { id: &quot;q-1&quot;, text: &quot;Summarize the last 3 deployments and show me any failures&quot; },
+    { id: &quot;q-2&quot;, text: &quot;Then list members who joined this week&quot; },
+    { id: &quot;q-3&quot;, text: &quot;And draft a release note from the changelog&quot; },
+  ]);
+  const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
   return (
     &lt;div className=&quot;mt-auto bg-on-background rounded-b-2xl&quot;&gt;
       &lt;AgentSidebarInput
@@ -14740,6 +15225,8 @@ export const Playground: StoryObj = {
         models={mockAgentModels}
         selectedModelId={modelId}
         onSelectModel={setModelId}
+        queuedMessages={queued}
+        onCancelQueued={(id) =&gt; setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))}
       /&gt;
     &lt;/div&gt;
   );
@@ -14751,10 +15238,15 @@ export const Playground: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              
+              <div class="hint">Full sidebar with live queue behavior: sending while the agent is still replying queues the message above the input; queued messages auto-send in order as each reply finishes.</div>
               <pre><code>const Playground = () =&gt; {
   const [messages, setMessages] = useState&lt;AgentSidebarMessage[]&gt;(
     mockAgentMessages,
+  );
+  const [queued, setQueued] = useState&lt;AgentQueuedMessage[]&gt;([]);
+  const nextQueueId = useRef(1);
+  const isStreaming = messages.some(
+    (m) =&gt; m.role === &quot;agent&quot; &amp;&amp; &quot;streaming&quot; in m &amp;&amp; m.streaming,
   );
 
   const patchMessage = (id: string, patch: Record&lt;string, unknown&gt;) =&gt; {
@@ -14765,7 +15257,7 @@ export const Playground: StoryObj = {
     );
   };
 
-  const handleSend = (content: string) =&gt; {
+  const reallySend = (content: string) =&gt; {
     const userId = `u-${Date.now()}`;
     const agentId = `a-${Date.now()}`;
     setMessages((prev) =&gt; [
@@ -14778,8 +15270,30 @@ export const Playground: StoryObj = {
         content: &quot;Got it — let me look into that.&quot;,
         streaming: false,
       });
-    }, 1500);
+    }, 2500);
   };
+
+  // Send while a reply is streaming → queue instead (the consumer contract
+  // the kit&#39;s queuedMessages slot is designed for).
+  const handleSend = (content: string) =&gt; {
+    if (isStreaming) {
+      setQueued((q) =&gt; [
+        ...q,
+        { id: `q-${nextQueueId.current++}`, text: content },
+      ]);
+      return;
+    }
+    reallySend(content);
+  };
+
+  // Reply finished → flush the next queued message.
+  useEffect(() =&gt; {
+    if (isStreaming || queued.length === 0) return;
+    const [next, ...rest] = queued;
+    setQueued(rest);
+    reallySend(next.text);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isStreaming, queued.length]);
 
   return (
     &lt;&gt;
@@ -14799,7 +15313,11 @@ export const Playground: StoryObj = {
           onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
           onMic={() =&gt; console.log(&quot;mic&quot;)}
           models={mockAgentModels}
-          selectedModelId=&quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;
+          selectedModelId={DEFAULT_MODEL_ID}
+          queuedMessages={queued}
+          onCancelQueued={(id) =&gt;
+            setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
+          }
         /&gt;
       &lt;/div&gt;
     &lt;/&gt;
