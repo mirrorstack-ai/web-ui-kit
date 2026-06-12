@@ -151,6 +151,77 @@ describe("AgentSidebarMessages action row", () => {
   });
 });
 
+describe("AgentSidebarMessages markdown rendering", () => {
+  it("renders agent markdown (bold, list, inline code)", () => {
+    const { container } = render(
+      <AgentSidebarMessages
+        messages={[
+          agentMsg({ content: "Changed **username** to `alice2`:\n\n- done" }),
+        ]}
+      />,
+    );
+    expect(screen.getByText("username").tagName).toBe("STRONG");
+    expect(screen.getByText("alice2").tagName).toBe("CODE");
+    expect(container.querySelector("ul > li")).toHaveTextContent("done");
+  });
+
+  it("renders fenced code blocks inside a pre", () => {
+    const { container } = render(
+      <AgentSidebarMessages
+        messages={[agentMsg({ content: "```bash\nmirrorstack deploy\n```" })]}
+      />,
+    );
+    expect(container.querySelector("pre > code")).toHaveTextContent(
+      "mirrorstack deploy",
+    );
+  });
+
+  it("opens links in a new tab with rel noopener noreferrer", () => {
+    render(
+      <AgentSidebarMessages
+        messages={[agentMsg({ content: "See [docs](https://example.com)" })]}
+      />,
+    );
+    const link = screen.getByRole("link", { name: "docs" });
+    expect(link).toHaveAttribute("href", "https://example.com");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("does not render raw HTML from the model", () => {
+    render(
+      <AgentSidebarMessages
+        messages={[agentMsg({ content: "hi <img src=x onerror=alert(1)>" })]}
+      />,
+    );
+    expect(document.querySelector("img")).not.toBeInTheDocument();
+  });
+
+  it("keeps user messages as plain text", () => {
+    render(
+      <AgentSidebarMessages
+        messages={[{ id: "u-1", role: "user", content: "use **bold** here" }]}
+      />,
+    );
+    // Raw asterisks survive — no markdown parsing on user input.
+    expect(screen.getByText("use **bold** here")).toBeInTheDocument();
+    expect(document.querySelector("strong")).not.toBeInTheDocument();
+  });
+
+  it("survives an unterminated code fence mid-stream", () => {
+    const { container } = render(
+      <AgentSidebarMessages
+        messages={[
+          agentMsg({ content: "Running:\n\n```bash\nmirrorstack au", streaming: true }),
+        ]}
+      />,
+    );
+    expect(container.querySelector("pre > code")).toHaveTextContent(
+      "mirrorstack au",
+    );
+  });
+});
+
 describe("AgentSidebarMessages showLogo", () => {
   // The logo wrapper is aria-hidden (decorative), so opt into hidden elements.
   const logo = () =>
