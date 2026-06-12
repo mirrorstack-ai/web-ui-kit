@@ -496,6 +496,15 @@ export {
   type ConversationHistoryItem,
   type RecencyLabels,
 } from "./hooks/agent-chat/history";
+export {
+  useAgentTabs,
+  isDraftTab,
+  deriveTabTitles,
+  type AgentSidebarState,
+  type AgentTabsPersistence,
+  type UseAgentTabsOptions,
+  type UseAgentTabsResult,
+} from "./hooks/agent-chat/useAgentTabs";
 export type {
   AgentApiMessage,
   AgentChatClient,
