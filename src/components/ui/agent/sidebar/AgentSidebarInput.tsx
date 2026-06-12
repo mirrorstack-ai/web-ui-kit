@@ -11,6 +11,12 @@ import { useMenuKeyNav } from "@/hooks/useMenuKeyNav";
 import { useModelSelection } from "@/hooks/useModelSelection";
 import type { AgentSidebarInputLabels } from "./types";
 
+/** One pending message in the send queue (see queuedMessages). */
+export interface AgentQueuedMessage {
+  id: string;
+  text: string;
+}
+
 export interface AgentSidebarInputModel {
   id: string;
   label: string;
@@ -34,11 +40,12 @@ export interface AgentSidebarInputProps {
   /** Selected model id. Falls back to the first enabled model when omitted. */
   selectedModelId?: string;
   onSelectModel?: (modelId: string) => void;
-  /** When set, renders a cancellable queued-message chip above the textarea.
-   *  Display-only — queueing logic lives in the consumer. */
-  queuedMessage?: string;
-  /** Called when the user clicks the X on the queued-message chip. */
-  onCancelQueued?: () => void;
+  /** Messages waiting to send once the current reply finishes — rendered as
+   *  cancellable rows above the textarea, in send order. Display-only:
+   *  queueing logic lives in the consumer. */
+  queuedMessages?: AgentQueuedMessage[];
+  /** Called with the row's id when its X is clicked. */
+  onCancelQueued?: (id: string) => void;
   /** Label overrides. All have EN defaults. */
   labels?: AgentSidebarInputLabels;
 }
@@ -66,7 +73,7 @@ export function AgentSidebarInput({
   models,
   selectedModelId,
   onSelectModel,
-  queuedMessage,
+  queuedMessages,
   onCancelQueued,
   labels,
 }: AgentSidebarInputProps) {
@@ -175,26 +182,31 @@ export function AgentSidebarInput({
           Tip — ctrl + c to interrupt
         </span>
       </div>
-      <div className="flex flex-col w-full border border-outline-variant/30 rounded-xl bg-inverse-on-surface/8 p-1 pt-1.5 gap-0.5">
-        {queuedMessage && (
-          <div className="flex items-center gap-1.5 px-2 py-1 border-b border-outline-variant/20 mb-0.5">
-            <span className="text-[11px] font-medium text-inverse-on-surface/50 shrink-0">
-              {labels?.queuedPrefix ?? "Queued"}
-            </span>
-            <span
-              className="flex-1 text-xs text-inverse-on-surface/70 truncate"
-              title={queuedMessage}
-            >
-              {queuedMessage}
-            </span>
-            <IconButton
-              icon="close"
-              variant="text"
-              size="sm"
-              className="text-inverse-on-surface/50 hover:text-inverse-on-surface shrink-0 -mr-0.5"
-              onClick={onCancelQueued}
-              aria-label={labels?.cancelQueuedLabel ?? "Cancel queued message"}
-            />
+      <div className="flex flex-col w-full border border-outline-variant/30 rounded-xl bg-inverse-on-surface/8 p-1 gap-0.5">
+        {queuedMessages && queuedMessages.length > 0 && (
+          <div className="flex flex-col border-b border-outline-variant/20 mb-0.5">
+            {queuedMessages.map((q, i) => (
+              <div key={q.id} className="flex items-center gap-1.5 px-2 py-0.5">
+                {/* prefix on the first row only; later rows align under it */}
+                <span className="text-[11px] font-medium text-inverse-on-surface/50 shrink-0 w-11">
+                  {i === 0 ? (labels?.queuedPrefix ?? "Queued") : ""}
+                </span>
+                <span
+                  className="flex-1 text-xs text-inverse-on-surface/70 truncate"
+                  title={q.text}
+                >
+                  {q.text}
+                </span>
+                <button
+                  type="button"
+                  className="w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-inverse-on-surface/50 hover:text-inverse-on-surface hover:bg-inverse-on-surface/10 shrink-0"
+                  onClick={() => onCancelQueued?.(q.id)}
+                  aria-label={labels?.cancelQueuedLabel ?? "Cancel queued message"}
+                >
+                  <Icon name="close" size={12} />
+                </button>
+              </div>
+            ))}
           </div>
         )}
         <textarea
@@ -204,7 +216,7 @@ export function AgentSidebarInput({
           onKeyDown={handleKeyDown}
           onCompositionStart={onCompositionStart}
           onCompositionEnd={onCompositionEnd}
-          className="w-full text-inverse-on-surface placeholder:text-inverse-on-surface/30 rounded-lg px-2 py-1 resize-none focus:outline-none bg-transparent text-sm"
+          className="w-full text-inverse-on-surface placeholder:text-inverse-on-surface/30 rounded-lg px-2 py-2 resize-none focus:outline-none bg-transparent text-sm"
           placeholder={placeholder}
           aria-label="Message to agent"
           rows={1}

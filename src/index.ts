@@ -45,6 +45,7 @@ export {
   AgentSidebarInput,
   type AgentSidebarInputProps,
   type AgentSidebarInputModel,
+  type AgentQueuedMessage,
 } from "./components/ui/agent/sidebar/AgentSidebarInput";
 export {
   AgentGreeting,

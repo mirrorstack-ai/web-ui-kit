@@ -434,7 +434,10 @@ export function AgentSidebarHeader({
           width changes snap during a live sidebar drag instead of easing
           through whatever transition class the ancestor chain inherits. */}
       <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 pr-1.5 gap-1.5 !transition-none">
-        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 h-full gap-1.5 !transition-none">
+        {/* min-w-0 here too: without it a long tab title inflates the
+            tablist's min-width:auto past the strip's content area and the
+            last tab gets clipped flat by overflow-hidden. */}
+        <div role="tablist" aria-label="Chat sessions" className="flex flex-1 min-w-0 h-full gap-1.5 !transition-none">
           {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
@@ -483,19 +486,21 @@ export function AgentSidebarHeader({
         </div>
       </div>
 
-      {/* Actions — z-10 keeps the icons above the active-tab notch overlay
-          (z-[5]); when the active tab is last in the strip its arc overhang
-          otherwise paints over them, dark-on-dark. */}
-      <div ref={overflowRef} className="relative z-10 flex items-center gap-0.5 pr-1 shrink-0">
+      {/* Actions. Each button gets its own relative z-10 so it paints above
+          the active-tab notch overlay (z-[5]) when the active tab is last in
+          the strip — a z on the CONTAINER would instead create one stacking
+          context that traps the ⋯ trigger's z-[51] beneath the header-level
+          overflow dropdown (z-50), hiding the trigger inside its notch. */}
+      <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
         {overflowTabs.length > 0 ? (
           <div ref={triggerBtnRef} className="relative z-[51]">
             <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />
           </div>
         ) : (
-          <IconButton icon="add" variant="text" size="sm" className="text-on-surface" onClick={handleAddTab} aria-label={labels?.newChatLabel ?? "New chat"} />
+          <IconButton icon="add" variant="text" size="sm" className="relative z-10 text-on-surface" onClick={handleAddTab} aria-label={labels?.newChatLabel ?? "New chat"} />
         )}
-        <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
-        <IconButton icon="close" variant="text" size="sm" className="text-on-surface" onClick={onClose} aria-label="Close sidebar" />
+        <IconButton icon={isCollapsed ? "unfold_more" : "unfold_less"} variant="text" size="sm" className="relative z-10 rotate-90 text-on-surface" onClick={onToggleCollapse} aria-label={isCollapsed ? "Expand" : "Collapse"} />
+        <IconButton icon="close" variant="text" size="sm" className="relative z-10 text-on-surface" onClick={onClose} aria-label="Close sidebar" />
       </div>
 
       {/* Overflow dropdown with notch tab connecting to the ... button */}

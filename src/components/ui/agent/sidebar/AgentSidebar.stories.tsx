@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AgentSidebarHeader } from "./AgentSidebarHeader";
-import { AgentSidebarInput } from "./AgentSidebarInput";
+import { AgentSidebarInput, type AgentQueuedMessage } from "./AgentSidebarInput";
 import {
   AgentSidebarMessages,
   type AgentSidebarMessage,
@@ -140,12 +140,15 @@ export const Input: StoryObj = {
   },
 };
 
-/** Queued-message chip pinned above the textarea while a reply streams. */
+/** Queued messages pinned above the textarea while a reply streams —
+ *  several stack in send order, each individually cancellable. */
 export const QueuedMessage: StoryObj = {
   render: () => {
-    const [queued, setQueued] = useState<string | undefined>(
-      "Summarize the last 3 deployments and show me any failures",
-    );
+    const [queued, setQueued] = useState<AgentQueuedMessage[]>([
+      { id: "q-1", text: "Summarize the last 3 deployments and show me any failures" },
+      { id: "q-2", text: "Then list members who joined this week" },
+      { id: "q-3", text: "And draft a release note from the changelog" },
+    ]);
     const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
     return (
       <div className="mt-auto bg-on-background rounded-b-2xl">
@@ -154,18 +157,26 @@ export const QueuedMessage: StoryObj = {
           models={mockAgentModels}
           selectedModelId={modelId}
           onSelectModel={setModelId}
-          queuedMessage={queued}
-          onCancelQueued={() => setQueued(undefined)}
+          queuedMessages={queued}
+          onCancelQueued={(id) => setQueued((q) => q.filter((m) => m.id !== id))}
         />
       </div>
     );
   },
 };
 
+/** Full sidebar with live queue behavior: sending while the agent is still
+ *  replying queues the message above the input; queued messages auto-send
+ *  in order as each reply finishes. */
 export const Playground: StoryObj = {
   render: () => {
     const [messages, setMessages] = useState<AgentSidebarMessage[]>(
       mockAgentMessages,
+    );
+    const [queued, setQueued] = useState<AgentQueuedMessage[]>([]);
+    const nextQueueId = useRef(1);
+    const isStreaming = messages.some(
+      (m) => m.role === "agent" && "streaming" in m && m.streaming,
     );
 
     const patchMessage = (id: string, patch: Record<string, unknown>) => {
@@ -176,7 +187,7 @@ export const Playground: StoryObj = {
       );
     };
 
-    const handleSend = (content: string) => {
+    const reallySend = (content: string) => {
       const userId = `u-${Date.now()}`;
       const agentId = `a-${Date.now()}`;
       setMessages((prev) => [
@@ -189,8 +200,30 @@ export const Playground: StoryObj = {
           content: "Got it — let me look into that.",
           streaming: false,
         });
-      }, 1500);
+      }, 2500);
     };
+
+    // Send while a reply is streaming → queue instead (the consumer contract
+    // the kit's queuedMessages slot is designed for).
+    const handleSend = (content: string) => {
+      if (isStreaming) {
+        setQueued((q) => [
+          ...q,
+          { id: `q-${nextQueueId.current++}`, text: content },
+        ]);
+        return;
+      }
+      reallySend(content);
+    };
+
+    // Reply finished → flush the next queued message.
+    useEffect(() => {
+      if (isStreaming || queued.length === 0) return;
+      const [next, ...rest] = queued;
+      setQueued(rest);
+      reallySend(next.text);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isStreaming, queued.length]);
 
     return (
       <>
@@ -211,6 +244,10 @@ export const Playground: StoryObj = {
             onMic={() => console.log("mic")}
             models={mockAgentModels}
             selectedModelId={DEFAULT_MODEL_ID}
+            queuedMessages={queued}
+            onCancelQueued={(id) =>
+              setQueued((q) => q.filter((m) => m.id !== id))
+            }
           />
         </div>
       </>

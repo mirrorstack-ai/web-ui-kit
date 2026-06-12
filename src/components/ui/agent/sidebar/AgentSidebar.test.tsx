@@ -319,27 +319,41 @@ describe("AgentSidebarInput", () => {
   });
 });
 
-describe("AgentSidebarInput queued message", () => {
-  it("renders the chip with full text in the title attr", () => {
-    render(<AgentSidebarInput queuedMessage="Summarize the logs" />);
+describe("AgentSidebarInput queued messages", () => {
+  const queue = (...texts: string[]) =>
+    texts.map((text, i) => ({ id: `q-${i + 1}`, text }));
+
+  it("renders each row with full text in the title attr", () => {
+    render(<AgentSidebarInput queuedMessages={queue("Summarize the logs", "List new members")} />);
     expect(screen.getByTitle("Summarize the logs")).toBeInTheDocument();
+    expect(screen.getByTitle("List new members")).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Cancel queued message")).toHaveLength(2);
   });
 
-  it("does not render the chip when queuedMessage is absent", () => {
-    render(<AgentSidebarInput />);
+  it("shows the queued prefix on the first row only", () => {
+    render(<AgentSidebarInput queuedMessages={queue("First", "Second")} />);
+    expect(screen.getAllByText("Queued")).toHaveLength(1);
+  });
+
+  it("does not render rows when the queue is absent or empty", () => {
+    const { rerender } = render(<AgentSidebarInput />);
+    expect(screen.queryByLabelText("Cancel queued message")).not.toBeInTheDocument();
+    rerender(<AgentSidebarInput queuedMessages={[]} />);
     expect(screen.queryByLabelText("Cancel queued message")).not.toBeInTheDocument();
   });
 
-  it("calls onCancelQueued when X is clicked", () => {
+  it("calls onCancelQueued with the clicked row's id", () => {
     const onCancel = vi.fn();
-    render(<AgentSidebarInput queuedMessage="Summarize the logs" onCancelQueued={onCancel} />);
-    fireEvent.click(screen.getByLabelText("Cancel queued message"));
-    expect(onCancel).toHaveBeenCalledOnce();
+    render(
+      <AgentSidebarInput queuedMessages={queue("First", "Second")} onCancelQueued={onCancel} />,
+    );
+    fireEvent.click(screen.getAllByLabelText("Cancel queued message")[1]);
+    expect(onCancel).toHaveBeenCalledExactlyOnceWith("q-2");
   });
 
-  it("keeps the textarea usable while the chip is shown", () => {
+  it("keeps the textarea usable while rows are shown", () => {
     const onSend = vi.fn();
-    render(<AgentSidebarInput queuedMessage="A queued message" onSend={onSend} />);
+    render(<AgentSidebarInput queuedMessages={queue("A queued message")} onSend={onSend} />);
     const textarea = screen.getByLabelText("Message to agent");
     fireEvent.change(textarea, { target: { value: "hello" } });
     fireEvent.keyDown(textarea, { key: "Enter" });
@@ -349,7 +363,7 @@ describe("AgentSidebarInput queued message", () => {
   it("uses custom labels overrides", () => {
     render(
       <AgentSidebarInput
-        queuedMessage="Something"
+        queuedMessages={queue("Something")}
         onCancelQueued={() => {}}
         labels={{ cancelQueuedLabel: "Remove queued", queuedPrefix: "Next up" }}
       />,
