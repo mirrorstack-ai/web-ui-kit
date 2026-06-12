@@ -39,11 +39,13 @@ export interface AgentSidebarHeaderProps {
 const TAB_WIDTH = 100;
 const GAP = 6;
 const ADD_BTN = 40;
-const TABS_PAD = 52; // strip's pl-10 (40) + pr-3 (12) — clientWidth includes padding
 
 // Active tab notch (headOnly)
 const TAB_R = 12;
 const TAB_IR = 12;
+// strip's pl-10 (40px history-btn clearance) + pr-3 (TAB_IR curl clearance)
+// clientWidth includes the strip's own padding, so subtract both sides.
+const TABS_PAD = 40 + TAB_IR;
 const HEADER_H = 40;
 
 // History dropdown
@@ -126,7 +128,7 @@ export function AgentSidebarHeader({
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
     // clientWidth includes the strip's own pl-10 + pr-3 padding — subtract
-    // it, or the math overestimates by 52px and tabs squeeze (min-w-0 lets
+    // TABS_PAD, or the math overestimates and tabs squeeze (min-w-0 lets
     // them shrink) instead of collapsing into the overflow dropdown.
     const available = tabsContainerRef.current.clientWidth - TABS_PAD;
     const spaceForAll = tabs.length * TAB_WIDTH + (tabs.length - 1) * GAP;
@@ -437,12 +439,12 @@ export function AgentSidebarHeader({
       {/* Tabs — !transition-none on the tab + its inner box so flex-1
           width changes snap during a live sidebar drag instead of easing
           through whatever transition class the ancestor chain inherits.
-          pr-3 (12px) reserves the active-tab notch's trailing inverse-radius
-          curl (TAB_IR): tabs are flex-1, so when the active tab is LAST its
-          right edge sits flush at the strip's content edge and the curl
-          bleeds TAB_IR past it — anything less than 12px of padding paints
-          the dark curl under the header action icons. (pl-10 covers the
-          leading curl.) Keep TABS_PAD in sync. */}
+          pr-3 (TAB_IR = 12px) reserves the active-tab notch's trailing
+          inverse-radius curl: when the active tab is LAST its right edge
+          sits flush at the strip's content edge and the curl bleeds TAB_IR
+          past it — anything less paints the dark curl under the action
+          icons. (pl-10 covers the leading curl.) TABS_PAD is derived from
+          TAB_IR so they stay in sync automatically. */}
       <div ref={tabsContainerRef} className="flex-1 flex h-full overflow-hidden pl-10 pr-3 gap-1.5 !transition-none">
         {/* min-w-0 here too: without it a long tab title inflates the
             tablist's min-width:auto past the strip's content area and the
