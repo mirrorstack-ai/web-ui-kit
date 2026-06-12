@@ -29,6 +29,9 @@ export interface AgentSidebarHeaderProps {
   /** Enables the hover rename affordance on history rows.
    *  Called with the trimmed title (1-200 chars) when the user commits an inline rename. */
   onRenameConversation?: (id: string, title: string) => void;
+  /** Enables the hover delete affordance on history rows. Confirmation (if any)
+   *  is the consumer's responsibility; the kit fires immediately. */
+  onDeleteConversation?: (id: string) => void;
   /** Label overrides. All have EN defaults. */
   labels?: AgentSidebarHeaderLabels;
 }
@@ -65,6 +68,7 @@ export function AgentSidebarHeader({
   onCloseTab,
   onNewTab,
   onRenameConversation,
+  onDeleteConversation,
   labels,
 }: AgentSidebarHeaderProps) {
   const isCollapsed = sidebarWidth <= 350;
@@ -392,6 +396,16 @@ export function AgentSidebarHeader({
                                 <Icon name="edit" size={12} />
                               </button>
                             )}
+                            {onDeleteConversation && (
+                              <button
+                                type="button"
+                                className="w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-on-surface hover:bg-error/10 hover:text-error shrink-0 opacity-0 group-hover/item:opacity-70 group-hover/item:hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                                onClick={(e) => { e.stopPropagation(); onDeleteConversation(item.id); }}
+                                aria-label={labels?.deleteConversationLabel ?? "Delete conversation"}
+                              >
+                                <Icon name="delete" size={12} />
+                              </button>
+                            )}
                           </>
                         )}
                       </div>
@@ -420,7 +434,10 @@ export function AgentSidebarHeader({
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => handleSelectTab(tab.id)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelectTab(tab.id); } }}
-                className="group relative h-full flex flex-1 !transition-none"
+                // min-w-0 overrides the flex min-width:auto floor so a long
+                // title shrinks to the strip's allotment and ellipsizes
+                // (the inner box's min-w-[100px]/[80px] is the real floor).
+                className="group relative h-full flex flex-1 min-w-0 !transition-none"
               >
                 <div
                   className={cn(

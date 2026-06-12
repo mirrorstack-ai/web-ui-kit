@@ -211,6 +211,54 @@ describe("AgentSidebarHeader history rename", () => {
   });
 });
 
+describe("AgentSidebarHeader history delete", () => {
+  const historyData: AgentSidebarHistoryGroup[] = [
+    {
+      label: "Today",
+      items: [{ id: "h-1", title: "My conversation", updatedAt: "2026-06-12T10:00:00Z" }],
+    },
+  ];
+
+  const renderHistory = (props?: {
+    onDelete?: (id: string) => void;
+    onSelect?: (id: string) => void;
+  }) =>
+    render(
+      <AgentSidebarHeader
+        sidebarWidth={400}
+        onToggleCollapse={() => {}}
+        onClose={() => {}}
+        history={historyData}
+        onSelectHistoryItem={props?.onSelect ?? (() => {})}
+        onDeleteConversation={props?.onDelete}
+      />,
+    );
+
+  const openHistory = () => fireEvent.click(screen.getByLabelText("Chat history"));
+
+  it("shows the delete button when onDeleteConversation is provided", () => {
+    renderHistory({ onDelete: () => {} });
+    openHistory();
+    expect(screen.getByLabelText("Delete conversation")).toBeInTheDocument();
+  });
+
+  it("hides the delete button when onDeleteConversation is absent", () => {
+    renderHistory();
+    openHistory();
+    expect(screen.queryByLabelText("Delete conversation")).not.toBeInTheDocument();
+  });
+
+  it("calls onDeleteConversation with the row id, without opening the conversation", () => {
+    const onDelete = vi.fn();
+    const onSelect = vi.fn();
+    renderHistory({ onDelete, onSelect });
+    openHistory();
+    fireEvent.click(screen.getByLabelText("Delete conversation"));
+    expect(onDelete).toHaveBeenCalledWith("h-1");
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+});
+
 describe("AgentSidebarInput", () => {
   it("renders textarea", () => {
     render(<AgentSidebarInput />);

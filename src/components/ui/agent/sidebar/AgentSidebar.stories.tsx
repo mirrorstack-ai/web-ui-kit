@@ -9,6 +9,8 @@ import {
 import { mockAgentHistory, mockAgentMessages, mockAgentModels } from "./mock-data";
 import type { AgentSidebarHistoryGroup, ChatTab } from "./types";
 
+const DEFAULT_MODEL_ID = "anthropic.claude-haiku-4-5-20251001-v1:0";
+
 const meta: Meta = {
   title: "UI/Agent/Sidebar",
   decorators: [
@@ -22,6 +24,7 @@ const meta: Meta = {
 
 export default meta;
 
+/** Uncontrolled header: internal tab state, history open/select only. */
 export const Header: StoryObj = {
   render: () => {
     const [width, setWidth] = useState(420);
@@ -39,6 +42,8 @@ export const Header: StoryObj = {
   },
 };
 
+/** Controlled tabs: titles from the consumer, history opens as a NEW tab,
+ *  long titles ellipsize within the strip's allotment. */
 export const ControlledTabs: StoryObj = {
   render: () => {
     const [tabs, setTabs] = useState<ChatTab[]>([
@@ -60,7 +65,6 @@ export const ControlledTabs: StoryObj = {
           onClose={() => {}}
           history={mockAgentHistory}
           onSelectHistoryItem={(id) => {
-            // Consumer opens a history entry as a NEW tab.
             const item = mockAgentHistory
               .flatMap((g) => g.items)
               .find((i) => i.id === id);
@@ -82,7 +86,8 @@ export const ControlledTabs: StoryObj = {
   },
 };
 
-export const HistoryRename: StoryObj = {
+/** History row actions: hover edit (inline rename) + hover delete. */
+export const History: StoryObj = {
   render: () => {
     const [history, setHistory] = useState<AgentSidebarHistoryGroup[]>(mockAgentHistory);
     return (
@@ -103,33 +108,29 @@ export const HistoryRename: StoryObj = {
               })),
             );
           }}
+          onDeleteConversation={(id) => {
+            setHistory((prev) =>
+              prev
+                .map((g) => ({ ...g, items: g.items.filter((item) => item.id !== id) }))
+                .filter((g) => g.items.length > 0),
+            );
+          }}
         />
       </div>
     );
   },
 };
 
+/** Composer with the model selector — the realistic host configuration. */
 export const Input: StoryObj = {
-  render: () => (
-    <div className="mt-auto bg-on-background rounded-b-2xl">
-      <AgentSidebarInput
-        onSend={(msg) => console.log("Send:", msg)}
-        onAttachFile={() => console.log("attach")}
-        onMic={() => console.log("mic")}
-      />
-    </div>
-  ),
-};
-
-export const InputWithModelSelector: StoryObj = {
   render: () => {
-    const [modelId, setModelId] = useState(
-      "anthropic.claude-haiku-4-5-20251001-v1:0",
-    );
+    const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
     return (
       <div className="mt-auto bg-on-background rounded-b-2xl">
         <AgentSidebarInput
           onSend={(msg) => console.log("Send:", msg)}
+          onAttachFile={() => console.log("attach")}
+          onMic={() => console.log("mic")}
           models={mockAgentModels}
           selectedModelId={modelId}
           onSelectModel={setModelId}
@@ -139,31 +140,13 @@ export const InputWithModelSelector: StoryObj = {
   },
 };
 
+/** Queued-message chip pinned above the textarea while a reply streams. */
 export const QueuedMessage: StoryObj = {
   render: () => {
     const [queued, setQueued] = useState<string | undefined>(
       "Summarize the last 3 deployments and show me any failures",
     );
-    return (
-      <div className="mt-auto bg-on-background rounded-b-2xl">
-        <AgentSidebarInput
-          onSend={(msg) => console.log("Send:", msg)}
-          queuedMessage={queued}
-          onCancelQueued={() => setQueued(undefined)}
-        />
-      </div>
-    );
-  },
-};
-
-export const QueuedMessageWithModelSelector: StoryObj = {
-  render: () => {
-    const [queued, setQueued] = useState<string | undefined>(
-      "Summarize the last 3 deployments",
-    );
-    const [modelId, setModelId] = useState(
-      "anthropic.claude-haiku-4-5-20251001-v1:0",
-    );
+    const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
     return (
       <div className="mt-auto bg-on-background rounded-b-2xl">
         <AgentSidebarInput
@@ -227,7 +210,7 @@ export const Playground: StoryObj = {
             onAttachFile={() => console.log("attach")}
             onMic={() => console.log("mic")}
             models={mockAgentModels}
-            selectedModelId="anthropic.claude-haiku-4-5-20251001-v1:0"
+            selectedModelId={DEFAULT_MODEL_ID}
           />
         </div>
       </>

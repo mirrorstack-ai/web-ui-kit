@@ -27,6 +27,8 @@ export interface AgentSidebarHeaderLabels {
   renameConversationLabel?: string;
   /** aria-label on the cancel-rename button. Default: "Cancel rename" */
   cancelRenameLabel?: string;
+  /** aria-label on the delete icon button in a history row. Default: "Delete conversation" */
+  deleteConversationLabel?: string;
   /** aria-label on the + button and text of the overflow new-chat entry. Default: "New chat" */
   newChatLabel?: string;
 }
