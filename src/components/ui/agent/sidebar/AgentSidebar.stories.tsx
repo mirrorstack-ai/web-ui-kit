@@ -86,6 +86,45 @@ export const ControlledTabs: StoryObj = {
   },
 };
 
+/** Regression: ACTIVE tab is the LAST tab in the strip, right next to the
+ *  header action icons. Tabs are flex-1, so the active tab's right edge sits
+ *  flush at the strip's content edge and its notch overlay flares TAB_IR
+ *  (12px) past it — the strip's pr-3 must absorb that curl so the dark
+ *  on-background fill never paints under the + / collapse / close icons. */
+export const ActiveLastTab: StoryObj = {
+  render: () => {
+    const [tabs, setTabs] = useState<ChatTab[]>([
+      { id: "conv-1", title: "New chat" },
+      { id: "conv-2", title: "Deploy checklist" },
+    ]);
+    const [activeTabId, setActiveTabId] = useState("conv-2");
+    const nextIdRef = useRef(3);
+    return (
+      <div className="bg-surface-container">
+        <AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() => {}}
+          onClose={() => {}}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelectTab={setActiveTabId}
+          onCloseTab={(id) => {
+            const next = tabs.filter((t) => t.id !== id);
+            if (!next.length) return;
+            setTabs(next);
+            if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+          }}
+          onNewTab={() => {
+            const tab = { id: `conv-${nextIdRef.current++}`, title: "New chat" };
+            setTabs((prev) => [...prev, tab]);
+            setActiveTabId(tab.id);
+          }}
+        />
+      </div>
+    );
+  },
+};
+
 /** History row actions: hover edit (inline rename) + hover delete. */
 export const History: StoryObj = {
   render: () => {
