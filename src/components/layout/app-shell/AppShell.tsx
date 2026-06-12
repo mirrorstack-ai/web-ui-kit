@@ -80,6 +80,9 @@ export interface AppShellProps {
   /** Enables the hover delete affordance on agent history rows. Confirmation
    *  (if any) is the consumer's responsibility; the kit fires immediately. */
   onDeleteAgentConversation?: AgentSidebarHeaderProps["onDeleteConversation"];
+  /** Label overrides for the agent header (history, rename, new-chat strings).
+   *  All have EN defaults. */
+  agentHeaderLabels?: AgentSidebarHeaderProps["labels"];
   /** Messages waiting to send once the current reply finishes — rendered as
    *  cancellable rows above the agent input, in send order. Display-only:
    *  queueing logic lives in the consumer. */
@@ -94,6 +97,11 @@ export interface AppShellProps {
   agentModels?: AgentSidebarInputModel[];
   selectedAgentModelId?: string;
   onSelectAgentModel?: (id: string) => void;
+  /** Placeholder for the agent input textarea. Default: "Type a message..." */
+  agentInputPlaceholder?: AgentSidebarInputProps["placeholder"];
+  /** Label overrides for the agent input (queued-message strings).
+   *  All have EN defaults. */
+  agentInputLabels?: AgentSidebarInputProps["labels"];
 }
 
 export function AppShell(props: AppShellProps) {
@@ -217,12 +225,15 @@ function AppShellInner({
   onNewAgentTab,
   onRenameAgentConversation,
   onDeleteAgentConversation,
+  agentHeaderLabels,
   agentQueuedMessages,
   onCancelAgentQueued,
   agentPendingContent,
   agentModels,
   selectedAgentModelId,
   onSelectAgentModel,
+  agentInputPlaceholder,
+  agentInputLabels,
 }: AppShellProps) {
   const { sidebarWidth, setSidebarWidth } = useSidebarWidth();
   const [isResizing, setIsResizing] = useState(false);
@@ -404,6 +415,7 @@ function AppShellInner({
                 onNewTab={onNewAgentTab}
                 onRenameConversation={onRenameAgentConversation}
                 onDeleteConversation={onDeleteAgentConversation}
+                labels={agentHeaderLabels}
               />
 
               <div className="rounded-2xl bg-on-background flex-1 min-h-0 flex flex-col">
@@ -421,11 +433,13 @@ function AppShellInner({
                   onSend={onAgentSend}
                   onAttachFile={onAgentAttachFile}
                   onMic={onAgentMic}
+                  placeholder={agentInputPlaceholder}
                   models={agentModels}
                   selectedModelId={selectedAgentModelId}
                   onSelectModel={onSelectAgentModel}
                   queuedMessages={agentQueuedMessages}
                   onCancelQueued={onCancelAgentQueued}
+                  labels={agentInputLabels}
                 />
               </div>
             </div>

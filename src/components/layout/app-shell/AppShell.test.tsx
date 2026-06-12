@@ -164,6 +164,34 @@ describe("AppShell agent sidebar pass-through", () => {
     expect(onCancel).toHaveBeenCalledWith("q1");
   });
 
+  it("forwards label overrides and placeholder to the header and input", () => {
+    render(
+      <AppShell
+        agentHeaderLabels={{ historyButtonLabel: "歷史紀錄", newChatLabel: "新對話" }}
+        agentInputLabels={{ queuedPrefix: "排隊中", cancelQueuedLabel: "取消排隊訊息" }}
+        agentInputPlaceholder="輸入訊息…"
+        agentQueuedMessages={[{ id: "q1", text: "Queued question" }]}
+      >
+        content
+      </AppShell>,
+    );
+    openSidebar();
+
+    expect(screen.getByLabelText("歷史紀錄")).toBeInTheDocument();
+    expect(screen.getByLabelText("新對話")).toBeInTheDocument();
+    expect(screen.getByText("排隊中")).toBeInTheDocument();
+    expect(screen.getByLabelText("取消排隊訊息")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("輸入訊息…")).toBeInTheDocument();
+  });
+
+  it("keeps the EN label defaults when no label props are wired", () => {
+    render(<AppShell>content</AppShell>);
+    openSidebar();
+    expect(screen.getByLabelText("Chat history")).toBeInTheDocument();
+    expect(screen.getByLabelText("New chat")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Type a message...")).toBeInTheDocument();
+  });
+
   it("keeps the uncontrolled tab fallback when no tab props are wired", () => {
     render(<AppShell>content</AppShell>);
     openSidebar();
