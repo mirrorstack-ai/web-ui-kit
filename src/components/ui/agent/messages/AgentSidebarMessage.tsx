@@ -95,6 +95,8 @@ export function AgentSidebarAgentMessage({
 // Spacing rhythm shared by every block element so a message starts and ends
 // flush with its bubble regardless of which block comes first/last.
 const BLOCK = "my-2 first:mt-0 last:mb-0";
+// h2–h4 share identical size/weight; only h1 is promoted to text-base.
+const HEADING_SM = cn(BLOCK, "mt-3 text-sm font-semibold");
 
 /** Markdown element styling on the kit's inverse sidebar surface. Raw HTML is
  *  never rendered (no rehype-raw) — model-emitted tags stay inert text. */
@@ -117,15 +119,9 @@ const markdownComponents: Components = {
   h1: ({ node: _node, ...props }) => (
     <h1 className={cn(BLOCK, "mt-3 text-base font-semibold")} {...props} />
   ),
-  h2: ({ node: _node, ...props }) => (
-    <h2 className={cn(BLOCK, "mt-3 text-sm font-semibold")} {...props} />
-  ),
-  h3: ({ node: _node, ...props }) => (
-    <h3 className={cn(BLOCK, "mt-3 text-sm font-semibold")} {...props} />
-  ),
-  h4: ({ node: _node, ...props }) => (
-    <h4 className={cn(BLOCK, "mt-3 text-sm font-semibold")} {...props} />
-  ),
+  h2: ({ node: _node, ...props }) => <h2 className={HEADING_SM} {...props} />,
+  h3: ({ node: _node, ...props }) => <h3 className={HEADING_SM} {...props} />,
+  h4: ({ node: _node, ...props }) => <h4 className={HEADING_SM} {...props} />,
   // Inline code chip. Fenced code lives inside <pre>, which resets the chip
   // styles below so block code reads as one surface, not nested chips.
   code: ({ node: _node, ...props }) => (
@@ -171,12 +167,14 @@ const markdownComponents: Components = {
   ),
 };
 
+const REMARK_PLUGINS = [remarkGfm];
+
 /** Agent reply body. Re-parses the full content on every render, which keeps
  *  streaming safe: an unterminated fence or half-written emphasis is just
  *  parsed as-is for that frame and settles once the closing chunk arrives. */
 function AgentMarkdown({ content }: { content: string }) {
   return (
-    <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+    <Markdown remarkPlugins={REMARK_PLUGINS} components={markdownComponents}>
       {content}
     </Markdown>
   );
