@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">4/73 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">73/73 infos</a><span class="filter-pill ok" aria-disabled="true">281 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">290 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -12889,6 +12889,418 @@ entries: TimelineEntry[]</code></pre>
 </article>
 <article
   class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="ToolCall">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> ToolCall</h2>
+      <div class="badges">
+        <label for="c-71-ui-agent-toolcall-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-71-ui-agent-toolcall-info" class="badge info as-toggle">1 info</label>
+        <label for="c-71-ui-agent-toolcall-stories" class="badge ok as-toggle">9 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/agent/messages/AgentSidebarToolCall.stories.tsx">ui-agent-toolcall · ./src/components/ui/agent/messages/AgentSidebarToolCall.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-71-ui-agent-toolcall-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-71-ui-agent-toolcall-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-71-ui-agent-toolcall-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
+   6 | } from &quot;./AgentSidebarMessages&quot;;
+   7 |
+&gt;  8 | const meta: Meta = {
+     | ^
+   9 |   title: &quot;UI/Agent/ToolCall&quot;,
+  10 |   decorators: [
+  11 |     (Story) =&gt; (
+
+./src/components/ui/agent/messages/AgentSidebarToolCall.stories.tsx:
+import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
+import { AgentSidebarToolCall } from &quot;./AgentSidebarToolCall&quot;;
+import {
+  AgentSidebarMessages,
+  type AgentSidebarMessage,
+} from &quot;./AgentSidebarMessages&quot;;
+
+const meta: Meta = {
+  title: &quot;UI/Agent/ToolCall&quot;,
+  decorators: [
+    (Story) =&gt; (
+      &lt;div className=&quot;w-[420px] rounded-2xl bg-on-background p-4 flex flex-col gap-2&quot;&gt;
+        &lt;Story /&gt;
+      &lt;/div&gt;
+    ),
+  ],
+};
+
+export default meta;
+
+export const Started: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;get_page&quot;, status: &quot;started&quot; }}
+    /&gt;
+  ),
+};
+
+export const Done: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;get_page&quot;, status: &quot;done&quot;, durationMs: 1234 }}
+    /&gt;
+  ),
+};
+
+export const DoneWithDetail: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{
+        moduleSlug: &quot;cms&quot;,
+        tool: &quot;get_page&quot;,
+        status: &quot;done&quot;,
+        durationMs: 842,
+        args: { slug: &quot;home&quot; },
+        result: { id: &quot;abc123&quot;, title: &quot;Home&quot;, status: &quot;published&quot; },
+      }}
+    /&gt;
+  ),
+};
+
+export const ErrorNoDetail: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;create_post&quot;, status: &quot;error&quot; }}
+    /&gt;
+  ),
+};
+
+export const ErrorWithDetail: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{
+        moduleSlug: &quot;cms&quot;,
+        tool: &quot;create_post&quot;,
+        status: &quot;error&quot;,
+        durationMs: 310,
+        args: { title: &quot;Draft 1&quot;, body: &quot;...&quot; },
+        error: &quot;permission_denied: you are not an admin of this app&quot;,
+      }}
+    /&gt;
+  ),
+};
+
+/** Account-scope call: 3-segment app · module · tool label. */
+export const WithAppSlug: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{
+        appSlug: &quot;kaohsiung-pet&quot;,
+        moduleSlug: &quot;cms&quot;,
+        tool: &quot;list_posts&quot;,
+        status: &quot;done&quot;,
+        durationMs: 93,
+        args: { limit: 10 },
+        result: [{ id: &quot;1&quot; }, { id: &quot;2&quot; }],
+      }}
+    /&gt;
+  ),
+};
+
+/** B-2 caps 16 calls per turn — the stack must stay calm. */
+export const SixteenRowStack: StoryObj = {
+  render: () =&gt; {
+    const messages: AgentSidebarMessage[] = Array.from({ length: 16 }, (_, i) =&gt; ({
+      id: `tool-${i}`,
+      role: &quot;tool&quot; as const,
+      tool: {
+        moduleSlug: `module-${(i % 3) + 1}`,
+        tool: [&quot;fetch_data&quot;, &quot;write_record&quot;, &quot;send_event&quot;][i % 3],
+        status: ([&quot;started&quot;, &quot;done&quot;, &quot;error&quot;] as const)[i % 3],
+        durationMs: i % 3 !== 0 ? 100 + i * 50 : undefined,
+      },
+    }));
+    return &lt;AgentSidebarMessages messages={messages} autoScroll={false} /&gt;;
+  },
+};
+
+/** Replay: persisted rows carry full meta (args/result/duration). */
+export const ReplayShape: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages
+      autoScroll={false}
+      messages={[
+        { id: &quot;u1&quot;, role: &quot;user&quot;, content: &quot;List my recent posts&quot; },
+        {
+          id: &quot;t1&quot;,
+          role: &quot;tool&quot;,
+          tool: {
+            moduleSlug: &quot;cms&quot;,
+            tool: &quot;list_posts&quot;,
+            status: &quot;done&quot;,
+            durationMs: 214,
+            args: { limit: 5 },
+            result: [{ id: &quot;p1&quot;, title: &quot;Hello world&quot; }],
+          },
+        },
+        {
+          id: &quot;a1&quot;,
+          role: &quot;agent&quot;,
+          content: &#39;You have 1 recent post: &quot;Hello world&quot;.&#39;,
+        },
+      ]}
+    /&gt;
+  ),
+};
+
+/** Live: the SSE `tool` event carries no args/result — a transient started row. */
+export const LiveShape: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages
+      autoScroll={false}
+      messages={[
+        { id: &quot;u1&quot;, role: &quot;user&quot;, content: &quot;Publish the draft&quot; },
+        {
+          id: &quot;t1&quot;,
+          role: &quot;tool&quot;,
+          tool: {
+            moduleSlug: &quot;cms&quot;,
+            tool: &quot;publish_post&quot;,
+            status: &quot;started&quot;,
+          },
+        },
+      ]}
+    /&gt;
+  ),
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { AgentSidebarMessages, AgentSidebarToolCall } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Started</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Started = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;get_page&quot;, status: &quot;started&quot; }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Done</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Done = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;get_page&quot;, status: &quot;done&quot;, durationMs: 1234 }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Done With Detail</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const DoneWithDetail = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{
+      moduleSlug: &quot;cms&quot;,
+      tool: &quot;get_page&quot;,
+      status: &quot;done&quot;,
+      durationMs: 842,
+      args: { slug: &quot;home&quot; },
+      result: { id: &quot;abc123&quot;, title: &quot;Home&quot;, status: &quot;published&quot; },
+    }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Error No Detail</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ErrorNoDetail = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;create_post&quot;, status: &quot;error&quot; }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Error With Detail</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ErrorWithDetail = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{
+      moduleSlug: &quot;cms&quot;,
+      tool: &quot;create_post&quot;,
+      status: &quot;error&quot;,
+      durationMs: 310,
+      args: { title: &quot;Draft 1&quot;, body: &quot;...&quot; },
+      error: &quot;permission_denied: you are not an admin of this app&quot;,
+    }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With App Slug</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Account-scope call: 3-segment app · module · tool label.</div>
+              <pre><code>const WithAppSlug = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{
+      appSlug: &quot;kaohsiung-pet&quot;,
+      moduleSlug: &quot;cms&quot;,
+      tool: &quot;list_posts&quot;,
+      status: &quot;done&quot;,
+      durationMs: 93,
+      args: { limit: 10 },
+      result: [{ id: &quot;1&quot; }, { id: &quot;2&quot; }],
+    }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Sixteen Row Stack</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">B-2 caps 16 calls per turn — the stack must stay calm.</div>
+              <pre><code>const SixteenRowStack = () =&gt; {
+  const messages: AgentSidebarMessage[] = Array.from({ length: 16 }, (_, i) =&gt; ({
+    id: `tool-${i}`,
+    role: &quot;tool&quot; as const,
+    tool: {
+      moduleSlug: `module-${(i % 3) + 1}`,
+      tool: [&quot;fetch_data&quot;, &quot;write_record&quot;, &quot;send_event&quot;][i % 3],
+      status: ([&quot;started&quot;, &quot;done&quot;, &quot;error&quot;] as const)[i % 3],
+      durationMs: i % 3 !== 0 ? 100 + i * 50 : undefined,
+    },
+  }));
+  return &lt;AgentSidebarMessages messages={messages} autoScroll={false} /&gt;;
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Replay Shape</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Replay: persisted rows carry full meta (args/result/duration).</div>
+              <pre><code>const ReplayShape = () =&gt; (
+  &lt;AgentSidebarMessages
+    autoScroll={false}
+    messages={[
+      { id: &quot;u1&quot;, role: &quot;user&quot;, content: &quot;List my recent posts&quot; },
+      {
+        id: &quot;t1&quot;,
+        role: &quot;tool&quot;,
+        tool: {
+          moduleSlug: &quot;cms&quot;,
+          tool: &quot;list_posts&quot;,
+          status: &quot;done&quot;,
+          durationMs: 214,
+          args: { limit: 5 },
+          result: [{ id: &quot;p1&quot;, title: &quot;Hello world&quot; }],
+        },
+      },
+      {
+        id: &quot;a1&quot;,
+        role: &quot;agent&quot;,
+        content: &#39;You have 1 recent post: &quot;Hello world&quot;.&#39;,
+      },
+    ]}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Live Shape</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Live: the SSE `tool` event carries no args/result — a transient started row.</div>
+              <pre><code>const LiveShape = () =&gt; (
+  &lt;AgentSidebarMessages
+    autoScroll={false}
+    messages={[
+      { id: &quot;u1&quot;, role: &quot;user&quot;, content: &quot;Publish the draft&quot; },
+      {
+        id: &quot;t1&quot;,
+        role: &quot;tool&quot;,
+        tool: {
+          moduleSlug: &quot;cms&quot;,
+          tool: &quot;publish_post&quot;,
+          status: &quot;started&quot;,
+        },
+      },
+    ]}
+  /&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
   no-error 
   has-info 
   no-story-error
@@ -12899,9 +13311,9 @@ entries: TimelineEntry[]</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> TypeToConfirmDialog</h2>
       <div class="badges">
-        <label for="c-71-ui-surfaces-typetoconfirmdialog-props" class="badge ok as-toggle">11 prop types</label>
-        <label for="c-71-ui-surfaces-typetoconfirmdialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-71-ui-surfaces-typetoconfirmdialog-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-72-ui-surfaces-typetoconfirmdialog-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-72-ui-surfaces-typetoconfirmdialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-72-ui-surfaces-typetoconfirmdialog-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -12913,10 +13325,10 @@ entries: TimelineEntry[]</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-71-ui-surfaces-typetoconfirmdialog-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-71-ui-surfaces-typetoconfirmdialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-72-ui-surfaces-typetoconfirmdialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-72-ui-surfaces-typetoconfirmdialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-71-ui-surfaces-typetoconfirmdialog-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-72-ui-surfaces-typetoconfirmdialog-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -13142,9 +13554,9 @@ warnTitle: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> VerificationCodeInput</h2>
       <div class="badges">
-        <label for="c-72-ui-inputs-verificationcodeinput-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-72-ui-inputs-verificationcodeinput-info" class="badge info as-toggle">1 info</label>
-        <label for="c-72-ui-inputs-verificationcodeinput-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-73-ui-inputs-verificationcodeinput-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-73-ui-inputs-verificationcodeinput-info" class="badge info as-toggle">1 info</label>
+        <label for="c-73-ui-inputs-verificationcodeinput-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -13156,10 +13568,10 @@ warnTitle: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-72-ui-inputs-verificationcodeinput-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-72-ui-inputs-verificationcodeinput-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-73-ui-inputs-verificationcodeinput-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-73-ui-inputs-verificationcodeinput-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-72-ui-inputs-verificationcodeinput-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-73-ui-inputs-verificationcodeinput-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -13284,7 +13696,7 @@ value: string</code></pre>
           <label for="no-component-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component found</span>
-            <span class="group-count">3</span>
+            <span class="group-count">4</span>
           </label>
           <div class="group-cards">
 <article
@@ -14393,6 +14805,418 @@ export const Playground: StoryObj = {
     &lt;/&gt;
   );
 };</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="ToolCall">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> ToolCall</h2>
+      <div class="badges">
+        <label for="c-error-3-ui-agent-toolcall-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-3-ui-agent-toolcall-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-3-ui-agent-toolcall-stories" class="badge ok as-toggle">9 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/agent/messages/AgentSidebarToolCall.stories.tsx">ui-agent-toolcall · ./src/components/ui/agent/messages/AgentSidebarToolCall.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-3-ui-agent-toolcall-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-3-ui-agent-toolcall-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-3-ui-agent-toolcall-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
+   6 | } from &quot;./AgentSidebarMessages&quot;;
+   7 |
+&gt;  8 | const meta: Meta = {
+     | ^
+   9 |   title: &quot;UI/Agent/ToolCall&quot;,
+  10 |   decorators: [
+  11 |     (Story) =&gt; (
+
+./src/components/ui/agent/messages/AgentSidebarToolCall.stories.tsx:
+import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
+import { AgentSidebarToolCall } from &quot;./AgentSidebarToolCall&quot;;
+import {
+  AgentSidebarMessages,
+  type AgentSidebarMessage,
+} from &quot;./AgentSidebarMessages&quot;;
+
+const meta: Meta = {
+  title: &quot;UI/Agent/ToolCall&quot;,
+  decorators: [
+    (Story) =&gt; (
+      &lt;div className=&quot;w-[420px] rounded-2xl bg-on-background p-4 flex flex-col gap-2&quot;&gt;
+        &lt;Story /&gt;
+      &lt;/div&gt;
+    ),
+  ],
+};
+
+export default meta;
+
+export const Started: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;get_page&quot;, status: &quot;started&quot; }}
+    /&gt;
+  ),
+};
+
+export const Done: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;get_page&quot;, status: &quot;done&quot;, durationMs: 1234 }}
+    /&gt;
+  ),
+};
+
+export const DoneWithDetail: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{
+        moduleSlug: &quot;cms&quot;,
+        tool: &quot;get_page&quot;,
+        status: &quot;done&quot;,
+        durationMs: 842,
+        args: { slug: &quot;home&quot; },
+        result: { id: &quot;abc123&quot;, title: &quot;Home&quot;, status: &quot;published&quot; },
+      }}
+    /&gt;
+  ),
+};
+
+export const ErrorNoDetail: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;create_post&quot;, status: &quot;error&quot; }}
+    /&gt;
+  ),
+};
+
+export const ErrorWithDetail: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{
+        moduleSlug: &quot;cms&quot;,
+        tool: &quot;create_post&quot;,
+        status: &quot;error&quot;,
+        durationMs: 310,
+        args: { title: &quot;Draft 1&quot;, body: &quot;...&quot; },
+        error: &quot;permission_denied: you are not an admin of this app&quot;,
+      }}
+    /&gt;
+  ),
+};
+
+/** Account-scope call: 3-segment app · module · tool label. */
+export const WithAppSlug: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarToolCall
+      tool={{
+        appSlug: &quot;kaohsiung-pet&quot;,
+        moduleSlug: &quot;cms&quot;,
+        tool: &quot;list_posts&quot;,
+        status: &quot;done&quot;,
+        durationMs: 93,
+        args: { limit: 10 },
+        result: [{ id: &quot;1&quot; }, { id: &quot;2&quot; }],
+      }}
+    /&gt;
+  ),
+};
+
+/** B-2 caps 16 calls per turn — the stack must stay calm. */
+export const SixteenRowStack: StoryObj = {
+  render: () =&gt; {
+    const messages: AgentSidebarMessage[] = Array.from({ length: 16 }, (_, i) =&gt; ({
+      id: `tool-${i}`,
+      role: &quot;tool&quot; as const,
+      tool: {
+        moduleSlug: `module-${(i % 3) + 1}`,
+        tool: [&quot;fetch_data&quot;, &quot;write_record&quot;, &quot;send_event&quot;][i % 3],
+        status: ([&quot;started&quot;, &quot;done&quot;, &quot;error&quot;] as const)[i % 3],
+        durationMs: i % 3 !== 0 ? 100 + i * 50 : undefined,
+      },
+    }));
+    return &lt;AgentSidebarMessages messages={messages} autoScroll={false} /&gt;;
+  },
+};
+
+/** Replay: persisted rows carry full meta (args/result/duration). */
+export const ReplayShape: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages
+      autoScroll={false}
+      messages={[
+        { id: &quot;u1&quot;, role: &quot;user&quot;, content: &quot;List my recent posts&quot; },
+        {
+          id: &quot;t1&quot;,
+          role: &quot;tool&quot;,
+          tool: {
+            moduleSlug: &quot;cms&quot;,
+            tool: &quot;list_posts&quot;,
+            status: &quot;done&quot;,
+            durationMs: 214,
+            args: { limit: 5 },
+            result: [{ id: &quot;p1&quot;, title: &quot;Hello world&quot; }],
+          },
+        },
+        {
+          id: &quot;a1&quot;,
+          role: &quot;agent&quot;,
+          content: &#39;You have 1 recent post: &quot;Hello world&quot;.&#39;,
+        },
+      ]}
+    /&gt;
+  ),
+};
+
+/** Live: the SSE `tool` event carries no args/result — a transient started row. */
+export const LiveShape: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages
+      autoScroll={false}
+      messages={[
+        { id: &quot;u1&quot;, role: &quot;user&quot;, content: &quot;Publish the draft&quot; },
+        {
+          id: &quot;t1&quot;,
+          role: &quot;tool&quot;,
+          tool: {
+            moduleSlug: &quot;cms&quot;,
+            tool: &quot;publish_post&quot;,
+            status: &quot;started&quot;,
+          },
+        },
+      ]}
+    /&gt;
+  ),
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { AgentSidebarMessages, AgentSidebarToolCall } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Started</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Started = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;get_page&quot;, status: &quot;started&quot; }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Done</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Done = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;get_page&quot;, status: &quot;done&quot;, durationMs: 1234 }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Done With Detail</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const DoneWithDetail = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{
+      moduleSlug: &quot;cms&quot;,
+      tool: &quot;get_page&quot;,
+      status: &quot;done&quot;,
+      durationMs: 842,
+      args: { slug: &quot;home&quot; },
+      result: { id: &quot;abc123&quot;, title: &quot;Home&quot;, status: &quot;published&quot; },
+    }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Error No Detail</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ErrorNoDetail = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{ moduleSlug: &quot;cms&quot;, tool: &quot;create_post&quot;, status: &quot;error&quot; }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Error With Detail</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ErrorWithDetail = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{
+      moduleSlug: &quot;cms&quot;,
+      tool: &quot;create_post&quot;,
+      status: &quot;error&quot;,
+      durationMs: 310,
+      args: { title: &quot;Draft 1&quot;, body: &quot;...&quot; },
+      error: &quot;permission_denied: you are not an admin of this app&quot;,
+    }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With App Slug</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Account-scope call: 3-segment app · module · tool label.</div>
+              <pre><code>const WithAppSlug = () =&gt; (
+  &lt;AgentSidebarToolCall
+    tool={{
+      appSlug: &quot;kaohsiung-pet&quot;,
+      moduleSlug: &quot;cms&quot;,
+      tool: &quot;list_posts&quot;,
+      status: &quot;done&quot;,
+      durationMs: 93,
+      args: { limit: 10 },
+      result: [{ id: &quot;1&quot; }, { id: &quot;2&quot; }],
+    }}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Sixteen Row Stack</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">B-2 caps 16 calls per turn — the stack must stay calm.</div>
+              <pre><code>const SixteenRowStack = () =&gt; {
+  const messages: AgentSidebarMessage[] = Array.from({ length: 16 }, (_, i) =&gt; ({
+    id: `tool-${i}`,
+    role: &quot;tool&quot; as const,
+    tool: {
+      moduleSlug: `module-${(i % 3) + 1}`,
+      tool: [&quot;fetch_data&quot;, &quot;write_record&quot;, &quot;send_event&quot;][i % 3],
+      status: ([&quot;started&quot;, &quot;done&quot;, &quot;error&quot;] as const)[i % 3],
+      durationMs: i % 3 !== 0 ? 100 + i * 50 : undefined,
+    },
+  }));
+  return &lt;AgentSidebarMessages messages={messages} autoScroll={false} /&gt;;
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Replay Shape</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Replay: persisted rows carry full meta (args/result/duration).</div>
+              <pre><code>const ReplayShape = () =&gt; (
+  &lt;AgentSidebarMessages
+    autoScroll={false}
+    messages={[
+      { id: &quot;u1&quot;, role: &quot;user&quot;, content: &quot;List my recent posts&quot; },
+      {
+        id: &quot;t1&quot;,
+        role: &quot;tool&quot;,
+        tool: {
+          moduleSlug: &quot;cms&quot;,
+          tool: &quot;list_posts&quot;,
+          status: &quot;done&quot;,
+          durationMs: 214,
+          args: { limit: 5 },
+          result: [{ id: &quot;p1&quot;, title: &quot;Hello world&quot; }],
+        },
+      },
+      {
+        id: &quot;a1&quot;,
+        role: &quot;agent&quot;,
+        content: &#39;You have 1 recent post: &quot;Hello world&quot;.&#39;,
+      },
+    ]}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Live Shape</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Live: the SSE `tool` event carries no args/result — a transient started row.</div>
+              <pre><code>const LiveShape = () =&gt; (
+  &lt;AgentSidebarMessages
+    autoScroll={false}
+    messages={[
+      { id: &quot;u1&quot;, role: &quot;user&quot;, content: &quot;Publish the draft&quot; },
+      {
+        id: &quot;t1&quot;,
+        role: &quot;tool&quot;,
+        tool: {
+          moduleSlug: &quot;cms&quot;,
+          tool: &quot;publish_post&quot;,
+          status: &quot;started&quot;,
+        },
+      },
+    ]}
+  /&gt;
+);</code></pre>
             </div>
         </div>
     
