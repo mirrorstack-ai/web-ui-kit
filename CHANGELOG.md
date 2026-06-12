@@ -3,6 +3,31 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.4.12
+
+Agent sidebar surface reachable through `AppShell`, headless agent-chat hooks,
+Markdown replies. **No breaking changes**; all new props/exports are optional.
+
+- `AppShell`: forwards the controlled agent sidebar surface — tabs
+  (`agentTabs` / `activeAgentTabId` / `onSelectAgentTab` / `onCloseAgentTab` /
+  `onNewAgentTab`), history rename/delete (`onRenameAgentConversation` /
+  `onDeleteAgentConversation`), queued chips (`agentQueuedMessages` /
+  `onCancelAgentQueued`). (#285)
+- `AppShell`: forwards the sidebar label/i18n surface — `agentHeaderLabels`,
+  `agentInputLabels`, `agentInputPlaceholder`. (#286)
+- `useAgentChat(client, opts)` / `useQueuedAgentSend(chat, scopeKey)` (new
+  hooks): headless agent-chat state machine (SSE streaming, tool-call rows,
+  replay, history, optimistic rename/feedback) + FIFO send queue. Transport is
+  injected via the new structural `AgentChatClient` type — no
+  api-client-shared dependency. Also exports
+  `groupConversationsByRecency`. (#288)
+- `AgentSidebarReply`: streamed replies render as Markdown (headings, lists,
+  code, links, emphasis) instead of plain text. (#283, regression-locked
+  in #287)
+- `Sparkline`: new `strokeWidth` and `opacity` props. (#282)
+- Fix: active-tab notch curl no longer overlaps the agent sidebar header
+  action icons. (#284)
+
 ## 0.4.9
 
 - `AgentSidebarInput`: new optional `detail` field on `AgentSidebarInputModel` —
