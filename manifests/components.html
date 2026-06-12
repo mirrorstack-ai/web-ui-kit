@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">296 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">297 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1130,9 +1130,9 @@ variant: | &quot;error&quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppShell</h2>
       <div class="badges">
-        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">20 prop types</label>
+        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">29 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -1164,11 +1164,16 @@ variant: | &quot;error&quot;
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">20 prop types</span>
+              <span class="badge ok">29 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/app-shell/AppShell.tsx::AppShell</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>/**
+ * Controlled active agent tab id.
+ */
+activeAgentTabId?: AgentSidebarHeaderProps[&quot;activeTabId&quot;]
+
+/**
  * Past conversations grouped by date — shown in the agent header history dropdown.
  */
 agentHistory?: AgentSidebarHistoryGroup[]
@@ -1186,9 +1191,23 @@ agentModels?: AgentSidebarInputModel[]
 agentPendingContent?: ReactNode
 
 /**
+ * Messages waiting to send once the current reply finishes — rendered as
+ *  cancellable rows above the agent input, in send order. Display-only:
+ *  queueing logic lives in the consumer.
+ */
+agentQueuedMessages?: AgentSidebarInputProps[&quot;queuedMessages&quot;]
+
+/**
  * Agent sidebar chat content
  */
 agentSidebarContent?: ReactNode
+
+/**
+ * Controlled tab list for the agent header. Provide together with
+ *  activeAgentTabId/onSelectAgentTab/onCloseAgentTab/onNewAgentTab; omit all
+ *  five to keep the header&#39;s internal uncontrolled tab state.
+ */
+agentTabs?: AgentSidebarHeaderProps[&quot;tabs&quot;]
 
 /**
  * App switcher slot — positioned top-left after nav area
@@ -1246,9 +1265,41 @@ onAgentMic?: () =&gt; void
 
 onAgentSend?: (message: string) =&gt; void
 
+/**
+ * Called with the queued row&#39;s id when its X is clicked.
+ */
+onCancelAgentQueued?: AgentSidebarInputProps[&quot;onCancelQueued&quot;]
+
+/**
+ * Called when the user clicks the X on an agent tab. Consumer removes it from agentTabs.
+ */
+onCloseAgentTab?: AgentSidebarHeaderProps[&quot;onCloseTab&quot;]
+
+/**
+ * Enables the hover delete affordance on agent history rows. Confirmation
+ *  (if any) is the consumer&#39;s responsibility; the kit fires immediately.
+ */
+onDeleteAgentConversation?: AgentSidebarHeaderProps[&quot;onDeleteConversation&quot;]
+
+/**
+ * Called when the user clicks + or the overflow &quot;New chat&quot; entry. Consumer appends a tab.
+ */
+onNewAgentTab?: AgentSidebarHeaderProps[&quot;onNewTab&quot;]
+
+/**
+ * Enables the hover rename affordance on agent history rows.
+ *  Called with the trimmed title (1-200 chars) when the user commits an inline rename.
+ */
+onRenameAgentConversation?: AgentSidebarHeaderProps[&quot;onRenameConversation&quot;]
+
 onSelectAgentHistoryItem?: (id: string) =&gt; void
 
 onSelectAgentModel?: (id: string) =&gt; void
+
+/**
+ * Called when the user clicks an agent tab. Consumer updates activeAgentTabId.
+ */
+onSelectAgentTab?: AgentSidebarHeaderProps[&quot;onSelectTab&quot;]
 
 selectedAgentModelId?: string
 
@@ -1370,6 +1421,15 @@ snackbarClassName?: string</code></pre>
     &lt;SnackbarScrollableDemoContent /&gt;
   &lt;/AppShell&gt;
 );</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Controlled Agent Sidebar</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ControlledAgentSidebar = () =&gt; &lt;ControlledAgentSidebarDemo /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
