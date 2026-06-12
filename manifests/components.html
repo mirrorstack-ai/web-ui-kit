@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">292 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">293 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -12014,9 +12014,9 @@ provider?: &quot;google&quot; | &quot;discord&quot; | &quot;openid&quot; | &quot
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Sparkline</h2>
       <div class="badges">
-        <label for="c-63-ui-blocks-sparkline-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-63-ui-blocks-sparkline-props" class="badge ok as-toggle">8 prop types</label>
         <label for="c-63-ui-blocks-sparkline-info" class="badge info as-toggle">1 info</label>
-        <label for="c-63-ui-blocks-sparkline-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-63-ui-blocks-sparkline-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -12048,7 +12048,7 @@ provider?: &quot;google&quot; | &quot;discord&quot; | &quot;openid&quot; | &quot
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">6 prop types</span>
+              <span class="badge ok">8 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/blocks/sparkline/Sparkline.tsx::Sparkline</code></pre>
             <pre><code>Props:</code></pre>
@@ -12073,6 +12073,17 @@ className?: string
  * Bars, as heights `0–100` (or `{ value, label }` for a labelled hover chip).
  */
 data: ReadonlyArray&lt;SparklinePoint&gt;
+
+/**
+ * Opacity of the line stroke, `0–1`. Defaults to `0.6` for `&quot;line&quot;`, `0.5` for `&quot;area&quot;`.
+ *  The area fill keeps its fixed `0.15` opacity. Only used by `&quot;line&quot;` / `&quot;area&quot;` variants.
+ */
+opacity?: number
+
+/**
+ * Stroke width of the line, in px (non-scaling). Default `1.5`. Only used by `&quot;line&quot;` / `&quot;area&quot;` variants.
+ */
+strokeWidth?: number = 1.5
 
 /**
  * Chart style. `&quot;bar&quot;` (default) renders div-based bars with hover chips.
@@ -12166,6 +12177,47 @@ variant?: &quot;bar&quot; | &quot;line&quot; | &quot;area&quot; = &quot;bar&quot
             data={[38, 62, 50, 78, 55, 70, 90, 60, 75, 95, 85, 100]}
             variant=&quot;area&quot;
             className=&quot;h-full&quot; /&gt;
+    &lt;/div&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Stroke And Opacity</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`strokeWidth` (px, non-scaling) and `opacity` (0–1) tune the line stroke. Defaults match the previous hardcoded look (`1.5` / `0.6` line, `0.5` area); the area fill keeps its fixed `0.15` opacity regardless.</div>
+              <pre><code>const StrokeAndOpacity = () =&gt; &lt;div className=&quot;flex flex-wrap items-start gap-6 bg-background p-6&quot;&gt;
+    &lt;div className=&quot;space-y-1&quot;&gt;
+        &lt;span className=&quot;text-xs text-on-surface-variant&quot;&gt;Defaults&lt;/span&gt;
+        &lt;div
+            className=&quot;h-24 w-64 rounded-2xl border border-outline-variant p-3 text-primary&quot;&gt;
+            &lt;Sparkline data={LABELLED} variant=&quot;line&quot; className=&quot;h-full&quot; /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div className=&quot;space-y-1&quot;&gt;
+        &lt;span className=&quot;text-xs text-on-surface-variant&quot;&gt;strokeWidth=3, opacity=1&lt;/span&gt;
+        &lt;div
+            className=&quot;h-24 w-64 rounded-2xl border border-outline-variant p-3 text-primary&quot;&gt;
+            &lt;Sparkline
+                variant=&quot;line&quot;
+                strokeWidth={3}
+                opacity={1}
+                data={LABELLED}
+                className=&quot;h-full&quot; /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div className=&quot;space-y-1&quot;&gt;
+        &lt;span className=&quot;text-xs text-on-surface-variant&quot;&gt;Area · strokeWidth=2.5, opacity=0.9&lt;/span&gt;
+        &lt;div
+            className=&quot;h-24 w-64 rounded-2xl border border-outline-variant p-3 text-primary&quot;&gt;
+            &lt;Sparkline
+                data={LABELLED}
+                variant=&quot;area&quot;
+                strokeWidth={2.5}
+                opacity={0.9}
+                className=&quot;h-full&quot; /&gt;
+        &lt;/div&gt;
     &lt;/div&gt;
 &lt;/div&gt;;</code></pre>
             </div>
