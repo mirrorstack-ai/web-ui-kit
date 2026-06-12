@@ -9,8 +9,12 @@ import {
   useSnackbarVisible,
 } from "@/context/snackbar/SnackbarProvider";
 import { AgentSidebarHeader } from "@/components/ui/agent/sidebar/AgentSidebarHeader";
+import type { AgentSidebarHeaderProps } from "@/components/ui/agent/sidebar/AgentSidebarHeader";
 import { AgentSidebarInput } from "@/components/ui/agent/sidebar/AgentSidebarInput";
-import type { AgentSidebarInputModel } from "@/components/ui/agent/sidebar/AgentSidebarInput";
+import type {
+  AgentSidebarInputModel,
+  AgentSidebarInputProps,
+} from "@/components/ui/agent/sidebar/AgentSidebarInput";
 import type { AgentSidebarHistoryGroup } from "@/components/ui/agent/sidebar/types";
 
 export const meta: ComponentMeta = {
@@ -58,6 +62,30 @@ export interface AppShellProps {
   /** Past conversations grouped by date — shown in the agent header history dropdown. */
   agentHistory?: AgentSidebarHistoryGroup[];
   onSelectAgentHistoryItem?: (id: string) => void;
+  /** Controlled tab list for the agent header. Provide together with
+   *  activeAgentTabId/onSelectAgentTab/onCloseAgentTab/onNewAgentTab; omit all
+   *  five to keep the header's internal uncontrolled tab state. */
+  agentTabs?: AgentSidebarHeaderProps["tabs"];
+  /** Controlled active agent tab id. */
+  activeAgentTabId?: AgentSidebarHeaderProps["activeTabId"];
+  /** Called when the user clicks an agent tab. Consumer updates activeAgentTabId. */
+  onSelectAgentTab?: AgentSidebarHeaderProps["onSelectTab"];
+  /** Called when the user clicks the X on an agent tab. Consumer removes it from agentTabs. */
+  onCloseAgentTab?: AgentSidebarHeaderProps["onCloseTab"];
+  /** Called when the user clicks + or the overflow "New chat" entry. Consumer appends a tab. */
+  onNewAgentTab?: AgentSidebarHeaderProps["onNewTab"];
+  /** Enables the hover rename affordance on agent history rows.
+   *  Called with the trimmed title (1-200 chars) when the user commits an inline rename. */
+  onRenameAgentConversation?: AgentSidebarHeaderProps["onRenameConversation"];
+  /** Enables the hover delete affordance on agent history rows. Confirmation
+   *  (if any) is the consumer's responsibility; the kit fires immediately. */
+  onDeleteAgentConversation?: AgentSidebarHeaderProps["onDeleteConversation"];
+  /** Messages waiting to send once the current reply finishes — rendered as
+   *  cancellable rows above the agent input, in send order. Display-only:
+   *  queueing logic lives in the consumer. */
+  agentQueuedMessages?: AgentSidebarInputProps["queuedMessages"];
+  /** Called with the queued row's id when its X is clicked. */
+  onCancelAgentQueued?: AgentSidebarInputProps["onCancelQueued"];
   /** Slot pinned directly above the agent input — used for messages the user
    *  sent while the agent was still responding (queued input). Stays in view
    *  with the input even when the messages list scrolls. */
@@ -182,6 +210,15 @@ function AppShellInner({
   onAgentMic,
   agentHistory,
   onSelectAgentHistoryItem,
+  agentTabs,
+  activeAgentTabId,
+  onSelectAgentTab,
+  onCloseAgentTab,
+  onNewAgentTab,
+  onRenameAgentConversation,
+  onDeleteAgentConversation,
+  agentQueuedMessages,
+  onCancelAgentQueued,
   agentPendingContent,
   agentModels,
   selectedAgentModelId,
@@ -360,6 +397,13 @@ function AppShellInner({
                 onClose={handleClose}
                 history={agentHistory}
                 onSelectHistoryItem={onSelectAgentHistoryItem}
+                tabs={agentTabs}
+                activeTabId={activeAgentTabId}
+                onSelectTab={onSelectAgentTab}
+                onCloseTab={onCloseAgentTab}
+                onNewTab={onNewAgentTab}
+                onRenameConversation={onRenameAgentConversation}
+                onDeleteConversation={onDeleteAgentConversation}
               />
 
               <div className="rounded-2xl bg-on-background flex-1 min-h-0 flex flex-col">
@@ -380,6 +424,8 @@ function AppShellInner({
                   models={agentModels}
                   selectedModelId={selectedAgentModelId}
                   onSelectModel={onSelectAgentModel}
+                  queuedMessages={agentQueuedMessages}
+                  onCancelQueued={onCancelAgentQueued}
                 />
               </div>
             </div>
