@@ -184,7 +184,7 @@ export function AgentSidebarInput({
       </div>
       <div className="flex flex-col w-full border border-outline-variant/30 rounded-xl bg-inverse-on-surface/8 p-1 gap-0.5">
         {queuedMessages && queuedMessages.length > 0 && (
-          <div className="flex flex-col border-b border-outline-variant/20 pb-0.5">
+          <div className="flex flex-col border-b border-outline-variant/20 pb-1">
             {queuedMessages.map((q, i) => (
               <div key={q.id} className="flex items-center gap-1.5 px-2 py-0.5">
                 {/* prefix on the first row only; later rows align under it */}
