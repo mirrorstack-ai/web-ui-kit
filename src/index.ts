@@ -45,6 +45,7 @@ export {
   AgentSidebarInput,
   type AgentSidebarInputProps,
   type AgentSidebarInputModel,
+  type AgentQueuedMessage,
 } from "./components/ui/agent/sidebar/AgentSidebarInput";
 export {
   AgentGreeting,
@@ -82,6 +83,9 @@ export {
 export {
   type AgentSidebarHistoryGroup,
   type AgentSidebarHistoryItem,
+  type ChatTab,
+  type AgentSidebarHeaderLabels,
+  type AgentSidebarInputLabels,
 } from "./components/ui/agent/sidebar/types";
 
 // --- ui/blocks (NotchGrid tile primitives) ---
