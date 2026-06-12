@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">293 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">294 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -10800,7 +10800,7 @@ title: ReactNode</code></pre>
       <div class="badges">
         <label for="c-58-ui-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
         <label for="c-58-ui-agent-sidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-58-ui-agent-sidebar-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-58-ui-agent-sidebar-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -10915,6 +10915,45 @@ export const ControlledTabs: StoryObj = {
             if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
           }}
           onNewTab={() =&gt; openTab(&quot;New chat&quot;)}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
+};
+
+/** Regression: ACTIVE tab is the LAST tab in the strip, right next to the
+ *  header action icons. Tabs are flex-1, so the active tab&#39;s right edge sits
+ *  flush at the strip&#39;s content edge and its notch overlay flares TAB_IR
+ *  (12px) past it — the strip&#39;s pr-3 must absorb that curl so the dark
+ *  on-background fill never paints under the + / collapse / close icons. */
+export const ActiveLastTab: StoryObj = {
+  render: () =&gt; {
+    const [tabs, setTabs] = useState&lt;ChatTab[]&gt;([
+      { id: &quot;conv-1&quot;, title: &quot;New chat&quot; },
+      { id: &quot;conv-2&quot;, title: &quot;Deploy checklist&quot; },
+    ]);
+    const [activeTabId, setActiveTabId] = useState(&quot;conv-2&quot;);
+    const nextIdRef = useRef(3);
+    return (
+      &lt;div className=&quot;bg-surface-container&quot;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelectTab={setActiveTabId}
+          onCloseTab={(id) =&gt; {
+            const next = tabs.filter((t) =&gt; t.id !== id);
+            if (!next.length) return;
+            setTabs(next);
+            if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+          }}
+          onNewTab={() =&gt; {
+            const tab = { id: `conv-${nextIdRef.current++}`, title: &quot;New chat&quot; };
+            setTabs((prev) =&gt; [...prev, tab]);
+            setActiveTabId(tab.id);
+          }}
         /&gt;
       &lt;/div&gt;
     );
@@ -11178,6 +11217,45 @@ export const Playground: StoryObj = {
           if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
         }}
         onNewTab={() =&gt; openTab(&quot;New chat&quot;)}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Active Last Tab</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Regression: ACTIVE tab is the LAST tab in the strip, right next to the header action icons. Tabs are flex-1, so the active tab&#39;s right edge sits flush at the strip&#39;s content edge and its notch overlay flares TAB_IR (12px) past it — the strip&#39;s pr-3 must absorb that curl so the dark on-background fill never paints under the + / collapse / close icons.</div>
+              <pre><code>const ActiveLastTab = () =&gt; {
+  const [tabs, setTabs] = useState&lt;ChatTab[]&gt;([
+    { id: &quot;conv-1&quot;, title: &quot;New chat&quot; },
+    { id: &quot;conv-2&quot;, title: &quot;Deploy checklist&quot; },
+  ]);
+  const [activeTabId, setActiveTabId] = useState(&quot;conv-2&quot;);
+  const nextIdRef = useRef(3);
+  return (
+    &lt;div className=&quot;bg-surface-container&quot;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onSelectTab={setActiveTabId}
+        onCloseTab={(id) =&gt; {
+          const next = tabs.filter((t) =&gt; t.id !== id);
+          if (!next.length) return;
+          setTabs(next);
+          if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+        }}
+        onNewTab={() =&gt; {
+          const tab = { id: `conv-${nextIdRef.current++}`, title: &quot;New chat&quot; };
+          setTabs((prev) =&gt; [...prev, tab]);
+          setActiveTabId(tab.id);
+        }}
       /&gt;
     &lt;/div&gt;
   );
@@ -14811,7 +14889,7 @@ export const MultiQuestionList: StoryObj = {
       <div class="badges">
         <label for="c-error-2-ui-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-2-ui-agent-sidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-2-ui-agent-sidebar-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-error-2-ui-agent-sidebar-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -14926,6 +15004,45 @@ export const ControlledTabs: StoryObj = {
             if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
           }}
           onNewTab={() =&gt; openTab(&quot;New chat&quot;)}
+        /&gt;
+      &lt;/div&gt;
+    );
+  },
+};
+
+/** Regression: ACTIVE tab is the LAST tab in the strip, right next to the
+ *  header action icons. Tabs are flex-1, so the active tab&#39;s right edge sits
+ *  flush at the strip&#39;s content edge and its notch overlay flares TAB_IR
+ *  (12px) past it — the strip&#39;s pr-3 must absorb that curl so the dark
+ *  on-background fill never paints under the + / collapse / close icons. */
+export const ActiveLastTab: StoryObj = {
+  render: () =&gt; {
+    const [tabs, setTabs] = useState&lt;ChatTab[]&gt;([
+      { id: &quot;conv-1&quot;, title: &quot;New chat&quot; },
+      { id: &quot;conv-2&quot;, title: &quot;Deploy checklist&quot; },
+    ]);
+    const [activeTabId, setActiveTabId] = useState(&quot;conv-2&quot;);
+    const nextIdRef = useRef(3);
+    return (
+      &lt;div className=&quot;bg-surface-container&quot;&gt;
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelectTab={setActiveTabId}
+          onCloseTab={(id) =&gt; {
+            const next = tabs.filter((t) =&gt; t.id !== id);
+            if (!next.length) return;
+            setTabs(next);
+            if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+          }}
+          onNewTab={() =&gt; {
+            const tab = { id: `conv-${nextIdRef.current++}`, title: &quot;New chat&quot; };
+            setTabs((prev) =&gt; [...prev, tab]);
+            setActiveTabId(tab.id);
+          }}
         /&gt;
       &lt;/div&gt;
     );
@@ -15189,6 +15306,45 @@ export const Playground: StoryObj = {
           if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
         }}
         onNewTab={() =&gt; openTab(&quot;New chat&quot;)}
+      /&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Active Last Tab</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Regression: ACTIVE tab is the LAST tab in the strip, right next to the header action icons. Tabs are flex-1, so the active tab&#39;s right edge sits flush at the strip&#39;s content edge and its notch overlay flares TAB_IR (12px) past it — the strip&#39;s pr-3 must absorb that curl so the dark on-background fill never paints under the + / collapse / close icons.</div>
+              <pre><code>const ActiveLastTab = () =&gt; {
+  const [tabs, setTabs] = useState&lt;ChatTab[]&gt;([
+    { id: &quot;conv-1&quot;, title: &quot;New chat&quot; },
+    { id: &quot;conv-2&quot;, title: &quot;Deploy checklist&quot; },
+  ]);
+  const [activeTabId, setActiveTabId] = useState(&quot;conv-2&quot;);
+  const nextIdRef = useRef(3);
+  return (
+    &lt;div className=&quot;bg-surface-container&quot;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onSelectTab={setActiveTabId}
+        onCloseTab={(id) =&gt; {
+          const next = tabs.filter((t) =&gt; t.id !== id);
+          if (!next.length) return;
+          setTabs(next);
+          if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+        }}
+        onNewTab={() =&gt; {
+          const tab = { id: `conv-${nextIdRef.current++}`, title: &quot;New chat&quot; };
+          setTabs((prev) =&gt; [...prev, tab]);
+          setActiveTabId(tab.id);
+        }}
       /&gt;
     &lt;/div&gt;
   );
