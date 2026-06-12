@@ -39,6 +39,7 @@ export interface AgentSidebarHeaderProps {
 const TAB_WIDTH = 100;
 const GAP = 6;
 const ADD_BTN = 40;
+const TABS_PAD = 46; // strip's pl-10 (40) + pr-1.5 (6) — clientWidth includes padding
 
 // Active tab notch (headOnly)
 const TAB_R = 12;
@@ -124,16 +125,19 @@ export function AgentSidebarHeader({
 
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
-    const container = tabsContainerRef.current.clientWidth;
+    // clientWidth includes the strip's own pl-10 + pr-1.5 padding — subtract
+    // it, or the math overestimates by 46px and tabs squeeze (min-w-0 lets
+    // them shrink) instead of collapsing into the overflow dropdown.
+    const available = tabsContainerRef.current.clientWidth - TABS_PAD;
     const spaceForAll = tabs.length * TAB_WIDTH + (tabs.length - 1) * GAP;
 
-    if (spaceForAll <= container) {
+    if (spaceForAll <= available) {
       setVisibleCount(tabs.length);
       return;
     }
 
-    const available = container - ADD_BTN;
-    const count = Math.floor((available + GAP) / (TAB_WIDTH + GAP));
+    const usable = available - ADD_BTN;
+    const count = Math.floor((usable + GAP) / (TAB_WIDTH + GAP));
     setVisibleCount(Math.max(1, count));
   }, [tabs.length]);
 
@@ -386,25 +390,33 @@ export function AgentSidebarHeader({
                           <>
                             <Icon name="chat_bubble_outline" size={14} className="text-on-surface-variant shrink-0" />
                             <span className="text-sm truncate flex-1">{item.title}</span>
-                            {onRenameConversation && (
-                              <button
-                                type="button"
-                                className="w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-on-surface hover:bg-on-surface/10 shrink-0 opacity-0 group-hover/item:opacity-70 group-hover/item:hover:opacity-100 focus-visible:opacity-100 transition-opacity"
-                                onClick={startEdit}
-                                aria-label={labels?.renameConversationLabel ?? "Rename conversation"}
-                              >
-                                <Icon name="edit" size={12} />
-                              </button>
-                            )}
-                            {onDeleteConversation && (
-                              <button
-                                type="button"
-                                className="w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-on-surface hover:bg-error/10 hover:text-error shrink-0 opacity-0 group-hover/item:opacity-70 group-hover/item:hover:opacity-100 focus-visible:opacity-100 transition-opacity"
-                                onClick={(e) => { e.stopPropagation(); onDeleteConversation(item.id); }}
-                                aria-label={labels?.deleteConversationLabel ?? "Delete conversation"}
-                              >
-                                <Icon name="delete" size={12} />
-                              </button>
+                            {/* Idle rows give the title the full width: the action
+                                cluster collapses to w-0 (still focusable — unlike
+                                display:none — so keyboard tab reveals it) and only
+                                takes layout space on hover/focus. */}
+                            {(onRenameConversation || onDeleteConversation) && (
+                              <div className="flex w-0 shrink-0 items-center gap-0.5 overflow-hidden opacity-0 group-hover/item:w-auto group-hover/item:opacity-100 focus-within:w-auto focus-within:opacity-100">
+                                {onRenameConversation && (
+                                  <button
+                                    type="button"
+                                    className="w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-on-surface opacity-70 hover:opacity-100 hover:bg-on-surface/10 shrink-0"
+                                    onClick={startEdit}
+                                    aria-label={labels?.renameConversationLabel ?? "Rename conversation"}
+                                  >
+                                    <Icon name="edit" size={12} />
+                                  </button>
+                                )}
+                                {onDeleteConversation && (
+                                  <button
+                                    type="button"
+                                    className="w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-on-surface opacity-70 hover:opacity-100 hover:bg-error/10 hover:text-error shrink-0"
+                                    onClick={(e) => { e.stopPropagation(); onDeleteConversation(item.id); }}
+                                    aria-label={labels?.deleteConversationLabel ?? "Delete conversation"}
+                                  >
+                                    <Icon name="delete" size={12} />
+                                  </button>
+                                )}
+                              </div>
                             )}
                           </>
                         )}
@@ -471,8 +483,10 @@ export function AgentSidebarHeader({
         </div>
       </div>
 
-      {/* Actions */}
-      <div ref={overflowRef} className="flex items-center gap-0.5 pr-1 shrink-0">
+      {/* Actions — z-10 keeps the icons above the active-tab notch overlay
+          (z-[5]); when the active tab is last in the strip its arc overhang
+          otherwise paints over them, dark-on-dark. */}
+      <div ref={overflowRef} className="relative z-10 flex items-center gap-0.5 pr-1 shrink-0">
         {overflowTabs.length > 0 ? (
           <div ref={triggerBtnRef} className="relative z-[51]">
             <IconButton icon="more_horiz" variant="text" size="sm" className="text-on-surface" onClick={() => setShowOverflow(!showOverflow)} aria-label={`${overflowTabs.length} more tabs`} />

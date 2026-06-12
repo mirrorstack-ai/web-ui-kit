@@ -73,6 +73,34 @@ describe("AgentSidebarHeader controlled tabs", () => {
     expect(screen.queryByText("Chat 1")).not.toBeInTheDocument();
   });
 
+  it("collapses tabs into the overflow dropdown when the strip is narrow", () => {
+    // 280 clientWidth − 46 strip padding = 234 available; three 100px tabs
+    // (312 with gaps) don't fit → 1 visible + 2 in the ⋯ dropdown. Before the
+    // padding fix the math compared against the raw 280 and squeezed tabs
+    // inline instead of overflowing.
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      value: 280,
+    });
+    try {
+      renderControlled({
+        tabs: [
+          { id: "a", title: "New chat" },
+          { id: "b", title: "Settings help" },
+          { id: "c", title: "Update display name" },
+        ],
+      });
+      expect(screen.getAllByRole("tab")).toHaveLength(1);
+      expect(screen.getByLabelText("2 more tabs")).toBeInTheDocument();
+      expect(screen.queryByLabelText("New chat")).not.toBeInTheDocument();
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+        configurable: true,
+        value: 400,
+      });
+    }
+  });
+
   it("calls onNewTab when + is clicked instead of adding an internal tab", () => {
     const onNewTab = vi.fn();
     renderControlled({ onNewTab });
