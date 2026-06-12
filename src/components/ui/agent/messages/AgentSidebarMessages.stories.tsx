@@ -33,6 +33,40 @@ export const Agent: StoryObj = {
   ),
 };
 
+const markdownReply = `## Account changes
+
+This week you made **three** changes:
+
+1. Renamed your username to \`alice2\`
+2. Enabled *dark mode*
+3. Added a passkey
+
+Run this to verify from the CLI:
+
+\`\`\`bash
+mirrorstack account audit --since 7d
+\`\`\`
+
+See the [audit log docs](https://docs.mirrorstack.ai/audit) for details.`;
+
+/** Agent replies render Markdown: headings, lists, inline + fenced code, links. */
+export const AgentMarkdown: StoryObj = {
+  render: () => <AgentSidebarAgentMessage content={markdownReply} />,
+};
+
+/** Mid-stream markdown — note the unterminated code fence renders calmly
+ *  as a code block until the closing fence arrives. */
+export const AgentMarkdownStreaming: StoryObj = {
+  render: () => (
+    <AgentSidebarAgentMessage
+      content={
+        "Here's what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au"
+      }
+      streaming
+    />
+  ),
+};
+
 export const AgentStreaming: StoryObj = {
   render: () => (
     <div className="flex flex-col gap-4">
