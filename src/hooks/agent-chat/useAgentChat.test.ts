@@ -168,6 +168,116 @@ describe("useAgentChat", () => {
     expect(result.current.messages[1]).toMatchObject({ tool: { status: "done" } });
   });
 
+  it("skips the history refresh when a send is superseded (aborted) by a newer send", async () => {
+    const listConversations = vi.fn().mockResolvedValue({ items: [], nextCursor: null });
+    const streamAgentReply = vi
+      .fn()
+      // First stream stays open until its signal aborts (like a real fetch).
+      .mockImplementationOnce(
+        (_c: string, _m: string, _h: AgentStreamHandlers, signal: AbortSignal) =>
+          new Promise<void>((_resolve, reject) => {
+            signal.addEventListener("abort", () => reject(new Error("aborted")));
+          }),
+      )
+      .mockResolvedValue(undefined);
+    const client = fakeClient({ listConversations, streamAgentReply });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    await flush();
+    const mountCalls = listConversations.mock.calls.length;
+
+    act(() => result.current.send("one"));
+    await flush();
+    act(() => result.current.send("two")); // aborts "one"
+    await flush();
+
+    // Only the second send's settle refreshes — the aborted one must not
+    // fire a list request.
+    expect(listConversations.mock.calls.length).toBe(mountCalls + 1);
+  });
+
+  // Seed a finished turn so a persisted agent reply ("m-1") exists to rerun.
+  async function seedFirstTurn(
+    result: { current: ReturnType<typeof useAgentChat> },
+    reply: ReturnType<typeof controlledStream>,
+  ) {
+    act(() => result.current.send("hello"));
+    await flush();
+    act(() => reply.handlers.onDelta("old answer"));
+    act(() => reply.handlers.onDone("m-1"));
+    reply.release();
+    await flush();
+  }
+
+  it("rerunMessage streams the replacement in place and swaps the persisted id", async () => {
+    const reply = controlledStream();
+    const rerun = controlledStream();
+    const client = fakeClient({ streamAgentReply: reply.fn, streamAgentRerun: rerun.fn });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    await seedFirstTurn(result, reply);
+
+    act(() => result.current.rerunMessage("m-1"));
+    await flush();
+
+    expect(rerun.fn).toHaveBeenCalledWith("c-1", "m-1", expect.anything(), expect.any(AbortSignal));
+    // The old reply became the streaming placeholder, holding its position.
+    expect(result.current.messages).toEqual([
+      expect.objectContaining({ role: "user", content: "hello" }),
+      expect.objectContaining({ role: "agent", content: "", streaming: true }),
+    ]);
+
+    act(() => rerun.handlers.onDelta("fresh"));
+    act(() => rerun.handlers.onDone("m-2"));
+    rerun.release();
+    await flush();
+    expect(result.current.messages[1]).toEqual({ id: "m-2", role: "agent", content: "fresh" });
+    expect(result.current.error).toBeNull();
+  });
+
+  it("rerun failure settles the pending bubble and reports send_failed", async () => {
+    const reply = controlledStream();
+    const client = fakeClient({
+      streamAgentReply: reply.fn,
+      streamAgentRerun: vi.fn().mockRejectedValue(new Error("boom")),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    await seedFirstTurn(result, reply);
+
+    act(() => result.current.rerunMessage("m-1"));
+    await flush();
+
+    expect(result.current.error).toBe("send_failed");
+    // The placeholder had no streamed text yet → dropped with the old reply.
+    expect(result.current.messages).toEqual([
+      expect.objectContaining({ role: "user", content: "hello" }),
+    ]);
+  });
+
+  it("rerun 409 (message superseded) reloads the conversation instead of erroring", async () => {
+    const reply = controlledStream();
+    const client = fakeClient({
+      streamAgentReply: reply.fn,
+      streamAgentRerun: vi
+        .fn()
+        .mockRejectedValue(Object.assign(new Error("conflict"), { status: 409 })),
+      listConversationMessages: vi.fn().mockResolvedValue([
+        { id: "m-1", role: "user", content: "hello", createdAt: NOW },
+        { id: "m-3", role: "agent", content: "winner", createdAt: NOW },
+      ]),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    await seedFirstTurn(result, reply);
+
+    act(() => result.current.rerunMessage("m-1"));
+    await flush();
+
+    expect(client.listConversationMessages).toHaveBeenCalledWith("c-1");
+    expect(result.current.error).toBeNull();
+    expect(result.current.messages).toEqual([
+      { id: "m-1", role: "user", content: "hello" },
+      { id: "m-3", role: "agent", content: "winner", feedback: undefined },
+    ]);
+  });
+
   it("selectConversation replays history, hiding superseded replies and mapping tool meta", async () => {
     const client = fakeClient({
       listConversationMessages: vi.fn().mockResolvedValue([
@@ -337,11 +447,16 @@ describe("useAgentChat", () => {
     expect(client.createConversation).toHaveBeenLastCalledWith({ appId: "app-2" });
   });
 
-  it("does not fetch anything while disabled", async () => {
+  it("does not fetch anything while disabled, and send is a no-op", async () => {
     const client = fakeClient();
-    renderHook(() => useAgentChat(client, { appId: null, enabled: false }));
+    const { result } = renderHook(() => useAgentChat(client, { appId: null, enabled: false }));
     await flush();
     expect(client.fetchAgentModels).not.toHaveBeenCalled();
     expect(client.listConversations).not.toHaveBeenCalled();
+
+    act(() => result.current.send("hello"));
+    await flush();
+    expect(client.createConversation).not.toHaveBeenCalled();
+    expect(result.current.messages).toHaveLength(0);
   });
 });

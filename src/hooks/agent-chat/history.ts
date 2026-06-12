@@ -1,5 +1,20 @@
-import type { AgentSidebarHistoryGroup } from "@/components/ui/agent/sidebar/types";
 import type { AgentConversation } from "./client";
+
+/** One past conversation in a history group. */
+export interface ConversationHistoryItem {
+  id: string;
+  title: string;
+  /** ISO 8601 UTC string. */
+  updatedAt: string;
+}
+
+/** A labeled recency bucket of past conversations. The sidebar's
+ *  AgentSidebarHistoryGroup is an alias of this shape — the type lives here
+ *  so the data layer never imports from the component layer. */
+export interface ConversationHistoryGroup {
+  label: string;
+  items: ConversationHistoryItem[];
+}
 
 /** Localized bucket labels for groupConversationsByRecency. */
 export interface RecencyLabels {
@@ -14,11 +29,13 @@ export interface RecencyLabels {
 export function groupConversationsByRecency(
   items: AgentConversation[],
   labels: RecencyLabels,
-): AgentSidebarHistoryGroup[] {
+): ConversationHistoryGroup[] {
   const now = new Date();
+  // Calendar-day arithmetic (not fixed ms offsets) so DST transitions —
+  // where a local day is 23 or 25 hours — still bucket correctly.
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const startOfYesterday = startOfToday - 86_400_000;
-  const startOfWeek = startOfToday - 6 * 86_400_000;
+  const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
+  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).getTime();
 
   const buckets: Record<keyof RecencyLabels, AgentConversation[]> = {
     today: [],

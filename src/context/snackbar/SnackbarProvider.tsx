@@ -155,6 +155,9 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
       savedRef.current = options.snapshot;
       isFirstRender.current = false;
     }
+    // Mount-only baseline snapshot — later snapshot changes are the dirtiness
+    // signal, not a new baseline.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -188,6 +191,10 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
       dismissSnackbar();
     }
     prevDirty.current = isDirty;
+    // Show/dismiss must fire only on dirtiness transitions; callbacks and
+    // message are read through optionsRef so they stay current without
+    // retriggering the effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDirty, options.snapshot]);
 
   return { isDirty, savedRef };

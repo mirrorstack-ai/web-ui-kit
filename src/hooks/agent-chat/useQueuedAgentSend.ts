@@ -34,8 +34,12 @@ export function useQueuedAgentSend(
 ): QueuedAgentSend {
   const [queued, setQueued] = useState<AgentQueuedMessage[]>([]);
 
+  // Destructured so the hooks below can depend on exactly what they read
+  // (the wrapping `chat` object is rebuilt per render at most call sites).
+  const { messages, send: sendNow } = chat;
+
   // The streaming reply placeholder is the only message with streaming: true.
-  const isStreaming = chat.messages.some((m) => m.role === "agent" && m.streaming);
+  const isStreaming = messages.some((m) => m.role === "agent" && m.streaming);
 
   // Scope switch resets the thread (useAgentChat) — drop the queue with it.
   useEffect(() => {
@@ -50,9 +54,9 @@ export function useQueuedAgentSend(
         setQueued((prev) => [...prev, { id: `queued-${crypto.randomUUID()}`, text: content }]);
         return;
       }
-      chat.send(content);
+      sendNow(content);
     },
-    [chat.send, isStreaming], // eslint-disable-line react-hooks/exhaustive-deps
+    [isStreaming, sendNow],
   );
 
   // Flush the queue head once the stream settles (done, error, or
@@ -62,8 +66,8 @@ export function useQueuedAgentSend(
     if (isStreaming || queued.length === 0) return;
     const [head, ...rest] = queued;
     setQueued(rest);
-    chat.send(head.text);
-  }, [isStreaming, queued, chat.send]); // eslint-disable-line react-hooks/exhaustive-deps
+    sendNow(head.text);
+  }, [isStreaming, queued, sendNow]);
 
   const cancelQueued = useCallback((id: string) => {
     setQueued((prev) => prev.filter((q) => q.id !== id));

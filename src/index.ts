@@ -492,6 +492,8 @@ export {
 } from "./hooks/agent-chat/useQueuedAgentSend";
 export {
   groupConversationsByRecency,
+  type ConversationHistoryGroup,
+  type ConversationHistoryItem,
   type RecencyLabels,
 } from "./hooks/agent-chat/history";
 export type {

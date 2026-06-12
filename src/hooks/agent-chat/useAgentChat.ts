@@ -10,7 +10,6 @@ import {
 import type { AgentSidebarMessageFeedback } from "@/components/ui/agent/messages/AgentSidebarMessage";
 import type { AgentToolCall } from "@/components/ui/agent/messages/AgentSidebarToolCall";
 import type { AgentSidebarInputModel } from "@/components/ui/agent/sidebar/AgentSidebarInput";
-import type { AgentSidebarHistoryGroup } from "@/components/ui/agent/sidebar/types";
 import type {
   AgentApiMessage,
   AgentChatClient,
@@ -21,7 +20,11 @@ import type {
   AgentToolEventStatus,
   AgentToolMessageMeta,
 } from "./client";
-import { groupConversationsByRecency, type RecencyLabels } from "./history";
+import {
+  groupConversationsByRecency,
+  type ConversationHistoryGroup,
+  type RecencyLabels,
+} from "./history";
 
 /** Sidebar-renderable chat message — assignable to the kit's
  *  AgentSidebarMessage union (text bubbles + tool-call rows). */
@@ -79,7 +82,7 @@ export interface UseAgentChatResult {
    *  placeholder for the fresh answer. */
   rerunMessage: (messageId: string) => void;
   /** Date-grouped past conversations for the header history dropdown. */
-  history: AgentSidebarHistoryGroup[] | undefined;
+  history: ConversationHistoryGroup[] | undefined;
   selectConversation: (id: string) => void;
   /** Retitle a past conversation — optimistic in history, rolls back on
    *  failure. Empty titles are ignored. */
@@ -335,7 +338,7 @@ export function useAgentChat(
   }, [enabled, appId, refreshConversations]);
 
   const historyLabels = labels?.history;
-  const history = useMemo<AgentSidebarHistoryGroup[] | undefined>(() => {
+  const history = useMemo<ConversationHistoryGroup[] | undefined>(() => {
     if (!conversations || conversations.length === 0) return undefined;
     return groupConversationsByRecency(conversations, {
       ...DEFAULT_HISTORY_LABELS,
@@ -389,6 +392,9 @@ export function useAgentChat(
 
   const send = useCallback(
     (raw: string) => {
+      // Hosts gate `enabled` on the session being ready — a send before
+      // that would create a conversation against an unauthenticated client.
+      if (!enabled) return;
       const content = raw.trim();
       if (!content) return;
 
@@ -425,12 +431,14 @@ export function useAgentChat(
           setMessages((prev) => settlePending(prev));
         } finally {
           if (abortRef.current === controller) abortRef.current = null;
-          // First message auto-titles the conversation; updatedAt reorders it.
-          refreshConversations();
+          // First message auto-titles the conversation; updatedAt reorders
+          // it. Skip when aborted (scope switch / superseding send) — the
+          // refresh would hit the OLD scope and race the new one's list.
+          if (!controller.signal.aborted) refreshConversations();
         }
       })();
     },
-    [ensureConversation, refreshConversations],
+    [enabled, ensureConversation, refreshConversations],
   );
 
   const selectConversation = useCallback(
@@ -465,16 +473,11 @@ export function useAgentChat(
       const title = rawTitle.trim();
       if (!title) return;
 
-      // Optimistic: retitle the history row now, snapshotting the prior
-      // title for rollback.
-      let prevTitle: string | undefined;
-      setConversations((prev) =>
-        prev?.map((c) => {
-          if (c.id !== id) return c;
-          prevTitle = c.title;
-          return { ...c, title };
-        }),
-      );
+      // Optimistic: snapshot the prior title for rollback, then retitle the
+      // history row now. The snapshot is read from state (not inside the
+      // updater) so it can't depend on updater invocation count.
+      const prevTitle = conversations?.find((c) => c.id === id)?.title;
+      setConversations((prev) => prev?.map((c) => (c.id === id ? { ...c, title } : c)));
 
       clientRef.current.renameConversation(id, title).catch((err) => {
         console.error("agent: rename failed", err);
@@ -485,34 +488,36 @@ export function useAgentChat(
         );
       });
     },
-    [],
+    [conversations],
   );
 
-  const rateMessage = useCallback((messageId: string, rating: AgentSidebarMessageFeedback) => {
-    const convId = conversationIdRef.current;
-    if (!convId) return;
+  const rateMessage = useCallback(
+    (messageId: string, rating: AgentSidebarMessageFeedback) => {
+      const convId = conversationIdRef.current;
+      if (!convId) return;
 
-    // Optimistic: flip the thumb now, snapshotting the prior rating for
-    // rollback. The updater runs synchronously inside setState, so the
-    // closure write is settled before the PATCH below.
-    let prevFeedback: AgentSidebarMessageFeedback | undefined;
-    setMessages((prev) =>
-      prev.map((m) => {
-        if (m.id !== messageId || m.role !== "agent") return m;
-        prevFeedback = m.feedback;
-        return { ...m, feedback: rating ?? undefined };
-      }),
-    );
-
-    clientRef.current.patchMessageFeedback(convId, messageId, rating).catch((err) => {
-      console.error("agent: feedback patch failed", err);
+      // Optimistic: snapshot the prior rating for rollback, then flip the
+      // thumb now. The snapshot is read from state (not inside the updater)
+      // so it can't depend on updater invocation count.
+      const target = messages.find((m) => m.id === messageId);
+      const prevFeedback = target?.role === "agent" ? target.feedback : undefined;
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === messageId && m.role === "agent" ? { ...m, feedback: prevFeedback } : m,
+          m.id === messageId && m.role === "agent" ? { ...m, feedback: rating ?? undefined } : m,
         ),
       );
-    });
-  }, []);
+
+      clientRef.current.patchMessageFeedback(convId, messageId, rating).catch((err) => {
+        console.error("agent: feedback patch failed", err);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId && m.role === "agent" ? { ...m, feedback: prevFeedback } : m,
+          ),
+        );
+      });
+    },
+    [messages],
+  );
 
   const rerunMessage = useCallback(
     (messageId: string) => {
@@ -557,7 +562,8 @@ export function useAgentChat(
         } finally {
           if (abortRef.current === controller) abortRef.current = null;
           // The rerun bumps the conversation's updatedAt — reorder history.
-          refreshConversations();
+          // Skip when aborted, same as send.
+          if (!controller.signal.aborted) refreshConversations();
         }
       })();
     },
