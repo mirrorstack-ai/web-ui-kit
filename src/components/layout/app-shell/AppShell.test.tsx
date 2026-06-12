@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it, afterEach } from "vitest";
+import { describe, expect, it, vi, afterEach, beforeAll, afterAll } from "vitest";
 import { AppShell } from "./AppShell";
 
 afterEach(cleanup);
@@ -70,5 +70,103 @@ describe("AppShell mobile navigation", () => {
     fireEvent.click(screen.getByLabelText("Open navigation"));
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});
+
+describe("AppShell agent sidebar pass-through", () => {
+  // jsdom reports clientWidth 0, which would collapse the tab strip to a
+  // single visible tab. Report a real width so both tabs render inline.
+  beforeAll(() => {
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      value: 400,
+    });
+  });
+  afterAll(() => {
+    Reflect.deleteProperty(HTMLElement.prototype, "clientWidth");
+  });
+
+  const openSidebar = () => fireEvent.click(screen.getByLabelText("Open agent"));
+
+  it("forwards controlled tabs to the agent header", () => {
+    const onSelectTab = vi.fn();
+    const onCloseTab = vi.fn();
+    render(
+      <AppShell
+        agentTabs={[
+          { id: "t1", title: "First chat" },
+          { id: "t2", title: "Second chat" },
+        ]}
+        activeAgentTabId="t1"
+        onSelectAgentTab={onSelectTab}
+        onCloseAgentTab={onCloseTab}
+        onNewAgentTab={() => {}}
+      >
+        content
+      </AppShell>,
+    );
+    openSidebar();
+
+    // Name regexes: a tab's accessible name folds in its close button's label.
+    const second = screen.getByRole("tab", { name: /^Second chat/ });
+    expect(screen.getByRole("tab", { name: /^First chat/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    fireEvent.click(second);
+    expect(onSelectTab).toHaveBeenCalledWith("t2");
+
+    fireEvent.click(screen.getByLabelText("Close Second chat"));
+    expect(onCloseTab).toHaveBeenCalledWith("t2");
+  });
+
+  it("forwards rename/delete handlers to the history rows", () => {
+    const onRename = vi.fn();
+    const onDelete = vi.fn();
+    render(
+      <AppShell
+        agentHistory={[
+          { label: "Today", items: [{ id: "h1", title: "Old title", updatedAt: "2026-06-12T00:00:00Z" }] },
+        ]}
+        onRenameAgentConversation={onRename}
+        onDeleteAgentConversation={onDelete}
+      >
+        content
+      </AppShell>,
+    );
+    openSidebar();
+    fireEvent.click(screen.getByLabelText("Chat history"));
+
+    fireEvent.click(screen.getByLabelText("Rename conversation"));
+    const input = screen.getByLabelText("Rename conversation: Old title");
+    fireEvent.change(input, { target: { value: "New title" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onRename).toHaveBeenCalledWith("h1", "New title");
+
+    fireEvent.click(screen.getByLabelText("Delete conversation"));
+    expect(onDelete).toHaveBeenCalledWith("h1");
+  });
+
+  it("forwards queued messages to the agent input", () => {
+    const onCancel = vi.fn();
+    render(
+      <AppShell
+        agentQueuedMessages={[{ id: "q1", text: "Queued question" }]}
+        onCancelAgentQueued={onCancel}
+      >
+        content
+      </AppShell>,
+    );
+    openSidebar();
+
+    expect(screen.getByText("Queued question")).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Cancel queued message"));
+    expect(onCancel).toHaveBeenCalledWith("q1");
+  });
+
+  it("keeps the uncontrolled tab fallback when no tab props are wired", () => {
+    render(<AppShell>content</AppShell>);
+    openSidebar();
+    expect(screen.getByRole("tab", { name: /^Chat 1/ })).toBeInTheDocument();
   });
 });

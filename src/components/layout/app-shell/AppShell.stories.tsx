@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AppShell } from "./AppShell";
 import { NavigationRail } from "@/components/ui/navigation/navigation-rail/NavigationRail";
@@ -10,7 +10,9 @@ import { NavDrawer, type NavDrawerItem } from "@/components/ui/navigation/nav-dr
 import { Avatar } from "@/components/ui/media/avatar/Avatar";
 import { Button } from "@/components/ui/actions/button/Button";
 import { useSnackbar } from "@/context/snackbar/SnackbarProvider";
-import { mockAgentModels } from "@/components/ui/agent/sidebar/mock-data";
+import { mockAgentHistory, mockAgentModels } from "@/components/ui/agent/sidebar/mock-data";
+import type { AgentQueuedMessage } from "@/components/ui/agent/sidebar/AgentSidebarInput";
+import type { AgentSidebarHistoryGroup, ChatTab } from "@/components/ui/agent/sidebar/types";
 
 const meta: Meta<typeof AppShell> = {
   title: "Layout/AppShell",
@@ -326,6 +328,76 @@ export const SnackbarWithScrollableContent: Story = {
       <SnackbarScrollableDemoContent />
     </AppShell>
   ),
+};
+
+/** The full sidebar pass-through surface, driven end-to-end through AppShell:
+ *  controlled tabs (select / close / new — history rows open as new tabs),
+ *  inline rename + delete on history rows, and cancellable queued-message
+ *  chips above the input. Open the agent sidebar with the floating button. */
+function ControlledAgentSidebarDemo() {
+  const [tabs, setTabs] = useState<ChatTab[]>([
+    { id: "conv-1", title: "New chat" },
+    { id: "conv-2", title: "Update display name" },
+  ]);
+  const [activeTabId, setActiveTabId] = useState("conv-1");
+  const [history, setHistory] = useState<AgentSidebarHistoryGroup[]>(mockAgentHistory);
+  const [queued, setQueued] = useState<AgentQueuedMessage[]>([
+    { id: "q-1", text: "Summarize the last 3 deployments and show me any failures" },
+    { id: "q-2", text: "Then list members who joined this week" },
+  ]);
+  const nextIdRef = useRef(3);
+
+  const openTab = (title: string) => {
+    const tab = { id: `conv-${nextIdRef.current++}`, title };
+    setTabs((prev) => [...prev, tab]);
+    setActiveTabId(tab.id);
+  };
+
+  return (
+    <AppShell
+      navigation={<DemoRail />}
+      appSwitcher={appSwitcher}
+      {...agentProps}
+      agentHistory={history}
+      onSelectAgentHistoryItem={(id) => {
+        const item = history.flatMap((g) => g.items).find((i) => i.id === id);
+        openTab(item?.title ?? "New chat");
+      }}
+      agentTabs={tabs}
+      activeAgentTabId={activeTabId}
+      onSelectAgentTab={setActiveTabId}
+      onCloseAgentTab={(id) => {
+        const next = tabs.filter((t) => t.id !== id);
+        if (!next.length) return;
+        setTabs(next);
+        if (activeTabId === id) setActiveTabId(next[next.length - 1].id);
+      }}
+      onNewAgentTab={() => openTab("New chat")}
+      onRenameAgentConversation={(id, title) => {
+        setHistory((prev) =>
+          prev.map((g) => ({
+            ...g,
+            items: g.items.map((item) => (item.id === id ? { ...item, title } : item)),
+          })),
+        );
+      }}
+      onDeleteAgentConversation={(id) => {
+        setHistory((prev) =>
+          prev
+            .map((g) => ({ ...g, items: g.items.filter((item) => item.id !== id) }))
+            .filter((g) => g.items.length > 0),
+        );
+      }}
+      agentQueuedMessages={queued}
+      onCancelAgentQueued={(id) => setQueued((q) => q.filter((m) => m.id !== id))}
+    >
+      <DemoContent />
+    </AppShell>
+  );
+}
+
+export const ControlledAgentSidebar: Story = {
+  render: () => <ControlledAgentSidebarDemo />,
 };
 
 export const Playground: Story = {
