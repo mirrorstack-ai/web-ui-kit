@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ChatTab } from "@/components/ui/agent/sidebar/types";
+
+/** A single tab in the agent sidebar header strip. Defined here — the data
+ *  layer owns the definitions so it never imports from the component layer;
+ *  `sidebar/types.ts` re-exports it for component consumers. */
+export interface ChatTab {
+  id: string;
+  title: string;
+}
 
 // ---- Wire state (mirrors the agent service's /v1/sidebar-state) ----
 
@@ -60,13 +67,16 @@ const selectTabState = (s: StripState, id: string): StripState =>
 /** Close ≠ delete: drop the tab from the strip only. Closing the active tab
  *  activates its right neighbor (the tab now at the closed index), or the
  *  left one when the rightmost tab closes — browser tab-strip behavior.
- *  Closing the only tab falls back to the given fresh draft. The draft is
- *  created by the caller so this updater stays pure. */
-const closeTabState = (s: StripState, id: string, draft: string): StripState => {
+ *  Closing the only tab falls back to a fresh draft from the given factory
+ *  (invoked only when actually needed). */
+const closeTabState = (s: StripState, id: string, makeDraft: () => string): StripState => {
   const index = s.tabs.indexOf(id);
   if (index === -1) return s;
   const next = s.tabs.filter((tab) => tab !== id);
-  if (next.length === 0) return { ...s, tabs: [draft], activeTabId: draft };
+  if (next.length === 0) {
+    const draft = makeDraft();
+    return { ...s, tabs: [draft], activeTabId: draft };
+  }
   return {
     ...s,
     tabs: next,
@@ -133,11 +143,25 @@ const sameStrip = (a: StripState, b: StripState) =>
 // Reconcile a fetched remote state into the local strip. Hydration replaces
 // the untouched initial placeholder outright; refetches (and hydration after
 // a local mutation) keep local drafts — they exist on this host only, so the
-// server can't know about them. The locally active tab keeps focus when it
-// survives; otherwise the remote active wins, then the first tab.
+// server can't know about them. The merge happens in place: surviving
+// conversation tabs adopt the remote (strip) order, drafts keep their
+// interleaved positions, tabs closed elsewhere drop, tabs opened elsewhere
+// append. The locally active tab keeps focus when it survives; otherwise
+// the remote active wins, then the first tab.
 function applyRemote(prev: StripState, remote: AgentSidebarState, ids: string[], keepDrafts: boolean): StripState {
-  const drafts = keepDrafts ? prev.tabs.filter(isDraftTab) : [];
-  const tabs = [...ids, ...drafts];
+  const prevTabs = new Set(prev.tabs);
+  const idSet = new Set(ids);
+  const survivors = ids.filter((id) => prevTabs.has(id));
+  let s = 0;
+  const tabs: string[] = [];
+  for (const tab of prev.tabs) {
+    if (isDraftTab(tab)) {
+      if (keepDrafts) tabs.push(tab);
+    } else if (idSet.has(tab)) {
+      tabs.push(survivors[s++]);
+    }
+  }
+  for (const id of ids) if (!prevTabs.has(id)) tabs.push(id);
   if (tabs.length === 0) return initialStrip(remote.open);
   let activeTabId: string;
   if (keepDrafts && tabs.includes(prev.activeTabId)) activeTabId = prev.activeTabId;
@@ -277,14 +301,14 @@ export function useAgentTabs(
       p.put(payload)
         .then(() => {
           lastPersistedRef.current = payload;
-        })
-        .catch((err) => {
-          // LWW: drop it — the next mutation re-PUTs the full state.
-          console.error("agent: sidebar state put failed", err);
-        })
-        .finally(() => {
           // A newer mutation may have re-armed the timer mid-flight.
           if (!timerRef.current) pendingRef.current = false;
+        })
+        .catch((err) => {
+          // Stay pending: the local state is still unsynced, so focus
+          // refetches keep being skipped and can't clobber it with the
+          // stale server state. The next mutation re-PUTs the full state.
+          console.error("agent: sidebar state put failed", err);
         });
     }, debounceMsRef.current);
   }, []);
@@ -305,6 +329,9 @@ export function useAgentTabs(
   );
 
   const reconcile = useCallback(async (mode: "hydrate" | "refetch") => {
+    // An unflushed local mutation always wins over a fetched state — skip
+    // the round-trip entirely, the flush will PUT the local state.
+    if (mode === "refetch" && pendingRef.current) return;
     const p = persistenceRef.current;
     if (!p) {
       if (mode === "hydrate") setHydrated(true);
@@ -381,10 +408,7 @@ export function useAgentTabs(
   );
   const selectTab = useCallback((id: string) => mutate((s) => selectTabState(s, id)), [mutate]);
   const closeTab = useCallback(
-    (id: string) => {
-      const draft = freshDraft();
-      mutate((s) => closeTabState(s, id, draft));
-    },
+    (id: string) => mutate((s) => closeTabState(s, id, freshDraft)),
     [mutate],
   );
   const newTab = useCallback(() => {

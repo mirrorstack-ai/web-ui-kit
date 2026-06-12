@@ -3,16 +3,13 @@ import type {
   ConversationHistoryItem,
 } from "@/hooks/agent-chat/history";
 
-/** Sidebar-facing aliases of the hooks-layer history shapes — the data
- *  layer owns the definitions so it never imports from components. */
+/** Sidebar-facing aliases of the hooks-layer shapes — the data layer owns
+ *  the definitions so it never imports from components. */
 export type AgentSidebarHistoryItem = ConversationHistoryItem;
 export type AgentSidebarHistoryGroup = ConversationHistoryGroup;
 
 /** A single tab in the agent sidebar header. */
-export interface ChatTab {
-  id: string;
-  title: string;
-}
+export type { ChatTab } from "@/hooks/agent-chat/useAgentTabs";
 
 /** Label overrides for AgentSidebarHeader. All have EN defaults. */
 export interface AgentSidebarHeaderLabels {

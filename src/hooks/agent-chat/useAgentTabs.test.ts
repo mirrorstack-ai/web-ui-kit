@@ -161,13 +161,73 @@ describe("useAgentTabs", () => {
     });
     await flush();
 
-    // The GET fired but its (stale) result was discarded — local state wins
-    // and the debounce later PUTs it.
-    expect(get).toHaveBeenCalledTimes(2);
+    // No GET fires beyond hydration — local state wins and the debounce
+    // later PUTs it.
+    expect(get).toHaveBeenCalledTimes(1);
     expect(result.current.activeTabId).toBe("c-1");
     await advance(1100);
     expect(put).toHaveBeenCalledTimes(1);
     expect(put).toHaveBeenCalledWith(state({ activeTabId: "c-1" }));
+  });
+
+  it("a failed PUT keeps local state authoritative: focus refetch can't clobber it, the next mutation re-PUTs", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { persistence, get, put } = fakePersistence();
+    put.mockRejectedValueOnce(new Error("boom"));
+    const { result } = renderHook(() => useAgentTabs(persistence));
+    await flush();
+
+    act(() => result.current.selectTab("c-1"));
+    await advance(1100);
+    expect(put).toHaveBeenCalledTimes(1);
+
+    // The mutation never reached the server — a focus refetch must not
+    // replace it with the stale remote state.
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
+    await flush();
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(result.current.activeTabId).toBe("c-1");
+
+    // The next mutation re-PUTs the full state; once synced, refetches
+    // resume.
+    act(() => result.current.setOpen(false));
+    await advance(1100);
+    expect(put).toHaveBeenCalledTimes(2);
+    expect(put).toHaveBeenLastCalledWith(state({ open: false, activeTabId: "c-1" }));
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
+    await flush();
+    expect(get).toHaveBeenCalledTimes(2);
+    errorSpy.mockRestore();
+  });
+
+  it("refetch keeps an interleaved draft in place while adopting remote order", async () => {
+    let remote = state();
+    const get = vi.fn().mockImplementation(async () => remote);
+    const put = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() => useAgentTabs({ get, put }));
+    await flush();
+
+    // Insert a draft BETWEEN the two conversation tabs.
+    act(() => result.current.newTab());
+    const draftId = result.current.activeTabId;
+    act(() => result.current.moveTab(draftId, 1));
+    expect(result.current.tabs).toEqual(["c-1", draftId, "c-2"]);
+    await advance(1100); // settle the PUT so the refetch isn't skipped
+
+    // Another host reordered the conversation tabs.
+    remote = state({ tabs: ["c-2", "c-1"], activeTabId: "c-1" });
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
+    await flush();
+
+    // The draft stays at strip position 1; survivors adopt remote order.
+    expect(result.current.tabs).toEqual(["c-2", draftId, "c-1"]);
+    expect(result.current.activeTabId).toBe(draftId);
   });
 
   it("never persists draft tabs: draft-only changes don't PUT, bindDraft persists the real id", async () => {
