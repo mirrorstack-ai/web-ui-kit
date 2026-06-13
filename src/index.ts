@@ -476,3 +476,38 @@ export {
   type SnackbarOutletProps,
   type UseUnsavedSnackbarOptions,
 } from "./context/snackbar/SnackbarProvider";
+
+// --- hooks ---
+export {
+  useAgentChat,
+  type AgentChatMessage,
+  type UseAgentChatLabels,
+  type UseAgentChatOptions,
+  type UseAgentChatResult,
+} from "./hooks/agent-chat/useAgentChat";
+export {
+  useQueuedAgentSend,
+  type QueuedAgentChatSource,
+  type QueuedAgentSend,
+} from "./hooks/agent-chat/useQueuedAgentSend";
+export {
+  groupConversationsByRecency,
+  type ConversationHistoryGroup,
+  type ConversationHistoryItem,
+  type RecencyLabels,
+} from "./hooks/agent-chat/history";
+export type {
+  AgentApiMessage,
+  AgentChatClient,
+  AgentConversation,
+  AgentConversationsPage,
+  AgentFeedbackRating,
+  AgentMessageMeta,
+  AgentModel,
+  AgentModelsResponse,
+  AgentStreamHandlers,
+  AgentToolEventStatus,
+  AgentToolMessageMeta,
+  CreateConversationOptions,
+  ListConversationsOptions,
+} from "./hooks/agent-chat/client";

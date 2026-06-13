@@ -1044,6 +1044,9 @@ const NotchComponent = memo(function NotchComponent({
   const leadItem = lead.item as NotchGridItem;
   const resolved = useMemo(
     () => resolveNotchTheme(leadItem.theme ?? {}),
+    // Deliberately keyed on the theme's fields, not the object — callers
+    // pass inline literals whose identity changes every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [leadItem.theme?.type, leadItem.theme?.variant, leadItem.theme?.gradient],
   );
 

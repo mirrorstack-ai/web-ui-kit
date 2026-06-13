@@ -1,14 +1,12 @@
-export interface AgentSidebarHistoryItem {
-  id: string;
-  title: string;
-  /** ISO 8601 UTC string. */
-  updatedAt: string;
-}
+import type {
+  ConversationHistoryGroup,
+  ConversationHistoryItem,
+} from "@/hooks/agent-chat/history";
 
-export interface AgentSidebarHistoryGroup {
-  label: string;
-  items: AgentSidebarHistoryItem[];
-}
+/** Sidebar-facing aliases of the hooks-layer history shapes — the data
+ *  layer owns the definitions so it never imports from components. */
+export type AgentSidebarHistoryItem = ConversationHistoryItem;
+export type AgentSidebarHistoryGroup = ConversationHistoryGroup;
 
 /** A single tab in the agent sidebar header. */
 export interface ChatTab {
