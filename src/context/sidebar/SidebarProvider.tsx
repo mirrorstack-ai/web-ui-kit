@@ -33,8 +33,10 @@ export interface SidebarProviderProps {
    *  preference, so localStorage is the right home (not server/session state). */
   persistKey?: string;
   /** Lower bound for a width considered a real "open" width worth persisting,
-   *  and the floor used to clamp a rehydrated value. Widths below this (e.g. 0
-   *  = closed) are not persisted. Default 350. */
+   *  and the floor used to clamp a rehydrated value. Widths at or below this
+   *  (e.g. 0 = closed, or `minOpenWidth` itself = collapsed-to-floor) are not
+   *  persisted, so a collapse never overwrites the remembered open width.
+   *  Default 350. */
   minOpenWidth?: number;
   /** Upper bound used to clamp a rehydrated value, guarding against a stored
    *  value from a wider viewport. Defaults to the current window width (minus a
@@ -98,11 +100,13 @@ export function SidebarProvider({
   }, []);
 
   // Persist every meaningful open width; skip closed/collapsed-to-floor states
-  // so a close doesn't wipe the remembered size.
+  // so a close OR a collapse (width === minOpenWidth) doesn't wipe the
+  // remembered size. The floor value itself is the collapsed state, not a real
+  // open width, so it must use a strict comparison.
   const persist = useCallback(
     (width: number) => {
       if (!persistKey || typeof window === "undefined") return;
-      if (width < minOpenWidth) return;
+      if (width <= minOpenWidth) return;
       try {
         window.localStorage.setItem(persistKey, String(Math.round(width)));
       } catch {
@@ -116,7 +120,12 @@ export function SidebarProvider({
   const handleSetWidth = useCallback(
     (width: number) => {
       setSidebarWidth(width);
-      if (width >= minOpenWidth) {
+      // Strict `>`: a width of exactly `minOpenWidth` is the collapsed floor
+      // (AppShell collapses by setting the width to MIN_WIDTH), not a real open
+      // width — recording it would erase the user's chosen drag size and make
+      // reopen fall back to the default. Only widths strictly above the floor
+      // count as the remembered open width.
+      if (width > minOpenWidth) {
         setLastOpenWidth(width);
         persist(width);
       }

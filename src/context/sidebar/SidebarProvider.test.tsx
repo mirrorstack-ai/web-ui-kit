@@ -20,6 +20,7 @@ function TestConsumer() {
       <span data-testid="last-open">{lastOpenWidth}</span>
       <button onClick={() => setSidebarWidth(500)}>Resize</button>
       <button onClick={() => setSidebarWidth(0)}>Close</button>
+      <button onClick={() => setSidebarWidth(350)}>Collapse</button>
     </div>
   );
 }
@@ -127,6 +128,35 @@ describe("SidebarProvider persistence", () => {
     });
     expect(screen.getByTestId("width").textContent).toBe("0");
     // lastOpenWidth and the stored value both survive the close.
+    expect(screen.getByTestId("last-open").textContent).toBe("500");
+    expect(localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY)).toBe("500");
+  });
+
+  it("a collapse (width === minOpenWidth) does not erase the persisted open width", () => {
+    // AppShell collapses by setting the width to the floor (MIN_WIDTH ===
+    // minOpenWidth). That floor value is the collapsed state, not a real open
+    // width, so it must NOT overwrite the remembered drag size — otherwise
+    // reopen falls back to the default and the user's chosen size is lost.
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        persistKey={SIDEBAR_WIDTH_STORAGE_KEY}
+        minOpenWidth={350}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+    act(() => {
+      fireEvent.click(screen.getByText("Resize"));
+    });
+    act(() => {
+      fireEvent.click(screen.getByText("Collapse"));
+    });
+    // The live width follows the collapse to the floor.
+    expect(screen.getByTestId("width").textContent).toBe("350");
+    // But the remembered open width (in memory AND storage) still holds the
+    // user's dragged 500 — the collapse did not clobber it.
     expect(screen.getByTestId("last-open").textContent).toBe("500");
     expect(localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY)).toBe("500");
   });
