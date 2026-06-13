@@ -5,6 +5,7 @@ import { Logo } from "@/components/ui/media/logo/Logo";
 import {
   AgentSidebarUserMessage,
   AgentSidebarAgentMessage,
+  type AgentMessageSegment,
   type AgentSidebarMessageFeedback,
   type AgentSidebarMessageActionLabels,
 } from "./AgentSidebarMessage";
@@ -31,6 +32,10 @@ export type AgentSidebarMessage =
       id: string;
       role: "agent";
       content: string;
+      /** Ordered text/tool segments — when present the bubble renders them
+       *  interleaved so streamed tool calls sit between the response text
+       *  instead of hoisted to the top. */
+      segments?: AgentMessageSegment[];
       streaming?: boolean;
       feedback?: AgentSidebarMessageFeedback;
     }
@@ -247,6 +252,8 @@ export function AgentSidebarMessages({
           <AgentSidebarAgentMessage
             key={m.id}
             content={m.content}
+            segments={m.segments}
+            toolLabels={toolLabels}
             streaming={m.streaming}
             feedback={m.feedback}
             onCopy={onCopyMessage && (() => onCopyMessage(m.id))}

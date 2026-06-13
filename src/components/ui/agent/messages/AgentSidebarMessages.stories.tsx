@@ -80,6 +80,70 @@ export const AgentStreaming: StoryObj = {
   ),
 };
 
+/** A reply whose tool calls are interleaved with the response text in stream
+ *  order — prose, then a tool step, then more prose — instead of every tool
+ *  call hoisted to the top of the message. */
+export const AgentInterleavedToolCalls: StoryObj = {
+  render: () => (
+    <AgentSidebarAgentMessage
+      content={
+        "Let me check your recent posts and tidy up the drafts.\n\nDone — published the latest draft and archived the two stale ones."
+      }
+      segments={[
+        {
+          type: "text",
+          text: "Let me check your recent posts and tidy up the drafts.",
+        },
+        {
+          type: "tool",
+          id: "t-1",
+          tool: {
+            moduleSlug: "cms",
+            tool: "list_posts",
+            status: "done",
+            durationMs: 214,
+            args: { limit: 5 },
+            result: [{ id: "p1", title: "Hello world" }],
+          },
+        },
+        {
+          type: "tool",
+          id: "t-2",
+          tool: {
+            moduleSlug: "cms",
+            tool: "publish_post",
+            status: "done",
+            durationMs: 96,
+          },
+        },
+        {
+          type: "text",
+          text: "Done — published the latest draft and archived the two stale ones.",
+        },
+      ]}
+    />
+  ),
+};
+
+/** Mid-stream: text has streamed, a tool is running, and the blinking caret
+ *  stays off because the trailing tool's spinner is the live indicator. */
+export const AgentInterleavedStreaming: StoryObj = {
+  render: () => (
+    <AgentSidebarAgentMessage
+      streaming
+      content="Checking your account settings."
+      segments={[
+        { type: "text", text: "Checking your account settings." },
+        {
+          type: "tool",
+          id: "t-1",
+          tool: { moduleSlug: "account", tool: "get_preferences", status: "started" },
+        },
+      ]}
+    />
+  ),
+};
+
 const noop = () => {};
 
 const actionCallbacks = {
