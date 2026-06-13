@@ -2,7 +2,11 @@ import { useState, useRef, useEffect, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
-import { SidebarProvider, useSidebarWidth } from "@/context/sidebar/SidebarProvider";
+import {
+  SidebarProvider,
+  useSidebarWidth,
+  SIDEBAR_WIDTH_STORAGE_KEY,
+} from "@/context/sidebar/SidebarProvider";
 import {
   SnackbarProvider,
   SnackbarOutlet,
@@ -106,7 +110,15 @@ export interface AppShellProps {
 
 export function AppShell(props: AppShellProps) {
   return (
-    <SidebarProvider defaultWidth={0}>
+    // Start closed (0); persist the drag-resized OPEN width so it survives
+    // reload. minOpenWidth matches the resize floor below; the provider clamps
+    // a rehydrated value to [MIN_WIDTH, viewport] and ignores corrupt/oversized
+    // stored values.
+    <SidebarProvider
+      defaultWidth={0}
+      persistKey={SIDEBAR_WIDTH_STORAGE_KEY}
+      minOpenWidth={MIN_WIDTH}
+    >
       <SnackbarProvider>
         <AppShellInner {...props} />
       </SnackbarProvider>
@@ -235,7 +247,7 @@ function AppShellInner({
   agentInputPlaceholder,
   agentInputLabels,
 }: AppShellProps) {
-  const { sidebarWidth, setSidebarWidth } = useSidebarWidth();
+  const { sidebarWidth, setSidebarWidth, lastOpenWidth } = useSidebarWidth();
   const [isResizing, setIsResizing] = useState(false);
   const [windowWidth, setWindowWidth] = useState(() =>
     typeof window === "undefined" ? 0 : window.innerWidth,
@@ -301,9 +313,20 @@ function AppShellInner({
   // Keep dragWidthRef in sync when sidebar opens
   useEffect(() => { dragWidthRef.current = sidebarWidth; }, [sidebarWidth]);
 
+  // Reopen to the user's remembered (persisted) width, clamped to the live
+  // viewport. Falls back to half the viewport when no wider width was ever
+  // recorded (lastOpenWidth still at the MIN_WIDTH floor).
+  const reopenWidth = () => {
+    const remembered =
+      lastOpenWidth > MIN_WIDTH
+        ? lastOpenWidth
+        : (windowWidth || 1000) * 0.5;
+    return Math.min(Math.max(remembered, MIN_WIDTH), maxWidthRef.current);
+  };
+
   const handleToggleCollapse = () => {
     if (sidebarWidth <= MIN_WIDTH) {
-      setSidebarWidth(Math.min((windowWidth || 1000) * 0.5, maxWidthRef.current));
+      setSidebarWidth(reopenWidth());
     } else {
       setSidebarWidth(MIN_WIDTH);
     }
@@ -454,7 +477,7 @@ function AppShellInner({
           variant="tonal"
           size="md"
           className="fixed top-2 right-2 z-50"
-          onClick={() => setSidebarWidth(MIN_WIDTH)}
+          onClick={() => setSidebarWidth(reopenWidth())}
           aria-label="Open agent"
         />
       )}

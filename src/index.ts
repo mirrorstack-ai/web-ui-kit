@@ -462,6 +462,7 @@ export {
 export {
   SidebarProvider,
   useSidebarWidth,
+  SIDEBAR_WIDTH_STORAGE_KEY,
   type SidebarProviderProps,
   type SidebarContextType,
 } from "./context/sidebar/SidebarProvider";

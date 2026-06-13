@@ -3,6 +3,19 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.1
+
+- `AppShell`: the drag-resized agent sidebar width now persists across reloads.
+  The chosen width is saved to `localStorage` (key `ms.agentSidebar.width`) on
+  resize and restored on reopen — closing/collapsing no longer forgets the size.
+  SSR-safe (read in an effect after mount, default on the server pass);
+  rehydrated values are clamped to the drag bounds and corrupt/out-of-range
+  values are ignored. No host changes required — every `AppShell` consumer
+  inherits it.
+- `SidebarProvider`: new optional `persistKey` / `minOpenWidth` / `maxOpenWidth`
+  props and a `lastOpenWidth` context value to drive the persisted reopen size.
+  New `SIDEBAR_WIDTH_STORAGE_KEY` export.
+
 ## 0.5.0
 
 Agent sidebar surface reachable through `AppShell`, headless agent-chat hooks,
