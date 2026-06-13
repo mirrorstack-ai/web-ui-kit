@@ -181,7 +181,12 @@ const DemoContent = () => (
 
 // --- Stories -----------------------------------------------------------------
 
-export const WithNavigationRail: Story = {
+// Baseline desktop shell: side rail + app switcher + agent sidebar. Open the
+// agent with the floating robot button. Two behaviors verify here without a
+// separate story: the sidebar's drag-resized OPEN width persists to
+// localStorage (`ms.agentSidebar.width`) and survives reload, and the agent
+// props are the same uncontrolled surface you'd tweak ad hoc.
+export const Default: Story = {
   render: () => (
     <AppShell navigation={<DemoRail />} appSwitcher={appSwitcher} {...agentProps}>
       <DemoContent />
@@ -189,6 +194,8 @@ export const WithNavigationRail: Story = {
   ),
 };
 
+// Swaps the side rail for a NavDrawer (sectioned destinations + context
+// switcher) in the same `navigation` slot.
 export const WithNavDrawer: Story = {
   render: () => (
     <AppShell navigation={<DemoNavDrawer />} appSwitcher={appSwitcher} {...agentProps}>
@@ -199,7 +206,7 @@ export const WithNavDrawer: Story = {
 
 // Below lg the side rail hides and the pill pins to the content area's bottom
 // edge; at lg+ the rail takes over. Resize the viewport to see the handoff.
-export const WithMobileBottomNav: Story = {
+export const MobileBottomNav: Story = {
   parameters: {
     viewport: { defaultViewport: "mobile2" },
   },
@@ -216,7 +223,7 @@ export const WithMobileBottomNav: Story = {
 
 // Below lg the menu button (bottom-left) opens `navigation` as a modal
 // slide-in drawer — no separate mobile tree needed.
-export const WithMobileNavDrawer: Story = {
+export const MobileNavDrawer: Story = {
   parameters: {
     viewport: { defaultViewport: "mobile2" },
   },
@@ -231,23 +238,28 @@ export const WithMobileNavDrawer: Story = {
   ),
 };
 
-function SnackbarDemoContent() {
+function SnackbarScrollableDemoContent() {
   const { showSnackbar } = useSnackbar();
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-on-surface mb-4">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-on-surface mb-4">Long Page</h1>
       <p className="text-on-surface-variant mb-6">
-        The snackbar outlet centers over the content area, not the full viewport.
-        Click the button to see it — at mobile widths the bottom nav steps aside
-        while the snackbar is up.
+        The snackbar outlet centers over the content area (not the full
+        viewport) and stays pinned to the bottom of the visible content while
+        the inner content scrolls. Scroll down — the snackbar must remain
+        visible even after the trigger button leaves the viewport, and at mobile
+        widths the bottom nav steps aside while it's up.
       </p>
-      <div className="flex gap-3">
+      <div className="mb-6 flex gap-3">
         <Button
           onClick={() =>
-            showSnackbar({ message: "Saved", variant: "success" })
+            showSnackbar({
+              message: "Snackbar stays pinned while content scrolls",
+              variant: "success",
+            })
           }
         >
-          Show Snackbar
+          Show snackbar
         </Button>
         <Button
           variant="outline"
@@ -259,45 +271,7 @@ function SnackbarDemoContent() {
             })
           }
         >
-          Show with Action
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-export const WithSnackbar: Story = {
-  render: () => (
-    <AppShell
-      navigation={<DemoRail />}
-      mobileNavigation={<DemoBottomNav />}
-      appSwitcher={appSwitcher}
-    >
-      <SnackbarDemoContent />
-    </AppShell>
-  ),
-};
-
-function SnackbarScrollableDemoContent() {
-  const { showSnackbar } = useSnackbar();
-  return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-on-surface mb-4">Long Page</h1>
-      <p className="text-on-surface-variant mb-6">
-        Scroll the content area down. The "Show snackbar" button at the top will
-        move out of view, but the snackbar must stay pinned to the bottom of the
-        visible content area.
-      </p>
-      <div className="mb-6">
-        <Button
-          onClick={() =>
-            showSnackbar({
-              message: "Snackbar stays pinned while content scrolls",
-              variant: "success",
-            })
-          }
-        >
-          Show snackbar
+          Show with action
         </Button>
       </div>
       <div className="flex flex-col gap-3">
@@ -314,17 +288,21 @@ function SnackbarScrollableDemoContent() {
   );
 }
 
-export const SnackbarWithScrollableContent: Story = {
+export const Snackbar: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Demonstrates that the SnackbarOutlet stays pinned to the bottom of the visible content area while the inner content scrolls. Scroll the content — the snackbar must remain visible even after the trigger button leaves the viewport.",
+          "The SnackbarOutlet centers over the content area and stays pinned to the bottom of the visible content while the inner content scrolls — scroll the content and the snackbar must remain visible even after the trigger button leaves the viewport. At mobile widths the bottom nav steps aside while the snackbar is up.",
       },
     },
   },
   render: () => (
-    <AppShell navigation={<DemoRail />} appSwitcher={appSwitcher}>
+    <AppShell
+      navigation={<DemoRail />}
+      mobileNavigation={<DemoBottomNav />}
+      appSwitcher={appSwitcher}
+    >
       <SnackbarScrollableDemoContent />
     </AppShell>
   ),
@@ -402,25 +380,4 @@ function ControlledAgentSidebarDemo() {
 
 export const ControlledAgentSidebar: Story = {
   render: () => <ControlledAgentSidebarDemo />,
-};
-
-export const Playground: Story = {
-  render: () => (
-    <AppShell navigation={<DemoRail />} {...agentProps}>
-      <DemoContent />
-    </AppShell>
-  ),
-};
-
-// The agent sidebar's drag-resized width persists to localStorage
-// (`ms.agentSidebar.width`). To verify: open the sidebar (floating robot
-// button), drag the left edge to resize, then reload this story — the sidebar
-// reopens at the width you chose, not the default. Closing/collapsing keeps the
-// remembered size. Use the toolbar to clear localStorage if you want to reset.
-export const PersistedSidebarWidth: Story = {
-  render: () => (
-    <AppShell navigation={<DemoRail />} appSwitcher={appSwitcher} {...agentProps}>
-      <DemoContent />
-    </AppShell>
-  ),
 };
