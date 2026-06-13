@@ -465,6 +465,7 @@ export {
   SIDEBAR_WIDTH_STORAGE_KEY,
   type SidebarProviderProps,
   type SidebarContextType,
+  type SidebarWidthPersistence,
 } from "./context/sidebar/SidebarProvider";
 export {
   SnackbarProvider,

@@ -5,7 +5,7 @@ import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import {
   SidebarProvider,
   useSidebarWidth,
-  SIDEBAR_WIDTH_STORAGE_KEY,
+  type SidebarWidthPersistence,
 } from "@/context/sidebar/SidebarProvider";
 import {
   SnackbarProvider,
@@ -52,6 +52,13 @@ export interface AppShellProps {
   mobileNavigationVariant?: "bottom" | "drawer";
   /** App switcher slot — positioned top-left after nav area */
   appSwitcher?: ReactNode;
+  /** Injected server-side sidebar-width persistence (docs 12.4 + 13b). When
+   *  wired, the rail width becomes ONE shared per-user value across every
+   *  platform host (read on mount, written on resize-end through the host's
+   *  shared agent client) instead of per-origin localStorage. Omit it for
+   *  in-memory-only width — Storybook and pre-migration hosts keep working,
+   *  width just doesn't persist. */
+  sidebarWidthPersistence?: SidebarWidthPersistence;
   /** Class for the outer shell */
   className?: string;
   /** Class for the app switcher container */
@@ -125,15 +132,20 @@ export interface AppShellProps {
   agentInputLabels?: AgentSidebarInputProps["labels"];
 }
 
-export function AppShell(props: AppShellProps) {
+export function AppShell({
+  sidebarWidthPersistence,
+  ...props
+}: AppShellProps) {
   return (
     // Start closed (0); persist the drag-resized OPEN width so it survives
-    // reload. minOpenWidth matches the resize floor below; the provider clamps
-    // a rehydrated value to [MIN_WIDTH, viewport] and ignores corrupt/oversized
-    // stored values.
+    // reload AND carries across hosts. Width lives in the injected server
+    // persistence (docs 12.4 + 13b) — ONE shared per-user value, NOT per-origin
+    // localStorage; omit it and the width is in-memory only. minOpenWidth
+    // matches the resize floor below; the provider clamps a rehydrated value to
+    // [MIN_WIDTH, viewport] and ignores corrupt/oversized stored values.
     <SidebarProvider
       defaultWidth={0}
-      persistKey={SIDEBAR_WIDTH_STORAGE_KEY}
+      widthPersistence={sidebarWidthPersistence}
       minOpenWidth={MIN_WIDTH}
     >
       <SnackbarProvider>
