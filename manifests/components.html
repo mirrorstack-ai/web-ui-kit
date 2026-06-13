@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7209,13 +7209,14 @@ export const AgentMarkdown: StoryObj = {
   render: () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;,
 };
 
-/** Mid-stream markdown — note the unterminated code fence renders calmly
- *  as a code block until the closing fence arrives. */
+/** Mid-stream markdown with every construct a real reply carries — heading,
+ *  bold, list, inline code, link — and an unterminated code fence that
+ *  renders calmly as a code block until the closing fence arrives. */
 export const AgentMarkdownStreaming: StoryObj = {
   render: () =&gt; (
     &lt;AgentSidebarAgentMessage
       content={
-        &quot;Here&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au&quot;
+        &quot;## Checking availability\n\nHere&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off` — see the [appearance docs](https://docs.mirrorstack.ai/appearance)\n\n```bash\nmirrorstack account au&quot;
       }
       streaming
     /&gt;
@@ -7361,11 +7362,11 @@ export const WithLogo: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Mid-stream markdown — note the unterminated code fence renders calmly as a code block until the closing fence arrives.</div>
+              <div class="hint">Mid-stream markdown with every construct a real reply carries — heading, bold, list, inline code, link — and an unterminated code fence that renders calmly as a code block until the closing fence arrives.</div>
               <pre><code>const AgentMarkdownStreaming = () =&gt; (
   &lt;AgentSidebarAgentMessage
     content={
-      &quot;Here&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au&quot;
+      &quot;## Checking availability\n\nHere&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off` — see the [appearance docs](https://docs.mirrorstack.ai/appearance)\n\n```bash\nmirrorstack account au&quot;
     }
     streaming
   /&gt;
@@ -14327,13 +14328,14 @@ export const AgentMarkdown: StoryObj = {
   render: () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;,
 };
 
-/** Mid-stream markdown — note the unterminated code fence renders calmly
- *  as a code block until the closing fence arrives. */
+/** Mid-stream markdown with every construct a real reply carries — heading,
+ *  bold, list, inline code, link — and an unterminated code fence that
+ *  renders calmly as a code block until the closing fence arrives. */
 export const AgentMarkdownStreaming: StoryObj = {
   render: () =&gt; (
     &lt;AgentSidebarAgentMessage
       content={
-        &quot;Here&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au&quot;
+        &quot;## Checking availability\n\nHere&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off` — see the [appearance docs](https://docs.mirrorstack.ai/appearance)\n\n```bash\nmirrorstack account au&quot;
       }
       streaming
     /&gt;
@@ -14479,11 +14481,11 @@ export const WithLogo: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Mid-stream markdown — note the unterminated code fence renders calmly as a code block until the closing fence arrives.</div>
+              <div class="hint">Mid-stream markdown with every construct a real reply carries — heading, bold, list, inline code, link — and an unterminated code fence that renders calmly as a code block until the closing fence arrives.</div>
               <pre><code>const AgentMarkdownStreaming = () =&gt; (
   &lt;AgentSidebarAgentMessage
     content={
-      &quot;Here&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au&quot;
+      &quot;## Checking availability\n\nHere&#39;s what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off` — see the [appearance docs](https://docs.mirrorstack.ai/appearance)\n\n```bash\nmirrorstack account au&quot;
     }
     streaming
   /&gt;
