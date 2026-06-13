@@ -54,13 +54,14 @@ export const AgentMarkdown: StoryObj = {
   render: () => <AgentSidebarAgentMessage content={markdownReply} />,
 };
 
-/** Mid-stream markdown — note the unterminated code fence renders calmly
- *  as a code block until the closing fence arrives. */
+/** Mid-stream markdown with every construct a real reply carries — heading,
+ *  bold, list, inline code, link — and an unterminated code fence that
+ *  renders calmly as a code block until the closing fence arrives. */
 export const AgentMarkdownStreaming: StoryObj = {
   render: () => (
     <AgentSidebarAgentMessage
       content={
-        "Here's what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off`\n\n```bash\nmirrorstack account au"
+        "## Checking availability\n\nHere's what I found so far:\n\n- Username **alice2** is available\n- Dark mode is `off` — see the [appearance docs](https://docs.mirrorstack.ai/appearance)\n\n```bash\nmirrorstack account au"
       }
       streaming
     />

@@ -220,6 +220,42 @@ describe("AgentSidebarMessages markdown rendering", () => {
       "mirrorstack au",
     );
   });
+
+  // Regression lock for the 2026-06-12 report: every construct a real
+  // streamed reply carries must render as markup, not raw text, while the
+  // message is still streaming.
+  it("renders headings, lists, code, links and bold in a streamed-style reply", () => {
+    const streamed = [
+      "## Audit summary",
+      "",
+      "Changed **username** to `alice2`:",
+      "",
+      "- [audit log](https://docs.mirrorstack.ai/audit)",
+      "- dark mode enabled",
+      "",
+      "```bash",
+      "mirrorstack account au", // fence still open mid-stream
+    ].join("\n");
+    const { container } = render(
+      <AgentSidebarMessages messages={[agentMsg({ content: streamed, streaming: true })]} />,
+    );
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
+      "Audit summary",
+    );
+    expect(screen.getByText("username").tagName).toBe("STRONG");
+    expect(screen.getByText("alice2").tagName).toBe("CODE");
+    expect(screen.getByRole("link", { name: "audit log" })).toHaveAttribute(
+      "href",
+      "https://docs.mirrorstack.ai/audit",
+    );
+    expect(container.querySelectorAll("ul > li")).toHaveLength(2);
+    expect(container.querySelector("pre > code")).toHaveTextContent(
+      "mirrorstack account au",
+    );
+    // None of the raw sigils leak through as literal text.
+    expect(container.textContent).not.toContain("**");
+    expect(container.textContent).not.toContain("## ");
+  });
 });
 
 describe("AgentSidebarMessages showLogo", () => {
