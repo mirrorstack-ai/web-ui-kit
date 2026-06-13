@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">299 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">297 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1130,9 +1130,9 @@ variant: | &quot;error&quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppShell</h2>
       <div class="badges">
-        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">33 prop types</label>
+        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">34 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -1164,7 +1164,7 @@ variant: | &quot;error&quot;
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">33 prop types</span>
+              <span class="badge ok">34 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/app-shell/AppShell.tsx::AppShell</code></pre>
             <pre><code>Props:</code></pre>
@@ -1257,6 +1257,15 @@ className?: string
  * Class for the content area
  */
 contentClassName?: string
+
+/**
+ * Hide the MirrorStack logo the shell paints above `agentEmptyState`.
+ *  Defaults to false (logo shown) — mirrors the inner
+ *  `AgentSidebarMessages` `hideEmptyStateLogo`, so a host that lets the shell
+ *  render the opener gets the same branded hero as one rendering the list
+ *  itself. No-op when `agentEmptyState` is omitted.
+ */
+hideAgentEmptyStateLogo?: AgentSidebarMessagesProps[&quot;hideEmptyStateLogo&quot;]
 
 /**
  * Mobile navigation slot — how `navigation` translates below lg (it&#39;s
@@ -1361,12 +1370,12 @@ snackbarClassName?: string</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Navigation Rail</span>
+                <span class="ex-name">Default</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithNavigationRail = () =&gt; (
+              <pre><code>const Default = () =&gt; (
   &lt;AppShell navigation={&lt;DemoRail /&gt;} appSwitcher={appSwitcher} {...agentProps}&gt;
     &lt;DemoContent /&gt;
   &lt;/AppShell&gt;
@@ -1387,12 +1396,12 @@ snackbarClassName?: string</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Mobile Bottom Nav</span>
+                <span class="ex-name">Mobile Bottom Nav</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithMobileBottomNav = () =&gt; (
+              <pre><code>const MobileBottomNav = () =&gt; (
   &lt;AppShell
     navigation={&lt;DemoRail /&gt;}
     mobileNavigation={&lt;DemoBottomNav /&gt;}
@@ -1404,12 +1413,12 @@ snackbarClassName?: string</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Mobile Nav Drawer</span>
+                <span class="ex-name">Mobile Nav Drawer</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithMobileNavDrawer = () =&gt; (
+              <pre><code>const MobileNavDrawer = () =&gt; (
   &lt;AppShell
     mobileNavigationVariant=&quot;drawer&quot;
     navigation={&lt;DemoNavDrawer /&gt;}
@@ -1421,30 +1430,17 @@ snackbarClassName?: string</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">With Snackbar</span>
+                <span class="ex-name">Snackbar</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const WithSnackbar = () =&gt; (
+              <pre><code>const Snackbar = () =&gt; (
   &lt;AppShell
     navigation={&lt;DemoRail /&gt;}
     mobileNavigation={&lt;DemoBottomNav /&gt;}
     appSwitcher={appSwitcher}
   &gt;
-    &lt;SnackbarDemoContent /&gt;
-  &lt;/AppShell&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Snackbar With Scrollable Content</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const SnackbarWithScrollableContent = () =&gt; (
-  &lt;AppShell navigation={&lt;DemoRail /&gt;} appSwitcher={appSwitcher}&gt;
     &lt;SnackbarScrollableDemoContent /&gt;
   &lt;/AppShell&gt;
 );</code></pre>
@@ -1457,32 +1453,6 @@ snackbarClassName?: string</code></pre>
               
               
               <pre><code>const ControlledAgentSidebar = () =&gt; &lt;ControlledAgentSidebarDemo /&gt;;</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Playground</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Playground = () =&gt; (
-  &lt;AppShell navigation={&lt;DemoRail /&gt;} {...agentProps}&gt;
-    &lt;DemoContent /&gt;
-  &lt;/AppShell&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Persisted Sidebar Width</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const PersistedSidebarWidth = () =&gt; (
-  &lt;AppShell navigation={&lt;DemoRail /&gt;} appSwitcher={appSwitcher} {...agentProps}&gt;
-    &lt;DemoContent /&gt;
-  &lt;/AppShell&gt;
-);</code></pre>
             </div>
         </div>
     
@@ -10960,7 +10930,7 @@ title: ReactNode</code></pre>
       <div class="badges">
         <label for="c-58-ui-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
         <label for="c-58-ui-agent-sidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-58-ui-agent-sidebar-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-58-ui-agent-sidebar-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -11199,10 +11169,11 @@ export const QueuedMessage: StoryObj = {
   },
 };
 
-/** Fresh conversation: with no messages, the list renders the host-supplied
- *  `emptyState` — a personalized opener — instead of a blank pane. Every host
- *  (web-applications, web-account) passes its own greeting, so the empty
- *  sidebar reads as a warm prompt rather than dead space. */
+/** Fresh conversation: with no messages, the list renders the MirrorStack
+ *  logo above the host-supplied `emptyState` — a personalized opener — instead
+ *  of a blank pane, so the empty sidebar reads as a branded hero (matching the
+ *  greeting surface) rather than dead space. Every host (web-applications,
+ *  web-account) passes its own greeting. */
 export const EmptyState: StoryObj = {
   render: () =&gt; (
     &lt;&gt;
@@ -11217,6 +11188,40 @@ export const EmptyState: StoryObj = {
         &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
           &lt;AgentSidebarMessages
             messages={[]}
+            emptyState={
+              &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
+                Hi, Sam, ask me anything about this app.
+              &lt;/p&gt;
+            }
+          /&gt;
+        &lt;/div&gt;
+        &lt;AgentSidebarInput
+          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+          models={mockAgentModels}
+          selectedModelId={DEFAULT_MODEL_ID}
+        /&gt;
+      &lt;/div&gt;
+    &lt;/&gt;
+  ),
+};
+
+/** Same empty thread with `hideEmptyStateLogo` — for hosts that want only
+ *  their opener with no brand mark above it. */
+export const EmptyStateNoLogo: StoryObj = {
+  render: () =&gt; (
+    &lt;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+      /&gt;
+      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
+        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+          &lt;AgentSidebarMessages
+            messages={[]}
+            hideEmptyStateLogo
             emptyState={
               &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
                 Hi, Sam, ask me anything about this app.
@@ -11552,7 +11557,7 @@ export const Playground: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Fresh conversation: with no messages, the list renders the host-supplied `emptyState` — a personalized opener — instead of a blank pane. Every host (web-applications, web-account) passes its own greeting, so the empty sidebar reads as a warm prompt rather than dead space.</div>
+              <div class="hint">Fresh conversation: with no messages, the list renders the MirrorStack logo above the host-supplied `emptyState` — a personalized opener — instead of a blank pane, so the empty sidebar reads as a branded hero (matching the greeting surface) rather than dead space. Every host (web-applications, web-account) passes its own greeting.</div>
               <pre><code>const EmptyState = () =&gt; (
   &lt;&gt;
     &lt;AgentSidebarHeader
@@ -11566,6 +11571,43 @@ export const Playground: StoryObj = {
       &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
         &lt;AgentSidebarMessages
           messages={[]}
+          emptyState={
+            &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
+              Hi, Sam, ask me anything about this app.
+            &lt;/p&gt;
+          }
+        /&gt;
+      &lt;/div&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+      /&gt;
+    &lt;/div&gt;
+  &lt;/&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Empty State No Logo</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Same empty thread with `hideEmptyStateLogo` — for hosts that want only their opener with no brand mark above it.</div>
+              <pre><code>const EmptyStateNoLogo = () =&gt; (
+  &lt;&gt;
+    &lt;AgentSidebarHeader
+      sidebarWidth={420}
+      onToggleCollapse={() =&gt; {}}
+      onClose={() =&gt; {}}
+      history={mockAgentHistory}
+      onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+    /&gt;
+    &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
+      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+        &lt;AgentSidebarMessages
+          messages={[]}
+          hideEmptyStateLogo
           emptyState={
             &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
               Hi, Sam, ask me anything about this app.
@@ -15180,7 +15222,7 @@ export const MultiQuestionList: StoryObj = {
       <div class="badges">
         <label for="c-error-2-ui-agent-sidebar-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-2-ui-agent-sidebar-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-2-ui-agent-sidebar-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-error-2-ui-agent-sidebar-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -15419,10 +15461,11 @@ export const QueuedMessage: StoryObj = {
   },
 };
 
-/** Fresh conversation: with no messages, the list renders the host-supplied
- *  `emptyState` — a personalized opener — instead of a blank pane. Every host
- *  (web-applications, web-account) passes its own greeting, so the empty
- *  sidebar reads as a warm prompt rather than dead space. */
+/** Fresh conversation: with no messages, the list renders the MirrorStack
+ *  logo above the host-supplied `emptyState` — a personalized opener — instead
+ *  of a blank pane, so the empty sidebar reads as a branded hero (matching the
+ *  greeting surface) rather than dead space. Every host (web-applications,
+ *  web-account) passes its own greeting. */
 export const EmptyState: StoryObj = {
   render: () =&gt; (
     &lt;&gt;
@@ -15437,6 +15480,40 @@ export const EmptyState: StoryObj = {
         &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
           &lt;AgentSidebarMessages
             messages={[]}
+            emptyState={
+              &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
+                Hi, Sam, ask me anything about this app.
+              &lt;/p&gt;
+            }
+          /&gt;
+        &lt;/div&gt;
+        &lt;AgentSidebarInput
+          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+          models={mockAgentModels}
+          selectedModelId={DEFAULT_MODEL_ID}
+        /&gt;
+      &lt;/div&gt;
+    &lt;/&gt;
+  ),
+};
+
+/** Same empty thread with `hideEmptyStateLogo` — for hosts that want only
+ *  their opener with no brand mark above it. */
+export const EmptyStateNoLogo: StoryObj = {
+  render: () =&gt; (
+    &lt;&gt;
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+      /&gt;
+      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
+        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+          &lt;AgentSidebarMessages
+            messages={[]}
+            hideEmptyStateLogo
             emptyState={
               &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
                 Hi, Sam, ask me anything about this app.
@@ -15772,7 +15849,7 @@ export const Playground: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">Fresh conversation: with no messages, the list renders the host-supplied `emptyState` — a personalized opener — instead of a blank pane. Every host (web-applications, web-account) passes its own greeting, so the empty sidebar reads as a warm prompt rather than dead space.</div>
+              <div class="hint">Fresh conversation: with no messages, the list renders the MirrorStack logo above the host-supplied `emptyState` — a personalized opener — instead of a blank pane, so the empty sidebar reads as a branded hero (matching the greeting surface) rather than dead space. Every host (web-applications, web-account) passes its own greeting.</div>
               <pre><code>const EmptyState = () =&gt; (
   &lt;&gt;
     &lt;AgentSidebarHeader
@@ -15786,6 +15863,43 @@ export const Playground: StoryObj = {
       &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
         &lt;AgentSidebarMessages
           messages={[]}
+          emptyState={
+            &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
+              Hi, Sam, ask me anything about this app.
+            &lt;/p&gt;
+          }
+        /&gt;
+      &lt;/div&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+      /&gt;
+    &lt;/div&gt;
+  &lt;/&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Empty State No Logo</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Same empty thread with `hideEmptyStateLogo` — for hosts that want only their opener with no brand mark above it.</div>
+              <pre><code>const EmptyStateNoLogo = () =&gt; (
+  &lt;&gt;
+    &lt;AgentSidebarHeader
+      sidebarWidth={420}
+      onToggleCollapse={() =&gt; {}}
+      onClose={() =&gt; {}}
+      history={mockAgentHistory}
+      onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+    /&gt;
+    &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
+      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+        &lt;AgentSidebarMessages
+          messages={[]}
+          hideEmptyStateLogo
           emptyState={
             &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
               Hi, Sam, ask me anything about this app.
