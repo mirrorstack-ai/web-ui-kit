@@ -502,6 +502,7 @@ export {
   useAgentTabs,
   isDraftTab,
   deriveTabTitles,
+  type AgentSidebarTab,
   type AgentSidebarState,
   type AgentTabsPersistence,
   type UseAgentTabsOptions,

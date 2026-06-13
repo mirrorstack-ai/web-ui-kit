@@ -5,11 +5,26 @@ import {
   isDraftTab,
   useAgentTabs,
   type AgentSidebarState,
+  type AgentSidebarTab,
   type AgentTabsPersistence,
 } from "./useAgentTabs";
 
+// Wire tabs are objects (matches api-client-shared AgentSidebarState): id +
+// conversationId both hold the conversation id (the kit tracks no separate
+// server tab-row id), title is the cached strip label, order is the strip
+// position. Tests assert on conversation ids — `tab()` keeps them terse.
+const tab = (conversationId: string, order: number, title = ""): AgentSidebarTab => ({
+  id: conversationId,
+  conversationId,
+  title,
+  order,
+});
+
+/** A persisted record from a list of conversation ids (strip order). */
+const tabsOf = (...ids: string[]): AgentSidebarTab[] => ids.map((id, i) => tab(id, i));
+
 function state(over: Partial<AgentSidebarState> = {}): AgentSidebarState {
-  return { open: true, activeTabId: "c-2", tabs: ["c-1", "c-2"], ...over };
+  return { open: true, activeTabId: "c-2", tabs: tabsOf("c-1", "c-2"), width: 0, ...over };
 }
 
 function fakePersistence(initial: AgentSidebarState = state()) {
@@ -55,7 +70,7 @@ describe("useAgentTabs", () => {
   });
 
   it("hydrate drops ids the host can't resolve (deleted conversations heal silently)", async () => {
-    const { persistence } = fakePersistence(state({ tabs: ["gone", "c-1"], activeTabId: "gone" }));
+    const { persistence } = fakePersistence(state({ tabs: tabsOf("gone", "c-1"), activeTabId: "gone" }));
     const resolveTabs = vi.fn().mockResolvedValue(["c-1"]);
     const { result } = renderHook(() => useAgentTabs(persistence, { resolveTabs }));
 
@@ -103,7 +118,8 @@ describe("useAgentTabs", () => {
     expect(put).toHaveBeenCalledWith({
       open: false,
       activeTabId: "c-1",
-      tabs: ["c-3", "c-1", "c-2"],
+      tabs: tabsOf("c-3", "c-1", "c-2"),
+      width: 0,
     });
   });
 
@@ -119,7 +135,7 @@ describe("useAgentTabs", () => {
     expect(result.current.activeTabId).toBe("c-1");
     await advance(1100);
     expect(put).toHaveBeenCalledTimes(1);
-    expect(put).toHaveBeenCalledWith({ open: true, activeTabId: "c-1", tabs: ["c-1"] });
+    expect(put).toHaveBeenCalledWith({ open: true, activeTabId: "c-1", tabs: tabsOf("c-1"), width: 0 });
   });
 
   it("refetches on focus and adopts the remote state, keeping local drafts", async () => {
@@ -138,7 +154,7 @@ describe("useAgentTabs", () => {
     await advance(1100);
 
     // Another host closed c-2 and switched the active tab.
-    remote = state({ tabs: ["c-1"], activeTabId: "c-1" });
+    remote = state({ tabs: tabsOf("c-1"), activeTabId: "c-1" });
     act(() => {
       window.dispatchEvent(new Event("focus"));
     });
@@ -219,7 +235,7 @@ describe("useAgentTabs", () => {
     await advance(1100); // settle the PUT so the refetch isn't skipped
 
     // Another host reordered the conversation tabs.
-    remote = state({ tabs: ["c-2", "c-1"], activeTabId: "c-1" });
+    remote = state({ tabs: tabsOf("c-2", "c-1"), activeTabId: "c-1" });
     act(() => {
       window.dispatchEvent(new Event("focus"));
     });
@@ -241,7 +257,7 @@ describe("useAgentTabs", () => {
     const draftId = result.current.activeTabId;
     await advance(1100);
     expect(put).toHaveBeenCalledTimes(1);
-    expect(put).toHaveBeenCalledWith({ open: true, activeTabId: null, tabs: ["c-1", "c-2"] });
+    expect(put).toHaveBeenCalledWith({ open: true, activeTabId: null, tabs: tabsOf("c-1", "c-2"), width: 0 });
 
     // Closing the draft restores the persisted projection — no second PUT.
     act(() => result.current.closeTab(draftId));
@@ -259,11 +275,12 @@ describe("useAgentTabs", () => {
     expect(put).toHaveBeenLastCalledWith({
       open: true,
       activeTabId: "c-9",
-      tabs: ["c-1", "c-2", "c-9"],
+      tabs: tabsOf("c-1", "c-2", "c-9"),
+      width: 0,
     });
     for (const call of put.mock.calls) {
       const persisted = call[0] as AgentSidebarState;
-      expect(persisted.tabs.some(isDraftTab)).toBe(false);
+      expect(persisted.tabs.some((t) => isDraftTab(t.conversationId))).toBe(false);
       expect(persisted.activeTabId === null || !isDraftTab(persisted.activeTabId)).toBe(true);
     }
   });
