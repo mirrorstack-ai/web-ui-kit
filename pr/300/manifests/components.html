@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">298 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">299 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7153,7 +7153,7 @@ function greet(name: string): string {
       <div class="badges">
         <label for="c-41-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-41-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-ui-agent-messages-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-41-ui-agent-messages-stories" class="badge ok as-toggle">10 stories</label>
         
       </div>
     </div>
@@ -7333,6 +7333,30 @@ export const WithLogo: StoryObj = {
     &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo /&gt;
   ),
 };
+
+const respondingThread: AgentSidebarMessage[] = [
+  {
+    id: &quot;m-1&quot;,
+    role: &quot;user&quot;,
+    content: &quot;Summarize my account changes this week.&quot;,
+  },
+  {
+    id: &quot;m-2&quot;,
+    role: &quot;agent&quot;,
+    content: &quot;Pulling your audit log&quot;,
+    streaming: true,
+  },
+];
+
+/** While the last agent message is still streaming, the brand logo renders and
+ *  SPINS below the list as the &quot;responding&quot; indicator (the loading prop is wired
+ *  from the last agent message&#39;s `streaming` flag). It settles to the static
+ *  mark once the reply finishes — see `WithLogo`. */
+export const Responding: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages messages={respondingThread} {...actionCallbacks} showLogo /&gt;
+  ),
+};
 </code></pre></div>
     </div>
         </div>
@@ -7478,6 +7502,17 @@ export const WithLogo: StoryObj = {
               <div class="hint">Brand mark in the sidebar accent below the list when the last message is finished.</div>
               <pre><code>const WithLogo = () =&gt; (
   &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Responding</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">While the last agent message is still streaming, the brand logo renders and SPINS below the list as the &quot;responding&quot; indicator (the loading prop is wired from the last agent message&#39;s `streaming` flag). It settles to the static mark once the reply finishes — see `WithLogo`.</div>
+              <pre><code>const Responding = () =&gt; (
+  &lt;AgentSidebarMessages messages={respondingThread} {...actionCallbacks} showLogo /&gt;
 );</code></pre>
             </div>
         </div>
@@ -14415,7 +14450,7 @@ value: string</code></pre>
       <div class="badges">
         <label for="c-error-0-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-0-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">10 stories</label>
         
       </div>
     </div>
@@ -14595,6 +14630,30 @@ export const WithLogo: StoryObj = {
     &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo /&gt;
   ),
 };
+
+const respondingThread: AgentSidebarMessage[] = [
+  {
+    id: &quot;m-1&quot;,
+    role: &quot;user&quot;,
+    content: &quot;Summarize my account changes this week.&quot;,
+  },
+  {
+    id: &quot;m-2&quot;,
+    role: &quot;agent&quot;,
+    content: &quot;Pulling your audit log&quot;,
+    streaming: true,
+  },
+];
+
+/** While the last agent message is still streaming, the brand logo renders and
+ *  SPINS below the list as the &quot;responding&quot; indicator (the loading prop is wired
+ *  from the last agent message&#39;s `streaming` flag). It settles to the static
+ *  mark once the reply finishes — see `WithLogo`. */
+export const Responding: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarMessages messages={respondingThread} {...actionCallbacks} showLogo /&gt;
+  ),
+};
 </code></pre></div>
     </div>
         </div>
@@ -14740,6 +14799,17 @@ export const WithLogo: StoryObj = {
               <div class="hint">Brand mark in the sidebar accent below the list when the last message is finished.</div>
               <pre><code>const WithLogo = () =&gt; (
   &lt;AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Responding</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">While the last agent message is still streaming, the brand logo renders and SPINS below the list as the &quot;responding&quot; indicator (the loading prop is wired from the last agent message&#39;s `streaming` flag). It settles to the static mark once the reply finishes — see `WithLogo`.</div>
+              <pre><code>const Responding = () =&gt; (
+  &lt;AgentSidebarMessages messages={respondingThread} {...actionCallbacks} showLogo /&gt;
 );</code></pre>
             </div>
         </div>
