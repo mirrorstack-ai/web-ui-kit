@@ -197,6 +197,64 @@ describe("AppShell agent sidebar pass-through", () => {
     openSidebar();
     expect(screen.getByRole("tab", { name: /^Chat 1/ })).toBeInTheDocument();
   });
+
+  it("renders agentEmptyState in the agent body when no content is wired", () => {
+    render(
+      <AppShell agentEmptyState={<p>Hi, Sam, ask me anything.</p>}>
+        content
+      </AppShell>,
+    );
+    openSidebar();
+    expect(screen.getByText("Hi, Sam, ask me anything.")).toBeInTheDocument();
+  });
+
+  it("prefers agentSidebarContent over agentEmptyState when both are set", () => {
+    render(
+      <AppShell
+        agentSidebarContent={<p>Live chat surface</p>}
+        agentEmptyState={<p>Empty opener</p>}
+      >
+        content
+      </AppShell>,
+    );
+    openSidebar();
+    expect(screen.getByText("Live chat surface")).toBeInTheDocument();
+    expect(screen.queryByText("Empty opener")).not.toBeInTheDocument();
+  });
+
+  // Decorative wrapper is aria-hidden, so query hidden elements.
+  const emptyLogo = () =>
+    screen.queryAllByRole("img", { name: "MirrorStack Logo", hidden: true });
+
+  it("paints the MirrorStack logo above agentEmptyState by default", () => {
+    render(
+      <AppShell agentEmptyState={<p>Hi, Sam.</p>}>content</AppShell>,
+    );
+    openSidebar();
+    expect(emptyLogo()).toHaveLength(1);
+    expect(screen.getByText("Hi, Sam.")).toBeInTheDocument();
+  });
+
+  it("hides the logo when hideAgentEmptyStateLogo is set", () => {
+    render(
+      <AppShell agentEmptyState={<p>Hi, Sam.</p>} hideAgentEmptyStateLogo>
+        content
+      </AppShell>,
+    );
+    openSidebar();
+    expect(emptyLogo()).toHaveLength(0);
+    expect(screen.getByText("Hi, Sam.")).toBeInTheDocument();
+  });
+
+  it("paints no empty-state logo when agentSidebarContent is wired", () => {
+    render(
+      <AppShell agentSidebarContent={<p>Live chat surface</p>}>
+        content
+      </AppShell>,
+    );
+    openSidebar();
+    expect(emptyLogo()).toHaveLength(0);
+  });
 });
 
 describe("AppShell sidebar width persistence", () => {

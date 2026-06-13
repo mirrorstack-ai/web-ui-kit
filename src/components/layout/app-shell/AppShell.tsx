@@ -20,6 +20,10 @@ import type {
   AgentSidebarInputProps,
 } from "@/components/ui/agent/sidebar/AgentSidebarInput";
 import type { AgentSidebarHistoryGroup } from "@/components/ui/agent/sidebar/types";
+import {
+  AGENT_EMPTY_STATE_LOGO,
+  type AgentSidebarMessagesProps,
+} from "@/components/ui/agent/messages/AgentSidebarMessages";
 
 export const meta: ComponentMeta = {
   name: "AppShell",
@@ -60,6 +64,19 @@ export interface AppShellProps {
   snackbarClassName?: string;
   /** Agent sidebar chat content */
   agentSidebarContent?: ReactNode;
+  /** Personalized opener shown in the agent body when no `agentSidebarContent`
+   *  is wired (e.g. before any conversation exists) — typically a host
+   *  greeting like "Hi, Sam, ask me anything about this app". Re-exports the
+   *  inner `AgentSidebarMessages` `emptyState` slot so a host that renders the
+   *  list itself and one that lets the shell render it agree on the same type.
+   *  Undefined-safe: omit it and the body falls back to `agentSidebarContent`. */
+  agentEmptyState?: AgentSidebarMessagesProps["emptyState"];
+  /** Hide the MirrorStack logo the shell paints above `agentEmptyState`.
+   *  Defaults to false (logo shown) — mirrors the inner
+   *  `AgentSidebarMessages` `hideEmptyStateLogo`, so a host that lets the shell
+   *  render the opener gets the same branded hero as one rendering the list
+   *  itself. No-op when `agentEmptyState` is omitted. */
+  hideAgentEmptyStateLogo?: AgentSidebarMessagesProps["hideEmptyStateLogo"];
   onAgentSend?: (message: string) => void;
   onAgentAttachFile?: () => void;
   onAgentMic?: () => void;
@@ -225,6 +242,8 @@ function AppShellInner({
   navClassName,
   snackbarClassName,
   agentSidebarContent,
+  agentEmptyState,
+  hideAgentEmptyStateLogo = false,
   onAgentSend,
   onAgentAttachFile,
   onAgentMic,
@@ -443,7 +462,19 @@ function AppShellInner({
 
               <div className="rounded-2xl bg-on-background flex-1 min-h-0 flex flex-col">
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
-                  {agentSidebarContent}
+                  {/* The host's chat surface when wired; otherwise the
+                      personalized empty-state opener under the brand logo
+                      (undefined-safe — both may be omitted, leaving an empty
+                      body). The logo only rides the shell-rendered opener; when
+                      a host wires `agentSidebarContent` its own
+                      `AgentSidebarMessages` owns the empty-state logo. */}
+                  {agentSidebarContent ??
+                    (agentEmptyState != null && (
+                      <div className="flex flex-col gap-4">
+                        {!hideAgentEmptyStateLogo && AGENT_EMPTY_STATE_LOGO}
+                        {agentEmptyState}
+                      </div>
+                    ))}
                 </div>
 
                 {agentPendingContent && (

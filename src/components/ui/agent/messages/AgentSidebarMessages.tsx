@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Logo } from "@/components/ui/media/logo/Logo";
@@ -77,8 +77,37 @@ export interface AgentSidebarMessagesProps {
   showLogo?: boolean;
   /** Auto-scroll to the latest message. Default: true. */
   autoScroll?: boolean;
+  /** Rendered in place of the list when there are no messages — the host's
+   *  personalized opener (e.g. "Hi, Sam, ask me anything about this app").
+   *  Omit to keep the kit's soft generic line so existing consumers are
+   *  unchanged. A node slot (not a string) so hosts can style/i18n freely. */
+  emptyState?: ReactNode;
+  /** Hide the MirrorStack logo shown above the empty-state opener. Defaults to
+   *  false (logo shown) — mirrors `AgentGreeting`'s `hideLogo`. The empty
+   *  sidebar reads as a branded hero just like the greeting surface. */
+  hideEmptyStateLogo?: boolean;
   className?: string;
 }
+
+/** The kit's fallback opener when a host wires no `emptyState`. Intentionally
+ *  plain — hosts are expected to override with a personalized line. */
+const DEFAULT_EMPTY_STATE = (
+  <p className="px-1 py-2 text-sm text-inverse-on-surface/60">
+    Ask the agent anything.
+  </p>
+);
+
+/** Brand signature above the empty-state opener — the same MirrorStack `Logo`
+ *  the greeting hero shows, sized for the narrower sidebar (size-10 vs the
+ *  hero's size-14) and tinted with `bg-inverse-primary` for the dark agent
+ *  surface. Decorative: the host's opener carries the accessible name.
+ *  Exported so `AppShell`, which renders the empty body itself, paints the
+ *  identical logo without duplicating the markup. */
+export const AGENT_EMPTY_STATE_LOGO = (
+  <div aria-hidden className="flex justify-start">
+    <Logo className="size-10 bg-inverse-primary" />
+  </div>
+);
 
 type ToolMessage = Extract<AgentSidebarMessage, { role: "tool" }>;
 
@@ -123,6 +152,8 @@ export function AgentSidebarMessages({
   toolLabels,
   showLogo = false,
   autoScroll = true,
+  emptyState,
+  hideEmptyStateLogo = false,
   className,
 }: AgentSidebarMessagesProps) {
   const endRef = useRef<HTMLDivElement>(null);
@@ -159,6 +190,20 @@ export function AgentSidebarMessages({
   const scrollToBottom = () => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   };
+
+  // Empty thread → the brand logo over the host's opener (or the kit fallback)
+  // in place of the list, so a freshly-opened sidebar reads as a branded hero
+  // rather than a blank pane. Rendered after the hooks above so hook order
+  // stays stable across renders.
+  if (messages.length === 0) {
+    return (
+      <div className={cn("flex flex-col items-start gap-1", className)}>
+        {!hideEmptyStateLogo && AGENT_EMPTY_STATE_LOGO}
+        {emptyState ?? DEFAULT_EMPTY_STATE}
+        <div ref={endRef} />
+      </div>
+    );
+  }
 
   const lastMessage = messages[messages.length - 1];
   const showBrandLogo =

@@ -258,6 +258,75 @@ describe("AgentSidebarMessages markdown rendering", () => {
   });
 });
 
+describe("AgentSidebarMessages empty state", () => {
+  it("renders the provided emptyState when there are no messages", () => {
+    render(
+      <AgentSidebarMessages
+        messages={[]}
+        emptyState={<p>Hi, Sam, ask me anything about this app.</p>}
+      />,
+    );
+    expect(
+      screen.getByText("Hi, Sam, ask me anything about this app."),
+    ).toBeInTheDocument();
+  });
+
+  it("falls back to the default opener when empty with no emptyState", () => {
+    render(<AgentSidebarMessages messages={[]} />);
+    expect(screen.getByText("Ask the agent anything.")).toBeInTheDocument();
+  });
+
+  it("renders the messages, not the emptyState, when non-empty", () => {
+    render(
+      <AgentSidebarMessages
+        messages={[agentMsg({ content: "Done." })]}
+        emptyState={<p>should not appear</p>}
+      />,
+    );
+    expect(screen.getByText("Done.")).toBeInTheDocument();
+    expect(screen.queryByText("should not appear")).not.toBeInTheDocument();
+  });
+
+  // The empty-state logo wrapper is aria-hidden (decorative), so opt into
+  // hidden elements when querying for it.
+  const emptyLogo = () =>
+    screen.queryAllByRole("img", { name: "MirrorStack Logo", hidden: true });
+
+  it("renders the MirrorStack logo above the opener by default", () => {
+    render(
+      <AgentSidebarMessages
+        messages={[]}
+        emptyState={<p>Hi, Sam.</p>}
+      />,
+    );
+    expect(emptyLogo()).toHaveLength(1);
+    expect(screen.getByText("Hi, Sam.")).toBeInTheDocument();
+  });
+
+  it("renders the logo above the default opener too", () => {
+    render(<AgentSidebarMessages messages={[]} />);
+    expect(emptyLogo()).toHaveLength(1);
+    expect(screen.getByText("Ask the agent anything.")).toBeInTheDocument();
+  });
+
+  it("hides the logo when hideEmptyStateLogo is set", () => {
+    render(
+      <AgentSidebarMessages
+        messages={[]}
+        hideEmptyStateLogo
+        emptyState={<p>Hi, Sam.</p>}
+      />,
+    );
+    expect(emptyLogo()).toHaveLength(0);
+    expect(screen.getByText("Hi, Sam.")).toBeInTheDocument();
+  });
+
+  it("renders no empty-state logo when non-empty (showLogo omitted)", () => {
+    render(<AgentSidebarMessages messages={[agentMsg({ content: "Done." })]} />);
+    expect(emptyLogo()).toHaveLength(0);
+  });
+});
+
 describe("AgentSidebarMessages showLogo", () => {
   // The logo wrapper is aria-hidden (decorative), so opt into hidden elements.
   const logo = () =>
