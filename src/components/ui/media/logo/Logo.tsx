@@ -44,13 +44,35 @@ const LOGO_CSS = `
 .ms-logo--loading .ms-logo__tri--ccw {
   animation: ms-logo-spin-reverse 1s cubic-bezier(0.85, 0, 0.15, 1) infinite;
 }
-@keyframes ms-logo-spin { from { transform: rotate(0); } to { transform: rotate(120deg); } }
-@keyframes ms-logo-spin-reverse { from { transform: rotate(0); } to { transform: rotate(-120deg); } }
+@keyframes ms-logo-spin {
+  from { transform: rotate(0); } to { transform: rotate(120deg); }
+}
+@keyframes ms-logo-spin-reverse {
+  from { transform: rotate(0); } to { transform: rotate(-120deg); }
+}
 @media (prefers-reduced-motion: reduce) {
   .ms-logo--loading .ms-logo__tri--cw,
   .ms-logo--loading .ms-logo__tri--ccw { animation: none; }
 }
 `;
+
+function BladeTriangle({
+  angles,
+  color,
+  dir,
+}: {
+  angles: number[];
+  color: string;
+  dir: "cw" | "ccw";
+}) {
+  return (
+    <g className={`ms-logo__tri ms-logo__tri--${dir}`}>
+      {angles.map((deg) => (
+        <path key={deg} d={BLADE} transform={`rotate(${deg} 32 32)`} fill={color} stroke={color} />
+      ))}
+    </g>
+  );
+}
 
 export function Logo({
   loading = false,
@@ -63,23 +85,15 @@ export function Logo({
       viewBox="0 0 64 64"
       role="img"
       aria-label={title}
-      aria-busy={loading || undefined}
+      aria-busy={loading ? true : undefined}
       style={style}
       className={cn("ms-logo h-full w-full", loading && "ms-logo--loading", className)}
     >
       <title>{title}</title>
       <style>{LOGO_CSS}</style>
       <g strokeWidth={6} strokeLinejoin="round" strokeLinecap="round">
-        <g className="ms-logo__tri ms-logo__tri--cw">
-          {TEAL_ANGLES.map((deg) => (
-            <path key={deg} d={BLADE} transform={`rotate(${deg} 32 32)`} fill={TEAL} stroke={TEAL} />
-          ))}
-        </g>
-        <g className="ms-logo__tri ms-logo__tri--ccw">
-          {CYAN_ANGLES.map((deg) => (
-            <path key={deg} d={BLADE} transform={`rotate(${deg} 32 32)`} fill={CYAN} stroke={CYAN} />
-          ))}
-        </g>
+        <BladeTriangle angles={TEAL_ANGLES} color={TEAL} dir="cw" />
+        <BladeTriangle angles={CYAN_ANGLES} color={CYAN} dir="ccw" />
       </g>
       {/* Forced-white core — punched on top so it reads on any background. */}
       <circle cx="32" cy="32" r="3" fill={CORE} />
