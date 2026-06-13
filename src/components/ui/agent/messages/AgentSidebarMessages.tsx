@@ -197,7 +197,7 @@ export function AgentSidebarMessages({
   // stays stable across renders.
   if (messages.length === 0) {
     return (
-      <div className={cn("flex flex-col items-start gap-1", className)}>
+      <div className={cn("flex flex-col items-start", className)}>
         {!hideEmptyStateLogo && AGENT_EMPTY_STATE_LOGO}
         {emptyState ?? DEFAULT_EMPTY_STATE}
         <div ref={endRef} />
