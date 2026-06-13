@@ -14,6 +14,10 @@ Notable API additions and breaking changes. For the full commit log, see
   re-exporting the `AgentSidebarMessages` `emptyState` type. Rendered in the
   agent body when no `agentSidebarContent` is wired (undefined-safe; the
   existing `agentSidebarContent` pass-through is unchanged).
+- The empty-state is branded with the MirrorStack logo above the opener
+  (mirroring `AgentGreeting`). Suppress it with `hideEmptyStateLogo` on
+  `AgentSidebarMessages` or `hideAgentEmptyStateLogo` on `AppShell` (both
+  default to showing the logo).
 
 ## 0.5.1
 
