@@ -159,7 +159,7 @@ export function SidebarProvider({
       Promise.resolve()
         .then(() => persistence.get())
         .then((stored) => {
-          if (!cancelled) apply(typeof stored === "number" ? stored : null);
+          if (!cancelled) apply(stored);
         })
         .catch(() => {
           // A failed read leaves the default in place — width simply isn't
