@@ -3,10 +3,12 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
-## 0.4.12
+## 0.5.0
 
 Agent sidebar surface reachable through `AppShell`, headless agent-chat hooks,
-Markdown replies. **No breaking changes**; all new props/exports are optional.
+persisted cross-platform tab strip, Markdown replies. **No breaking changes**;
+all new props/exports are optional. Minor bump (vs the usual pre-1.0 patch) to
+mark the agent-sidebar surface reaching feature completeness.
 
 - `AppShell`: forwards the controlled agent sidebar surface — tabs
   (`agentTabs` / `activeAgentTabId` / `onSelectAgentTab` / `onCloseAgentTab` /
@@ -21,6 +23,11 @@ Markdown replies. **No breaking changes**; all new props/exports are optional.
   injected via the new structural `AgentChatClient` type — no
   api-client-shared dependency. Also exports
   `groupConversationsByRecency`. (#288)
+- `useAgentTabs(persistence, opts)` (new hook): cross-platform persisted agent
+  tab strip — hydrates on mount, debounced last-write-wins persistence on
+  open/close/select/reorder, focus refetch for multi-host convergence; drafts
+  are never persisted. Persistence is injected via a structural interface — no
+  api-client-shared dependency. (#290)
 - `AgentSidebarReply`: streamed replies render as Markdown (headings, lists,
   code, links, emphasis) instead of plain text. (#283, regression-locked
   in #287)
