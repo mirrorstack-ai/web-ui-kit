@@ -332,8 +332,9 @@ export const SnackbarWithScrollableContent: Story = {
 
 /** The full sidebar pass-through surface, driven end-to-end through AppShell:
  *  controlled tabs (select / close / new — history rows open as new tabs),
- *  inline rename + delete on history rows, and cancellable queued-message
- *  chips above the input. Open the agent sidebar with the floating button. */
+ *  inline rename + delete on history rows, cancellable queued-message
+ *  chips above the input, and label/placeholder overrides (i18n) for the
+ *  header and input. Open the agent sidebar with the floating button. */
 function ControlledAgentSidebarDemo() {
   const [tabs, setTabs] = useState<ChatTab[]>([
     { id: "conv-1", title: "New chat" },
@@ -390,6 +391,9 @@ function ControlledAgentSidebarDemo() {
       }}
       agentQueuedMessages={queued}
       onCancelAgentQueued={(id) => setQueued((q) => q.filter((m) => m.id !== id))}
+      agentHeaderLabels={{ newChatLabel: "New conversation" }}
+      agentInputLabels={{ queuedPrefix: "Up next" }}
+      agentInputPlaceholder="Ask the agent anything…"
     >
       <DemoContent />
     </AppShell>
