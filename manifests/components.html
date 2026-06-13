@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1130,7 +1130,7 @@ variant: | &quot;error&quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppShell</h2>
       <div class="badges">
-        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">34 prop types</label>
+        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">35 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
         <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">6 stories</label>
         
@@ -1164,7 +1164,7 @@ variant: | &quot;error&quot;
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">34 prop types</span>
+              <span class="badge ok">35 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/app-shell/AppShell.tsx::AppShell</code></pre>
             <pre><code>Props:</code></pre>
@@ -1338,6 +1338,16 @@ onSelectAgentModel?: (id: string) =&gt; void
 onSelectAgentTab?: AgentSidebarHeaderProps[&quot;onSelectTab&quot;]
 
 selectedAgentModelId?: string
+
+/**
+ * Injected server-side sidebar-width persistence (docs 12.4 + 13b). When
+ *  wired, the rail width becomes ONE shared per-user value across every
+ *  platform host (read on mount, written on resize-end through the host&#39;s
+ *  shared agent client) instead of per-origin localStorage. Omit it for
+ *  in-memory-only width — Storybook and pre-migration hosts keep working,
+ *  width just doesn&#39;t persist.
+ */
+sidebarWidthPersistence?: SidebarWidthPersistence
 
 /**
  * Class for the snackbar container (e.g. max-w-2xl mx-auto)
