@@ -20,6 +20,7 @@ import type {
   AgentSidebarInputProps,
 } from "@/components/ui/agent/sidebar/AgentSidebarInput";
 import type { AgentSidebarHistoryGroup } from "@/components/ui/agent/sidebar/types";
+import type { AgentSidebarMessagesProps } from "@/components/ui/agent/messages/AgentSidebarMessages";
 
 export const meta: ComponentMeta = {
   name: "AppShell",
@@ -60,6 +61,13 @@ export interface AppShellProps {
   snackbarClassName?: string;
   /** Agent sidebar chat content */
   agentSidebarContent?: ReactNode;
+  /** Personalized opener shown in the agent body when no `agentSidebarContent`
+   *  is wired (e.g. before any conversation exists) — typically a host
+   *  greeting like "Hi, Sam, ask me anything about this app". Re-exports the
+   *  inner `AgentSidebarMessages` `emptyState` slot so a host that renders the
+   *  list itself and one that lets the shell render it agree on the same type.
+   *  Undefined-safe: omit it and the body falls back to `agentSidebarContent`. */
+  agentEmptyState?: AgentSidebarMessagesProps["emptyState"];
   onAgentSend?: (message: string) => void;
   onAgentAttachFile?: () => void;
   onAgentMic?: () => void;
@@ -225,6 +233,7 @@ function AppShellInner({
   navClassName,
   snackbarClassName,
   agentSidebarContent,
+  agentEmptyState,
   onAgentSend,
   onAgentAttachFile,
   onAgentMic,
@@ -443,7 +452,10 @@ function AppShellInner({
 
               <div className="rounded-2xl bg-on-background flex-1 min-h-0 flex flex-col">
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
-                  {agentSidebarContent}
+                  {/* The host's chat surface when wired; otherwise the
+                      personalized empty-state opener (undefined-safe — both
+                      may be omitted, leaving an empty body). */}
+                  {agentSidebarContent ?? agentEmptyState}
                 </div>
 
                 {agentPendingContent && (

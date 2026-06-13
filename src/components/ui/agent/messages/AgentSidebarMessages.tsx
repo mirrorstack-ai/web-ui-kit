@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Logo } from "@/components/ui/media/logo/Logo";
@@ -77,8 +77,21 @@ export interface AgentSidebarMessagesProps {
   showLogo?: boolean;
   /** Auto-scroll to the latest message. Default: true. */
   autoScroll?: boolean;
+  /** Rendered in place of the list when there are no messages — the host's
+   *  personalized opener (e.g. "Hi, Sam, ask me anything about this app").
+   *  Omit to keep the kit's soft generic line so existing consumers are
+   *  unchanged. A node slot (not a string) so hosts can style/i18n freely. */
+  emptyState?: ReactNode;
   className?: string;
 }
+
+/** The kit's fallback opener when a host wires no `emptyState`. Intentionally
+ *  plain — hosts are expected to override with a personalized line. */
+const DEFAULT_EMPTY_STATE = (
+  <p className="px-1 py-2 text-sm text-inverse-on-surface/60">
+    Ask the agent anything.
+  </p>
+);
 
 type ToolMessage = Extract<AgentSidebarMessage, { role: "tool" }>;
 
@@ -123,6 +136,7 @@ export function AgentSidebarMessages({
   toolLabels,
   showLogo = false,
   autoScroll = true,
+  emptyState,
   className,
 }: AgentSidebarMessagesProps) {
   const endRef = useRef<HTMLDivElement>(null);
@@ -159,6 +173,18 @@ export function AgentSidebarMessages({
   const scrollToBottom = () => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   };
+
+  // Empty thread → the host's opener (or the kit fallback) in place of the
+  // list, so a freshly-opened sidebar is never a blank pane. Rendered after
+  // the hooks above so hook order stays stable across renders.
+  if (messages.length === 0) {
+    return (
+      <div className={cn("flex flex-col gap-4", className)}>
+        {emptyState ?? DEFAULT_EMPTY_STATE}
+        <div ref={endRef} />
+      </div>
+    );
+  }
 
   const lastMessage = messages[messages.length - 1];
   const showBrandLogo =

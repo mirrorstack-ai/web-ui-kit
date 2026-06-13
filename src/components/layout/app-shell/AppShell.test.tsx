@@ -197,6 +197,30 @@ describe("AppShell agent sidebar pass-through", () => {
     openSidebar();
     expect(screen.getByRole("tab", { name: /^Chat 1/ })).toBeInTheDocument();
   });
+
+  it("renders agentEmptyState in the agent body when no content is wired", () => {
+    render(
+      <AppShell agentEmptyState={<p>Hi, Sam, ask me anything.</p>}>
+        content
+      </AppShell>,
+    );
+    openSidebar();
+    expect(screen.getByText("Hi, Sam, ask me anything.")).toBeInTheDocument();
+  });
+
+  it("prefers agentSidebarContent over agentEmptyState when both are set", () => {
+    render(
+      <AppShell
+        agentSidebarContent={<p>Live chat surface</p>}
+        agentEmptyState={<p>Empty opener</p>}
+      >
+        content
+      </AppShell>,
+    );
+    openSidebar();
+    expect(screen.getByText("Live chat surface")).toBeInTheDocument();
+    expect(screen.queryByText("Empty opener")).not.toBeInTheDocument();
+  });
 });
 
 describe("AppShell sidebar width persistence", () => {

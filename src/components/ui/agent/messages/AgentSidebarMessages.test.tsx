@@ -258,6 +258,36 @@ describe("AgentSidebarMessages markdown rendering", () => {
   });
 });
 
+describe("AgentSidebarMessages empty state", () => {
+  it("renders the provided emptyState when there are no messages", () => {
+    render(
+      <AgentSidebarMessages
+        messages={[]}
+        emptyState={<p>Hi, Sam, ask me anything about this app.</p>}
+      />,
+    );
+    expect(
+      screen.getByText("Hi, Sam, ask me anything about this app."),
+    ).toBeInTheDocument();
+  });
+
+  it("falls back to the default opener when empty with no emptyState", () => {
+    render(<AgentSidebarMessages messages={[]} />);
+    expect(screen.getByText("Ask the agent anything.")).toBeInTheDocument();
+  });
+
+  it("renders the messages, not the emptyState, when non-empty", () => {
+    render(
+      <AgentSidebarMessages
+        messages={[agentMsg({ content: "Done." })]}
+        emptyState={<p>should not appear</p>}
+      />,
+    );
+    expect(screen.getByText("Done.")).toBeInTheDocument();
+    expect(screen.queryByText("should not appear")).not.toBeInTheDocument();
+  });
+});
+
 describe("AgentSidebarMessages showLogo", () => {
   // The logo wrapper is aria-hidden (decorative), so opt into hidden elements.
   const logo = () =>

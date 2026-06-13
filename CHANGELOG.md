@@ -3,6 +3,18 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.2
+
+- `AgentSidebarMessages`: new optional `emptyState?: ReactNode`. When the
+  thread has no messages the component renders this node (a host-supplied
+  personalized opener like "Hi, Sam, ask me anything about this app") in place
+  of the list, so a freshly-opened sidebar is never a blank pane. Omit it and
+  the kit shows a soft generic line — existing consumers are unchanged.
+- `AppShell`: new optional `agentEmptyState` on the agent sidebar surface,
+  re-exporting the `AgentSidebarMessages` `emptyState` type. Rendered in the
+  agent body when no `agentSidebarContent` is wired (undefined-safe; the
+  existing `agentSidebarContent` pass-through is unchanged).
+
 ## 0.5.1
 
 - `AppShell`: the drag-resized agent sidebar width now persists across reloads.

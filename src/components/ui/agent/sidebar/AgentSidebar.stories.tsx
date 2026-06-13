@@ -204,6 +204,41 @@ export const QueuedMessage: StoryObj = {
   },
 };
 
+/** Fresh conversation: with no messages, the list renders the host-supplied
+ *  `emptyState` — a personalized opener — instead of a blank pane. Every host
+ *  (web-applications, web-account) passes its own greeting, so the empty
+ *  sidebar reads as a warm prompt rather than dead space. */
+export const EmptyState: StoryObj = {
+  render: () => (
+    <>
+      <AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() => {}}
+        onClose={() => {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) => console.log("history", id)}
+      />
+      <div className="flex-1 bg-on-background rounded-2xl flex flex-col min-h-0">
+        <div className="flex-1 overflow-y-auto p-4">
+          <AgentSidebarMessages
+            messages={[]}
+            emptyState={
+              <p className="px-1 py-2 text-sm text-inverse-on-surface/70">
+                Hi, Sam, ask me anything about this app.
+              </p>
+            }
+          />
+        </div>
+        <AgentSidebarInput
+          onSend={(msg) => console.log("Send:", msg)}
+          models={mockAgentModels}
+          selectedModelId={DEFAULT_MODEL_ID}
+        />
+      </div>
+    </>
+  ),
+};
+
 /** Full sidebar with live queue behavior: sending while the agent is still
  *  replying queues the message above the input; queued messages auto-send
  *  in order as each reply finishes. */
