@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -16,29 +17,66 @@ function resolveMaxOpenWidth(maxOpenWidth: number | undefined): number {
   return Number.POSITIVE_INFINITY;
 }
 
+/** Structural width-persistence surface (docs 12.4 + 13b): the sidebar width
+ *  is ONE per-user value shared across EVERY platform host (web-account,
+ *  web-applications, future CRM/PM), persisted SERVER-SIDE — never per-origin
+ *  localStorage. The kit stays backend-agnostic: a host injects any object
+ *  with these methods, typically bound to the shared agent client's
+ *  `/v1/sidebar-state` (the same record that carries open/tabs/activeTabId —
+ *  this surface owns just the `width` field of that envelope):
+ *
+ *    const widthPersistence: SidebarWidthPersistence = {
+ *      get: async () => (await getSidebarState(agentApi)).width,
+ *      set: (width) => putSidebarWidth(agentApi, width), // host debounces + merges
+ *    };
+ *
+ *  `set` is called with the last meaningful OPEN width (strictly above the
+ *  collapse floor); the host is responsible for debouncing the write
+ *  (resize-end) and folding `width` into the full sidebar-state PUT. A width
+ *  of 0 from `get` means "no saved width — use the host default" (mirrors the
+ *  server sentinel), so a fresh user paints at the default until the first
+ *  drag persists a real width. */
+export interface SidebarWidthPersistence {
+  /** Read the persisted per-user width (0 = no saved width / host default). */
+  get(): number | Promise<number>;
+  /** Persist the last open width. The host debounces and merges into the
+   *  shared sidebar-state record; failures are the host's to swallow. */
+  set(width: number): void | Promise<void>;
+}
+
 export interface SidebarContextType {
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
-  /** Last width the sidebar was opened to — survives close AND reload (when
-   *  `persistKey` is set). Reopen logic should restore this, not the default,
-   *  so the user's chosen size sticks. Falls back to `defaultWidth` until a
-   *  real open width has been recorded. */
+  /** Last width the sidebar was opened to — survives close AND reload (when a
+   *  persistence surface is wired). Reopen logic should restore this, not the
+   *  default, so the user's chosen size sticks. Falls back to `defaultWidth`
+   *  until a real open width has been recorded. */
   lastOpenWidth: number;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
-/** Namespaced default localStorage key for the agent sidebar width. */
+/** Namespaced localStorage key for the (now legacy) per-origin sidebar width.
+ *  @deprecated Width is now ONE shared per-user server-side value (docs 12.4 +
+ *  13b) — inject `widthPersistence` instead. Retained only for the legacy
+ *  `persistKey` fallback so pre-migration consumers don't break. */
 export const SIDEBAR_WIDTH_STORAGE_KEY = "ms.agentSidebar.width";
 
 export interface SidebarProviderProps {
   children: ReactNode;
   defaultWidth?: number;
-  /** localStorage key for persisting the sidebar width across reloads. Omit to
-   *  disable persistence (in-memory only). The stored value is the last
-   *  meaningful OPEN width — closing/collapsing does not erase it, so reopening
-   *  restores the user's chosen size. Width is a per-device cosmetic
-   *  preference, so localStorage is the right home (not server/session state). */
+  /** Injected server-side width persistence (docs 12.4 + 13b). When wired, the
+   *  width is read from / written to this surface (one shared per-user value
+   *  across every host) and the legacy `persistKey` localStorage path is
+   *  bypassed entirely. Omit it (and `persistKey`) for in-memory-only width
+   *  (Storybook, tests, hosts that don't share width). */
+  widthPersistence?: SidebarWidthPersistence;
+  /** @deprecated Width moved to shared server-side persistence (docs 12.4 +
+   *  13b) — pass `widthPersistence` instead. localStorage is per-origin, so a
+   *  width saved here does NOT carry across platform hosts. Honored only when
+   *  `widthPersistence` is NOT injected, to keep pre-migration consumers from
+   *  losing their saved width. The stored value is the last meaningful OPEN
+   *  width — closing/collapsing does not erase it. */
   persistKey?: string;
   /** Lower bound for a width considered a real "open" width worth persisting,
    *  and the floor used to clamp a rehydrated value. Widths at or below this
@@ -52,9 +90,10 @@ export interface SidebarProviderProps {
   maxOpenWidth?: number;
 }
 
-/** SSR-safe read of the persisted width. Returns null during SSR, when the key
- *  is unset, or when the stored value is missing/corrupt/out-of-range — callers
- *  fall back to the default in those cases. */
+/** SSR-safe read of the LEGACY localStorage-persisted width. Returns null
+ *  during SSR, when the key is unset, or when the stored value is
+ *  missing/corrupt/out-of-range — callers fall back to the default in those
+ *  cases. Only used for the deprecated `persistKey` fallback. */
 function readPersistedWidth(
   key: string | undefined,
   min: number,
@@ -78,37 +117,84 @@ function readPersistedWidth(
 export function SidebarProvider({
   children,
   defaultWidth = 350,
+  widthPersistence,
   persistKey,
   minOpenWidth = 350,
   maxOpenWidth,
 }: SidebarProviderProps) {
   const [sidebarWidth, setSidebarWidth] = useState(defaultWidth);
   // Tracked separately from sidebarWidth so a close (width → 0) keeps the last
-  // size for reopen. Seeded from the default; rehydrated from storage on mount.
+  // size for reopen. Seeded from the default; rehydrated from persistence on
+  // mount.
   const [lastOpenWidth, setLastOpenWidth] = useState(defaultWidth);
+
+  // The injected persistence rides a ref so an unstable identity (an inline
+  // object literal at the call site) doesn't churn the mount effect — same
+  // pattern as useAgentTabs' injected collaborators.
+  const persistenceRef = useRef(widthPersistence);
+  persistenceRef.current = widthPersistence;
 
   // Rehydrate after mount only — never during render/SSR — so the server pass
   // and first client render both use `defaultWidth` (no hydration mismatch).
-  // The persisted width applies one tick later. Clamped to [min, max]; corrupt
-  // or out-of-range values are ignored (default stands).
+  // The persisted width applies one tick (or one round-trip) later. The
+  // injected server persistence wins; the legacy localStorage `persistKey` is
+  // honored only when no persistence surface is wired. Clamped to [min, max];
+  // corrupt or out-of-range values are ignored (default stands).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const stored = readPersistedWidth(
-      persistKey,
-      minOpenWidth,
-      resolveMaxOpenWidth(maxOpenWidth),
-    );
-    if (stored !== null) setLastOpenWidth(stored);
+    const min = minOpenWidth;
+    const max = resolveMaxOpenWidth(maxOpenWidth);
+    const apply = (stored: number | null) => {
+      // A stored 0 is the "no saved width — host default" sentinel; only a
+      // value clear of the open floor is a real remembered width. Out-of-range
+      // values (e.g. from a wider viewport, or a bad client) are ignored.
+      if (stored === null) return;
+      if (stored < min || stored > max) return;
+      setLastOpenWidth(stored);
+    };
+
+    const persistence = persistenceRef.current;
+    if (persistence) {
+      let cancelled = false;
+      Promise.resolve()
+        .then(() => persistence.get())
+        .then((stored) => {
+          if (!cancelled) apply(typeof stored === "number" ? stored : null);
+        })
+        .catch(() => {
+          // A failed read leaves the default in place — width simply isn't
+          // restored this session; the next resize re-persists it.
+        });
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    // Legacy fallback: per-origin localStorage (deprecated, does not share
+    // across hosts). Only reached when no server persistence is injected.
+    apply(readPersistedWidth(persistKey, min, max));
   }, []);
 
   // Persist every meaningful open width; skip closed/collapsed-to-floor states
   // so a close OR a collapse (width === minOpenWidth) doesn't wipe the
-  // remembered size. The floor value itself is the collapsed state, not a real
-  // open width, so it must use a strict comparison.
+  // remembered size. The injected server persistence wins; the legacy
+  // localStorage `persistKey` is written only when no persistence is wired.
   const persist = useCallback(
     (width: number) => {
+      const persistence = persistenceRef.current;
+      if (persistence) {
+        try {
+          // The host owns debounce + the server PUT; a thrown/rejected write
+          // is non-fatal (the live width still updates).
+          void Promise.resolve(persistence.set(Math.round(width))).catch(
+            () => {},
+          );
+        } catch {
+          // Synchronous throw from a misbehaving setter — ignore.
+        }
+        return;
+      }
       if (!persistKey || typeof window === "undefined") return;
-      if (width <= minOpenWidth) return;
       try {
         window.localStorage.setItem(persistKey, String(Math.round(width)));
       } catch {
@@ -116,7 +202,7 @@ export function SidebarProvider({
         // width still updates, it just won't survive reload.
       }
     },
-    [persistKey, minOpenWidth],
+    [persistKey],
   );
 
   const handleSetWidth = useCallback(

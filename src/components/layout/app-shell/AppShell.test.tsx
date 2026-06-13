@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi, afterEach, beforeAll, afterAll } from "vitest";
 import { AppShell } from "./AppShell";
 
@@ -258,14 +258,25 @@ describe("AppShell agent sidebar pass-through", () => {
 });
 
 describe("AppShell sidebar width persistence", () => {
-  afterEach(() => localStorage.clear());
+  // Width now lives in the INJECTED server persistence (docs 12.4 + 13b), ONE
+  // shared per-user value across every host — NOT per-origin localStorage. The
+  // host wires `sidebarWidthPersistence`; the rail reads it on mount and writes
+  // it on resize-end.
 
-  it("reopens to the persisted width after reload (clamped to the viewport)", () => {
-    // Simulate a prior session that drag-resized to 500px. jsdom's
-    // window.innerWidth is 1024, so 500 is well within [350, 1004].
-    localStorage.setItem("ms.agentSidebar.width", "500");
+  it("reopens to the server-persisted width after reload (clamped to the viewport)", async () => {
+    // Simulate a prior session that drag-resized to 500px, persisted to the
+    // user's shared sidebar-state row. jsdom's window.innerWidth is 1024, so
+    // 500 is well within [350, 1004].
+    const widthPersistence = { get: () => 500, set: () => {} };
 
-    render(<AppShell>content</AppShell>);
+    render(
+      <AppShell sidebarWidthPersistence={widthPersistence}>content</AppShell>,
+    );
+    // The mount read resolves asynchronously (get() may be a promise) — wait
+    // for lastOpenWidth to rehydrate before opening.
+    await act(async () => {
+      await Promise.resolve();
+    });
     // Sidebar starts closed (toggle button shown), not auto-opened.
     fireEvent.click(screen.getByLabelText("Open agent"));
 
@@ -274,11 +285,45 @@ describe("AppShell sidebar width persistence", () => {
     expect(document.querySelector('[style*="width: 500px"]')).not.toBeNull();
   });
 
-  it("ignores a corrupt persisted value and uses the default reopen behavior", () => {
-    localStorage.setItem("ms.agentSidebar.width", "garbage");
-    render(<AppShell>content</AppShell>);
+  it("ignores an out-of-range server width and uses the default reopen behavior", async () => {
+    // A bad/oversized stored width (here below the open floor) is ignored; the
+    // provider clamps to [minOpenWidth, viewport] and falls back to the default.
+    const widthPersistence = { get: () => 100, set: () => {} };
+    render(
+      <AppShell sidebarWidthPersistence={widthPersistence}>content</AppShell>,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
     fireEvent.click(screen.getByLabelText("Open agent"));
     // No 500px panel — reopen fell back to the 50%-of-viewport default.
     expect(document.querySelector('[style*="width: 500px"]')).toBeNull();
+  });
+
+  it("writes the dragged width back through the injected persistence", async () => {
+    const set = vi.fn();
+    const widthPersistence = { get: () => 0, set };
+    render(
+      <AppShell sidebarWidthPersistence={widthPersistence}>content</AppShell>,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    // Open the sidebar — the reopen width (50% of the 1024 viewport = 512) is a
+    // real open width strictly above the 350 floor, so it persists.
+    fireEvent.click(screen.getByLabelText("Open agent"));
+    expect(set).toHaveBeenCalledWith(512);
+  });
+
+  it("works with no persistence injected (in-memory only, never touches localStorage)", () => {
+    const setItem = vi.spyOn(Storage.prototype, "setItem");
+    render(<AppShell>content</AppShell>);
+    fireEvent.click(screen.getByLabelText("Open agent"));
+    // Sidebar still opens; nothing is written to localStorage (the per-origin
+    // path is gone).
+    expect(
+      setItem.mock.calls.some(([key]) => key === "ms.agentSidebar.width"),
+    ).toBe(false);
+    setItem.mockRestore();
   });
 });

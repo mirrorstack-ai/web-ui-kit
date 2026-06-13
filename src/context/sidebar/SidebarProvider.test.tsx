@@ -233,3 +233,155 @@ describe("SidebarProvider persistence", () => {
     expect(screen.getByTestId("last-open").textContent).toBe("500");
   });
 });
+
+describe("SidebarProvider injected server persistence (docs 12.4 + 13b)", () => {
+  it("rehydrates lastOpenWidth from the injected get() on mount", async () => {
+    const widthPersistence = { get: () => 480, set: vi.fn() };
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        widthPersistence={widthPersistence}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+    // get() resolves via a microtask (it may be async).
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId("last-open").textContent).toBe("480");
+  });
+
+  it("supports an async get()", async () => {
+    const widthPersistence = { get: () => Promise.resolve(520), set: vi.fn() };
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        widthPersistence={widthPersistence}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId("last-open").textContent).toBe("520");
+  });
+
+  it("treats a 0 width from get() as the host-default sentinel (no rehydrate)", async () => {
+    const widthPersistence = { get: () => 0, set: vi.fn() };
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        widthPersistence={widthPersistence}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    // 0 < minOpenWidth (350) → ignored; the default stands.
+    expect(screen.getByTestId("last-open").textContent).toBe("0");
+  });
+
+  it("writes a real open width through the injected set() and bypasses localStorage", () => {
+    const setItem = vi.spyOn(Storage.prototype, "setItem");
+    const set = vi.fn();
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        widthPersistence={{ get: () => 0, set }}
+        // persistKey present but MUST be ignored — server persistence wins.
+        persistKey={SIDEBAR_WIDTH_STORAGE_KEY}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+    act(() => {
+      fireEvent.click(screen.getByText("Resize"));
+    });
+    expect(set).toHaveBeenCalledWith(500);
+    expect(localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY)).toBeNull();
+    expect(
+      setItem.mock.calls.some(([key]) => key === SIDEBAR_WIDTH_STORAGE_KEY),
+    ).toBe(false);
+    setItem.mockRestore();
+  });
+
+  it("a close/collapse does not call set() (the open width is preserved)", () => {
+    const set = vi.fn();
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        widthPersistence={{ get: () => 0, set }}
+        minOpenWidth={350}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+    act(() => {
+      fireEvent.click(screen.getByText("Resize"));
+    });
+    set.mockClear();
+    act(() => {
+      fireEvent.click(screen.getByText("Collapse"));
+    });
+    act(() => {
+      fireEvent.click(screen.getByText("Close"));
+    });
+    // Neither the collapse (350 === floor) nor the close (0) is a real open
+    // width — nothing is written back, so the remembered 500 sticks.
+    expect(set).not.toHaveBeenCalled();
+    expect(screen.getByTestId("last-open").textContent).toBe("500");
+  });
+
+  it("swallows a rejected set() without crashing", async () => {
+    const set = vi.fn(() => Promise.reject(new Error("network")));
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        widthPersistence={{ get: () => 0, set }}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+    act(() => {
+      fireEvent.click(screen.getByText("Resize"));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    // The live width still updated despite the failed write.
+    expect(screen.getByTestId("width").textContent).toBe("500");
+    expect(set).toHaveBeenCalledWith(500);
+  });
+
+  it("leaves the default in place when get() rejects", async () => {
+    const widthPersistence = {
+      get: () => Promise.reject(new Error("offline")),
+      set: vi.fn(),
+    };
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        widthPersistence={widthPersistence}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId("last-open").textContent).toBe("0");
+  });
+});
