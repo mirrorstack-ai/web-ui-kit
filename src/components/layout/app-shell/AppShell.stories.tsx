@@ -411,3 +411,16 @@ export const Playground: Story = {
     </AppShell>
   ),
 };
+
+// The agent sidebar's drag-resized width persists to localStorage
+// (`ms.agentSidebar.width`). To verify: open the sidebar (floating robot
+// button), drag the left edge to resize, then reload this story — the sidebar
+// reopens at the width you chose, not the default. Closing/collapsing keeps the
+// remembered size. Use the toolbar to clear localStorage if you want to reset.
+export const PersistedSidebarWidth: Story = {
+  render: () => (
+    <AppShell navigation={<DemoRail />} appSwitcher={appSwitcher} {...agentProps}>
+      <DemoContent />
+    </AppShell>
+  ),
+};

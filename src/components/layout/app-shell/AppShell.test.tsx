@@ -198,3 +198,29 @@ describe("AppShell agent sidebar pass-through", () => {
     expect(screen.getByRole("tab", { name: /^Chat 1/ })).toBeInTheDocument();
   });
 });
+
+describe("AppShell sidebar width persistence", () => {
+  afterEach(() => localStorage.clear());
+
+  it("reopens to the persisted width after reload (clamped to the viewport)", () => {
+    // Simulate a prior session that drag-resized to 500px. jsdom's
+    // window.innerWidth is 1024, so 500 is well within [350, 1004].
+    localStorage.setItem("ms.agentSidebar.width", "500");
+
+    render(<AppShell>content</AppShell>);
+    // Sidebar starts closed (toggle button shown), not auto-opened.
+    fireEvent.click(screen.getByLabelText("Open agent"));
+
+    // The agent inner panel width reflects the rehydrated 500, not the 350
+    // floor — the persisted size survived the "reload".
+    expect(document.querySelector('[style*="width: 500px"]')).not.toBeNull();
+  });
+
+  it("ignores a corrupt persisted value and uses the default reopen behavior", () => {
+    localStorage.setItem("ms.agentSidebar.width", "garbage");
+    render(<AppShell>content</AppShell>);
+    fireEvent.click(screen.getByLabelText("Open agent"));
+    // No 500px panel — reopen fell back to the 50%-of-viewport default.
+    expect(document.querySelector('[style*="width: 500px"]')).toBeNull();
+  });
+});
