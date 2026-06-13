@@ -263,7 +263,7 @@ describe("AgentSidebarMessages showLogo", () => {
   const logo = () =>
     screen.queryAllByRole("img", { name: "MirrorStack Logo", hidden: true });
 
-  it("renders exactly one logo when the last message is a finished agent message", () => {
+  it("renders exactly one static logo when the last message is a finished agent message", () => {
     render(
       <AgentSidebarMessages
         messages={[agentMsg({ id: "a-1" }), agentMsg({ id: "a-2" })]}
@@ -271,16 +271,18 @@ describe("AgentSidebarMessages showLogo", () => {
       />,
     );
     expect(logo()).toHaveLength(1);
+    expect(logo()[0]).not.toHaveAttribute("aria-busy");
   });
 
-  it("renders no logo while the last message is streaming", () => {
+  it("renders the logo in its loading state while the last message is streaming", () => {
     render(
       <AgentSidebarMessages
         messages={[agentMsg({ streaming: true })]}
         showLogo
       />,
     );
-    expect(logo()).toHaveLength(0);
+    expect(logo()).toHaveLength(1);
+    expect(logo()[0]).toHaveAttribute("aria-busy", "true");
   });
 
   it("renders no logo when the last message is a user message", () => {
