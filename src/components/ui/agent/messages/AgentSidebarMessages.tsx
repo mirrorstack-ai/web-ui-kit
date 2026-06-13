@@ -82,6 +82,10 @@ export interface AgentSidebarMessagesProps {
    *  Omit to keep the kit's soft generic line so existing consumers are
    *  unchanged. A node slot (not a string) so hosts can style/i18n freely. */
   emptyState?: ReactNode;
+  /** Hide the MirrorStack logo shown above the empty-state opener. Defaults to
+   *  false (logo shown) — mirrors `AgentGreeting`'s `hideLogo`. The empty
+   *  sidebar reads as a branded hero just like the greeting surface. */
+  hideEmptyStateLogo?: boolean;
   className?: string;
 }
 
@@ -91,6 +95,18 @@ const DEFAULT_EMPTY_STATE = (
   <p className="px-1 py-2 text-sm text-inverse-on-surface/60">
     Ask the agent anything.
   </p>
+);
+
+/** Brand signature above the empty-state opener — the same MirrorStack `Logo`
+ *  the greeting hero shows, sized for the narrower sidebar (size-10 vs the
+ *  hero's size-14) and tinted with `bg-inverse-primary` for the dark agent
+ *  surface. Decorative: the host's opener carries the accessible name.
+ *  Exported so `AppShell`, which renders the empty body itself, paints the
+ *  identical logo without duplicating the markup. */
+export const AGENT_EMPTY_STATE_LOGO = (
+  <div aria-hidden className="flex justify-center pb-1">
+    <Logo className="size-10 bg-inverse-primary" />
+  </div>
 );
 
 type ToolMessage = Extract<AgentSidebarMessage, { role: "tool" }>;
@@ -137,6 +153,7 @@ export function AgentSidebarMessages({
   showLogo = false,
   autoScroll = true,
   emptyState,
+  hideEmptyStateLogo = false,
   className,
 }: AgentSidebarMessagesProps) {
   const endRef = useRef<HTMLDivElement>(null);
@@ -174,12 +191,14 @@ export function AgentSidebarMessages({
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   };
 
-  // Empty thread → the host's opener (or the kit fallback) in place of the
-  // list, so a freshly-opened sidebar is never a blank pane. Rendered after
-  // the hooks above so hook order stays stable across renders.
+  // Empty thread → the brand logo over the host's opener (or the kit fallback)
+  // in place of the list, so a freshly-opened sidebar reads as a branded hero
+  // rather than a blank pane. Rendered after the hooks above so hook order
+  // stays stable across renders.
   if (messages.length === 0) {
     return (
       <div className={cn("flex flex-col gap-4", className)}>
+        {!hideEmptyStateLogo && AGENT_EMPTY_STATE_LOGO}
         {emptyState ?? DEFAULT_EMPTY_STATE}
         <div ref={endRef} />
       </div>

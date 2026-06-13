@@ -204,10 +204,11 @@ export const QueuedMessage: StoryObj = {
   },
 };
 
-/** Fresh conversation: with no messages, the list renders the host-supplied
- *  `emptyState` — a personalized opener — instead of a blank pane. Every host
- *  (web-applications, web-account) passes its own greeting, so the empty
- *  sidebar reads as a warm prompt rather than dead space. */
+/** Fresh conversation: with no messages, the list renders the MirrorStack
+ *  logo above the host-supplied `emptyState` — a personalized opener — instead
+ *  of a blank pane, so the empty sidebar reads as a branded hero (matching the
+ *  greeting surface) rather than dead space. Every host (web-applications,
+ *  web-account) passes its own greeting. */
 export const EmptyState: StoryObj = {
   render: () => (
     <>
@@ -222,6 +223,40 @@ export const EmptyState: StoryObj = {
         <div className="flex-1 overflow-y-auto p-4">
           <AgentSidebarMessages
             messages={[]}
+            emptyState={
+              <p className="px-1 text-center text-sm text-inverse-on-surface/70">
+                Hi, Sam, ask me anything about this app.
+              </p>
+            }
+          />
+        </div>
+        <AgentSidebarInput
+          onSend={(msg) => console.log("Send:", msg)}
+          models={mockAgentModels}
+          selectedModelId={DEFAULT_MODEL_ID}
+        />
+      </div>
+    </>
+  ),
+};
+
+/** Same empty thread with `hideEmptyStateLogo` — for hosts that want only
+ *  their opener with no brand mark above it. */
+export const EmptyStateNoLogo: StoryObj = {
+  render: () => (
+    <>
+      <AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() => {}}
+        onClose={() => {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) => console.log("history", id)}
+      />
+      <div className="flex-1 bg-on-background rounded-2xl flex flex-col min-h-0">
+        <div className="flex-1 overflow-y-auto p-4">
+          <AgentSidebarMessages
+            messages={[]}
+            hideEmptyStateLogo
             emptyState={
               <p className="px-1 py-2 text-sm text-inverse-on-surface/70">
                 Hi, Sam, ask me anything about this app.
