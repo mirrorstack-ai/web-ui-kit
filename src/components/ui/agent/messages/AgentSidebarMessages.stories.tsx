@@ -145,3 +145,27 @@ export const WithLogo: StoryObj = {
     <AgentSidebarMessages messages={finishedThread} {...actionCallbacks} showLogo />
   ),
 };
+
+const respondingThread: AgentSidebarMessage[] = [
+  {
+    id: "m-1",
+    role: "user",
+    content: "Summarize my account changes this week.",
+  },
+  {
+    id: "m-2",
+    role: "agent",
+    content: "Pulling your audit log",
+    streaming: true,
+  },
+];
+
+/** While the last agent message is still streaming, the brand logo renders and
+ *  SPINS below the list as the "responding" indicator (the loading prop is wired
+ *  from the last agent message's `streaming` flag). It settles to the static
+ *  mark once the reply finishes — see `WithLogo`. */
+export const Responding: StoryObj = {
+  render: () => (
+    <AgentSidebarMessages messages={respondingThread} {...actionCallbacks} showLogo />
+  ),
+};

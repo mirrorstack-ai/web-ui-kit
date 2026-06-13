@@ -5,7 +5,7 @@ import type { ComponentMeta } from "@/types/component-meta";
 export const meta: ComponentMeta = {
   name: "Logo",
   description:
-    "MirrorStack aperture logomark as inline SVG: two interleaved triangles of rounded petals in the fixed brand teal/cyan, around a forced-white core. Set `loading` to counter-rotate the triangles as a busy indicator.",
+    "MirrorStack aperture logomark as inline SVG: two interleaved triangles of rounded petals in the fixed brand teal/cyan, around a transparent centre hole that lets the background show through. Set `loading` to counter-rotate the triangles as a busy indicator.",
 };
 
 export interface LogoProps {
@@ -27,7 +27,6 @@ const CYAN_ANGLES = [60, 180, 300];
 /** Fixed brand colours — the mark stays on-brand in every theme. */
 const TEAL = "#006973";
 const CYAN = "#28bdce";
-const CORE = "#ffffff";
 
 /**
  * Logo-specific animation. Lives here rather than in the shared theme tokens
@@ -82,7 +81,10 @@ export function Logo({
 }: LogoProps) {
   return (
     <svg
-      viewBox="0 0 64 64"
+      // viewBox is cropped tight to the mark's stroked bounds (centred on the
+      // 32,32 spin origin) so the same-sized box renders a visibly larger mark
+      // with almost no internal padding — without touching width/height.
+      viewBox="11 11 42 42"
       role="img"
       aria-label={title}
       aria-busy={loading ? true : undefined}
@@ -95,8 +97,8 @@ export function Logo({
         <BladeTriangle angles={TEAL_ANGLES} color={TEAL} dir="cw" />
         <BladeTriangle angles={CYAN_ANGLES} color={CYAN} dir="ccw" />
       </g>
-      {/* Forced-white core — punched on top so it reads on any background. */}
-      <circle cx="32" cy="32" r="3" fill={CORE} />
+      {/* The aperture's centre is left transparent — the hole shows the
+          background through to whatever sits behind the mark. */}
     </svg>
   );
 }
