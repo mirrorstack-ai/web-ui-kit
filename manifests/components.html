@@ -1130,7 +1130,7 @@ variant: | &quot;error&quot;
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> AppShell</h2>
       <div class="badges">
-        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">29 prop types</label>
+        <label for="c-3-layout-appshell-props" class="badge ok as-toggle">32 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
         <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">8 stories</label>
         
@@ -1164,7 +1164,7 @@ variant: | &quot;error&quot;
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">29 prop types</span>
+              <span class="badge ok">32 prop types</span>
             </div>
             <pre><code>Component: src/components/layout/app-shell/AppShell.tsx::AppShell</code></pre>
             <pre><code>Props:</code></pre>
@@ -1174,9 +1174,26 @@ variant: | &quot;error&quot;
 activeAgentTabId?: AgentSidebarHeaderProps[&quot;activeTabId&quot;]
 
 /**
+ * Label overrides for the agent header (history, rename, new-chat strings).
+ *  All have EN defaults.
+ */
+agentHeaderLabels?: AgentSidebarHeaderProps[&quot;labels&quot;]
+
+/**
  * Past conversations grouped by date — shown in the agent header history dropdown.
  */
 agentHistory?: AgentSidebarHistoryGroup[]
+
+/**
+ * Label overrides for the agent input (queued-message strings).
+ *  All have EN defaults.
+ */
+agentInputLabels?: AgentSidebarInputProps[&quot;labels&quot;]
+
+/**
+ * Placeholder for the agent input textarea. Default: &quot;Type a message...&quot;
+ */
+agentInputPlaceholder?: AgentSidebarInputProps[&quot;placeholder&quot;]
 
 /**
  * Model roster for the agent input&#39;s model selector — omitted = no selector.
