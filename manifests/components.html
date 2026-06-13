@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">297 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">298 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1132,7 +1132,7 @@ variant: | &quot;error&quot;
       <div class="badges">
         <label for="c-3-layout-appshell-props" class="badge ok as-toggle">32 prop types</label>
         <label for="c-3-layout-appshell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-3-layout-appshell-stories" class="badge ok as-toggle">9 stories</label>
         
       </div>
     </div>
@@ -1457,6 +1457,19 @@ snackbarClassName?: string</code></pre>
               
               <pre><code>const Playground = () =&gt; (
   &lt;AppShell navigation={&lt;DemoRail /&gt;} {...agentProps}&gt;
+    &lt;DemoContent /&gt;
+  &lt;/AppShell&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Persisted Sidebar Width</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const PersistedSidebarWidth = () =&gt; (
+  &lt;AppShell navigation={&lt;DemoRail /&gt;} appSwitcher={appSwitcher} {...agentProps}&gt;
     &lt;DemoContent /&gt;
   &lt;/AppShell&gt;
 );</code></pre>
