@@ -297,7 +297,7 @@ function makeStreamHandlers(
                 id: messageId,
                 role: "agent",
                 content: m.content,
-                ...(m.segments && m.segments.length > 0 ? { segments: m.segments } : {}),
+                ...(m.segments?.length ? { segments: m.segments } : {}),
               }
             : m,
         ),
