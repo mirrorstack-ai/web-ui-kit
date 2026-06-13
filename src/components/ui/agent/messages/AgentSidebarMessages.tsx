@@ -104,7 +104,7 @@ const DEFAULT_EMPTY_STATE = (
  *  Exported so `AppShell`, which renders the empty body itself, paints the
  *  identical logo without duplicating the markup. */
 export const AGENT_EMPTY_STATE_LOGO = (
-  <div aria-hidden className="flex justify-center pb-1">
+  <div aria-hidden className="flex justify-start">
     <Logo className="size-10 bg-inverse-primary" />
   </div>
 );
@@ -197,7 +197,7 @@ export function AgentSidebarMessages({
   // stays stable across renders.
   if (messages.length === 0) {
     return (
-      <div className={cn("flex flex-col gap-4", className)}>
+      <div className={cn("flex flex-col items-start", className)}>
         {!hideEmptyStateLogo && AGENT_EMPTY_STATE_LOGO}
         {emptyState ?? DEFAULT_EMPTY_STATE}
         <div ref={endRef} />
