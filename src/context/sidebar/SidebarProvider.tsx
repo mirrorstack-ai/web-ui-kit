@@ -8,6 +8,14 @@ import {
   type ReactNode,
 } from "react";
 
+/** Resolve the clamp ceiling for a rehydrated width: explicit prop wins, else
+ *  the live viewport minus a small gutter, else unbounded (SSR / non-browser). */
+function resolveMaxOpenWidth(maxOpenWidth: number | undefined): number {
+  if (typeof maxOpenWidth === "number") return maxOpenWidth;
+  if (typeof window !== "undefined") return window.innerWidth - 20;
+  return Number.POSITIVE_INFINITY;
+}
+
 export interface SidebarContextType {
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
@@ -79,24 +87,18 @@ export function SidebarProvider({
   // size for reopen. Seeded from the default; rehydrated from storage on mount.
   const [lastOpenWidth, setLastOpenWidth] = useState(defaultWidth);
 
-  // Resolve the clamp ceiling: explicit prop wins, else the live viewport,
-  // else unbounded (SSR / non-browser).
-  const resolveMax = useCallback(() => {
-    if (typeof maxOpenWidth === "number") return maxOpenWidth;
-    if (typeof window !== "undefined") return window.innerWidth - 20;
-    return Number.POSITIVE_INFINITY;
-  }, [maxOpenWidth]);
-
   // Rehydrate after mount only — never during render/SSR — so the server pass
   // and first client render both use `defaultWidth` (no hydration mismatch).
   // The persisted width applies one tick later. Clamped to [min, max]; corrupt
   // or out-of-range values are ignored (default stands).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const stored = readPersistedWidth(persistKey, minOpenWidth, resolveMax());
+    const stored = readPersistedWidth(
+      persistKey,
+      minOpenWidth,
+      resolveMaxOpenWidth(maxOpenWidth),
+    );
     if (stored !== null) setLastOpenWidth(stored);
-    // Run once on mount. minOpenWidth/persistKey are effectively static per
-    // mount; resolveMax reads live window width at call time.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persist every meaningful open width; skip closed/collapsed-to-floor states
