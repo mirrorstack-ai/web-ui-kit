@@ -508,6 +508,12 @@ export {
   type UseAgentTabsOptions,
   type UseAgentTabsResult,
 } from "./hooks/agent-chat/useAgentTabs";
+export {
+  useAgentSession,
+  type UseAgentSessionDeps,
+  type UseAgentSessionLabels,
+  type UseAgentSessionResult,
+} from "./hooks/agent-chat/useAgentSession";
 export type {
   AgentApiMessage,
   AgentChatClient,
