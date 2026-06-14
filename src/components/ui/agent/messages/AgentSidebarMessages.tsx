@@ -105,13 +105,14 @@ const DEFAULT_EMPTY_STATE = (
 
 /** Brand signature above the empty-state opener — the same MirrorStack `Logo`
  *  the greeting hero shows, sized for the narrower sidebar (size-10 vs the
- *  hero's size-14) and tinted with `bg-inverse-primary` for the dark agent
- *  surface. Decorative: the host's opener carries the accessible name.
- *  Exported so `AppShell`, which renders the empty body itself, paints the
- *  identical logo without duplicating the markup. */
+ *  hero's size-14). The aperture mark carries its own fixed brand colours and a
+ *  transparent centre, so it needs no background tint — adding one would paint a
+ *  solid square behind the mark. Decorative: the host's opener carries the
+ *  accessible name. Exported so `AppShell`, which renders the empty body itself,
+ *  paints the identical logo without duplicating the markup. */
 export const AGENT_EMPTY_STATE_LOGO = (
   <div aria-hidden className="flex justify-start">
-    <Logo className="size-10 bg-inverse-primary" />
+    <Logo className="size-10" />
   </div>
 );
 
