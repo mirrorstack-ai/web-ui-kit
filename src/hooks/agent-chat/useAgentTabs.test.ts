@@ -95,6 +95,45 @@ describe("useAgentTabs", () => {
     expect(put).not.toHaveBeenCalled();
   });
 
+  it("does NOT persist before hydration settles — a mount-time mutation must not clobber the server", async () => {
+    // Deferred GET: hydration is still in flight when a mount-time mutation
+    // fires (the host bridge's setOpen, a route-driven tab change).
+    let resolveGet!: (s: AgentSidebarState) => void;
+    const get = vi.fn().mockImplementation(
+      () => new Promise<AgentSidebarState>((r) => { resolveGet = r; }),
+    );
+    const put = vi.fn().mockResolvedValue(undefined);
+    const persistence: AgentTabsPersistence = { get, put };
+    const { result } = renderHook(() => useAgentTabs(persistence));
+
+    // Pre-fix this scheduled a PUT of the empty, un-hydrated strip (tabs:[],
+    // placeholder width), permanently clobbering the server's saved state —
+    // the "reload reverts to default / new chat" bug. The gate suppresses it.
+    act(() => {
+      result.current.openConversation("c-9");
+    });
+    await advance(5000); // well past the debounce window
+    expect(result.current.hydrated).toBe(false);
+    expect(put).not.toHaveBeenCalled();
+
+    // Hydration settles with the real saved state (tabs + a real width).
+    await act(async () => {
+      resolveGet(state({ width: 700 }));
+    });
+    expect(result.current.hydrated).toBe(true);
+    expect(result.current.tabs).toEqual(["c-1", "c-2"]); // restored, not wiped
+    expect(put).not.toHaveBeenCalled(); // hydration itself never writes
+
+    // A genuine post-hydrate mutation DOES persist, carrying the hydrated
+    // width — never a placeholder.
+    act(() => {
+      result.current.openConversation("c-3");
+    });
+    await advance(5000);
+    expect(put).toHaveBeenCalledTimes(1);
+    expect(put.mock.calls[0][0].width).toBe(700);
+  });
+
   it("debounces mutations into ONE trailing PUT carrying the final state", async () => {
     const { persistence, put } = fakePersistence();
     const { result } = renderHook(() => useAgentTabs(persistence));
