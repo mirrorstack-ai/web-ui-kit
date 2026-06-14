@@ -394,13 +394,20 @@ function AppShellInner({
                     // Responsive gutters — tight on phones, roomier as the
                     // viewport grows. Pages must NOT add their own horizontal
                     // padding (it would double up); they own max-width only.
-                    "mx-auto w-full px-4 md:px-8 xl:px-12 pt-12",
+                    // The padding lives in the dedicated `ms-content-gutter`
+                    // class (theme.css) instead of Tailwind utilities so a
+                    // module-injected global `.px-4`/`.pt-12` cannot override
+                    // it by cascade order — see theme.css.
+                    "mx-auto w-full ms-content-gutter",
                     // Clear the pinned mobile bottom nav so content isn't hidden
                     // behind it. No-op at lg+, with no mobile navigation, and
                     // for the drawer variant (an overlay, not a pinned bar).
+                    // Bottom padding is conditional, so it stays its own
+                    // dedicated class (also leak-proof) rather than folding
+                    // into ms-content-gutter.
                     mobileNavigation && mobileNavigationVariant === "bottom"
-                      ? "pb-28 lg:pb-16"
-                      : "pb-16",
+                      ? "ms-content-gutter-pb-bottomnav"
+                      : "ms-content-gutter-pb",
                     contentClassName,
                   )}
                 >

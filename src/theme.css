@@ -151,6 +151,43 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* AppShell content gutter — emitted as a dedicated (non-utility) class so a
+   module-injected global Tailwind stylesheet (.px-4, .pt-12, etc.) cannot
+   override it by cascade order. Raw CSS, not @apply, so the resolved values
+   can't be re-clobbered by the same leaking utilities. Mirrors the original
+   utilities: px-4 / md:px-8 / xl:px-12 / pt-12, with the conditional bottom
+   padding split out (default pb-16, mobile-bottom-nav pb-28 → lg:pb-16). */
+.ms-content-gutter {
+  padding-inline: 1rem; /* px-4 */
+  padding-top: 3rem; /* pt-12 */
+}
+@media (min-width: 48rem) {
+  .ms-content-gutter {
+    padding-inline: 2rem; /* md:px-8 */
+  }
+}
+@media (min-width: 80rem) {
+  .ms-content-gutter {
+    padding-inline: 3rem; /* xl:px-12 */
+  }
+}
+
+/* Default bottom padding (no pinned mobile bottom nav). */
+.ms-content-gutter-pb {
+  padding-bottom: 4rem; /* pb-16 */
+}
+
+/* Bottom padding when the pinned mobile bottom nav is shown: clear the bar on
+   small screens, collapse back to the default at lg+. */
+.ms-content-gutter-pb-bottomnav {
+  padding-bottom: 7rem; /* pb-28 */
+}
+@media (min-width: 64rem) {
+  .ms-content-gutter-pb-bottomnav {
+    padding-bottom: 4rem; /* lg:pb-16 */
+  }
+}
+
 /* Progress indicator animations */
 @keyframes progress-bar-1 {
   0% {
