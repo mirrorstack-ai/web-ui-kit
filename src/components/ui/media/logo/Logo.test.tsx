@@ -27,11 +27,14 @@ describe("Logo", () => {
     ).toHaveAttribute("fill", "#28bdce");
   });
 
-  it("leaves the centre transparent — no painted core element", () => {
+  it("punches a transparent centre via a mask", () => {
     const { container } = render(<Logo />);
-    // The aperture's centre hole shows the background through; there must be
-    // no circle/core punched on top.
-    expect(container.querySelector("circle")).not.toBeInTheDocument();
+    const mask = container.querySelector("mask");
+    expect(mask).toBeInTheDocument();
+    expect(container.querySelector("g[mask]")).toHaveAttribute(
+      "mask",
+      `url(#${mask!.id})`,
+    );
   });
 
   it("does not report busy or request the loading animation by default", () => {

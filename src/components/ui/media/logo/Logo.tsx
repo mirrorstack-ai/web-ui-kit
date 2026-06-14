@@ -1,11 +1,11 @@
-import type { CSSProperties } from "react";
+import { useId, type CSSProperties } from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 
 export const meta: ComponentMeta = {
   name: "Logo",
   description:
-    "MirrorStack aperture logomark as inline SVG: two interleaved triangles of rounded petals in the fixed brand teal/cyan, around a transparent centre hole that lets the background show through. Set `loading` to counter-rotate the triangles as a busy indicator.",
+    "MirrorStack aperture logomark as inline SVG: two interleaved triangles of rounded petals in the fixed brand teal/cyan, around a punched-out (transparent) centre that lets the background show through. Set `loading` to counter-rotate the triangles as a busy indicator.",
 };
 
 export interface LogoProps {
@@ -32,8 +32,9 @@ const CYAN = "#28bdce";
  * Logo-specific animation. Lives here rather than in the shared theme tokens
  * because each logo can carry its own motion. The two triangles each have
  * 3-fold symmetry, so a 120° step loops seamlessly; the snappy curve gives it
- * energy. Spin is centred on the viewBox (not each triangle's bounding box)
- * and disabled under prefers-reduced-motion.
+ * energy. Spin is centred on the viewBox (50% of the 0 0 64 64 box = 32,32),
+ * so the viewBox must stay 0 0 64 64 for the rotation to stay centred, and it
+ * is disabled under prefers-reduced-motion.
  */
 const LOGO_CSS = `
 .ms-logo__tri { transform-box: view-box; transform-origin: 50% 50%; }
@@ -79,26 +80,34 @@ export function Logo({
   className,
   style,
 }: LogoProps) {
+  // Unique, selector-safe id so the centre cut-out works with many Logos.
+  const holeId = `ms-logo-hole-${useId().replace(/:/g, "")}`;
+
   return (
     <svg
-      // viewBox is cropped tight to the mark's stroked bounds (centred on the
-      // 32,32 spin origin) so the same-sized box renders a visibly larger mark
-      // with almost no internal padding — without touching width/height.
-      viewBox="11 11 42 42"
+      viewBox="0 0 64 64"
       role="img"
       aria-label={title}
-      aria-busy={loading ? true : undefined}
+      aria-busy={loading || undefined}
       style={style}
       className={cn("ms-logo h-full w-full", loading && "ms-logo--loading", className)}
     >
       <title>{title}</title>
       <style>{LOGO_CSS}</style>
-      <g strokeWidth={6} strokeLinejoin="round" strokeLinecap="round">
+      {/* Transparent core — punched out so the background shows through. */}
+      <mask id={holeId}>
+        <rect x="0" y="0" width="64" height="64" fill="white" />
+        <circle cx="32" cy="32" r="3" fill="black" />
+      </mask>
+      <g
+        mask={`url(#${holeId})`}
+        strokeWidth={6}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      >
         <BladeTriangle angles={TEAL_ANGLES} color={TEAL} dir="cw" />
         <BladeTriangle angles={CYAN_ANGLES} color={CYAN} dir="ccw" />
       </g>
-      {/* The aperture's centre is left transparent — the hole shows the
-          background through to whatever sits behind the mark. */}
     </svg>
   );
 }
