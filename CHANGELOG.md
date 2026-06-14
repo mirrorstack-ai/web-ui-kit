@@ -3,6 +3,24 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.7
+
+- `AppShell`: new optional controlled-open props `open?` / `onOpenChange?`. The
+  agent sidebar's open/closed state can now be driven (and persisted) by the
+  host — on reload the shell paints the persisted open flag instead of always
+  deriving visibility from width. Uncontrolled usage (`open === undefined`) is
+  unchanged.
+- Agent sidebar: a persisted drag-width is now restored on **reload**, not just
+  on the next open gesture (the fetched width is reconciled into the rendered
+  state on mount; a user gesture landing before the async fetch is never
+  clobbered).
+- `AgentChatClient` / `useAgentChat` / `useAgentSession`: new `deleteConversation`
+  (optimistic history removal + open-thread clear, rollback on failure) backing
+  the existing history trash-icon control.
+- `AgentSidebarMessages`: the empty-state icon no longer renders inside a filled
+  background box (the redesigned `Logo` carries its own brand fill + transparent
+  centre).
+
 ## 0.5.2
 
 - `AgentSidebarMessages`: new optional `emptyState?: ReactNode`. When the
