@@ -70,8 +70,8 @@ describe("SidebarProvider persistence", () => {
 
   it("does not read localStorage at module load (SSR-safe — value applied after mount)", () => {
     // A pre-existing stored value must NOT bleed into the first render: the
-    // default stands on the SSR/first pass, the stored value applies in an
-    // effect. Guards against hydration mismatch.
+    // default stands on the SSR/first pass, the stored value applies in a
+    // post-mount effect. Guards against hydration mismatch.
     localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, "500");
     const getItem = vi.spyOn(Storage.prototype, "getItem");
 
@@ -85,10 +85,12 @@ describe("SidebarProvider persistence", () => {
       </SidebarProvider>,
     );
 
-    // The width state still reflects the default on the committed render — the
-    // sidebar doesn't auto-open from a persisted width.
-    expect(screen.getByTestId("width").textContent).toBe("0");
-    // After mount, lastOpenWidth carries the rehydrated value for reopen.
+    // After mount, the persisted width is reconciled into the RENDERED state
+    // (defect #1 fix: a persisted width is restored on reload, not stranded in
+    // reopen memory). The functional updater seeds only from the default floor
+    // (cur <= 0), so a persisted 500 over a defaultWidth of 0 applies here.
+    expect(screen.getByTestId("width").textContent).toBe("500");
+    // lastOpenWidth also carries the rehydrated value for reopen.
     expect(screen.getByTestId("last-open").textContent).toBe("500");
     getItem.mockRestore();
   });

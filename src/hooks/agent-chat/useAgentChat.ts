@@ -573,11 +573,12 @@ export function useAgentChat(
 
   const deleteConversation = useCallback(
     (id: string) => {
-      // Optimistic: snapshot the prior list for rollback, then drop the row
-      // now so the history entry vanishes immediately. The snapshot is read
-      // from state (not inside the updater) so it can't depend on updater
+      // Optimistic: snapshot the removed row AND its position for rollback, then
+      // drop it now so the history entry vanishes immediately. The snapshot is
+      // read from state (not inside the updater) so it can't depend on updater
       // invocation count.
-      const prevConversations = conversations;
+      const removedIndex = conversations?.findIndex((c) => c.id === id) ?? -1;
+      const removedRow = removedIndex >= 0 ? conversations?.[removedIndex] : undefined;
       setConversations((prev) => prev?.filter((c) => c.id !== id));
 
       // Deleting the OPEN conversation must clear the thread too — otherwise a
@@ -593,9 +594,18 @@ export function useAgentChat(
 
       clientRef.current.deleteConversation(id).catch((err) => {
         console.error("agent: delete failed", err);
-        // Restore the history row on failure; the cleared thread is not
-        // re-loaded (the host can reselect the conversation to reopen it).
-        setConversations(() => prevConversations);
+        // Restore the removed row on failure with a MERGE updater (mirrors
+        // renameConversation's rollback) so any conversation created between the
+        // optimistic drop and this failure is preserved rather than clobbered.
+        // Re-insert at the original index to keep history order stable. The
+        // cleared thread is not re-loaded (the host can reselect the
+        // conversation to reopen it).
+        setConversations((prev) => {
+          if (!removedRow || prev?.some((c) => c.id === id)) return prev;
+          const next = [...(prev ?? [])];
+          next.splice(Math.min(removedIndex, next.length), 0, removedRow);
+          return next;
+        });
       });
     },
     [conversations],

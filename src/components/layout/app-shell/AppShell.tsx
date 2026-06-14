@@ -386,8 +386,8 @@ function AppShellInner({
     if (open === undefined) return;
     if (open && sidebarWidth === 0) setSidebarWidth(reopenWidth());
     else if (!open && sidebarWidth > 0) setSidebarWidth(0);
-    // reopenWidth reads refs/state captured per render; depend on the inputs
-    // that actually change the decision.
+    // reopenWidth is recreated each render; we intentionally depend only on
+    // [open, sidebarWidth], the inputs that gate this decision.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, sidebarWidth]);
 
@@ -473,6 +473,10 @@ function AppShellInner({
           @starting-style block that holds width at 0 on mount, then
           transition-all interpolates up to the inline style — so open
           uses the same curve + duration as drag-end + collapse. */}
+      {/* `sidebarWidth > 0` is load-bearing, not redundant with isOpen: in the
+          controlled-open path open can be true while the seed effect hasn't yet
+          landed a real width, so we wait for it before painting (avoids a 0-width
+          flash). Uncontrolled, the two halves are equivalent. */}
       {isOpen && sidebarWidth > 0 && (
         <div
           className={cn(
