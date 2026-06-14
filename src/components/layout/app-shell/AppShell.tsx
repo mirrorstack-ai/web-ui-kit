@@ -293,7 +293,8 @@ function AppShellInner({
   agentInputPlaceholder,
   agentInputLabels,
 }: AppShellProps) {
-  const { sidebarWidth, setSidebarWidth, lastOpenWidth } = useSidebarWidth();
+  const { sidebarWidth, setSidebarWidth, seedWidth, lastOpenWidth } =
+    useSidebarWidth();
   const [isResizing, setIsResizing] = useState(false);
   const [windowWidth, setWindowWidth] = useState(() =>
     typeof window === "undefined" ? 0 : window.innerWidth,
@@ -377,14 +378,22 @@ function AppShellInner({
 
   // When `open` is controlled, keep the rendered width in lockstep with it:
   // open === true while the width is still 0 (fresh open, or a reload that
-  // restored open:true before the async width fetch landed) seeds the width;
-  // open === false while open collapses it. The width fetch's own reconcile
-  // (SidebarProvider) only touches a default-0 width, so the two don't fight:
-  // the first one to land wins and the other no-ops. Uncontrolled
-  // (open === undefined) skips this entirely.
+  // restored open:true before the async width fetch landed) SEEDS the width;
+  // open === false while open collapses it. Uncontrolled (open === undefined)
+  // skips this entirely.
+  //
+  // On reload this seed is a PLACEHOLDER: the persisted open:true hydrates
+  // synchronously while the async width GET (SidebarProvider) is still in
+  // flight, and lastOpenWidth is still 0 at that instant, so reopenWidth()
+  // returns the half-viewport fallback — not the user's saved drag. We seed
+  // through `seedWidth`, NOT `setSidebarWidth`, so this placeholder does NOT
+  // mark the width hydrated; the fetched stored width then overrides it exactly
+  // once when the GET lands (SidebarProvider). A genuine user drag still goes
+  // through setSidebarWidth and wins. Closing (open=false) is a real intent, so
+  // it uses setSidebarWidth.
   useEffect(() => {
     if (open === undefined) return;
-    if (open && sidebarWidth === 0) setSidebarWidth(reopenWidth());
+    if (open && sidebarWidth === 0) seedWidth(reopenWidth());
     else if (!open && sidebarWidth > 0) setSidebarWidth(0);
     // reopenWidth is recreated each render; we intentionally depend only on
     // [open, sidebarWidth], the inputs that gate this decision.

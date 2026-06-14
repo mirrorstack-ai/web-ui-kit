@@ -323,6 +323,82 @@ describe("useAgentTabs", () => {
     expect(put).toHaveBeenCalledTimes(1);
     expect(put).toHaveBeenCalledWith(state({ activeTabId: "c-1" }));
   });
+
+  // ---- Bug 2 regression: an interleaving event during the in-flight hydrate
+  // could strand a fresh placeholder draft over the restored conversation ----
+  //
+  // The first (hydrate) load is authoritative: it must restore the remote tabs
+  // and active tab even if a host mutation or a focus/visibility refetch races
+  // it. Old behavior kept drafts (keepDrafts = mode==='refetch' || touchedRef)
+  // whenever the in-flight hydrate overlapped such an event, so the new-chat
+  // placeholder won and the user's restored conversation was lost.
+
+  it("a host mutation during the in-flight hydrate does not strand the placeholder draft (Bug 2)", async () => {
+    // A controllable get() that resolves only when we release it — the hydrate
+    // round-trip is in flight while the mutation lands.
+    let release!: (s: AgentSidebarState) => void;
+    const get = vi.fn(
+      () =>
+        new Promise<AgentSidebarState>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const put = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() => useAgentTabs({ get, put }));
+
+    // Hydrate GET is in flight (not yet resolved). A route-change / host
+    // mutation creates and focuses a fresh draft — this sets touchedRef, which
+    // old code honored as keepDrafts on the still-pending hydrate.
+    act(() => result.current.newTab());
+    const draftId = result.current.activeTabId;
+    expect(isDraftTab(draftId)).toBe(true);
+
+    // Now the hydrate response lands with the user's restored conversation.
+    await act(async () => {
+      release(state({ tabs: tabsOf("c-1", "c-2"), activeTabId: "c-2" }));
+      await Promise.resolve();
+    });
+
+    // First load is authoritative: remote tabs + active restored, the racing
+    // placeholder draft did NOT win. (Old behavior: draft kept + still active.)
+    expect(result.current.tabs).toEqual(["c-1", "c-2"]);
+    expect(result.current.activeTabId).toBe("c-2");
+    expect(result.current.hydrated).toBe(true);
+  });
+
+  it("a focus/visibility event during the in-flight hydrate cannot pre-empt it (Bug 2)", async () => {
+    let release!: (s: AgentSidebarState) => void;
+    const get = vi.fn(
+      () =>
+        new Promise<AgentSidebarState>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const put = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() => useAgentTabs({ get, put }));
+
+    // Hydrate GET in flight. A focus + visibilitychange fire before it settles.
+    // Old code ran reconcile('refetch'), bumping the shared fetchSeq so the
+    // hydrate GET early-returned (stale seq) — the restore was dropped. The fix
+    // skips refetches until the first hydrate settles.
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    // Only the single in-flight hydrate GET exists — no refetch was issued.
+    expect(get).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      release(state({ tabs: tabsOf("c-1", "c-2"), activeTabId: "c-2" }));
+      await Promise.resolve();
+    });
+
+    // The hydrate completed and restored the remote strip + active tab.
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(result.current.tabs).toEqual(["c-1", "c-2"]);
+    expect(result.current.activeTabId).toBe("c-2");
+    expect(result.current.hydrated).toBe(true);
+  });
 });
 
 describe("deriveTabTitles", () => {

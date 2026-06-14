@@ -47,6 +47,14 @@ export interface SidebarWidthPersistence {
 export interface SidebarContextType {
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
+  /** Set a PLACEHOLDER width that must yield to the persisted width once it is
+   *  fetched. Use for the open-flag-driven seed (AppShell's controlled-open
+   *  effect, which on reload derives a half-viewport / floor value because the
+   *  real width hasn't hydrated yet) — NOT for a user gesture. Unlike
+   *  `setSidebarWidth`, it never marks the width hydrated, so the async-fetched
+   *  stored width overrides it exactly once on first hydrate (first REAL writer
+   *  wins; a placeholder is not a real writer). It also never persists. */
+  seedWidth: (width: number) => void;
   /** Last width the sidebar was opened to — survives close AND reload (when a
    *  persistence surface is wired). Reopen logic should restore this, not the
    *  default, so the user's chosen size sticks. Falls back to `defaultWidth`
@@ -134,6 +142,16 @@ export function SidebarProvider({
   const persistenceRef = useRef(widthPersistence);
   persistenceRef.current = widthPersistence;
 
+  // True once a REAL width has hydrated the rendered state — either the
+  // async-fetched stored width landed (apply() below) OR a genuine user drag
+  // recorded an open width before the fetch resolved. Until then, an open-flag
+  // PLACEHOLDER seed (AppShell's controlled-open effect, which derives a
+  // half-viewport / floor width because lastOpenWidth is still 0 mid-restore)
+  // does NOT count as hydrated, so the fetched stored width may overwrite it
+  // exactly once. This makes the persisted width authoritative for the hydrate
+  // window regardless of which writer seeded a non-zero placeholder first.
+  const widthHydratedRef = useRef(false);
+
   // Rehydrate after mount only — never during render/SSR — so the server pass
   // and first client render both use `defaultWidth` (no hydration mismatch).
   // The persisted width applies one tick (or one round-trip) later. The
@@ -155,13 +173,28 @@ export function SidebarProvider({
       // reopen memory (`lastOpenWidth`). Without this the fetched width is
       // stranded — it only surfaces on the NEXT open gesture (reopenWidth reads
       // lastOpenWidth), which is why close-then-reopen restored it but a reload
-      // did not. The functional updater seeds only from the default floor
-      // (`cur <= 0`), so a user open gesture (or AppShell's controlled-open
-      // effect) that landed a real width before this async fetch resolved is
-      // never clobbered — first writer of a real width wins. No render gate:
-      // width intentionally paints default-then-hydrate to avoid an SSR
-      // mismatch.
-      setSidebarWidth((cur) => (cur <= 0 ? stored : cur));
+      // did not.
+      //
+      // The first time we apply, the fetched stored width overrides whatever is
+      // rendered — even a non-zero PLACEHOLDER seed. On reload AppShell's
+      // controlled-open effect synchronously seeds a half-viewport / floor width
+      // the instant the host's persisted open:true hydrates (lastOpenWidth is
+      // still 0 at that point, so reopenWidth() returns a placeholder, not the
+      // real saved width). That seed lands BEFORE this async GET resolves, so a
+      // plain `cur <= 0` guard would discard the real stored width. Overriding
+      // once on first hydrate makes the persisted width win that race. A genuine
+      // user drag landing before the fetch sets widthHydratedRef in
+      // handleSetWidth, so it is treated as already-hydrated and is NOT
+      // clobbered — first REAL writer wins. After the one-time hydrate, the
+      // functional updater seeds only from the default floor (`cur <= 0`). No
+      // render gate: width intentionally paints default-then-hydrate to avoid an
+      // SSR mismatch.
+      if (!widthHydratedRef.current) {
+        widthHydratedRef.current = true;
+        setSidebarWidth(stored);
+      } else {
+        setSidebarWidth((cur) => (cur <= 0 ? stored : cur));
+      }
     };
 
     const persistence = persistenceRef.current;
@@ -225,6 +258,11 @@ export function SidebarProvider({
       // reopen fall back to the default. Only widths strictly above the floor
       // count as the remembered open width.
       if (width > minOpenWidth) {
+        // A real user drag landing before the async fetch resolves is the
+        // authoritative width — mark hydrated so the late-arriving stored width
+        // does NOT overwrite it (first REAL writer wins). A placeholder seed at
+        // or below the floor never reaches here, so it can't claim hydration.
+        widthHydratedRef.current = true;
         setLastOpenWidth(width);
         persist(width);
       }
@@ -232,9 +270,24 @@ export function SidebarProvider({
     [minOpenWidth, persist],
   );
 
+  // A placeholder seed (the open-flag-driven width on reload) paints the
+  // sidebar open immediately, but it is NOT the user's real width — it must not
+  // mark the width hydrated, or the async-fetched stored width would be
+  // discarded (the bug). It also never persists. The fetched width overrides it
+  // exactly once when the GET lands. Seeding 0 (or the floor) is a no-op for the
+  // hydration race; only a positive placeholder needs the special handling.
+  const seedWidth = useCallback((width: number) => {
+    setSidebarWidth(width);
+  }, []);
+
   const value = useMemo(
-    () => ({ sidebarWidth, setSidebarWidth: handleSetWidth, lastOpenWidth }),
-    [sidebarWidth, handleSetWidth, lastOpenWidth],
+    () => ({
+      sidebarWidth,
+      setSidebarWidth: handleSetWidth,
+      seedWidth,
+      lastOpenWidth,
+    }),
+    [sidebarWidth, handleSetWidth, seedWidth, lastOpenWidth],
   );
 
   return (

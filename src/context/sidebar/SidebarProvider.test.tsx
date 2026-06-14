@@ -386,4 +386,108 @@ describe("SidebarProvider injected server persistence (docs 12.4 + 13b)", () => 
     });
     expect(screen.getByTestId("last-open").textContent).toBe("0");
   });
+
+  // ---- Bug 1 regression: the seed-vs-fetch width race on reload ----
+  //
+  // On reload SidebarProvider mounts with defaultWidth 0, so sidebarWidth and
+  // lastOpenWidth are both 0. A NON-ZERO placeholder writer then runs BEFORE the
+  // async width GET resolves — either AppShell's controlled-open half-viewport
+  // seed, or (in web-applications) AgentSessionBridge's setSidebarWidth(350)
+  // clobber. The old reconcile only seeded a default-0 width
+  // (`cur <= 0 ? stored : cur`), so any non-zero placeholder won the race and
+  // the saved width was discarded — reload reopened at the placeholder, not the
+  // user's drag size. The fix overrides the placeholder with the fetched width
+  // exactly once on first hydrate.
+  it("overrides a non-zero placeholder seed with the fetched width on first hydrate (Bug 1)", async () => {
+    // A controllable get() that resolves only when we say so — this is the
+    // async round-trip that lands AFTER the synchronous placeholder seed.
+    let resolveGet!: (width: number) => void;
+    const get = vi.fn(
+      () =>
+        new Promise<number>((resolve) => {
+          resolveGet = resolve;
+        }),
+    );
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        widthPersistence={{ get, set: vi.fn() }}
+        minOpenWidth={350}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+
+    // The mount effect calls get() inside a microtask — let it run so the
+    // deferred resolver is wired, while the GET itself stays in flight.
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(get).toHaveBeenCalledTimes(1);
+
+    // Reproduce the racing placeholder writer (e.g. AgentSessionBridge's 350
+    // clobber): a non-zero width is set while the GET is still in flight. 350
+    // === minOpenWidth, so it is NOT a "real" open width — it must not be
+    // allowed to defeat the saved width.
+    act(() => {
+      fireEvent.click(screen.getByText("Collapse"));
+    });
+    expect(screen.getByTestId("width").textContent).toBe("350");
+
+    // Now the GET resolves to the user's saved drag width.
+    await act(async () => {
+      resolveGet(700);
+      await Promise.resolve();
+    });
+
+    // The fetched width wins: it overrides the non-zero placeholder seed once.
+    // (Old behavior: 350 stayed because `cur <= 0` was false.)
+    expect(screen.getByTestId("width").textContent).toBe("700");
+    expect(screen.getByTestId("last-open").textContent).toBe("700");
+  });
+
+  // A genuine user drag landing before the fetch is a REAL width and must win
+  // over the late GET — "first REAL writer wins". The placeholder seed above
+  // never reaches this path (it stays at/below the floor), so only an actual
+  // drag claims hydration.
+  it("a real pre-fetch user drag wins over the late fetched width (Bug 1, inverse)", async () => {
+    let resolveGet!: (width: number) => void;
+    const get = vi.fn(
+      () =>
+        new Promise<number>((resolve) => {
+          resolveGet = resolve;
+        }),
+    );
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        widthPersistence={{ get, set: vi.fn() }}
+        minOpenWidth={350}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+
+    // Let the mount effect wire the deferred resolver (GET still in flight).
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(get).toHaveBeenCalledTimes(1);
+
+    // A real drag (500 > minOpenWidth) lands before the GET resolves.
+    act(() => {
+      fireEvent.click(screen.getByText("Resize"));
+    });
+    expect(screen.getByTestId("width").textContent).toBe("500");
+
+    await act(async () => {
+      resolveGet(700);
+      await Promise.resolve();
+    });
+
+    // The user's live drag is authoritative — the stale GET does not clobber it.
+    expect(screen.getByTestId("width").textContent).toBe("500");
+  });
 });

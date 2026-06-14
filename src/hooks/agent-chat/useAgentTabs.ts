@@ -373,6 +373,14 @@ export function useAgentTabs(
   const pendingRef = useRef(false);
   // Guards stale GET responses racing a newer fetch.
   const fetchSeq = useRef(0);
+  // True once the FIRST successful load (hydrate OR a focus refetch that beat
+  // the hydrate) has settled. The first load is authoritative: it forces
+  // keepDrafts=false regardless of mode/touchedRef so an interleaving refetch
+  // or host mutation (route-change newTab/selectTab, AgentSessionBridge setOpen)
+  // can't strand a fresh placeholder draft over the restored conversation/active
+  // tab. Until it flips true, focus/visibility refetches are skipped so they
+  // can't pre-empt the in-flight hydrate via the shared fetchSeq.
+  const hasHydratedRef = useRef(false);
 
   const schedulePut = useCallback(() => {
     if (!persistenceRef.current || !enabledRef.current) return;
@@ -424,10 +432,20 @@ export function useAgentTabs(
     if (mode === "refetch" && pendingRef.current) return;
     const p = persistenceRef.current;
     if (!p) {
-      if (mode === "hydrate") setHydrated(true);
+      if (mode === "hydrate") {
+        hasHydratedRef.current = true;
+        setHydrated(true);
+      }
       return;
     }
     const seq = ++fetchSeq.current;
+    // The first successful load is authoritative whether it arrives via the
+    // hydrate effect or a focus refetch that beat it: force keepDrafts=false so
+    // the restored remote tabs + active tab replace the initial placeholder
+    // draft outright. An interleaving refetch/mutation (which would otherwise
+    // set touchedRef or pass mode==='refetch') can no longer keep — and strand —
+    // a fresh placeholder draft over the user's restored conversation.
+    const isFirstLoad = !hasHydratedRef.current;
     try {
       const remote = await p.get();
       if (fetchSeq.current !== seq || pendingRef.current) return;
@@ -444,7 +462,12 @@ export function useAgentTabs(
         if (fetchSeq.current !== seq || pendingRef.current) return;
       }
       const prev = stripRef.current;
-      const next = applyRemote(prev, remote, ids, mode === "refetch" || touchedRef.current);
+      const next = applyRemote(
+        prev,
+        remote,
+        ids,
+        !isFirstLoad && (mode === "refetch" || touchedRef.current),
+      );
       // Healed drops stay silent (no write-back) — the next real mutation
       // PUTs the full healed state anyway.
       lastPersistedRef.current = toPersisted(next);
@@ -455,7 +478,14 @@ export function useAgentTabs(
     } catch (err) {
       console.error("agent: sidebar state get failed", err);
     } finally {
-      if (mode === "hydrate" && fetchSeq.current === seq) setHydrated(true);
+      // Mark hydrated whenever a load WINS its seq — not just mode==='hydrate'.
+      // A focus refetch that completes before the hydrate effect's GET settles
+      // is the first authoritative load; it must flip the flag (and surface
+      // `hydrated`) so the next load takes the normal keep-drafts path.
+      if (fetchSeq.current === seq) {
+        hasHydratedRef.current = true;
+        setHydrated(true);
+      }
     }
   }, []);
 
@@ -469,6 +499,12 @@ export function useAgentTabs(
   useEffect(() => {
     if (!enabled) return;
     const onVisible = () => {
+      // Until the first hydrate settles, a focus/visibility refetch must NOT
+      // fire: it shares fetchSeq with the in-flight hydrate, so a refetch that
+      // bumps the seq would make the hydrate GET early-return (stale seq) and a
+      // fresh placeholder draft could win. Once hydrated, refetches converge
+      // concurrent hosts as normal.
+      if (!hasHydratedRef.current) return;
       if (document.visibilityState === "visible") void reconcile("refetch");
     };
     window.addEventListener("focus", onVisible);
