@@ -18,8 +18,10 @@ export interface LogoProps {
   style?: CSSProperties;
 }
 
-/** One rounded petal — a slim swept triangle pointing out from the centre. */
-const BLADE = "M32 32 L31 15 L41 20 Z";
+/** One rounded petal — a slim swept triangle pointing out from the centre.
+ *  Scaled ~1.2x around (32,32) vs. the base shape so the mark fills the
+ *  64×64 box with roughly 8px of padding instead of ~12px. */
+const BLADE = "M32 32 L30.8 11.6 L42.8 17.6 Z";
 /** Two interleaved triangles, 60° offset. Teal triangle vs. cyan triangle. */
 const TEAL_ANGLES = [0, 120, 240];
 const CYAN_ANGLES = [60, 180, 300];
@@ -101,7 +103,7 @@ export function Logo({
       </mask>
       <g
         mask={`url(#${holeId})`}
-        strokeWidth={6}
+        strokeWidth={7.2}
         strokeLinejoin="round"
         strokeLinecap="round"
       >
