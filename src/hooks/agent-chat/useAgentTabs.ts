@@ -383,7 +383,19 @@ export function useAgentTabs(
   const hasHydratedRef = useRef(false);
 
   const schedulePut = useCallback(() => {
-    if (!persistenceRef.current || !enabledRef.current) return;
+    // NEVER persist before the mount GET has settled. A mount-time mutation
+    // (the host bridge's setOpen, a route-driven newTab/selectTab) fires
+    // `mutate -> schedulePut` while the strip is still the empty, un-hydrated
+    // placeholder; without this gate that empty strip (tabs:[], placeholder
+    // width) gets PUT and permanently clobbers the server's real saved state
+    // — the reload "reverts to default / new chat" bug. hasHydratedRef flips
+    // true in reconcile's finally even on GET failure, so saves never stall.
+    if (
+      !persistenceRef.current ||
+      !enabledRef.current ||
+      !hasHydratedRef.current
+    )
+      return;
     pendingRef.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
