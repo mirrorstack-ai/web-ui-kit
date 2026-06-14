@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">299 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">301 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7153,7 +7153,7 @@ function greet(name: string): string {
       <div class="badges">
         <label for="c-41-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-41-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-ui-agent-messages-stories" class="badge ok as-toggle">10 stories</label>
+        <label for="c-41-ui-agent-messages-stories" class="badge ok as-toggle">12 stories</label>
         
       </div>
     </div>
@@ -7265,6 +7265,70 @@ export const AgentStreaming: StoryObj = {
         streaming
       /&gt;
     &lt;/div&gt;
+  ),
+};
+
+/** A reply whose tool calls are interleaved with the response text in stream
+ *  order — prose, then a tool step, then more prose — instead of every tool
+ *  call hoisted to the top of the message. */
+export const AgentInterleavedToolCalls: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarAgentMessage
+      content={
+        &quot;Let me check your recent posts and tidy up the drafts.\n\nDone — published the latest draft and archived the two stale ones.&quot;
+      }
+      segments={[
+        {
+          type: &quot;text&quot;,
+          text: &quot;Let me check your recent posts and tidy up the drafts.&quot;,
+        },
+        {
+          type: &quot;tool&quot;,
+          id: &quot;t-1&quot;,
+          tool: {
+            moduleSlug: &quot;cms&quot;,
+            tool: &quot;list_posts&quot;,
+            status: &quot;done&quot;,
+            durationMs: 214,
+            args: { limit: 5 },
+            result: [{ id: &quot;p1&quot;, title: &quot;Hello world&quot; }],
+          },
+        },
+        {
+          type: &quot;tool&quot;,
+          id: &quot;t-2&quot;,
+          tool: {
+            moduleSlug: &quot;cms&quot;,
+            tool: &quot;publish_post&quot;,
+            status: &quot;done&quot;,
+            durationMs: 96,
+          },
+        },
+        {
+          type: &quot;text&quot;,
+          text: &quot;Done — published the latest draft and archived the two stale ones.&quot;,
+        },
+      ]}
+    /&gt;
+  ),
+};
+
+/** Mid-stream: text has streamed, a tool is running, and the blinking caret
+ *  stays off because the trailing tool&#39;s spinner is the live indicator. */
+export const AgentInterleavedStreaming: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarAgentMessage
+      streaming
+      content=&quot;Checking your account settings.&quot;
+      segments={[
+        { type: &quot;text&quot;, text: &quot;Checking your account settings.&quot; },
+        {
+          type: &quot;tool&quot;,
+          id: &quot;t-1&quot;,
+          tool: { moduleSlug: &quot;account&quot;, tool: &quot;get_preferences&quot;, status: &quot;started&quot; },
+        },
+      ]}
+    /&gt;
   ),
 };
 
@@ -7444,6 +7508,75 @@ export const Responding: StoryObj = {
       streaming
     /&gt;
   &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Interleaved Tool Calls</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A reply whose tool calls are interleaved with the response text in stream order — prose, then a tool step, then more prose — instead of every tool call hoisted to the top of the message.</div>
+              <pre><code>const AgentInterleavedToolCalls = () =&gt; (
+  &lt;AgentSidebarAgentMessage
+    content={
+      &quot;Let me check your recent posts and tidy up the drafts.\n\nDone — published the latest draft and archived the two stale ones.&quot;
+    }
+    segments={[
+      {
+        type: &quot;text&quot;,
+        text: &quot;Let me check your recent posts and tidy up the drafts.&quot;,
+      },
+      {
+        type: &quot;tool&quot;,
+        id: &quot;t-1&quot;,
+        tool: {
+          moduleSlug: &quot;cms&quot;,
+          tool: &quot;list_posts&quot;,
+          status: &quot;done&quot;,
+          durationMs: 214,
+          args: { limit: 5 },
+          result: [{ id: &quot;p1&quot;, title: &quot;Hello world&quot; }],
+        },
+      },
+      {
+        type: &quot;tool&quot;,
+        id: &quot;t-2&quot;,
+        tool: {
+          moduleSlug: &quot;cms&quot;,
+          tool: &quot;publish_post&quot;,
+          status: &quot;done&quot;,
+          durationMs: 96,
+        },
+      },
+      {
+        type: &quot;text&quot;,
+        text: &quot;Done — published the latest draft and archived the two stale ones.&quot;,
+      },
+    ]}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Interleaved Streaming</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Mid-stream: text has streamed, a tool is running, and the blinking caret stays off because the trailing tool&#39;s spinner is the live indicator.</div>
+              <pre><code>const AgentInterleavedStreaming = () =&gt; (
+  &lt;AgentSidebarAgentMessage
+    streaming
+    content=&quot;Checking your account settings.&quot;
+    segments={[
+      { type: &quot;text&quot;, text: &quot;Checking your account settings.&quot; },
+      {
+        type: &quot;tool&quot;,
+        id: &quot;t-1&quot;,
+        tool: { moduleSlug: &quot;account&quot;, tool: &quot;get_preferences&quot;, status: &quot;started&quot; },
+      },
+    ]}
+  /&gt;
 );</code></pre>
             </div>
             <div class="note ok">
@@ -14450,7 +14583,7 @@ value: string</code></pre>
       <div class="badges">
         <label for="c-error-0-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-0-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">10 stories</label>
+        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">12 stories</label>
         
       </div>
     </div>
@@ -14562,6 +14695,70 @@ export const AgentStreaming: StoryObj = {
         streaming
       /&gt;
     &lt;/div&gt;
+  ),
+};
+
+/** A reply whose tool calls are interleaved with the response text in stream
+ *  order — prose, then a tool step, then more prose — instead of every tool
+ *  call hoisted to the top of the message. */
+export const AgentInterleavedToolCalls: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarAgentMessage
+      content={
+        &quot;Let me check your recent posts and tidy up the drafts.\n\nDone — published the latest draft and archived the two stale ones.&quot;
+      }
+      segments={[
+        {
+          type: &quot;text&quot;,
+          text: &quot;Let me check your recent posts and tidy up the drafts.&quot;,
+        },
+        {
+          type: &quot;tool&quot;,
+          id: &quot;t-1&quot;,
+          tool: {
+            moduleSlug: &quot;cms&quot;,
+            tool: &quot;list_posts&quot;,
+            status: &quot;done&quot;,
+            durationMs: 214,
+            args: { limit: 5 },
+            result: [{ id: &quot;p1&quot;, title: &quot;Hello world&quot; }],
+          },
+        },
+        {
+          type: &quot;tool&quot;,
+          id: &quot;t-2&quot;,
+          tool: {
+            moduleSlug: &quot;cms&quot;,
+            tool: &quot;publish_post&quot;,
+            status: &quot;done&quot;,
+            durationMs: 96,
+          },
+        },
+        {
+          type: &quot;text&quot;,
+          text: &quot;Done — published the latest draft and archived the two stale ones.&quot;,
+        },
+      ]}
+    /&gt;
+  ),
+};
+
+/** Mid-stream: text has streamed, a tool is running, and the blinking caret
+ *  stays off because the trailing tool&#39;s spinner is the live indicator. */
+export const AgentInterleavedStreaming: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarAgentMessage
+      streaming
+      content=&quot;Checking your account settings.&quot;
+      segments={[
+        { type: &quot;text&quot;, text: &quot;Checking your account settings.&quot; },
+        {
+          type: &quot;tool&quot;,
+          id: &quot;t-1&quot;,
+          tool: { moduleSlug: &quot;account&quot;, tool: &quot;get_preferences&quot;, status: &quot;started&quot; },
+        },
+      ]}
+    /&gt;
   ),
 };
 
@@ -14741,6 +14938,75 @@ export const Responding: StoryObj = {
       streaming
     /&gt;
   &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Interleaved Tool Calls</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A reply whose tool calls are interleaved with the response text in stream order — prose, then a tool step, then more prose — instead of every tool call hoisted to the top of the message.</div>
+              <pre><code>const AgentInterleavedToolCalls = () =&gt; (
+  &lt;AgentSidebarAgentMessage
+    content={
+      &quot;Let me check your recent posts and tidy up the drafts.\n\nDone — published the latest draft and archived the two stale ones.&quot;
+    }
+    segments={[
+      {
+        type: &quot;text&quot;,
+        text: &quot;Let me check your recent posts and tidy up the drafts.&quot;,
+      },
+      {
+        type: &quot;tool&quot;,
+        id: &quot;t-1&quot;,
+        tool: {
+          moduleSlug: &quot;cms&quot;,
+          tool: &quot;list_posts&quot;,
+          status: &quot;done&quot;,
+          durationMs: 214,
+          args: { limit: 5 },
+          result: [{ id: &quot;p1&quot;, title: &quot;Hello world&quot; }],
+        },
+      },
+      {
+        type: &quot;tool&quot;,
+        id: &quot;t-2&quot;,
+        tool: {
+          moduleSlug: &quot;cms&quot;,
+          tool: &quot;publish_post&quot;,
+          status: &quot;done&quot;,
+          durationMs: 96,
+        },
+      },
+      {
+        type: &quot;text&quot;,
+        text: &quot;Done — published the latest draft and archived the two stale ones.&quot;,
+      },
+    ]}
+  /&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Interleaved Streaming</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Mid-stream: text has streamed, a tool is running, and the blinking caret stays off because the trailing tool&#39;s spinner is the live indicator.</div>
+              <pre><code>const AgentInterleavedStreaming = () =&gt; (
+  &lt;AgentSidebarAgentMessage
+    streaming
+    content=&quot;Checking your account settings.&quot;
+    segments={[
+      { type: &quot;text&quot;, text: &quot;Checking your account settings.&quot; },
+      {
+        type: &quot;tool&quot;,
+        id: &quot;t-1&quot;,
+        tool: { moduleSlug: &quot;account&quot;, tool: &quot;get_preferences&quot;, status: &quot;started&quot; },
+      },
+    ]}
+  /&gt;
 );</code></pre>
             </div>
             <div class="note ok">
