@@ -440,7 +440,7 @@ function AppShellInner({
                     // Responsive gutters — tight on phones, roomier as the
                     // viewport grows. Pages must NOT add their own horizontal
                     // padding (it would double up); they own max-width only.
-                    "mx-auto w-full px-4 md:px-8 xl:px-12 pt-12",
+                    "mx-auto w-full px-4 md:px-8 xl:px-10 pt-12",
                     // Clear the pinned mobile bottom nav so content isn't hidden
                     // behind it. No-op at lg+, with no mobile navigation, and
                     // for the drawer variant (an overlay, not a pinned bar).
