@@ -93,7 +93,13 @@ describe("useAgentChat", () => {
     act(() => stream.handlers.onDone("m-1"));
     stream.release();
     await flush();
-    expect(result.current.messages[1]).toEqual({ id: "m-1", role: "agent", content: "Hi there" });
+    // A text-only reply keeps a single text segment alongside the flat content.
+    expect(result.current.messages[1]).toEqual({
+      id: "m-1",
+      role: "agent",
+      content: "Hi there",
+      segments: [{ type: "text", text: "Hi there" }],
+    });
     expect(result.current.error).toBeNull();
   });
 
@@ -149,23 +155,76 @@ describe("useAgentChat", () => {
     expect(result.current.messages[1].id).not.toBe("__pending__");
   });
 
-  it("tool frames insert a running row above the placeholder and resolve it in place", async () => {
+  it("interleaves tool calls with response text in stream order, resolving in place", async () => {
     const stream = controlledStream();
     const client = fakeClient({ streamAgentReply: stream.fn });
     const { result } = renderHook(() => useAgentChat(client, { appId: null }));
 
     act(() => result.current.send("hello"));
     await flush();
+    // text → tool → more text: the reply is ONE bubble whose ordered segments
+    // preserve occurrence order (no top-level tool rows, no hoisting).
+    act(() => stream.handlers.onDelta("Let me check. "));
     act(() => stream.handlers.onTool?.("analytics__summarize_views", "started"));
+    act(() => stream.handlers.onDelta("Here's the result."));
 
-    expect(result.current.messages[1]).toMatchObject({
-      role: "tool",
-      tool: { moduleSlug: "analytics", tool: "summarize_views", status: "started" },
-    });
-    expect(result.current.messages[2]).toMatchObject({ role: "agent", streaming: true });
+    expect(result.current.messages).toHaveLength(2);
+    const pending = result.current.messages[1];
+    expect(pending).toMatchObject({ role: "agent", streaming: true });
+    expect((pending as { content: string }).content).toBe(
+      "Let me check. Here's the result.",
+    );
+    expect((pending as { segments: unknown }).segments).toEqual([
+      { type: "text", text: "Let me check. " },
+      {
+        type: "tool",
+        id: expect.any(String),
+        tool: { moduleSlug: "analytics", tool: "summarize_views", status: "started" },
+      },
+      { type: "text", text: "Here's the result." },
+    ]);
 
+    // done/error resolves the matching started segment in place (no new row).
     act(() => stream.handlers.onTool?.("analytics__summarize_views", "done"));
-    expect(result.current.messages[1]).toMatchObject({ tool: { status: "done" } });
+    const segs = (result.current.messages[1] as { segments: { type: string; tool?: { status: string } }[] }).segments;
+    expect(segs[1].tool?.status).toBe("done");
+    expect(segs).toHaveLength(3);
+
+    act(() => stream.handlers.onDone("m-1"));
+    stream.release();
+    await flush();
+    // done keeps the interleaved segments and swaps in the persisted id.
+    expect(result.current.messages[1]).toMatchObject({
+      id: "m-1",
+      role: "agent",
+      content: "Let me check. Here's the result.",
+    });
+    expect(
+      (result.current.messages[1] as { segments: unknown[] }).segments,
+    ).toHaveLength(3);
+  });
+
+  it("drops an unresolved tool segment when the stream errors but keeps text", async () => {
+    const stream = controlledStream();
+    const client = fakeClient({ streamAgentReply: stream.fn });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+
+    act(() => result.current.send("hello"));
+    await flush();
+    act(() => stream.handlers.onDelta("Working on it. "));
+    act(() => stream.handlers.onTool?.("cms__publish", "started"));
+    act(() => stream.handlers.onError("reply_failed"));
+    stream.release();
+    await flush();
+
+    expect(result.current.error).toBe("reply_failed");
+    const reply = result.current.messages[1] as {
+      content: string;
+      segments: { type: string }[];
+    };
+    expect(reply.content).toBe("Working on it. ");
+    // The eternal-spinner tool segment is gone; the text segment survives.
+    expect(reply.segments).toEqual([{ type: "text", text: "Working on it. " }]);
   });
 
   it("skips the history refresh when a send is superseded (aborted) by a newer send", async () => {
@@ -229,7 +288,12 @@ describe("useAgentChat", () => {
     act(() => rerun.handlers.onDone("m-2"));
     rerun.release();
     await flush();
-    expect(result.current.messages[1]).toEqual({ id: "m-2", role: "agent", content: "fresh" });
+    expect(result.current.messages[1]).toEqual({
+      id: "m-2",
+      role: "agent",
+      content: "fresh",
+      segments: [{ type: "text", text: "fresh" }],
+    });
     expect(result.current.error).toBeNull();
   });
 

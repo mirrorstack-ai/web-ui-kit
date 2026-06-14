@@ -7,7 +7,10 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import type { AgentSidebarMessageFeedback } from "@/components/ui/agent/messages/AgentSidebarMessage";
+import type {
+  AgentSidebarMessageFeedback,
+  AgentMessageSegment,
+} from "@/components/ui/agent/messages/AgentSidebarMessage";
 import type { AgentToolCall } from "@/components/ui/agent/messages/AgentSidebarToolCall";
 import type { AgentSidebarInputModel } from "@/components/ui/agent/sidebar/AgentSidebarInput";
 import type {
@@ -34,6 +37,12 @@ export type AgentChatMessage =
       id: string;
       role: "agent";
       content: string;
+      /** Ordered text/tool segments captured during streaming so tool calls
+       *  render interleaved with the response text (text → tool → more text)
+       *  instead of hoisted above the reply. `content` mirrors the text runs
+       *  for copy/replay. Absent on replayed rows (the server stores one text
+       *  blob; their tool calls are separate `role:"tool"` messages). */
+      segments?: AgentMessageSegment[];
       streaming?: boolean;
       feedback?: AgentSidebarMessageFeedback;
     }
@@ -112,17 +121,39 @@ const DEFAULT_MODEL_DISABLED_HINT = "Currently unavailable";
 // fractions at exactly two decimals ("$1.50/$9").
 const formatPrice = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(2));
 
+// Drop tool segments still running when the stream died — they never resolve,
+// and only resolved calls persist server-side, so leaving them would strand an
+// eternal spinner inside the finalized reply.
+function settleSegments(
+  segments: AgentMessageSegment[] | undefined,
+): AgentMessageSegment[] | undefined {
+  if (!segments) return undefined;
+  const kept = segments.filter(
+    (s) => s.type !== "tool" || s.tool.status !== "started",
+  );
+  return kept.length > 0 ? kept : undefined;
+}
+
 // Settle a stale pending reply before appending new turns: keep whatever
-// text already streamed in (finalized as a local message), drop it if empty.
+// text/resolved tool calls already streamed in (finalized as a local message),
+// drop it if nothing landed. Top-level `started` tool rows (replay/legacy
+// shape) are dropped for the same reason.
 function settlePending(list: AgentChatMessage[]): AgentChatMessage[] {
   return list.flatMap((m) => {
-    // A tool call still running when its stream dies never resolves — and
-    // only resolved calls persist server-side, so drop it with the pending
-    // bubble rather than leaving an eternal spinner.
     if (m.role === "tool" && m.tool.status === "started") return [];
     if (m.id !== PENDING_ID) return [m];
-    if (m.role === "agent" && m.content) {
-      return [{ id: `local-${crypto.randomUUID()}`, role: "agent" as const, content: m.content }];
+    if (m.role === "agent") {
+      const segments = settleSegments(m.segments);
+      if (m.content || segments) {
+        return [
+          {
+            id: `local-${crypto.randomUUID()}`,
+            role: "agent" as const,
+            content: m.content,
+            ...(segments ? { segments } : {}),
+          },
+        ];
+      }
     }
     return [];
   });
@@ -137,38 +168,56 @@ function parseToolWireName(name: string): { moduleSlug: string; tool: string } {
   return { moduleSlug: name.slice(0, i), tool: name.slice(i + 2) };
 }
 
-// Apply one tool lifecycle frame to the thread: "started" inserts a running
-// row above the streaming reply placeholder; "done"/"error" resolve the
-// OLDEST matching running row (frames carry no call id — wire name + order
-// is the join key). A resolution with no running counterpart (shouldn't
-// happen, but the wire allows it) inserts an already-resolved row.
+// Apply one tool lifecycle frame to the streaming reply's ordered segments,
+// preserving stream order so tool calls render interleaved with the response
+// text. "started" appends a running tool segment AFTER whatever text streamed
+// so far; "done"/"error" resolve the OLDEST matching running segment in place
+// (frames carry no call id — wire name + order is the join key). A resolution
+// with no running counterpart (shouldn't happen, but the wire allows it) is
+// appended as an already-resolved segment.
+function applyToolToSegments(
+  segments: AgentMessageSegment[],
+  name: string,
+  status: AgentToolEventStatus,
+): AgentMessageSegment[] {
+  const { moduleSlug, tool } = parseToolWireName(name);
+  if (status !== "started") {
+    const idx = segments.findIndex(
+      (s) =>
+        s.type === "tool" &&
+        s.tool.status === "started" &&
+        s.tool.moduleSlug === moduleSlug &&
+        s.tool.tool === tool,
+    );
+    if (idx !== -1) {
+      return segments.map((s, i) =>
+        i === idx && s.type === "tool" ? { ...s, tool: { ...s.tool, status } } : s,
+      );
+    }
+  }
+  return [
+    ...segments,
+    {
+      type: "tool",
+      id: `tool-${crypto.randomUUID()}`,
+      tool: { moduleSlug, tool, status },
+    },
+  ];
+}
+
+// Route a tool frame into the pending reply bubble's segments. Falls back to a
+// no-op when the bubble has gone (e.g. settled by an error) — a stray frame
+// must not resurrect a finished reply.
 function applyToolEvent(
   list: AgentChatMessage[],
   name: string,
   status: AgentToolEventStatus,
 ): AgentChatMessage[] {
-  const { moduleSlug, tool } = parseToolWireName(name);
-  if (status !== "started") {
-    const idx = list.findIndex(
-      (m) =>
-        m.role === "tool" &&
-        m.tool.status === "started" &&
-        m.tool.moduleSlug === moduleSlug &&
-        m.tool.tool === tool,
-    );
-    if (idx !== -1) {
-      return list.map((m, i) =>
-        i === idx && m.role === "tool" ? { ...m, tool: { ...m.tool, status } } : m,
-      );
-    }
-  }
-  const row: AgentChatMessage = {
-    id: `tool-${crypto.randomUUID()}`,
-    role: "tool",
-    tool: { moduleSlug, tool, status },
-  };
-  const at = list.findIndex((m) => m.id === PENDING_ID);
-  return at === -1 ? [...list, row] : [...list.slice(0, at), row, ...list.slice(at)];
+  return list.map((m) =>
+    m.id === PENDING_ID && m.role === "agent"
+      ? { ...m, segments: applyToolToSegments(m.segments ?? [], name, status) }
+      : m,
+  );
 }
 
 // Map one persisted replay row to its sidebar representation (or nothing).
@@ -203,9 +252,25 @@ function replayMessage(m: AgentApiMessage): AgentChatMessage[] {
   return [{ id: m.id, role: "agent", content: m.content, feedback: meta?.feedback }];
 }
 
+// Append a text delta to the reply's ordered segments: extend the trailing
+// text run, or open a new one when the last segment is a tool (so text after a
+// tool call lands below it, not merged into the pre-tool prose).
+function appendTextSegment(
+  segments: AgentMessageSegment[] | undefined,
+  text: string,
+): AgentMessageSegment[] {
+  const segs = segments ?? [];
+  const last = segs[segs.length - 1];
+  if (last?.type === "text") {
+    return [...segs.slice(0, -1), { type: "text", text: last.text + text }];
+  }
+  return [...segs, { type: "text", text }];
+}
+
 // Build the four SSE handlers shared by send and rerunMessage. Both paths
-// push deltas into the PENDING_ID bubble, update tool rows, swap the bubble
-// for the persisted id on done, and settle+error on failure.
+// push deltas into the PENDING_ID bubble (as ordered segments + flat content),
+// interleave tool rows, swap the bubble for the persisted id on done, and
+// settle+error on failure.
 function makeStreamHandlers(
   setMessages: Dispatch<SetStateAction<AgentChatMessage[]>>,
   setError: Dispatch<SetStateAction<string | null>>,
@@ -214,7 +279,13 @@ function makeStreamHandlers(
     onDelta: (text) =>
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === PENDING_ID && m.role === "agent" ? { ...m, content: m.content + text } : m,
+          m.id === PENDING_ID && m.role === "agent"
+            ? {
+                ...m,
+                content: m.content + text,
+                segments: appendTextSegment(m.segments, text),
+              }
+            : m,
         ),
       ),
     onTool: (name, status) => setMessages((prev) => applyToolEvent(prev, name, status)),
@@ -222,7 +293,12 @@ function makeStreamHandlers(
       setMessages((prev) =>
         prev.map((m) =>
           m.id === PENDING_ID && m.role === "agent"
-            ? { id: messageId, role: "agent", content: m.content }
+            ? {
+                id: messageId,
+                role: "agent",
+                content: m.content,
+                ...(m.segments?.length ? { segments: m.segments } : {}),
+              }
             : m,
         ),
       ),
