@@ -24,6 +24,15 @@ export interface AgentSidebarHeaderLabels {
   cancelRenameLabel?: string;
   /** aria-label on the delete icon button in a history row. Default: "Delete conversation" */
   deleteConversationLabel?: string;
+  /** Title of the delete-confirmation dialog. Default: "Delete conversation?" */
+  deleteConfirmTitle?: string;
+  /** Body text of the delete-confirmation dialog.
+   *  Default: "This conversation will be permanently deleted." */
+  deleteConfirmMessage?: string;
+  /** Label on the destructive confirm button in the delete dialog. Default: "Delete" */
+  deleteConfirmConfirmLabel?: string;
+  /** Label on the cancel button in the delete dialog. Default: "Cancel" */
+  deleteConfirmCancelLabel?: string;
   /** aria-label on the + button and text of the overflow new-chat entry. Default: "New chat" */
   newChatLabel?: string;
 }

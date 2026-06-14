@@ -125,7 +125,9 @@ export const ActiveLastTab: StoryObj = {
   },
 };
 
-/** History row actions: hover edit (inline rename) + hover delete. */
+/** History row actions: hover edit (inline rename) + hover delete. Delete
+ *  opens a destructive confirmation dialog; onDeleteConversation fires only
+ *  on confirm. */
 export const History: StoryObj = {
   render: () => {
     const [history, setHistory] = useState<AgentSidebarHistoryGroup[]>(mockAgentHistory);
