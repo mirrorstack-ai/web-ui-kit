@@ -3,6 +3,17 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.9
+
+- Agent sidebar reload **clobber fix**: a mount-time mutation (the host bridge's
+  `setOpen`, a route-driven tab change) could `put` the empty, un-hydrated strip
+  before the mount GET settled, permanently overwriting the server's saved
+  state with `{tabs:[], placeholder width}`. Reloads then "reverted to default /
+  new chat" and stayed. `schedulePut` now refuses to persist until the strip has
+  hydrated (the flag is set even on GET failure, so saves never stall). This is
+  the live-reproduced root cause that 0.5.7/0.5.8 did not resolve. Regression
+  test included (a pre-hydration mutation must not `put`).
+
 ## 0.5.8
 
 - Agent sidebar reload reliability: the persisted drag-width and the restored
