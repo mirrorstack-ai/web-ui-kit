@@ -49,6 +49,7 @@ function fakeChatClient(over: Partial<AgentChatClient> = {}): AgentChatClient {
     renameConversation: vi
       .fn()
       .mockImplementation(async (id: string, title: string) => conv({ id, title })),
+    deleteConversation: vi.fn().mockResolvedValue(undefined),
     patchConversationModel: vi
       .fn()
       .mockImplementation(async (id: string, model: string) => conv({ id, model })),

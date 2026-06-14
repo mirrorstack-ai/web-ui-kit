@@ -151,6 +151,17 @@ export function SidebarProvider({
       if (stored === null) return;
       if (stored < min || stored > max) return;
       setLastOpenWidth(stored);
+      // Reconcile the fetched width into the RENDERED state, not just the
+      // reopen memory (`lastOpenWidth`). Without this the fetched width is
+      // stranded — it only surfaces on the NEXT open gesture (reopenWidth reads
+      // lastOpenWidth), which is why close-then-reopen restored it but a reload
+      // did not. The functional updater seeds only from the default floor
+      // (`cur <= 0`), so a user open gesture (or AppShell's controlled-open
+      // effect) that landed a real width before this async fetch resolved is
+      // never clobbered — first writer of a real width wins. No render gate:
+      // width intentionally paints default-then-hydrate to avoid an SSR
+      // mismatch.
+      setSidebarWidth((cur) => (cur <= 0 ? stored : cur));
     };
 
     const persistence = persistenceRef.current;
