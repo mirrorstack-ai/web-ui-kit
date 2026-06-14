@@ -77,8 +77,9 @@ export interface AgentSidebarMessagesProps {
   actionLabels?: AgentSidebarMessageActionLabels;
   /** Localizable status/aria text for tool-call rows (English defaults). */
   toolLabels?: AgentToolCallLabels;
-  /** Render the brand logo once below the list when the last message is a
-   *  finished agent message — a clear platform signature, never per-message. */
+  /** Render the brand logo once below the list when the last message is an
+   *  agent reply — a clear platform signature, never per-message. While that
+   *  reply is still streaming the mark spins as a "responding" indicator. */
   showLogo?: boolean;
   /** Auto-scroll to the latest message. Default: true. */
   autoScroll?: boolean;
@@ -211,12 +212,15 @@ export function AgentSidebarMessages({
   }
 
   const lastMessage = messages[messages.length - 1];
-  const showBrandLogo =
-    showLogo &&
-    !!lastMessage &&
-    lastMessage.role === "agent" &&
-    !("kind" in lastMessage) &&
-    !lastMessage.streaming;
+  const lastAgentMessage =
+    lastMessage && lastMessage.role === "agent" && !("kind" in lastMessage)
+      ? lastMessage
+      : undefined;
+  // Brand signature once the last message is an agent reply. While that reply
+  // is still streaming the mark spins as a "responding" indicator, then
+  // settles to the static logo when the response finishes.
+  const showBrandLogo = showLogo && !!lastAgentMessage;
+  const logoResponding = !!lastAgentMessage?.streaming;
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
@@ -267,8 +271,9 @@ export function AgentSidebarMessages({
       })}
       {showBrandLogo && (
         // Decorative signature only — hidden from the accessibility tree.
+        // The streaming message already announces "thinking" for a11y.
         <div aria-hidden className="flex justify-start">
-          <Logo className="h-10 w-10 bg-inverse-primary" />
+          <Logo loading={logoResponding} className="h-10 w-10" />
         </div>
       )}
       <div ref={endRef} />
