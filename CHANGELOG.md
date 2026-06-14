@@ -3,6 +3,21 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.8
+
+- Agent sidebar reload reliability: the persisted drag-width and the restored
+  tabs/active conversation are no longer lost on reload. Fixes two races — the
+  controlled-open width *seed* placing a placeholder before the async width
+  fetch resolved (saved width discarded), and a focus/refetch or host mutation
+  during the in-flight tab hydrate stranding a fresh "new chat" draft over the
+  restored conversation. The fetched width is now authoritative once, and the
+  first load wins regardless of source.
+- `AgentSidebarHeader`: deleting a conversation now opens a destructive
+  confirmation dialog (fires only on confirm), with optional localizable labels
+  (`deleteConfirmTitle`/`deleteConfirmMessage`/`deleteConfirmConfirmLabel`/
+  `deleteConfirmCancelLabel`).
+- `AppShell`: content gutter tightened at xl (`xl:px-12` → `xl:px-10`).
+
 ## 0.5.7
 
 - `AppShell`: new optional controlled-open props `open?` / `onOpenChange?`. The
