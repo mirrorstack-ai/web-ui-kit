@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1184,8 +1184,8 @@ activeAgentTabId?: AgentSidebarHeaderProps[&quot;activeTabId&quot;]
 agentEmptyState?: AgentSidebarMessagesProps[&quot;emptyState&quot;]
 
 /**
- * Label overrides for the agent header (history, rename, new-chat strings).
- *  All have EN defaults.
+ * Label overrides for the agent header (history, rename, new-chat, and the
+ *  delete-confirmation dialog strings). All have EN defaults.
  */
 agentHeaderLabels?: AgentSidebarHeaderProps[&quot;labels&quot;]
 
@@ -1312,8 +1312,9 @@ onCancelAgentQueued?: AgentSidebarInputProps[&quot;onCancelQueued&quot;]
 onCloseAgentTab?: AgentSidebarHeaderProps[&quot;onCloseTab&quot;]
 
 /**
- * Enables the hover delete affordance on agent history rows. Confirmation
- *  (if any) is the consumer&#39;s responsibility; the kit fires immediately.
+ * Enables the hover delete affordance on agent history rows. Clicking it
+ *  opens a destructive confirmation dialog first; this fires only once the
+ *  user confirms (cancel/dismiss does nothing).
  */
 onDeleteAgentConversation?: AgentSidebarHeaderProps[&quot;onDeleteConversation&quot;]
 
@@ -11317,7 +11318,9 @@ export const ActiveLastTab: StoryObj = {
   },
 };
 
-/** History row actions: hover edit (inline rename) + hover delete. */
+/** History row actions: hover edit (inline rename) + hover delete. Delete
+ *  opens a destructive confirmation dialog; onDeleteConversation fires only
+ *  on confirm. */
 export const History: StoryObj = {
   render: () =&gt; {
     const [history, setHistory] = useState&lt;AgentSidebarHistoryGroup[]&gt;(mockAgentHistory);
@@ -11694,7 +11697,7 @@ export const Playground: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">History row actions: hover edit (inline rename) + hover delete.</div>
+              <div class="hint">History row actions: hover edit (inline rename) + hover delete. Delete opens a destructive confirmation dialog; onDeleteConversation fires only on confirm.</div>
               <pre><code>const History = () =&gt; {
   const [history, setHistory] = useState&lt;AgentSidebarHistoryGroup[]&gt;(mockAgentHistory);
   return (
@@ -15777,7 +15780,9 @@ export const ActiveLastTab: StoryObj = {
   },
 };
 
-/** History row actions: hover edit (inline rename) + hover delete. */
+/** History row actions: hover edit (inline rename) + hover delete. Delete
+ *  opens a destructive confirmation dialog; onDeleteConversation fires only
+ *  on confirm. */
 export const History: StoryObj = {
   render: () =&gt; {
     const [history, setHistory] = useState&lt;AgentSidebarHistoryGroup[]&gt;(mockAgentHistory);
@@ -16154,7 +16159,7 @@ export const Playground: StoryObj = {
                 <span class="badge ok">story ok</span>
               </div>
               
-              <div class="hint">History row actions: hover edit (inline rename) + hover delete.</div>
+              <div class="hint">History row actions: hover edit (inline rename) + hover delete. Delete opens a destructive confirmation dialog; onDeleteConversation fires only on confirm.</div>
               <pre><code>const History = () =&gt; {
   const [history, setHistory] = useState&lt;AgentSidebarHistoryGroup[]&gt;(mockAgentHistory);
   return (
