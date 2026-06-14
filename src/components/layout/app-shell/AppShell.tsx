@@ -59,6 +59,19 @@ export interface AppShellProps {
    *  in-memory-only width — Storybook and pre-migration hosts keep working,
    *  width just doesn't persist. */
   sidebarWidthPersistence?: SidebarWidthPersistence;
+  /** Controlled sidebar open/closed. Wire it to the host's persisted session
+   *  open flag (`useAgentSession().open`) so a reload repaints the sidebar in
+   *  the state the user left it — without it the shell derives visibility from
+   *  width alone and always paints closed on reload. When `true` while the
+   *  width is still 0 (fresh open, or restored-open before the width fetch
+   *  lands) the shell seeds the width from the remembered/half-viewport size;
+   *  when `false` while open it collapses to 0. Omit it (undefined) to keep the
+   *  uncontrolled width-derived behavior unchanged. */
+  open?: boolean;
+  /** Called whenever the user opens or closes the sidebar (toggle, close,
+   *  FAB). Pair with `open` to persist the flag — e.g.
+   *  `useAgentSession().setOpen`. */
+  onOpenChange?: (open: boolean) => void;
   /** Class for the outer shell */
   className?: string;
   /** Class for the app switcher container */
@@ -248,6 +261,8 @@ function AppShellInner({
   mobileNavigation,
   mobileNavigationVariant = "bottom",
   appSwitcher,
+  open,
+  onOpenChange,
   className,
   appSwitcherClassName = "max-w-7xl",
   contentClassName,
@@ -299,8 +314,13 @@ function AppShellInner({
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  // Sidebar visibility: controlled by `open` when the host wires it (restores
+  // the persisted open flag on reload), else derived from width alone
+  // (uncontrolled — behavior unchanged when `open` is undefined).
+  const isOpen = open ?? sidebarWidth > 0;
+
   const isOverlaying =
-    sidebarWidth > 0 &&
+    isOpen &&
     windowWidth > 0 &&
     windowWidth < sidebarWidth + 800;
 
@@ -355,6 +375,29 @@ function AppShellInner({
     return Math.min(Math.max(remembered, MIN_WIDTH), maxWidthRef.current);
   };
 
+  // When `open` is controlled, keep the rendered width in lockstep with it:
+  // open === true while the width is still 0 (fresh open, or a reload that
+  // restored open:true before the async width fetch landed) seeds the width;
+  // open === false while open collapses it. The width fetch's own reconcile
+  // (SidebarProvider) only touches a default-0 width, so the two don't fight:
+  // the first one to land wins and the other no-ops. Uncontrolled
+  // (open === undefined) skips this entirely.
+  useEffect(() => {
+    if (open === undefined) return;
+    if (open && sidebarWidth === 0) setSidebarWidth(reopenWidth());
+    else if (!open && sidebarWidth > 0) setSidebarWidth(0);
+    // reopenWidth is recreated each render; we intentionally depend only on
+    // [open, sidebarWidth], the inputs that gate this decision.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, sidebarWidth]);
+
+  // Open/close the sidebar AND notify the host so it can persist the flag.
+  // When uncontrolled (`onOpenChange` omitted) only the width changes.
+  const openSidebar = () => {
+    setSidebarWidth(reopenWidth());
+    onOpenChange?.(true);
+  };
+
   const handleToggleCollapse = () => {
     if (sidebarWidth <= MIN_WIDTH) {
       setSidebarWidth(reopenWidth());
@@ -363,7 +406,10 @@ function AppShellInner({
     }
   };
 
-  const handleClose = () => setSidebarWidth(0);
+  const handleClose = () => {
+    setSidebarWidth(0);
+    onOpenChange?.(false);
+  };
 
   return (
     <div className="h-dvh flex bg-background text-on-background overflow-hidden">
@@ -427,7 +473,11 @@ function AppShellInner({
           @starting-style block that holds width at 0 on mount, then
           transition-all interpolates up to the inline style — so open
           uses the same curve + duration as drag-end + collapse. */}
-      {sidebarWidth > 0 && (
+      {/* `sidebarWidth > 0` is load-bearing, not redundant with isOpen: in the
+          controlled-open path open can be true while the seed effect hasn't yet
+          landed a real width, so we wait for it before painting (avoids a 0-width
+          flash). Uncontrolled, the two halves are equivalent. */}
+      {isOpen && sidebarWidth > 0 && (
         <div
           className={cn(
             "flex justify-end shrink-0 starting:!w-0",
@@ -514,13 +564,13 @@ function AppShellInner({
       )}
 
       {/* Agent toggle button */}
-      {sidebarWidth === 0 && (
+      {!isOpen && (
         <IconButton
           icon="smart_toy"
           variant="tonal"
           size="md"
           className="fixed top-2 right-2 z-50"
-          onClick={() => setSidebarWidth(reopenWidth())}
+          onClick={openSidebar}
           aria-label="Open agent"
         />
       )}

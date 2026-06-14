@@ -257,13 +257,71 @@ describe("AppShell agent sidebar pass-through", () => {
   });
 });
 
+describe("AppShell controlled sidebar open", () => {
+  // jsdom reports clientWidth 0; give the strip a real width so the header
+  // renders (same fixup the pass-through suite uses).
+  beforeAll(() => {
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      value: 400,
+    });
+  });
+  afterAll(() => {
+    Reflect.deleteProperty(HTMLElement.prototype, "clientWidth");
+  });
+
+  it("paints the sidebar open (no FAB) when open is true, without a click", () => {
+    render(
+      <AppShell open onOpenChange={() => {}}>
+        content
+      </AppShell>,
+    );
+    // The controlled-open effect seeds the width, so the agent header shows and
+    // the open FAB is gone — the persisted open flag drove it open on mount.
+    expect(screen.getByLabelText("Chat history")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Open agent")).not.toBeInTheDocument();
+  });
+
+  it("paints closed (FAB shown) when open is false", () => {
+    render(
+      <AppShell open={false} onOpenChange={() => {}}>
+        content
+      </AppShell>,
+    );
+    expect(screen.getByLabelText("Open agent")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Chat history")).not.toBeInTheDocument();
+  });
+
+  it("fires onOpenChange(true) when the FAB opens the sidebar", () => {
+    const onOpenChange = vi.fn();
+    render(
+      <AppShell open={false} onOpenChange={onOpenChange}>
+        content
+      </AppShell>,
+    );
+    fireEvent.click(screen.getByLabelText("Open agent"));
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it("fires onOpenChange(false) when the sidebar is closed", () => {
+    const onOpenChange = vi.fn();
+    render(
+      <AppShell open onOpenChange={onOpenChange}>
+        content
+      </AppShell>,
+    );
+    fireEvent.click(screen.getByLabelText("Close sidebar"));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+});
+
 describe("AppShell sidebar width persistence", () => {
   // Width now lives in the INJECTED server persistence (docs 12.4 + 13b), ONE
   // shared per-user value across every host — NOT per-origin localStorage. The
   // host wires `sidebarWidthPersistence`; the rail reads it on mount and writes
   // it on resize-end.
 
-  it("reopens to the server-persisted width after reload (clamped to the viewport)", async () => {
+  it("restores the server-persisted width on reload (reconciled into rendered state)", async () => {
     // Simulate a prior session that drag-resized to 500px, persisted to the
     // user's shared sidebar-state row. jsdom's window.innerWidth is 1024, so
     // 500 is well within [350, 1004].
@@ -273,12 +331,13 @@ describe("AppShell sidebar width persistence", () => {
       <AppShell sidebarWidthPersistence={widthPersistence}>content</AppShell>,
     );
     // The mount read resolves asynchronously (get() may be a promise) — wait
-    // for lastOpenWidth to rehydrate before opening.
+    // for it to land. The fetch now reconciles into the RENDERED width (not
+    // just the reopen memory), so the sidebar repaints at the user's size on
+    // reload without a manual open gesture — the fix for defect #1 (width
+    // stranded in lastOpenWidth until the next open click).
     await act(async () => {
       await Promise.resolve();
     });
-    // Sidebar starts closed (toggle button shown), not auto-opened.
-    fireEvent.click(screen.getByLabelText("Open agent"));
 
     // The agent inner panel width reflects the rehydrated 500, not the 350
     // floor — the persisted size survived the "reload".

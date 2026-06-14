@@ -28,6 +28,7 @@ function fakeClient(over: Partial<AgentChatClient> = {}): AgentChatClient {
     renameConversation: vi.fn().mockImplementation(async (id: string, title: string) =>
       conv({ id, title }),
     ),
+    deleteConversation: vi.fn().mockResolvedValue(undefined),
     patchConversationModel: vi.fn().mockImplementation(async (id: string, model: string) =>
       conv({ id, model }),
     ),
@@ -445,6 +446,49 @@ describe("useAgentChat", () => {
 
     await flush();
     expect(result.current.history?.[0]?.items[0]?.title).toBe("Old title");
+  });
+
+  it("deleteConversation removes the history row optimistically and rolls back on failure", async () => {
+    const client = fakeClient({
+      listConversations: vi.fn().mockResolvedValue({
+        items: [
+          conv({ id: "c-1", title: "Keep me", updatedAt: NOW }),
+          conv({ id: "c-2", title: "Delete me", updatedAt: NOW }),
+        ],
+        nextCursor: null,
+      }),
+      deleteConversation: vi.fn().mockRejectedValue(new Error("500")),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    await waitFor(() => expect(result.current.history).toBeDefined());
+
+    act(() => result.current.deleteConversation("c-2"));
+    expect(result.current.history?.[0]?.items.map((i) => i.id)).toEqual(["c-1"]);
+    expect(client.deleteConversation).toHaveBeenCalledWith("c-2");
+
+    await flush();
+    expect(result.current.history?.[0]?.items.map((i) => i.id)).toEqual(["c-1", "c-2"]);
+  });
+
+  it("deleteConversation clears the open thread when the deleted id is active", async () => {
+    const client = fakeClient({
+      listConversations: vi.fn().mockResolvedValue({
+        items: [conv({ id: "c-1", title: "Open one", updatedAt: NOW })],
+        nextCursor: null,
+      }),
+      listConversationMessages: vi
+        .fn()
+        .mockResolvedValue([{ id: "m-1", role: "user", content: "hi", createdAt: NOW }]),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    await waitFor(() => expect(result.current.history).toBeDefined());
+
+    act(() => result.current.selectConversation("c-1"));
+    await waitFor(() => expect(result.current.messages.length).toBe(1));
+
+    act(() => result.current.deleteConversation("c-1"));
+    expect(result.current.messages).toEqual([]);
+    expect(client.deleteConversation).toHaveBeenCalledWith("c-1");
   });
 
   it("maps the model roster and falls back to the server default selection", async () => {

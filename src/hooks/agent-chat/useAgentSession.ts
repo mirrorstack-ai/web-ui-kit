@@ -96,6 +96,7 @@ export interface UseAgentSessionResult
     | "rerunMessage"
     | "history"
     | "renameConversation"
+    | "deleteConversation"
     | "models"
     | "selectedModelId"
     | "selectModel"
@@ -364,6 +365,7 @@ export function useAgentSession(deps: UseAgentSessionDeps): UseAgentSessionResul
     rerunMessage: chat.rerunMessage,
     history: chat.history,
     renameConversation: chat.renameConversation,
+    deleteConversation: chat.deleteConversation,
     models: chat.models,
     selectedModelId: chat.selectedModelId,
     selectModel: chat.selectModel,

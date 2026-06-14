@@ -7,6 +7,7 @@
 //     listConversations: (o) => listConversations(agentApi, o),
 //     createConversation: (o) => createConversation(agentApi, o),
 //     renameConversation: (id, t) => renameConversation(agentApi, id, t),
+//     deleteConversation: (id) => deleteConversation(agentApi, id),
 //     patchConversationModel: (id, m) => patchConversationModel(agentApi, id, m),
 //     listConversationMessages: (id) => listConversationMessages(agentApi, id),
 //     fetchAgentModels: () => fetchAgentModels(agentApi),
@@ -137,6 +138,9 @@ export interface AgentChatClient {
   listConversations(opts?: ListConversationsOptions): Promise<AgentConversationsPage>;
   createConversation(opts?: CreateConversationOptions): Promise<AgentConversation>;
   renameConversation(conversationId: string, title: string): Promise<AgentConversation>;
+  /** Permanently delete a conversation and all its messages (ms_agent.message
+   *  FK is ON DELETE CASCADE, so one DELETE removes the whole thread). */
+  deleteConversation(conversationId: string): Promise<void>;
   /** Re-pin the conversation's model ("" clears to the platform default). */
   patchConversationModel(conversationId: string, model: string): Promise<AgentConversation>;
   /** Full replay, oldest first — includes superseded rows (clients hide them). */

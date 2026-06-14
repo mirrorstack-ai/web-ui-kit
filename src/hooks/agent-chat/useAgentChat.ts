@@ -96,6 +96,10 @@ export interface UseAgentChatResult {
   /** Retitle a past conversation — optimistic in history, rolls back on
    *  failure. Empty titles are ignored. */
   renameConversation: (id: string, title: string) => void;
+  /** Permanently delete a past conversation — optimistic (the history row
+   *  vanishes now), rolls back on failure. Clears the open thread when the
+   *  deleted id is the active conversation. */
+  deleteConversation: (id: string) => void;
   /** Roster for the input's model picker — undefined hides the picker
    *  (e.g. /v1/models not deployed yet). */
   models: AgentSidebarInputModel[] | undefined;
@@ -567,6 +571,46 @@ export function useAgentChat(
     [conversations],
   );
 
+  const deleteConversation = useCallback(
+    (id: string) => {
+      // Optimistic: snapshot the removed row AND its position for rollback, then
+      // drop it now so the history entry vanishes immediately. The snapshot is
+      // read from state (not inside the updater) so it can't depend on updater
+      // invocation count.
+      const removedIndex = conversations?.findIndex((c) => c.id === id) ?? -1;
+      const removedRow = removedIndex >= 0 ? conversations?.[removedIndex] : undefined;
+      setConversations((prev) => prev?.filter((c) => c.id !== id));
+
+      // Deleting the OPEN conversation must clear the thread too — otherwise a
+      // freshly-deleted conversation keeps rendering its messages and the next
+      // send would resurrect it under the dead id. Abort any in-flight stream
+      // and null the ref so the next send lazy-creates a fresh conversation.
+      if (conversationIdRef.current === id) {
+        abortRef.current?.abort();
+        conversationIdRef.current = null;
+        createConversationRef.current = null;
+        setMessages([]);
+      }
+
+      clientRef.current.deleteConversation(id).catch((err) => {
+        console.error("agent: delete failed", err);
+        // Restore the removed row on failure with a MERGE updater (mirrors
+        // renameConversation's rollback) so any conversation created between the
+        // optimistic drop and this failure is preserved rather than clobbered.
+        // Re-insert at the original index to keep history order stable. The
+        // cleared thread is not re-loaded (the host can reselect the
+        // conversation to reopen it).
+        setConversations((prev) => {
+          if (!removedRow || prev?.some((c) => c.id === id)) return prev;
+          const next = [...(prev ?? [])];
+          next.splice(Math.min(removedIndex, next.length), 0, removedRow);
+          return next;
+        });
+      });
+    },
+    [conversations],
+  );
+
   const rateMessage = useCallback(
     (messageId: string, rating: AgentSidebarMessageFeedback) => {
       const convId = conversationIdRef.current;
@@ -673,6 +717,7 @@ export function useAgentChat(
     history,
     selectConversation,
     renameConversation,
+    deleteConversation,
     models,
     // The pick when the user made one, else the server default — never
     // let the consumer guess (a first-enabled fallback can advertise a
