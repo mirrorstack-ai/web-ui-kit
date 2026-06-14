@@ -118,11 +118,12 @@ export interface AppShellProps {
   /** Enables the hover rename affordance on agent history rows.
    *  Called with the trimmed title (1-200 chars) when the user commits an inline rename. */
   onRenameAgentConversation?: AgentSidebarHeaderProps["onRenameConversation"];
-  /** Enables the hover delete affordance on agent history rows. Confirmation
-   *  (if any) is the consumer's responsibility; the kit fires immediately. */
+  /** Enables the hover delete affordance on agent history rows. Clicking it
+   *  opens a destructive confirmation dialog first; this fires only once the
+   *  user confirms (cancel/dismiss does nothing). */
   onDeleteAgentConversation?: AgentSidebarHeaderProps["onDeleteConversation"];
-  /** Label overrides for the agent header (history, rename, new-chat strings).
-   *  All have EN defaults. */
+  /** Label overrides for the agent header (history, rename, new-chat, and the
+   *  delete-confirmation dialog strings). All have EN defaults. */
   agentHeaderLabels?: AgentSidebarHeaderProps["labels"];
   /** Messages waiting to send once the current reply finishes — rendered as
    *  cancellable rows above the agent input, in send order. Display-only:

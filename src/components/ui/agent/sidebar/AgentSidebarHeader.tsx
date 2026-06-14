@@ -5,6 +5,7 @@ import { isDev } from "@/utils/env";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
+import { Dialog } from "@/components/ui/surfaces/dialog/Dialog";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import type { AgentSidebarHeaderLabels, AgentSidebarHistoryGroup, ChatTab } from "./types";
 
@@ -29,8 +30,9 @@ export interface AgentSidebarHeaderProps {
   /** Enables the hover rename affordance on history rows.
    *  Called with the trimmed title (1-200 chars) when the user commits an inline rename. */
   onRenameConversation?: (id: string, title: string) => void;
-  /** Enables the hover delete affordance on history rows. Confirmation (if any)
-   *  is the consumer's responsibility; the kit fires immediately. */
+  /** Enables the hover delete affordance on history rows. Clicking it opens a
+   *  destructive confirmation dialog first; this fires only once the user
+   *  confirms (cancel/dismiss does nothing). */
   onDeleteConversation?: (id: string) => void;
   /** Label overrides. All have EN defaults. */
   labels?: AgentSidebarHeaderLabels;
@@ -124,6 +126,11 @@ export function AgentSidebarHeader({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const editInputRef = useRef<HTMLInputElement>(null);
+
+  // Id of the conversation pending a delete confirmation; null = dialog closed.
+  // Deletion only fires once the user confirms, so a misclick on the row's
+  // trash icon can't silently remove a conversation.
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const calculateVisible = useCallback(() => {
     if (!tabsContainerRef.current) return;
@@ -416,7 +423,7 @@ export function AgentSidebarHeader({
                                   <button
                                     type="button"
                                     className="w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-on-surface opacity-70 hover:opacity-100 hover:bg-error/10 hover:text-error shrink-0"
-                                    onClick={(e) => { e.stopPropagation(); onDeleteConversation(item.id); }}
+                                    onClick={(e) => { e.stopPropagation(); setDeletingId(item.id); }}
                                     aria-label={labels?.deleteConversationLabel ?? "Delete conversation"}
                                   >
                                     <Icon name="delete" size={12} />
@@ -565,6 +572,36 @@ export function AgentSidebarHeader({
           </div>
         </div>
       )}
+
+      {/* Destructive delete confirmation. onDeleteConversation fires only on
+          confirm; Cancel, Escape, and backdrop click all just close the
+          dialog (via setDeletingId(null)) so a misclick is recoverable. */}
+      <Dialog
+        open={deletingId !== null}
+        onClose={() => setDeletingId(null)}
+        title={labels?.deleteConfirmTitle ?? "Delete conversation?"}
+        actions={[
+          {
+            label: labels?.deleteConfirmCancelLabel ?? "Cancel",
+            variant: "text",
+            onClick: () => setDeletingId(null),
+          },
+          {
+            label: labels?.deleteConfirmConfirmLabel ?? "Delete",
+            variant: "filled",
+            color: "error",
+            onClick: () => {
+              if (deletingId !== null) onDeleteConversation?.(deletingId);
+              setDeletingId(null);
+            },
+          },
+        ]}
+      >
+        <p className="text-sm text-on-surface-variant">
+          {labels?.deleteConfirmMessage ??
+            "This conversation will be permanently deleted."}
+        </p>
+      </Dialog>
     </div>
   );
 }

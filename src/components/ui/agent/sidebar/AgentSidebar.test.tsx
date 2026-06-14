@@ -1,6 +1,7 @@
 import { cleanup, render, screen, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi, afterEach, beforeAll, afterAll } from "vitest";
 import { AgentSidebarHeader } from "./AgentSidebarHeader";
+import type { AgentSidebarHeaderProps } from "./AgentSidebarHeader";
 import { AgentSidebarInput } from "./AgentSidebarInput";
 import type { AgentSidebarHistoryGroup, ChatTab } from "./types";
 
@@ -250,6 +251,7 @@ describe("AgentSidebarHeader history delete", () => {
   const renderHistory = (props?: {
     onDelete?: (id: string) => void;
     onSelect?: (id: string) => void;
+    labels?: AgentSidebarHeaderProps["labels"];
   }) =>
     render(
       <AgentSidebarHeader
@@ -259,10 +261,12 @@ describe("AgentSidebarHeader history delete", () => {
         history={historyData}
         onSelectHistoryItem={props?.onSelect ?? (() => {})}
         onDeleteConversation={props?.onDelete}
+        labels={props?.labels}
       />,
     );
 
   const openHistory = () => fireEvent.click(screen.getByLabelText("Chat history"));
+  const clickDelete = () => fireEvent.click(screen.getByLabelText("Delete conversation"));
 
   it("shows the delete button when onDeleteConversation is provided", () => {
     renderHistory({ onDelete: () => {} });
@@ -276,14 +280,69 @@ describe("AgentSidebarHeader history delete", () => {
     expect(screen.queryByLabelText("Delete conversation")).not.toBeInTheDocument();
   });
 
-  it("calls onDeleteConversation with the row id, without opening the conversation", () => {
+  it("opens a confirmation dialog instead of deleting immediately", () => {
     const onDelete = vi.fn();
     const onSelect = vi.fn();
     renderHistory({ onDelete, onSelect });
     openHistory();
-    fireEvent.click(screen.getByLabelText("Delete conversation"));
-    expect(onDelete).toHaveBeenCalledWith("h-1");
+    clickDelete();
+    // Dialog is shown; nothing deleted or opened yet.
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText("Delete conversation?")).toBeInTheDocument();
+    expect(onDelete).not.toHaveBeenCalled();
     expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("calls onDeleteConversation with the row id only after confirm", () => {
+    const onDelete = vi.fn();
+    const onSelect = vi.fn();
+    renderHistory({ onDelete, onSelect });
+    openHistory();
+    clickDelete();
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    expect(onDelete).toHaveBeenCalledWith("h-1");
+    expect(onDelete).toHaveBeenCalledTimes(1);
+    expect(onSelect).not.toHaveBeenCalled();
+    // Dialog closes after confirm.
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("does not delete when the dialog is cancelled", () => {
+    const onDelete = vi.fn();
+    renderHistory({ onDelete });
+    openHistory();
+    clickDelete();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("does not delete when the dialog is dismissed via Escape", () => {
+    const onDelete = vi.fn();
+    renderHistory({ onDelete });
+    openHistory();
+    clickDelete();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("uses overridable labels for the confirm dialog", () => {
+    renderHistory({
+      onDelete: () => {},
+      labels: {
+        deleteConfirmTitle: "Eliminar conversación?",
+        deleteConfirmMessage: "Se eliminará de forma permanente.",
+        deleteConfirmConfirmLabel: "Eliminar",
+        deleteConfirmCancelLabel: "Cancelar",
+      },
+    });
+    openHistory();
+    clickDelete();
+    expect(screen.getByText("Eliminar conversación?")).toBeInTheDocument();
+    expect(screen.getByText("Se eliminará de forma permanente.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Eliminar" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument();
   });
 });
 

@@ -143,7 +143,11 @@ describe("AppShell agent sidebar pass-through", () => {
     fireEvent.keyDown(input, { key: "Enter" });
     expect(onRename).toHaveBeenCalledWith("h1", "New title");
 
+    // Delete opens a confirmation dialog first; the forwarded handler fires
+    // only after the user clicks the destructive confirm button.
     fireEvent.click(screen.getByLabelText("Delete conversation"));
+    expect(onDelete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
     expect(onDelete).toHaveBeenCalledWith("h1");
   });
 
