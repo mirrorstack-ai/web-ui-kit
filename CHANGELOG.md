@@ -3,6 +3,15 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.11
+
+- **`secondary` is now the brand teal.** The secondary tonal family shifts from
+  the M3-generated blue-grey to the brand teal — light `#006973`, a luminous
+  `#5bc2cd` on dark — with its container/on/fixed tones moved into the same teal
+  ramp. This gives apps a second on-brand accent (the dark `primary` remains the
+  M3 light-blue); `color="secondary"` now reads as teal in both modes. Only the
+  secondary family changes; primary and the neutrals are untouched.
+
 ## 0.5.10
 
 - **Warm dark theme.** The dark-mode neutral tokens shift from cool near-black
