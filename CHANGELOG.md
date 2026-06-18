@@ -3,6 +3,17 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.10
+
+- **Warm dark theme.** The dark-mode neutral tokens shift from cool near-black
+  (`background #000`, `surface #101417`, blue-grey `surface-variant`/`outline`)
+  to a warm `#1a1a18` charcoal family on a `#14110f` base, with warm off-white
+  ink (`on-surface #e8e2d7`) and warm muted/outline tones. Only the neutral
+  surface/ink ramp changes — every brand and semantic accent (primary,
+  secondary, tertiary, error, success, warning) is untouched, so contrast pairs
+  hold. Light mode is unchanged. Every app inherits the warmth via
+  `bg-background` / `bg-surface` / `text-on-surface`; no app-level overrides.
+
 ## 0.5.9
 
 - Agent sidebar reload **clobber fix**: a mount-time mutation (the host bridge's
