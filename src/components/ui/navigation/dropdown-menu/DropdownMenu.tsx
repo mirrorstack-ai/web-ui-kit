@@ -18,6 +18,7 @@ const DD_NOTCH_W = 52;
 const DD_NOTCH_H = 46;
 const DD_R = 16;
 const DD_IR = 10;
+const DD_SW = 1.5;
 
 // Item density tokens per `size` — "lg" pads up to comfortable touch targets.
 const SIZES = {
@@ -56,6 +57,16 @@ export interface DropdownMenuProps {
   notchWidth?: number;
   /** Height of the notch tab (SVG units). Default `46`. */
   notchHeight?: number;
+  /** Corner radius of the notch outline (SVG units). Default `16`. Lower it to
+   *  match a small trigger's own radius for a less-rounded head (e.g. an icon
+   *  button with an 8px radius). */
+  notchRadius?: number;
+  /** Radius of the notch's inverse (concave) corners, where the tab curves back
+   *  into the card (SVG units). Default `10`. Usually scaled down alongside
+   *  `notchRadius` for a tighter head. */
+  notchInverseRadius?: number;
+  /** Stroke (border) width of the notch outline, in px. Default `1.5`. */
+  notchStrokeWidth?: number;
   /** Render the kit's signature notch wrapping the trigger. Default `true`. Set
    *  to `false` for a plain floating menu (e.g. selects, period pickers). */
   useNotch?: boolean;
@@ -89,6 +100,9 @@ export function DropdownMenu({
   offset = 0,
   notchWidth = DD_NOTCH_W,
   notchHeight = DD_NOTCH_H,
+  notchRadius = DD_R,
+  notchInverseRadius = DD_IR,
+  notchStrokeWidth = DD_SW,
   useNotch = true,
   placement = "bottom",
   size = "md",
@@ -207,10 +221,10 @@ export function DropdownMenu({
               notchHeight={notchHeight}
               notchSide={openUp ? "top" : "bottom"}
               notchOffset={offset}
-              radius={DD_R}
-              inverseRadius={DD_IR}
+              radius={notchRadius}
+              inverseRadius={notchInverseRadius}
               stroke="var(--color-primary)"
-              strokeWidth={1.5}
+              strokeWidth={notchStrokeWidth}
               className={cn("absolute left-0", openUp ? "bottom-0" : "top-0")}
             />
           )}

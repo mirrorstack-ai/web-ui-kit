@@ -197,9 +197,13 @@ export function Notch({
     const transform = getTransform(notchSide, pathW, pathH);
 
     return (
+      // Element sized to the CONTENT box; the viewBox stays padded by `pad` on
+      // every side so the centered stroke renders fully INSIDE the box. (Sizing
+      // the element to svgW+strokeWidth instead pins it `pad` larger and pushes
+      // the right & bottom strokes outside the box.)
       <svg
-        width={svgW + strokeWidth}
-        height={svgH + strokeWidth}
+        width={svgW}
+        height={svgH}
         viewBox={`${-pad} ${-pad} ${svgW + strokeWidth} ${svgH + strokeWidth}`}
         className={cn("pointer-events-none", className)}
         style={style}
@@ -225,9 +229,12 @@ export function Notch({
   const transform = getTransform(notchSide, pw, ph);
 
   return (
+    // Element sized to the CONTENT box; the viewBox stays padded by `pad` on
+    // every side so the centered stroke renders fully INSIDE the box (rather
+    // than spilling the right & bottom strokes outside it).
     <svg
-      width={svgW + strokeWidth}
-      height={svgH + strokeWidth}
+      width={svgW}
+      height={svgH}
       viewBox={`${-pad} ${-pad} ${svgW + strokeWidth} ${svgH + strokeWidth}`}
       className={cn("pointer-events-none", className)}
       style={style}
