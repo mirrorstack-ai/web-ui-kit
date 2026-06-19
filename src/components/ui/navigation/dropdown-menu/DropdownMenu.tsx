@@ -35,7 +35,14 @@ export const meta: ComponentMeta = {
 export interface DropdownMenuItem {
   id: string;
   label: string;
-  icon?: string;
+  /** Leading icon: a Material Symbols name, or a custom node (e.g. a brand-logo
+   *  SVG that Material Symbols can't provide). A custom node should size itself
+   *  to ~`size` and use `currentColor` so it inherits the muted icon colour. */
+  icon?: string | ReactNode;
+  /** Marks an item that opens externally (a new tab): renders a trailing
+   *  open-in-new glyph as the affordance. Performing the navigation is still the
+   *  caller's job in `onSelect`. */
+  external?: boolean;
   /** `"danger"` is a deprecated alias for `"error"`. */
   variant?: "default" | "error" | "danger";
   disabled?: boolean;
@@ -283,17 +290,34 @@ export function DropdownMenu({
                     if (!item.disabled) setActiveIndex(index);
                   }}
                 >
-                  {item.icon && (
+                  {item.icon != null &&
+                    (typeof item.icon === "string" ? (
+                      <Icon
+                        name={item.icon}
+                        size={sz.icon}
+                        className={cn(
+                          "shrink-0",
+                          isError ? "text-error" : "text-on-surface-variant",
+                        )}
+                      />
+                    ) : (
+                      <span
+                        className={cn(
+                          "flex shrink-0 items-center",
+                          isError ? "text-error" : "text-on-surface-variant",
+                        )}
+                      >
+                        {item.icon}
+                      </span>
+                    ))}
+                  {item.label}
+                  {item.external && (
                     <Icon
-                      name={item.icon}
-                      size={sz.icon}
-                      className={cn(
-                        "shrink-0",
-                        isError ? "text-error" : "text-on-surface-variant",
-                      )}
+                      name="open_in_new"
+                      size={sz.icon - 3}
+                      className="ml-auto shrink-0 text-on-surface-variant/60"
                     />
                   )}
-                  {item.label}
                 </div>
               );
             })}
