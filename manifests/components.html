@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">301 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">302 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -3949,9 +3949,9 @@ title?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DropdownMenu</h2>
       <div class="badges">
-        <label for="c-19-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-19-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">14 prop types</label>
         <label for="c-19-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-19-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-19-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
@@ -3983,7 +3983,7 @@ title?: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">11 prop types</span>
+              <span class="badge ok">14 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/navigation/dropdown-menu/DropdownMenu.tsx::DropdownMenu</code></pre>
             <pre><code>Props:</code></pre>
@@ -4002,6 +4002,25 @@ menuClassName?: string
  * Height of the notch tab (SVG units). Default `46`.
  */
 notchHeight?: number = 46
+
+/**
+ * Radius of the notch&#39;s inverse (concave) corners, where the tab curves back
+ *  into the card (SVG units). Default `10`. Usually scaled down alongside
+ *  `notchRadius` for a tighter head.
+ */
+notchInverseRadius?: number = 10
+
+/**
+ * Corner radius of the notch outline (SVG units). Default `16`. Lower it to
+ *  match a small trigger&#39;s own radius for a less-rounded head (e.g. an icon
+ *  button with an 8px radius).
+ */
+notchRadius?: number = 16
+
+/**
+ * Stroke (border) width of the notch outline, in px. Default `1.5`.
+ */
+notchStrokeWidth?: number = 1.5
 
 /**
  * Width of the notch tab (SVG units). Default `52`.
@@ -4065,6 +4084,27 @@ useNotch?: boolean = true</code></pre>
       { id: &quot;duplicate&quot;, label: &quot;Duplicate&quot;, icon: &quot;content_copy&quot; },
       { type: &quot;separator&quot; as const },
       { id: &quot;delete&quot;, label: &quot;Delete&quot;, icon: &quot;delete&quot;, variant: &quot;danger&quot; as const },
+    ]}
+    onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Tight Head</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">The notch head tuned to a small trigger: `notchWidth`/`notchHeight` size the tab to the icon button, and `notchRadius`/`notchInverseRadius` round the head down to the button&#39;s own corner radius instead of the default bulbous 16.</div>
+              <pre><code>const TightHead = () =&gt; &lt;DropdownMenu
+    trigger={(&lt;IconButton icon=&quot;menu&quot; aria-label=&quot;Open menu&quot; variant=&quot;text&quot; size=&quot;sm&quot; /&gt;)}
+    notchWidth={34}
+    notchHeight={38}
+    notchRadius={8}
+    notchInverseRadius={6}
+    items={[
+      { id: &quot;how&quot;, label: &quot;How it works&quot;, icon: &quot;play_circle&quot; },
+      { id: &quot;source&quot;, label: &quot;View source&quot;, icon: &quot;code&quot; },
+      { type: &quot;separator&quot; as const },
+      { id: &quot;subscribe&quot;, label: &quot;Get early access&quot;, icon: &quot;mail&quot; },
     ]}
     onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
             </div>
