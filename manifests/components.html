@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">302 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">303 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3951,7 +3951,7 @@ title?: string</code></pre>
       <div class="badges">
         <label for="c-19-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">14 prop types</label>
         <label for="c-19-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-19-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-19-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -4084,6 +4084,34 @@ useNotch?: boolean = true</code></pre>
       { id: &quot;duplicate&quot;, label: &quot;Duplicate&quot;, icon: &quot;content_copy&quot; },
       { type: &quot;separator&quot; as const },
       { id: &quot;delete&quot;, label: &quot;Delete&quot;, icon: &quot;delete&quot;, variant: &quot;danger&quot; as const },
+    ]}
+    onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Custom Icon And External</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">An item&#39;s `icon` can be a custom node (e.g. a brand-logo SVG that Material Symbols doesn&#39;t ship) instead of an icon name &amp;mdash; size it to ~the item icon size and use `currentColor`. `external: true` adds a trailing open-in-new glyph for items that open in a new tab.</div>
+              <pre><code>const CustomIconAndExternal = () =&gt; &lt;DropdownMenu
+    trigger={(&lt;IconButton icon=&quot;menu&quot; aria-label=&quot;Open menu&quot; variant=&quot;text&quot; size=&quot;sm&quot; /&gt;)}
+    notchRadius={8}
+    notchInverseRadius={6}
+    items={[
+      {
+        id: &quot;repo&quot;,
+        label: &quot;Repository&quot;,
+        external: true,
+        icon: (
+          &lt;svg viewBox=&quot;0 0 16 16&quot; width={16} height={16} fill=&quot;currentColor&quot;&gt;
+            &lt;path d=&quot;M8 1l6 3.5v7L8 15l-6-3.5v-7L8 1z&quot; /&gt;
+          &lt;/svg&gt;
+        ),
+      },
+      { id: &quot;docs&quot;, label: &quot;Docs&quot;, icon: &quot;menu_book&quot;, external: true },
+      { type: &quot;separator&quot; as const },
+      { id: &quot;settings&quot;, label: &quot;Settings&quot;, icon: &quot;settings&quot; },
     ]}
     onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
             </div>
