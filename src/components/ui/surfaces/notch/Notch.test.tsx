@@ -19,8 +19,12 @@ describe("Notch", () => {
       <Notch width={200} height={150} notchWidth={40} notchHeight={50} notchSide="right" />,
     );
     const svg = container.querySelector("svg");
-    expect(svg).toHaveAttribute("width", "241");
-    expect(svg).toHaveAttribute("height", "151");
+    // Element is the content box (width+notchWidth × height); the centered
+    // stroke is accommodated by the padded viewBox (content + strokeWidth,
+    // offset by -strokeWidth/2) so the border stays inside the box.
+    expect(svg).toHaveAttribute("width", "240");
+    expect(svg).toHaveAttribute("height", "150");
+    expect(svg).toHaveAttribute("viewBox", "-0.5 -0.5 241 151");
   });
 
   it("sets correct SVG dimensions for bottom notch", () => {
@@ -28,8 +32,9 @@ describe("Notch", () => {
       <Notch width={200} height={150} notchWidth={40} notchHeight={50} notchSide="bottom" />,
     );
     const svg = container.querySelector("svg");
-    expect(svg).toHaveAttribute("width", "201");
-    expect(svg).toHaveAttribute("height", "201");
+    expect(svg).toHaveAttribute("width", "200");
+    expect(svg).toHaveAttribute("height", "200");
+    expect(svg).toHaveAttribute("viewBox", "-0.5 -0.5 201 201");
   });
 
   it("renders head only", () => {
@@ -38,10 +43,11 @@ describe("Notch", () => {
     );
     const svg = container.querySelector("svg");
     // offset=0 → atStart=true, topIr=0, botIr=6
-    // pathW = 60 + 6 = 66, + stroke = 67
-    // pathH = 40 + 0 + 6 = 46, + stroke = 47
-    expect(svg).toHaveAttribute("width", "67");
-    expect(svg).toHaveAttribute("height", "47");
+    // pathW = 60 + 6 = 66 (element width); pathH = 40 + 0 + 6 = 46 (element height)
+    // viewBox pads by strokeWidth so the stroke stays inside the box: 67 × 47.
+    expect(svg).toHaveAttribute("width", "66");
+    expect(svg).toHaveAttribute("height", "46");
+    expect(svg).toHaveAttribute("viewBox", "-0.5 -0.5 67 47");
   });
 
   it("applies fill and stroke", () => {
