@@ -65,6 +65,31 @@ export const CustomIconAndExternal: Story = {
 };
 
 /**
+ * `openOnHover` opens the menu on mouse hover of the trigger, layered on top of
+ * click. The menu stays open while the pointer is over the trigger or the menu,
+ * and closes after a short grace on leave so trigger&rarr;menu travel does not
+ * dismiss it. Mouse-only &mdash; touch/pen keep tap-to-toggle. Reach for it on a
+ * desktop toolbar overflow menu, never a mobile bottom-nav menu. Hover over the
+ * button below to open it.
+ */
+export const OpenOnHover: Story = {
+  args: {
+    openOnHover: true,
+    trigger: (
+      <IconButton icon="more_horiz" aria-label="More" variant="text" />
+    ),
+    items: [
+      { id: "rename", label: "Rename", icon: "edit" },
+      { id: "move", label: "Move to…", icon: "drive_file_move" },
+      { type: "separator" as const },
+      { id: "archive", label: "Archive", icon: "archive" },
+      { id: "delete", label: "Delete", icon: "delete", variant: "error" as const },
+    ],
+    onSelect: (item) => console.log("Selected:", item.id),
+  },
+};
+
+/**
  * The notch head tuned to a small trigger: `notchWidth`/`notchHeight` size the
  * tab to the icon button, and `notchRadius`/`notchInverseRadius` round the head
  * down to the button's own corner radius instead of the default bulbous 16.

@@ -20,6 +20,12 @@ const DD_R = 16;
 const DD_IR = 10;
 const DD_SW = 1.5;
 
+// Grace before a hover-opened menu closes on pointer-leave. Outlasts a normal
+// mouse traversal of the trigger->menu gap (8px no-notch / ~0 notch) so the
+// menu doesn't dismiss mid-travel; short enough to feel responsive on an
+// intentional leave. Private by design — no caller needs to tune it yet.
+const HOVER_CLOSE_GRACE_MS = 150;
+
 // Item density tokens per `size` — "lg" pads up to comfortable touch targets.
 const SIZES = {
   md: { item: "gap-2 px-2 py-1.5", icon: 16, minW: "min-w-[180px]", sep: "mx-1.5" },
@@ -85,6 +91,18 @@ export interface DropdownMenuProps {
    *  touch targets — use it for menus opened on touch surfaces (e.g. a mobile
    *  bottom nav). `"md"` is the default desktop density. */
   size?: "md" | "lg";
+  /** Open the menu on mouse hover of the trigger, in addition to click.
+   *  The menu stays open while the pointer is over the trigger OR the floating
+   *  menu, and closes after a short grace on leave so trigger->menu travel does
+   *  not dismiss it. Mouse-only: no-op on touch/pen (which keep tap-to-toggle)
+   *  and for keyboard. Default `false` — hover menus hurt touch and keyboard
+   *  discoverability, so opt in deliberately (e.g. a desktop toolbar overflow
+   *  menu, not a mobile bottom-nav menu).
+   *
+   *  COUPLING NOTE: relies on the menu rendering INLINE inside `containerRef`
+   *  (no portal). If DropdownMenu ever moves to a portal, hover-leave detection
+   *  must be reworked (the menu would no longer be a container descendant). */
+  openOnHover?: boolean;
   /** Class applied to the floating menu element (the notched card) — use it to
    *  fine-tune the menu's position relative to the trigger, e.g. a translate
    *  to nudge the whole notched card off the auto-aligned anchor. */
@@ -113,6 +131,7 @@ export function DropdownMenu({
   useNotch = true,
   placement = "bottom",
   size = "md",
+  openOnHover = false,
   menuClassName,
   className,
 }: DropdownMenuProps) {
@@ -123,9 +142,17 @@ export function DropdownMenu({
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<number | null>(null);
   const [contentH, setContentH] = useState(0);
   const [menuW, setMenuW] = useState(0);
   const menuId = useId();
+
+  const clearCloseTimer = useCallback(() => {
+    if (closeTimer.current != null) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }, []);
 
   const actionableIndices = items
     .map((entry, i) => (isActionable(entry) ? i : -1))
@@ -151,14 +178,16 @@ export function DropdownMenu({
   });
 
   const openMenu = useCallback(() => {
+    clearCloseTimer();
     setOpen(true);
     setActiveIndex(actionableIndices[0] ?? -1);
-  }, [actionableIndices, setActiveIndex]);
+  }, [actionableIndices, setActiveIndex, clearCloseTimer]);
 
   const closeMenu = useCallback(() => {
+    clearCloseTimer();
     setOpen(false);
     setActiveIndex(-1);
-  }, [setActiveIndex]);
+  }, [setActiveIndex, clearCloseTimer]);
 
   useEffect(() => {
     if (!open) return;
@@ -176,8 +205,14 @@ export function DropdownMenu({
     return () => {
       cancelAnimationFrame(raf);
       document.removeEventListener("mousedown", handleClickOutside);
+      // A pending hover-close must not setState after the menu closes.
+      clearCloseTimer();
     };
-  }, [open, closeMenu]);
+  }, [open, closeMenu, clearCloseTimer]);
+
+  // Guaranteed unmount kill: the open-effect only runs while open, so it alone
+  // does not cover unmount-while-closed.
+  useEffect(() => clearCloseTimer, [clearCloseTimer]);
 
   useLayoutEffect(() => {
     if (!open || !contentRef.current) return;
@@ -186,9 +221,36 @@ export function DropdownMenu({
   }, [open, items.length]);
 
   return (
-    <div ref={containerRef} className={cn("relative inline-block", className)}>
+    <div
+      ref={containerRef}
+      className={cn("relative inline-block", className)}
+      onPointerEnter={
+        openOnHover
+          ? (e) => {
+              if (e.pointerType !== "mouse") return; // touch/pen -> tap-to-toggle only
+              clearCloseTimer();
+              if (!open) openMenu();
+            }
+          : undefined
+      }
+      onPointerLeave={
+        openOnHover
+          ? (e) => {
+              if (e.pointerType !== "mouse") return;
+              clearCloseTimer();
+              closeTimer.current = window.setTimeout(() => {
+                closeTimer.current = null;
+                closeMenu();
+              }, HOVER_CLOSE_GRACE_MS);
+            }
+          : undefined
+      }
+    >
       <div
         className={cn("relative", open && "z-[51]")}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
         onClick={() => {
           if (open) {
             closeMenu();
