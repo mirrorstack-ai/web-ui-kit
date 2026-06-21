@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">303 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/74 infos</a><span class="filter-pill ok" aria-disabled="true">304 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -3949,9 +3949,9 @@ title?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DropdownMenu</h2>
       <div class="badges">
-        <label for="c-19-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">14 prop types</label>
+        <label for="c-19-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">15 prop types</label>
         <label for="c-19-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-19-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-19-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -3983,7 +3983,7 @@ title?: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">14 prop types</span>
+              <span class="badge ok">15 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/navigation/dropdown-menu/DropdownMenu.tsx::DropdownMenu</code></pre>
             <pre><code>Props:</code></pre>
@@ -4033,6 +4033,21 @@ notchWidth?: number = 52
 offset?: number = 0
 
 onSelect: (item: DropdownMenuItem) =&gt; void
+
+/**
+ * Open the menu on mouse hover of the trigger, in addition to click.
+ *  The menu stays open while the pointer is over the trigger OR the floating
+ *  menu, and closes after a short grace on leave so trigger-&gt;menu travel does
+ *  not dismiss it. Mouse-only: no-op on touch/pen (which keep tap-to-toggle)
+ *  and for keyboard. Default `false` — hover menus hurt touch and keyboard
+ *  discoverability, so opt in deliberately (e.g. a desktop toolbar overflow
+ *  menu, not a mobile bottom-nav menu).
+ * 
+ *  COUPLING NOTE: relies on the menu rendering INLINE inside `containerRef`
+ *  (no portal). If DropdownMenu ever moves to a portal, hover-leave detection
+ *  must be reworked (the menu would no longer be a container descendant).
+ */
+openOnHover?: boolean = false
 
 /**
  * Which side of the trigger the menu opens toward. `&quot;top&quot;` opens upward —
@@ -4112,6 +4127,25 @@ useNotch?: boolean = true</code></pre>
       { id: &quot;docs&quot;, label: &quot;Docs&quot;, icon: &quot;menu_book&quot;, external: true },
       { type: &quot;separator&quot; as const },
       { id: &quot;settings&quot;, label: &quot;Settings&quot;, icon: &quot;settings&quot; },
+    ]}
+    onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Open On Hover</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`openOnHover` opens the menu on mouse hover of the trigger, layered on top of click. The menu stays open while the pointer is over the trigger or the menu, and closes after a short grace on leave so trigger&amp;rarr;menu travel does not dismiss it. Mouse-only &amp;mdash; touch/pen keep tap-to-toggle. Reach for it on a desktop toolbar overflow menu, never a mobile bottom-nav menu. Hover over the button below to open it.</div>
+              <pre><code>const OpenOnHover = () =&gt; &lt;DropdownMenu
+    openOnHover
+    trigger={(&lt;IconButton icon=&quot;more_horiz&quot; aria-label=&quot;More&quot; variant=&quot;text&quot; /&gt;)}
+    items={[
+      { id: &quot;rename&quot;, label: &quot;Rename&quot;, icon: &quot;edit&quot; },
+      { id: &quot;move&quot;, label: &quot;Move to…&quot;, icon: &quot;drive_file_move&quot; },
+      { type: &quot;separator&quot; as const },
+      { id: &quot;archive&quot;, label: &quot;Archive&quot;, icon: &quot;archive&quot; },
+      { id: &quot;delete&quot;, label: &quot;Delete&quot;, icon: &quot;delete&quot;, variant: &quot;error&quot; as const },
     ]}
     onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
             </div>
