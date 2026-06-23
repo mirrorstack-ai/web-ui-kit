@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -11284,16 +11284,16 @@ title: ReactNode</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
-  12 | const DEFAULT_MODEL_ID = &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;;
-  13 |
-&gt; 14 | const meta: Meta = {
+  59 | }
+  60 |
+&gt; 61 | const meta: Meta = {
      | ^
-  15 |   title: &quot;UI/Agent/Sidebar&quot;,
-  16 |   decorators: [
-  17 |     (Story) =&gt; (
+  62 |   title: &quot;UI/Agent/Sidebar&quot;,
+  63 |   decorators: [
+  64 |     (Story) =&gt; (
 
 ./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx:
-import { useEffect, useRef, useState } from &quot;react&quot;;
+import { useEffect, useRef, useState, type ReactNode } from &quot;react&quot;;
 import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
 import { AgentSidebarHeader } from &quot;./AgentSidebarHeader&quot;;
 import { AgentSidebarInput, type AgentQueuedMessage } from &quot;./AgentSidebarInput&quot;;
@@ -11305,6 +11305,53 @@ import { mockAgentHistory, mockAgentMessages, mockAgentModels } from &quot;./moc
 import type { AgentSidebarHistoryGroup, ChatTab } from &quot;./types&quot;;
 
 const DEFAULT_MODEL_ID = &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;;
+
+/**
+ * Full-window assembly with the one-shape drawing: instead of the header
+ * painting only the active-tab cap above a SEPARATE cream body (two fills of
+ * --color-on-background meeting edge-to-edge → a 1px seam that aliases on
+ * fractional-DPI), the header draws the WHOLE window as ONE &lt;Notch&gt; (rounded
+ * body + active-tab notch, one fill) behind everything once we hand it the
+ * body&#39;s measured height. The body container is therefore TRANSPARENT — it
+ * supplies only layout (flex/min-h-0), never a fill of its own, so the single
+ * shape shows through. We measure the body&#39;s own height (window height minus
+ * the 40px header) via a ResizeObserver on agentBodyRef and pass it as
+ * windowBodyHeight only once measured (&gt;0).
+ */
+function WindowFrame({
+  header,
+  children,
+}: {
+  header: (windowBodyHeight?: number) =&gt; ReactNode;
+  children: ReactNode;
+}) {
+  const agentBodyRef = useRef&lt;HTMLDivElement&gt;(null);
+  const [agentBodyH, setAgentBodyH] = useState(0);
+
+  useEffect(() =&gt; {
+    const el = agentBodyRef.current;
+    if (!el) return;
+    if (typeof ResizeObserver === &quot;undefined&quot;) return;
+    const observer = new ResizeObserver((entries) =&gt; {
+      setAgentBodyH(entries[0].contentRect.height);
+    });
+    observer.observe(el);
+    return () =&gt; observer.disconnect();
+  }, []);
+
+  return (
+    &lt;&gt;
+      {header(agentBodyH &gt; 0 ? agentBodyH : undefined)}
+      {/* Transparent body: only layout classes remain. The single &lt;Notch&gt; the
+          header draws (rounded body + active-tab notch) supplies the surface,
+          so there is no bg-on-background / rounded-2xl / shadow here to abut
+          the header cap and alias into a seam. */}
+      &lt;div ref={agentBodyRef} className=&quot;flex-1 flex flex-col min-h-0&quot;&gt;
+        {children}
+      &lt;/div&gt;
+    &lt;/&gt;
+  );
+}
 
 const meta: Meta = {
   title: &quot;UI/Agent/Sidebar&quot;,
@@ -11508,32 +11555,34 @@ export const QueuedMessage: StoryObj = {
  *  web-account) passes its own greeting. */
 export const EmptyState: StoryObj = {
   render: () =&gt; (
-    &lt;&gt;
-      &lt;AgentSidebarHeader
-        sidebarWidth={420}
-        onToggleCollapse={() =&gt; {}}
-        onClose={() =&gt; {}}
-        history={mockAgentHistory}
-        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-      /&gt;
-      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-          &lt;AgentSidebarMessages
-            messages={[]}
-            emptyState={
-              &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
-                Hi, Sam, ask me anything about this app.
-              &lt;/p&gt;
-            }
-          /&gt;
-        &lt;/div&gt;
-        &lt;AgentSidebarInput
-          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-          models={mockAgentModels}
-          selectedModelId={DEFAULT_MODEL_ID}
+    &lt;WindowFrame
+      header={(windowBodyHeight) =&gt; (
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+          windowBodyHeight={windowBodyHeight}
+        /&gt;
+      )}
+    &gt;
+      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+        &lt;AgentSidebarMessages
+          messages={[]}
+          emptyState={
+            &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
+              Hi, Sam, ask me anything about this app.
+            &lt;/p&gt;
+          }
         /&gt;
       &lt;/div&gt;
-    &lt;/&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+      /&gt;
+    &lt;/WindowFrame&gt;
   ),
 };
 
@@ -11541,33 +11590,35 @@ export const EmptyState: StoryObj = {
  *  their opener with no brand mark above it. */
 export const EmptyStateNoLogo: StoryObj = {
   render: () =&gt; (
-    &lt;&gt;
-      &lt;AgentSidebarHeader
-        sidebarWidth={420}
-        onToggleCollapse={() =&gt; {}}
-        onClose={() =&gt; {}}
-        history={mockAgentHistory}
-        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-      /&gt;
-      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-          &lt;AgentSidebarMessages
-            messages={[]}
-            hideEmptyStateLogo
-            emptyState={
-              &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
-                Hi, Sam, ask me anything about this app.
-              &lt;/p&gt;
-            }
-          /&gt;
-        &lt;/div&gt;
-        &lt;AgentSidebarInput
-          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-          models={mockAgentModels}
-          selectedModelId={DEFAULT_MODEL_ID}
+    &lt;WindowFrame
+      header={(windowBodyHeight) =&gt; (
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+          windowBodyHeight={windowBodyHeight}
+        /&gt;
+      )}
+    &gt;
+      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+        &lt;AgentSidebarMessages
+          messages={[]}
+          hideEmptyStateLogo
+          emptyState={
+            &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
+              Hi, Sam, ask me anything about this app.
+            &lt;/p&gt;
+          }
         /&gt;
       &lt;/div&gt;
-    &lt;/&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+      /&gt;
+    &lt;/WindowFrame&gt;
   ),
 };
 
@@ -11632,31 +11683,33 @@ export const Playground: StoryObj = {
     }, [isStreaming, queued.length]);
 
     return (
-      &lt;&gt;
-        &lt;AgentSidebarHeader
-          sidebarWidth={420}
-          onToggleCollapse={() =&gt; {}}
-          onClose={() =&gt; {}}
-          history={mockAgentHistory}
-          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-        /&gt;
-        &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-          &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-            &lt;AgentSidebarMessages messages={messages} /&gt;
-          &lt;/div&gt;
-          &lt;AgentSidebarInput
-            onSend={handleSend}
-            onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-            onMic={() =&gt; console.log(&quot;mic&quot;)}
-            models={mockAgentModels}
-            selectedModelId={DEFAULT_MODEL_ID}
-            queuedMessages={queued}
-            onCancelQueued={(id) =&gt;
-              setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
-            }
+      &lt;WindowFrame
+        header={(windowBodyHeight) =&gt; (
+          &lt;AgentSidebarHeader
+            sidebarWidth={420}
+            onToggleCollapse={() =&gt; {}}
+            onClose={() =&gt; {}}
+            history={mockAgentHistory}
+            onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+            windowBodyHeight={windowBodyHeight}
           /&gt;
+        )}
+      &gt;
+        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+          &lt;AgentSidebarMessages messages={messages} /&gt;
         &lt;/div&gt;
-      &lt;/&gt;
+        &lt;AgentSidebarInput
+          onSend={handleSend}
+          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+          onMic={() =&gt; console.log(&quot;mic&quot;)}
+          models={mockAgentModels}
+          selectedModelId={DEFAULT_MODEL_ID}
+          queuedMessages={queued}
+          onCancelQueued={(id) =&gt;
+            setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
+          }
+        /&gt;
+      &lt;/WindowFrame&gt;
     );
   },
 };
@@ -11891,32 +11944,34 @@ export const Playground: StoryObj = {
               
               <div class="hint">Fresh conversation: with no messages, the list renders the MirrorStack logo above the host-supplied `emptyState` — a personalized opener — instead of a blank pane, so the empty sidebar reads as a branded hero (matching the greeting surface) rather than dead space. Every host (web-applications, web-account) passes its own greeting.</div>
               <pre><code>const EmptyState = () =&gt; (
-  &lt;&gt;
-    &lt;AgentSidebarHeader
-      sidebarWidth={420}
-      onToggleCollapse={() =&gt; {}}
-      onClose={() =&gt; {}}
-      history={mockAgentHistory}
-      onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-    /&gt;
-    &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-        &lt;AgentSidebarMessages
-          messages={[]}
-          emptyState={
-            &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
-              Hi, Sam, ask me anything about this app.
-            &lt;/p&gt;
-          }
-        /&gt;
-      &lt;/div&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        models={mockAgentModels}
-        selectedModelId={DEFAULT_MODEL_ID}
+  &lt;WindowFrame
+    header={(windowBodyHeight) =&gt; (
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+        windowBodyHeight={windowBodyHeight}
+      /&gt;
+    )}
+  &gt;
+    &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+      &lt;AgentSidebarMessages
+        messages={[]}
+        emptyState={
+          &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
+            Hi, Sam, ask me anything about this app.
+          &lt;/p&gt;
+        }
       /&gt;
     &lt;/div&gt;
-  &lt;/&gt;
+    &lt;AgentSidebarInput
+      onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+      models={mockAgentModels}
+      selectedModelId={DEFAULT_MODEL_ID}
+    /&gt;
+  &lt;/WindowFrame&gt;
 );</code></pre>
             </div>
             <div class="note ok">
@@ -11927,33 +11982,35 @@ export const Playground: StoryObj = {
               
               <div class="hint">Same empty thread with `hideEmptyStateLogo` — for hosts that want only their opener with no brand mark above it.</div>
               <pre><code>const EmptyStateNoLogo = () =&gt; (
-  &lt;&gt;
-    &lt;AgentSidebarHeader
-      sidebarWidth={420}
-      onToggleCollapse={() =&gt; {}}
-      onClose={() =&gt; {}}
-      history={mockAgentHistory}
-      onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-    /&gt;
-    &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-        &lt;AgentSidebarMessages
-          messages={[]}
-          hideEmptyStateLogo
-          emptyState={
-            &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
-              Hi, Sam, ask me anything about this app.
-            &lt;/p&gt;
-          }
-        /&gt;
-      &lt;/div&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        models={mockAgentModels}
-        selectedModelId={DEFAULT_MODEL_ID}
+  &lt;WindowFrame
+    header={(windowBodyHeight) =&gt; (
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+        windowBodyHeight={windowBodyHeight}
+      /&gt;
+    )}
+  &gt;
+    &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+      &lt;AgentSidebarMessages
+        messages={[]}
+        hideEmptyStateLogo
+        emptyState={
+          &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
+            Hi, Sam, ask me anything about this app.
+          &lt;/p&gt;
+        }
       /&gt;
     &lt;/div&gt;
-  &lt;/&gt;
+    &lt;AgentSidebarInput
+      onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+      models={mockAgentModels}
+      selectedModelId={DEFAULT_MODEL_ID}
+    /&gt;
+  &lt;/WindowFrame&gt;
 );</code></pre>
             </div>
             <div class="note ok">
@@ -12020,31 +12077,33 @@ export const Playground: StoryObj = {
   }, [isStreaming, queued.length]);
 
   return (
-    &lt;&gt;
-      &lt;AgentSidebarHeader
-        sidebarWidth={420}
-        onToggleCollapse={() =&gt; {}}
-        onClose={() =&gt; {}}
-        history={mockAgentHistory}
-        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-      /&gt;
-      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-          &lt;AgentSidebarMessages messages={messages} /&gt;
-        &lt;/div&gt;
-        &lt;AgentSidebarInput
-          onSend={handleSend}
-          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-          onMic={() =&gt; console.log(&quot;mic&quot;)}
-          models={mockAgentModels}
-          selectedModelId={DEFAULT_MODEL_ID}
-          queuedMessages={queued}
-          onCancelQueued={(id) =&gt;
-            setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
-          }
+    &lt;WindowFrame
+      header={(windowBodyHeight) =&gt; (
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+          windowBodyHeight={windowBodyHeight}
         /&gt;
+      )}
+    &gt;
+      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+        &lt;AgentSidebarMessages messages={messages} /&gt;
       &lt;/div&gt;
-    &lt;/&gt;
+      &lt;AgentSidebarInput
+        onSend={handleSend}
+        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+        onMic={() =&gt; console.log(&quot;mic&quot;)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+        queuedMessages={queued}
+        onCancelQueued={(id) =&gt;
+          setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
+        }
+      /&gt;
+    &lt;/WindowFrame&gt;
   );
 };</code></pre>
             </div>
@@ -15746,16 +15805,16 @@ export const MultiQuestionList: StoryObj = {
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
-  12 | const DEFAULT_MODEL_ID = &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;;
-  13 |
-&gt; 14 | const meta: Meta = {
+  59 | }
+  60 |
+&gt; 61 | const meta: Meta = {
      | ^
-  15 |   title: &quot;UI/Agent/Sidebar&quot;,
-  16 |   decorators: [
-  17 |     (Story) =&gt; (
+  62 |   title: &quot;UI/Agent/Sidebar&quot;,
+  63 |   decorators: [
+  64 |     (Story) =&gt; (
 
 ./src/components/ui/agent/sidebar/AgentSidebar.stories.tsx:
-import { useEffect, useRef, useState } from &quot;react&quot;;
+import { useEffect, useRef, useState, type ReactNode } from &quot;react&quot;;
 import type { Meta, StoryObj } from &quot;@storybook/react&quot;;
 import { AgentSidebarHeader } from &quot;./AgentSidebarHeader&quot;;
 import { AgentSidebarInput, type AgentQueuedMessage } from &quot;./AgentSidebarInput&quot;;
@@ -15767,6 +15826,53 @@ import { mockAgentHistory, mockAgentMessages, mockAgentModels } from &quot;./moc
 import type { AgentSidebarHistoryGroup, ChatTab } from &quot;./types&quot;;
 
 const DEFAULT_MODEL_ID = &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;;
+
+/**
+ * Full-window assembly with the one-shape drawing: instead of the header
+ * painting only the active-tab cap above a SEPARATE cream body (two fills of
+ * --color-on-background meeting edge-to-edge → a 1px seam that aliases on
+ * fractional-DPI), the header draws the WHOLE window as ONE &lt;Notch&gt; (rounded
+ * body + active-tab notch, one fill) behind everything once we hand it the
+ * body&#39;s measured height. The body container is therefore TRANSPARENT — it
+ * supplies only layout (flex/min-h-0), never a fill of its own, so the single
+ * shape shows through. We measure the body&#39;s own height (window height minus
+ * the 40px header) via a ResizeObserver on agentBodyRef and pass it as
+ * windowBodyHeight only once measured (&gt;0).
+ */
+function WindowFrame({
+  header,
+  children,
+}: {
+  header: (windowBodyHeight?: number) =&gt; ReactNode;
+  children: ReactNode;
+}) {
+  const agentBodyRef = useRef&lt;HTMLDivElement&gt;(null);
+  const [agentBodyH, setAgentBodyH] = useState(0);
+
+  useEffect(() =&gt; {
+    const el = agentBodyRef.current;
+    if (!el) return;
+    if (typeof ResizeObserver === &quot;undefined&quot;) return;
+    const observer = new ResizeObserver((entries) =&gt; {
+      setAgentBodyH(entries[0].contentRect.height);
+    });
+    observer.observe(el);
+    return () =&gt; observer.disconnect();
+  }, []);
+
+  return (
+    &lt;&gt;
+      {header(agentBodyH &gt; 0 ? agentBodyH : undefined)}
+      {/* Transparent body: only layout classes remain. The single &lt;Notch&gt; the
+          header draws (rounded body + active-tab notch) supplies the surface,
+          so there is no bg-on-background / rounded-2xl / shadow here to abut
+          the header cap and alias into a seam. */}
+      &lt;div ref={agentBodyRef} className=&quot;flex-1 flex flex-col min-h-0&quot;&gt;
+        {children}
+      &lt;/div&gt;
+    &lt;/&gt;
+  );
+}
 
 const meta: Meta = {
   title: &quot;UI/Agent/Sidebar&quot;,
@@ -15970,32 +16076,34 @@ export const QueuedMessage: StoryObj = {
  *  web-account) passes its own greeting. */
 export const EmptyState: StoryObj = {
   render: () =&gt; (
-    &lt;&gt;
-      &lt;AgentSidebarHeader
-        sidebarWidth={420}
-        onToggleCollapse={() =&gt; {}}
-        onClose={() =&gt; {}}
-        history={mockAgentHistory}
-        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-      /&gt;
-      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-          &lt;AgentSidebarMessages
-            messages={[]}
-            emptyState={
-              &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
-                Hi, Sam, ask me anything about this app.
-              &lt;/p&gt;
-            }
-          /&gt;
-        &lt;/div&gt;
-        &lt;AgentSidebarInput
-          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-          models={mockAgentModels}
-          selectedModelId={DEFAULT_MODEL_ID}
+    &lt;WindowFrame
+      header={(windowBodyHeight) =&gt; (
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+          windowBodyHeight={windowBodyHeight}
+        /&gt;
+      )}
+    &gt;
+      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+        &lt;AgentSidebarMessages
+          messages={[]}
+          emptyState={
+            &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
+              Hi, Sam, ask me anything about this app.
+            &lt;/p&gt;
+          }
         /&gt;
       &lt;/div&gt;
-    &lt;/&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+      /&gt;
+    &lt;/WindowFrame&gt;
   ),
 };
 
@@ -16003,33 +16111,35 @@ export const EmptyState: StoryObj = {
  *  their opener with no brand mark above it. */
 export const EmptyStateNoLogo: StoryObj = {
   render: () =&gt; (
-    &lt;&gt;
-      &lt;AgentSidebarHeader
-        sidebarWidth={420}
-        onToggleCollapse={() =&gt; {}}
-        onClose={() =&gt; {}}
-        history={mockAgentHistory}
-        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-      /&gt;
-      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-          &lt;AgentSidebarMessages
-            messages={[]}
-            hideEmptyStateLogo
-            emptyState={
-              &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
-                Hi, Sam, ask me anything about this app.
-              &lt;/p&gt;
-            }
-          /&gt;
-        &lt;/div&gt;
-        &lt;AgentSidebarInput
-          onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-          models={mockAgentModels}
-          selectedModelId={DEFAULT_MODEL_ID}
+    &lt;WindowFrame
+      header={(windowBodyHeight) =&gt; (
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+          windowBodyHeight={windowBodyHeight}
+        /&gt;
+      )}
+    &gt;
+      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+        &lt;AgentSidebarMessages
+          messages={[]}
+          hideEmptyStateLogo
+          emptyState={
+            &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
+              Hi, Sam, ask me anything about this app.
+            &lt;/p&gt;
+          }
         /&gt;
       &lt;/div&gt;
-    &lt;/&gt;
+      &lt;AgentSidebarInput
+        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+      /&gt;
+    &lt;/WindowFrame&gt;
   ),
 };
 
@@ -16094,31 +16204,33 @@ export const Playground: StoryObj = {
     }, [isStreaming, queued.length]);
 
     return (
-      &lt;&gt;
-        &lt;AgentSidebarHeader
-          sidebarWidth={420}
-          onToggleCollapse={() =&gt; {}}
-          onClose={() =&gt; {}}
-          history={mockAgentHistory}
-          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-        /&gt;
-        &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-          &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-            &lt;AgentSidebarMessages messages={messages} /&gt;
-          &lt;/div&gt;
-          &lt;AgentSidebarInput
-            onSend={handleSend}
-            onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-            onMic={() =&gt; console.log(&quot;mic&quot;)}
-            models={mockAgentModels}
-            selectedModelId={DEFAULT_MODEL_ID}
-            queuedMessages={queued}
-            onCancelQueued={(id) =&gt;
-              setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
-            }
+      &lt;WindowFrame
+        header={(windowBodyHeight) =&gt; (
+          &lt;AgentSidebarHeader
+            sidebarWidth={420}
+            onToggleCollapse={() =&gt; {}}
+            onClose={() =&gt; {}}
+            history={mockAgentHistory}
+            onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+            windowBodyHeight={windowBodyHeight}
           /&gt;
+        )}
+      &gt;
+        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+          &lt;AgentSidebarMessages messages={messages} /&gt;
         &lt;/div&gt;
-      &lt;/&gt;
+        &lt;AgentSidebarInput
+          onSend={handleSend}
+          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+          onMic={() =&gt; console.log(&quot;mic&quot;)}
+          models={mockAgentModels}
+          selectedModelId={DEFAULT_MODEL_ID}
+          queuedMessages={queued}
+          onCancelQueued={(id) =&gt;
+            setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
+          }
+        /&gt;
+      &lt;/WindowFrame&gt;
     );
   },
 };
@@ -16353,32 +16465,34 @@ export const Playground: StoryObj = {
               
               <div class="hint">Fresh conversation: with no messages, the list renders the MirrorStack logo above the host-supplied `emptyState` — a personalized opener — instead of a blank pane, so the empty sidebar reads as a branded hero (matching the greeting surface) rather than dead space. Every host (web-applications, web-account) passes its own greeting.</div>
               <pre><code>const EmptyState = () =&gt; (
-  &lt;&gt;
-    &lt;AgentSidebarHeader
-      sidebarWidth={420}
-      onToggleCollapse={() =&gt; {}}
-      onClose={() =&gt; {}}
-      history={mockAgentHistory}
-      onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-    /&gt;
-    &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-        &lt;AgentSidebarMessages
-          messages={[]}
-          emptyState={
-            &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
-              Hi, Sam, ask me anything about this app.
-            &lt;/p&gt;
-          }
-        /&gt;
-      &lt;/div&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        models={mockAgentModels}
-        selectedModelId={DEFAULT_MODEL_ID}
+  &lt;WindowFrame
+    header={(windowBodyHeight) =&gt; (
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+        windowBodyHeight={windowBodyHeight}
+      /&gt;
+    )}
+  &gt;
+    &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+      &lt;AgentSidebarMessages
+        messages={[]}
+        emptyState={
+          &lt;p className=&quot;px-1 text-center text-sm text-inverse-on-surface/70&quot;&gt;
+            Hi, Sam, ask me anything about this app.
+          &lt;/p&gt;
+        }
       /&gt;
     &lt;/div&gt;
-  &lt;/&gt;
+    &lt;AgentSidebarInput
+      onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+      models={mockAgentModels}
+      selectedModelId={DEFAULT_MODEL_ID}
+    /&gt;
+  &lt;/WindowFrame&gt;
 );</code></pre>
             </div>
             <div class="note ok">
@@ -16389,33 +16503,35 @@ export const Playground: StoryObj = {
               
               <div class="hint">Same empty thread with `hideEmptyStateLogo` — for hosts that want only their opener with no brand mark above it.</div>
               <pre><code>const EmptyStateNoLogo = () =&gt; (
-  &lt;&gt;
-    &lt;AgentSidebarHeader
-      sidebarWidth={420}
-      onToggleCollapse={() =&gt; {}}
-      onClose={() =&gt; {}}
-      history={mockAgentHistory}
-      onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-    /&gt;
-    &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-        &lt;AgentSidebarMessages
-          messages={[]}
-          hideEmptyStateLogo
-          emptyState={
-            &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
-              Hi, Sam, ask me anything about this app.
-            &lt;/p&gt;
-          }
-        /&gt;
-      &lt;/div&gt;
-      &lt;AgentSidebarInput
-        onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
-        models={mockAgentModels}
-        selectedModelId={DEFAULT_MODEL_ID}
+  &lt;WindowFrame
+    header={(windowBodyHeight) =&gt; (
+      &lt;AgentSidebarHeader
+        sidebarWidth={420}
+        onToggleCollapse={() =&gt; {}}
+        onClose={() =&gt; {}}
+        history={mockAgentHistory}
+        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+        windowBodyHeight={windowBodyHeight}
+      /&gt;
+    )}
+  &gt;
+    &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+      &lt;AgentSidebarMessages
+        messages={[]}
+        hideEmptyStateLogo
+        emptyState={
+          &lt;p className=&quot;px-1 py-2 text-sm text-inverse-on-surface/70&quot;&gt;
+            Hi, Sam, ask me anything about this app.
+          &lt;/p&gt;
+        }
       /&gt;
     &lt;/div&gt;
-  &lt;/&gt;
+    &lt;AgentSidebarInput
+      onSend={(msg) =&gt; console.log(&quot;Send:&quot;, msg)}
+      models={mockAgentModels}
+      selectedModelId={DEFAULT_MODEL_ID}
+    /&gt;
+  &lt;/WindowFrame&gt;
 );</code></pre>
             </div>
             <div class="note ok">
@@ -16482,31 +16598,33 @@ export const Playground: StoryObj = {
   }, [isStreaming, queued.length]);
 
   return (
-    &lt;&gt;
-      &lt;AgentSidebarHeader
-        sidebarWidth={420}
-        onToggleCollapse={() =&gt; {}}
-        onClose={() =&gt; {}}
-        history={mockAgentHistory}
-        onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
-      /&gt;
-      &lt;div className=&quot;flex-1 bg-on-background rounded-2xl flex flex-col min-h-0&quot;&gt;
-        &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
-          &lt;AgentSidebarMessages messages={messages} /&gt;
-        &lt;/div&gt;
-        &lt;AgentSidebarInput
-          onSend={handleSend}
-          onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
-          onMic={() =&gt; console.log(&quot;mic&quot;)}
-          models={mockAgentModels}
-          selectedModelId={DEFAULT_MODEL_ID}
-          queuedMessages={queued}
-          onCancelQueued={(id) =&gt;
-            setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
-          }
+    &lt;WindowFrame
+      header={(windowBodyHeight) =&gt; (
+        &lt;AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() =&gt; {}}
+          onClose={() =&gt; {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) =&gt; console.log(&quot;history&quot;, id)}
+          windowBodyHeight={windowBodyHeight}
         /&gt;
+      )}
+    &gt;
+      &lt;div className=&quot;flex-1 overflow-y-auto p-4&quot;&gt;
+        &lt;AgentSidebarMessages messages={messages} /&gt;
       &lt;/div&gt;
-    &lt;/&gt;
+      &lt;AgentSidebarInput
+        onSend={handleSend}
+        onAttachFile={() =&gt; console.log(&quot;attach&quot;)}
+        onMic={() =&gt; console.log(&quot;mic&quot;)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+        queuedMessages={queued}
+        onCancelQueued={(id) =&gt;
+          setQueued((q) =&gt; q.filter((m) =&gt; m.id !== id))
+        }
+      /&gt;
+    &lt;/WindowFrame&gt;
   );
 };</code></pre>
             </div>
