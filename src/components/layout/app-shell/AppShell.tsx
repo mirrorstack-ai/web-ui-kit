@@ -305,6 +305,12 @@ function AppShellInner({
   const maxWidthRef = useRef(800);
   const dragWidthRef = useRef(0);
   const sidebarElRef = useRef<HTMLDivElement>(null);
+  // Body container (everything below the 40px header). Its measured height is
+  // the window-minus-header height the AgentSidebarHeader needs to draw the
+  // whole window as ONE Notch (rounded body + active-tab notch, single fill) —
+  // killing the header↔body cream seam that aliases on fractional-DPI.
+  const agentBodyRef = useRef<HTMLDivElement>(null);
+  const [agentBodyH, setAgentBodyH] = useState(0);
 
   useEffect(() => {
     const update = () => {
@@ -320,6 +326,21 @@ function AppShellInner({
   // the persisted open flag on reload), else derived from width alone
   // (uncontrolled — behavior unchanged when `open` is undefined).
   const isOpen = open ?? sidebarWidth > 0;
+
+  // Track the agent body's own height (window height MINUS the 40px header) so
+  // the single window shape always matches it through opens, drag-resize, and
+  // viewport changes. Re-runs when the sidebar mounts/unmounts (isOpen) so the
+  // observer attaches once the body element exists.
+  useEffect(() => {
+    const el = agentBodyRef.current;
+    if (!el) return;
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      setAgentBodyH(entries[0].contentRect.height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isOpen]);
 
   const isOverlaying =
     isOpen &&
@@ -530,9 +551,20 @@ function AppShellInner({
                 onRenameConversation={onRenameAgentConversation}
                 onDeleteConversation={onDeleteAgentConversation}
                 labels={agentHeaderLabels}
+                // Once measured, the header draws the whole window as ONE Notch
+                // (rounded body + active-tab notch, single fill) BEHIND the body.
+                // The body below is transparent so that shape shows through — no
+                // header↔body cream seam. Omit until measured to keep the
+                // original separate-cap rendering on first paint.
+                {...(agentBodyH > 0 ? { windowBodyHeight: agentBodyH } : {})}
               />
 
-              <div className="rounded-2xl bg-on-background flex-1 min-h-0 flex flex-col">
+              {/* Transparent body: the single window shape from AgentSidebarHeader
+                  supplies the cream fill + rounding behind it. We keep ONLY layout
+                  (flex/min-h-0) and drop bg-on-background + rounded-2xl so the shape
+                  shows through with no abutting seam. The inner scroller and input
+                  carry no opaque bg of their own, so this is the only fill to strip. */}
+              <div ref={agentBodyRef} className="flex-1 min-h-0 flex flex-col">
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
                   {/* The host's chat surface when wired; otherwise the
                       personalized empty-state opener under the brand logo

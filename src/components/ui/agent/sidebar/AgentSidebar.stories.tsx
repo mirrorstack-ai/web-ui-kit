@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AgentSidebarHeader } from "./AgentSidebarHeader";
 import { AgentSidebarInput, type AgentQueuedMessage } from "./AgentSidebarInput";
@@ -10,6 +10,53 @@ import { mockAgentHistory, mockAgentMessages, mockAgentModels } from "./mock-dat
 import type { AgentSidebarHistoryGroup, ChatTab } from "./types";
 
 const DEFAULT_MODEL_ID = "anthropic.claude-haiku-4-5-20251001-v1:0";
+
+/**
+ * Full-window assembly with the one-shape drawing: instead of the header
+ * painting only the active-tab cap above a SEPARATE cream body (two fills of
+ * --color-on-background meeting edge-to-edge → a 1px seam that aliases on
+ * fractional-DPI), the header draws the WHOLE window as ONE <Notch> (rounded
+ * body + active-tab notch, one fill) behind everything once we hand it the
+ * body's measured height. The body container is therefore TRANSPARENT — it
+ * supplies only layout (flex/min-h-0), never a fill of its own, so the single
+ * shape shows through. We measure the body's own height (window height minus
+ * the 40px header) via a ResizeObserver on agentBodyRef and pass it as
+ * windowBodyHeight only once measured (>0).
+ */
+function WindowFrame({
+  header,
+  children,
+}: {
+  header: (windowBodyHeight?: number) => ReactNode;
+  children: ReactNode;
+}) {
+  const agentBodyRef = useRef<HTMLDivElement>(null);
+  const [agentBodyH, setAgentBodyH] = useState(0);
+
+  useEffect(() => {
+    const el = agentBodyRef.current;
+    if (!el) return;
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      setAgentBodyH(entries[0].contentRect.height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <>
+      {header(agentBodyH > 0 ? agentBodyH : undefined)}
+      {/* Transparent body: only layout classes remain. The single <Notch> the
+          header draws (rounded body + active-tab notch) supplies the surface,
+          so there is no bg-on-background / rounded-2xl / shadow here to abut
+          the header cap and alias into a seam. */}
+      <div ref={agentBodyRef} className="flex-1 flex flex-col min-h-0">
+        {children}
+      </div>
+    </>
+  );
+}
 
 const meta: Meta = {
   title: "UI/Agent/Sidebar",
@@ -213,32 +260,34 @@ export const QueuedMessage: StoryObj = {
  *  web-account) passes its own greeting. */
 export const EmptyState: StoryObj = {
   render: () => (
-    <>
-      <AgentSidebarHeader
-        sidebarWidth={420}
-        onToggleCollapse={() => {}}
-        onClose={() => {}}
-        history={mockAgentHistory}
-        onSelectHistoryItem={(id) => console.log("history", id)}
-      />
-      <div className="flex-1 bg-on-background rounded-2xl flex flex-col min-h-0">
-        <div className="flex-1 overflow-y-auto p-4">
-          <AgentSidebarMessages
-            messages={[]}
-            emptyState={
-              <p className="px-1 text-center text-sm text-inverse-on-surface/70">
-                Hi, Sam, ask me anything about this app.
-              </p>
-            }
-          />
-        </div>
-        <AgentSidebarInput
-          onSend={(msg) => console.log("Send:", msg)}
-          models={mockAgentModels}
-          selectedModelId={DEFAULT_MODEL_ID}
+    <WindowFrame
+      header={(windowBodyHeight) => (
+        <AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() => {}}
+          onClose={() => {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) => console.log("history", id)}
+          windowBodyHeight={windowBodyHeight}
+        />
+      )}
+    >
+      <div className="flex-1 overflow-y-auto p-4">
+        <AgentSidebarMessages
+          messages={[]}
+          emptyState={
+            <p className="px-1 text-center text-sm text-inverse-on-surface/70">
+              Hi, Sam, ask me anything about this app.
+            </p>
+          }
         />
       </div>
-    </>
+      <AgentSidebarInput
+        onSend={(msg) => console.log("Send:", msg)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+      />
+    </WindowFrame>
   ),
 };
 
@@ -246,33 +295,35 @@ export const EmptyState: StoryObj = {
  *  their opener with no brand mark above it. */
 export const EmptyStateNoLogo: StoryObj = {
   render: () => (
-    <>
-      <AgentSidebarHeader
-        sidebarWidth={420}
-        onToggleCollapse={() => {}}
-        onClose={() => {}}
-        history={mockAgentHistory}
-        onSelectHistoryItem={(id) => console.log("history", id)}
-      />
-      <div className="flex-1 bg-on-background rounded-2xl flex flex-col min-h-0">
-        <div className="flex-1 overflow-y-auto p-4">
-          <AgentSidebarMessages
-            messages={[]}
-            hideEmptyStateLogo
-            emptyState={
-              <p className="px-1 py-2 text-sm text-inverse-on-surface/70">
-                Hi, Sam, ask me anything about this app.
-              </p>
-            }
-          />
-        </div>
-        <AgentSidebarInput
-          onSend={(msg) => console.log("Send:", msg)}
-          models={mockAgentModels}
-          selectedModelId={DEFAULT_MODEL_ID}
+    <WindowFrame
+      header={(windowBodyHeight) => (
+        <AgentSidebarHeader
+          sidebarWidth={420}
+          onToggleCollapse={() => {}}
+          onClose={() => {}}
+          history={mockAgentHistory}
+          onSelectHistoryItem={(id) => console.log("history", id)}
+          windowBodyHeight={windowBodyHeight}
+        />
+      )}
+    >
+      <div className="flex-1 overflow-y-auto p-4">
+        <AgentSidebarMessages
+          messages={[]}
+          hideEmptyStateLogo
+          emptyState={
+            <p className="px-1 py-2 text-sm text-inverse-on-surface/70">
+              Hi, Sam, ask me anything about this app.
+            </p>
+          }
         />
       </div>
-    </>
+      <AgentSidebarInput
+        onSend={(msg) => console.log("Send:", msg)}
+        models={mockAgentModels}
+        selectedModelId={DEFAULT_MODEL_ID}
+      />
+    </WindowFrame>
   ),
 };
 
@@ -337,31 +388,33 @@ export const Playground: StoryObj = {
     }, [isStreaming, queued.length]);
 
     return (
-      <>
-        <AgentSidebarHeader
-          sidebarWidth={420}
-          onToggleCollapse={() => {}}
-          onClose={() => {}}
-          history={mockAgentHistory}
-          onSelectHistoryItem={(id) => console.log("history", id)}
-        />
-        <div className="flex-1 bg-on-background rounded-2xl flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto p-4">
-            <AgentSidebarMessages messages={messages} />
-          </div>
-          <AgentSidebarInput
-            onSend={handleSend}
-            onAttachFile={() => console.log("attach")}
-            onMic={() => console.log("mic")}
-            models={mockAgentModels}
-            selectedModelId={DEFAULT_MODEL_ID}
-            queuedMessages={queued}
-            onCancelQueued={(id) =>
-              setQueued((q) => q.filter((m) => m.id !== id))
-            }
+      <WindowFrame
+        header={(windowBodyHeight) => (
+          <AgentSidebarHeader
+            sidebarWidth={420}
+            onToggleCollapse={() => {}}
+            onClose={() => {}}
+            history={mockAgentHistory}
+            onSelectHistoryItem={(id) => console.log("history", id)}
+            windowBodyHeight={windowBodyHeight}
           />
+        )}
+      >
+        <div className="flex-1 overflow-y-auto p-4">
+          <AgentSidebarMessages messages={messages} />
         </div>
-      </>
+        <AgentSidebarInput
+          onSend={handleSend}
+          onAttachFile={() => console.log("attach")}
+          onMic={() => console.log("mic")}
+          models={mockAgentModels}
+          selectedModelId={DEFAULT_MODEL_ID}
+          queuedMessages={queued}
+          onCancelQueued={(id) =>
+            setQueued((q) => q.filter((m) => m.id !== id))
+          }
+        />
+      </WindowFrame>
     );
   },
 };
