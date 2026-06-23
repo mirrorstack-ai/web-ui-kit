@@ -50,6 +50,19 @@ describe("Notch", () => {
     expect(svg).toHaveAttribute("viewBox", "-0.5 -0.5 67 47");
   });
 
+  it("bleeds the headOnly connecting edge to avoid a fractional-DPI seam", () => {
+    const { container } = render(
+      <Notch width={200} height={150} notchWidth={60} notchHeight={40} headOnly />,
+    );
+    const svg = container.querySelector("svg");
+    // The flat connecting edge (build x=0) is extended to x=-1 so the tab fill
+    // OVERLAPS the surface below rather than abutting it edge-to-edge — otherwise
+    // the shared boundary aliases into a 1px seam on non-integer DPR. overflow
+    // must be visible so that 1px bleed isn't clipped to the box.
+    expect(svg).toHaveAttribute("overflow", "visible");
+    expect(svg?.querySelector("path")?.getAttribute("d")).toMatch(/^M -1,/);
+  });
+
   it("applies fill and stroke", () => {
     const { container } = render(
       <Notch width={200} height={150} notchWidth={40} notchHeight={50} fill="red" stroke="blue" strokeWidth={2} />,

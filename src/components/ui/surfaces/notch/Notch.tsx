@@ -80,17 +80,34 @@ function buildPath(
   return d.join(" ");
 }
 
-function buildHeadPath(nw: number, nh: number, r: number, ir: number, atStart: boolean, atEnd: boolean) {
+// A headOnly tab sits flush on the surface below it. Extending its fill 1px past
+// that flat CONNECTING edge so the two same-colour fills OVERLAP (rather than abut
+// edge-to-edge) removes a sub-pixel seam: when the shared boundary lands on a
+// fractional device-pixel row — sub-pixel transforms or non-integer DPR such as
+// Windows display scaling — each fill paints <100% coverage on that physical row
+// and the layer beneath shows through as a 1px line. A whole-pixel overlap closes
+// the gap. (Invisible on integer-DPR/retina, where the edges snap and abut cleanly.)
+const HEAD_SEAM_BLEED = 1;
+
+function buildHeadPath(
+  nw: number, nh: number, r: number, ir: number,
+  atStart: boolean, atEnd: boolean,
+  // px to extend the flat connecting edge (build x = 0) past the box, toward the
+  // surface the tab attaches to. Only the build-x=0 edge moves; the radiused tab
+  // corners (build x = w, the tab TOP) are untouched. `bleed = 0` ⇒ original path.
+  bleed = 0,
+) {
   const w = nw + ir;
   const topIr = atStart ? 0 : ir;
   const botIr = atEnd ? 0 : ir;
+  const x0 = -bleed;
   const d: string[] = [];
 
   if (!atStart) {
-    d.push(`M 0,0`);
+    d.push(`M ${x0},0`);
     d.push(`A ${ir},${ir} 0 0,0 ${ir},${topIr}`);
   } else {
-    d.push(`M 0,${topIr}`);
+    d.push(`M ${x0},${topIr}`);
   }
 
   d.push(`H ${w - r}`);
@@ -100,7 +117,7 @@ function buildHeadPath(nw: number, nh: number, r: number, ir: number, atStart: b
   d.push(`H ${ir}`);
 
   if (!atEnd) {
-    d.push(`A ${ir},${ir} 0 0,0 0,${topIr + nh + botIr}`);
+    d.push(`A ${ir},${ir} 0 0,0 ${x0},${topIr + nh + botIr}`);
   }
 
   d.push(`V 0`);
@@ -188,7 +205,7 @@ export function Notch({
     const botIr = atEnd ? 0 : ir;
     const pathW = notchWidth + ir;
     const pathH = notchHeight + topIr + botIr;
-    const headPath = buildHeadPath(notchWidth, notchHeight, radius, ir, atStart, atEnd);
+    const headPath = buildHeadPath(notchWidth, notchHeight, radius, ir, atStart, atEnd, HEAD_SEAM_BLEED);
 
     let svgW: number, svgH: number;
     if (horiz) { svgW = pathW; svgH = pathH; }
@@ -201,10 +218,13 @@ export function Notch({
       // every side so the centered stroke renders fully INSIDE the box. (Sizing
       // the element to svgW+strokeWidth instead pins it `pad` larger and pushes
       // the right & bottom strokes outside the box.)
+      // `overflow: visible` lets the HEAD_SEAM_BLEED extend the fill 1px past the
+      // box on the connecting edge without being clipped to the viewport.
       <svg
         width={svgW}
         height={svgH}
         viewBox={`${-pad} ${-pad} ${svgW + strokeWidth} ${svgH + strokeWidth}`}
+        overflow="visible"
         className={cn("pointer-events-none", className)}
         style={style}
       >
