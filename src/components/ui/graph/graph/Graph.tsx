@@ -15,7 +15,7 @@ import type { ComponentMeta } from "@/types/component-meta";
 export const meta: ComponentMeta = {
   name: "Graph",
   description:
-    "Force-directed network graph canvas with auto-sizing, drag-to-pin, scroll/pinch-to-zoom, fixed nodes, and an imperative replay/fit handle. Pair with GraphAction and GraphSide for a full UI.",
+    "Force-directed network graph canvas with auto-sizing, drag-to-pin, scroll/pinch-to-zoom, fixed nodes, and an imperative replay/fit handle. The physics simulation auto-pauses once the layout settles and resumes on drag, replay, or resize, so an idle graph costs no per-frame work. Pair with GraphAction and GraphSide for a full UI.",
 };
 
 export type GraphNode = {
@@ -97,6 +97,10 @@ const SPRING = 0.04;
 const DEFAULT_LINK_DISTANCE = 70;
 const CENTER = 0.005;
 const DAMPING = 0.85;
+// |velocity|² below which a revealed, unpinned node counts as at rest
+// (≈0.05 px/frame — sub-pixel, imperceptible). When every such node is below
+// this and nothing is driving motion, the RAF loop parks itself (see below).
+const SETTLE_V2 = 0.0025;
 const CLICK_THRESHOLD = 4;
 const ZOOM_MIN = 0.3;
 const ZOOM_MAX = 5;
@@ -305,6 +309,8 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
             n.y = (n.y / prev.h) * h;
           }
         }
+        // Positions were just re-mapped to the new viewport — re-settle.
+        activeRef.current = true;
         setSize({ w, h });
       }
     });
@@ -360,6 +366,14 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   const byIdRef = useRef<Map<string, Sim>>(new Map());
   const [reseedKey, setReseedKey] = useState(0);
 
+  // Whether the simulation is doing visible work. The RAF loop parks (skips the
+  // O(n²) physics step AND the per-frame SVG re-render) once the cluster has
+  // settled and nothing is driving motion, then any wake source below re-arms
+  // it within a frame. Without this, every on-page Graph re-runs physics and
+  // reconciles its whole SVG forever; three of them cold-starting on a single
+  // scroll frame is what makes scrolling into a multi-graph section lag.
+  const activeRef = useRef(true);
+
   // Rebuild node positions, byId map, and degree counts. Used both inline
   // when topology identity changes and from the replay-key effect.
   const rebuildSim = (w: number, h: number) => {
@@ -373,6 +387,8 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
       if (b) b.degree += 1;
     }
     byIdRef.current = map;
+    // A fresh seed scatters every node — wake the loop to animate the settle.
+    activeRef.current = true;
   };
 
   if (
@@ -452,18 +468,41 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   useEffect(() => {
     let raf = 0;
     const loop = () => {
-      const s = sizeRef.current;
-      step(
-        nodesRef.current,
-        byIdRef.current,
-        edgesRef.current,
-        revealedRef.current,
-        s.w,
-        s.h,
-        repulsionRef.current,
-        linkDistanceRef.current,
-      );
-      setFrame((f) => f + 1);
+      if (activeRef.current) {
+        const s = sizeRef.current;
+        const ns = nodesRef.current;
+        step(
+          ns,
+          byIdRef.current,
+          edgesRef.current,
+          revealedRef.current,
+          s.w,
+          s.h,
+          repulsionRef.current,
+          linkDistanceRef.current,
+        );
+        setFrame((f) => f + 1);
+        // Park once the cluster has settled and nothing is driving motion, so
+        // an at-rest graph stops re-running physics + reconciling its SVG every
+        // frame for the life of the page. Checked AFTER step() so a just-
+        // released node (velocity 0 at release, force applied this frame) keeps
+        // the loop awake until it actually comes to rest. Drag, replay/reseed,
+        // and resize re-arm activeRef; the loop resumes within one frame.
+        if (draggingIdRef.current === null && revealTimerRef.current === null) {
+          const revealed = revealedRef.current;
+          let settled = true;
+          for (let i = 0; i < ns.length; i++) {
+            const n = ns[i];
+            if (n.pinned || !revealed.has(n.id)) continue;
+            // Bail on the first still-moving node — only the predicate matters.
+            if (n.vx * n.vx + n.vy * n.vy >= SETTLE_V2) {
+              settled = false;
+              break;
+            }
+          }
+          if (settled) activeRef.current = false;
+        }
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
@@ -519,6 +558,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
   }, [allNodes]);
 
   const startReveal = useCallback(() => {
+    activeRef.current = true;
     if (revealTimerRef.current !== null) {
       window.clearTimeout(revealTimerRef.current);
       revealTimerRef.current = null;
@@ -638,6 +678,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
       node.pinned = true;
       node.vx = 0;
       node.vy = 0;
+      activeRef.current = true;
       setDraggingId(id);
       pointerStartRef.current = toGraph(e.clientX, e.clientY);
       pointerMovedRef.current = false;
