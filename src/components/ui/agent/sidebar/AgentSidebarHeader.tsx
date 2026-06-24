@@ -36,6 +36,11 @@ export interface AgentSidebarHeaderProps {
   onDeleteConversation?: (id: string) => void;
   /** Label overrides. All have EN defaults. */
   labels?: AgentSidebarHeaderLabels;
+  /** When set (px), render the whole window as ONE shape: a rounded body of this
+   *  height with the active tab notched up out of its top edge, filled once — so the
+   *  header tab + body are a single surface with no abutting edge to alias into a
+   *  seam. The consumer MUST give the body element a transparent background. */
+  windowBodyHeight?: number;
 }
 
 const TAB_WIDTH = 100;
@@ -49,6 +54,19 @@ const TAB_IR = 12;
 // clientWidth includes the strip's own padding, so subtract both sides.
 const TABS_PAD = 40 + TAB_IR;
 const HEADER_H = 40;
+
+// Shared appearance for the active-tab notch — used by BOTH the headOnly cap and
+// the combined full-window shape; only their geometry / z-index / position differ.
+// strokeWidth 0 (no stroke) means no half-px viewBox pad, so the fill is exactly
+// its nominal size with no overhang.
+const TAB_NOTCH_BASE = {
+  notchSide: "bottom",
+  radius: TAB_R,
+  inverseRadius: TAB_IR,
+  fill: "var(--color-on-background)",
+  stroke: "none",
+  strokeWidth: 0,
+} as const;
 
 // History dropdown
 const HIST_W = 260;
@@ -75,6 +93,7 @@ export function AgentSidebarHeader({
   onRenameConversation,
   onDeleteConversation,
   labels,
+  windowBodyHeight,
 }: AgentSidebarHeaderProps) {
   const isCollapsed = sidebarWidth <= 350;
 
@@ -109,7 +128,7 @@ export function AgentSidebarHeader({
   const nextIdRef = useRef(2);
   const headerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLDivElement>(null);
-  const [activeTabRect, setActiveTabRect] = useState<{ left: number; width: number } | null>(null);
+  const [activeTabRect, setActiveTabRect] = useState<{ left: number; width: number; headerWidth: number } | null>(null);
   const historyBtnRef = useRef<HTMLDivElement>(null);
   const historyDropdownRef = useRef<HTMLDivElement>(null);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
@@ -200,7 +219,7 @@ export function AgentSidebarHeader({
     const measure = () => {
       const tRect = tab.getBoundingClientRect();
       const hRect = header.getBoundingClientRect();
-      return { left: tRect.left - hRect.left, width: tRect.width };
+      return { left: tRect.left - hRect.left, width: tRect.width, headerWidth: hRect.width };
     };
     setActiveTabRect(measure());
     if (typeof ResizeObserver === "undefined") return;
@@ -212,7 +231,12 @@ export function AgentSidebarHeader({
       const next = measure();
       flushSync(() =>
         setActiveTabRect((prev) =>
-          prev && prev.left === next.left && prev.width === next.width ? prev : next,
+          prev &&
+          prev.left === next.left &&
+          prev.width === next.width &&
+          prev.headerWidth === next.headerWidth
+            ? prev
+            : next,
         ),
       );
     });
@@ -269,27 +293,41 @@ export function AgentSidebarHeader({
           tab on every ResizeObserver fire — without it, parent transitions
           (e.g. the wrapper's transition-all on open / drag-end) can bleed in
           via `all` and give the notch a perceptible easing curve. */}
-      {activeTabRect && (
-        <Notch
-          width={1000}
-          height={1000}
-          notchWidth={HEADER_H - TAB_IR}
-          notchHeight={activeTabRect.width}
-          notchSide="bottom"
-          notchOffset={100}
-          radius={TAB_R}
-          inverseRadius={TAB_IR}
-          fill="var(--color-on-background)"
-          stroke="none"
-          // The default strokeWidth (1) pads the SVG half a pixel past the
-          // shape on each side — with no stroke that pad is pure overhang,
-          // so zero it and keep the overlay exactly tabWidth + 2×TAB_IR wide.
-          strokeWidth={0}
-          headOnly
-          className="absolute z-[5] !transition-none"
-          style={{ left: activeTabRect.left - TAB_IR, top: 0 }}
-        />
-      )}
+      {activeTabRect &&
+        (windowBodyHeight != null ? (
+          // One filled shape: rounded body + active tab notched out of its top edge,
+          // so the tab and body are a single surface (no header↔body seam).
+          // notchSide="bottom" renders the tab on the screen TOP (getTransform
+          // rotates the build path) — the same convention the headOnly cap uses.
+          // Unlike the cap, the non-headOnly buildPath carves the TAB_IR flange from
+          // WITHIN notchHeight and curls it OUTSIDE notchOffset on its own — so pass
+          // notchHeight={HEADER_H} and notchOffset={left} directly; subtracting
+          // TAB_IR would double-count the curl (12px left shift) and seat the body
+          // 12px high. -z-10 keeps the shape behind all content.
+          <Notch
+            {...TAB_NOTCH_BASE}
+            width={activeTabRect.headerWidth}
+            height={windowBodyHeight}
+            notchWidth={activeTabRect.width}
+            notchHeight={HEADER_H}
+            notchOffset={activeTabRect.left}
+            className="absolute left-0 -z-10 !transition-none"
+            style={{ top: 0 }}
+          />
+        ) : (
+          // Original active-tab cap: just the tab nub (headOnly), no body.
+          <Notch
+            {...TAB_NOTCH_BASE}
+            width={1000}
+            height={1000}
+            notchWidth={HEADER_H - TAB_IR}
+            notchHeight={activeTabRect.width}
+            notchOffset={100}
+            headOnly
+            className="absolute z-[5] !transition-none"
+            style={{ left: activeTabRect.left - TAB_IR, top: 0 }}
+          />
+        ))}
 
       {/* History */}
       <div ref={historyBtnRef} className="absolute left-0 top-0 z-[51] w-10 h-10 flex justify-center">
@@ -301,7 +339,9 @@ export function AgentSidebarHeader({
         <div
           ref={historyDropdownRef}
           className="absolute z-50 overflow-visible"
-          style={{ left: 4, top: 4, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
+          // left:2 (not 4): realigns the history dropdown's notch to the trigger
+          // after a prior Notch update shifted the rendered notch border by 2px.
+          style={{ left: 2, top: 4, filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))" }}
         >
           {histContentH > 0 && (
             <Notch
