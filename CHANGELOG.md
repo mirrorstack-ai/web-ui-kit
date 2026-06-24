@@ -3,6 +3,18 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.15
+
+- **Graph physics auto-parks when settled.** The force-directed `Graph`'s
+  `requestAnimationFrame` loop previously ran forever — every frame re-ran the
+  O(n²) force step and re-reconciled the whole SVG, for the life of the page,
+  even after the layout had visibly stopped moving. It now parks itself once
+  every revealed, unpinned node falls below a sub-pixel velocity threshold and
+  nothing is driving motion, and re-arms within a frame on drag, replay/reseed,
+  or resize. An idle graph now costs no per-frame work — material for pages
+  that mount several graphs at once. No API change; the settle look, BFS reveal
+  (replays on `replay()`), and node dragging are all unchanged.
+
 ## 0.5.10
 
 - **Warm dark theme.** The dark-mode neutral tokens shift from cool near-black
