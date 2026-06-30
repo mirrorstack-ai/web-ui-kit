@@ -13,14 +13,21 @@ afterEach(() => {
 });
 
 function TestConsumer() {
-  const { sidebarWidth, setSidebarWidth, lastOpenWidth } = useSidebarWidth();
+  const { sidebarWidth, setSidebarWidth, seedWidth, lastOpenWidth } =
+    useSidebarWidth();
   return (
     <div>
       <span data-testid="width">{sidebarWidth}</span>
       <span data-testid="last-open">{lastOpenWidth}</span>
       <button onClick={() => setSidebarWidth(500)}>Resize</button>
       <button onClick={() => setSidebarWidth(0)}>Close</button>
-      <button onClick={() => setSidebarWidth(350)}>Collapse</button>
+      {/* Collapse uses seedWidth (what AppShell's collapse button does) — sets
+          the rendered width to the floor WITHOUT recording it as the open
+          width, so reopen restores the prior size. */}
+      <button onClick={() => seedWidth(350)}>Collapse</button>
+      {/* A user DRAG that lands exactly on the floor goes through
+          setSidebarWidth and IS a real chosen width (must be recorded). */}
+      <button onClick={() => setSidebarWidth(350)}>DragFloor</button>
     </div>
   );
 }
@@ -161,6 +168,35 @@ describe("SidebarProvider persistence", () => {
     // user's dragged 500 — the collapse did not clobber it.
     expect(screen.getByTestId("last-open").textContent).toBe("500");
     expect(localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY)).toBe("500");
+  });
+
+  it("a DRAG to exactly minOpenWidth is recorded as the open width (regression: floor was dropped by a strict `>`)", () => {
+    // The bug: dragging the rail all the way to its minimum (width ===
+    // minOpenWidth) was discarded — handleSetWidth/reopenWidth used a strict
+    // `>`, so lastOpenWidth kept the previous larger size and reopen restored
+    // THAT, not the dragged floor. A drag to the floor is a real chosen width
+    // and must stick. (Contrast the collapse test above, which seeds the floor
+    // and must NOT record.)
+    render(
+      <SidebarProvider
+        defaultWidth={0}
+        persistKey={SIDEBAR_WIDTH_STORAGE_KEY}
+        minOpenWidth={350}
+        maxOpenWidth={2000}
+      >
+        <TestConsumer />
+      </SidebarProvider>,
+    );
+    act(() => {
+      fireEvent.click(screen.getByText("Resize")); // open wide (500) first
+    });
+    act(() => {
+      fireEvent.click(screen.getByText("DragFloor")); // drag down to the floor
+    });
+    expect(screen.getByTestId("width").textContent).toBe("350");
+    // The floor IS now the remembered open width — in memory AND storage.
+    expect(screen.getByTestId("last-open").textContent).toBe("350");
+    expect(localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY)).toBe("350");
   });
 
   it("rehydrates a valid stored width", () => {

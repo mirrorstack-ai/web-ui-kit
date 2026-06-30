@@ -297,6 +297,15 @@ export interface UseAgentTabsResult {
   /** Sidebar open/closed — persisted, shared across hosts. */
   open: boolean;
   setOpen: (open: boolean) => void;
+  /** Shared open-sidebar width (px) — the SAME persisted record as
+   *  open/tabs/activeTabId. 0 = no saved width (host default). */
+  width: number;
+  /** Persist a new open-sidebar width. Routes through the strip's single
+   *  debounced writer so a width save can never race/clobber the open or tabs
+   *  fields (and vice-versa) — there is exactly ONE writer for the record. The
+   *  host wires this to the kit's width-persistence `set` so a drag-end folds
+   *  width into the same PUT as the rest of the strip. */
+  setWidth: (width: number) => void;
   /** Open tabs as conversation ids (conversation ids + local draft ids),
    *  strip order. Map to titled ChatTabs with deriveTabTitles. */
   tabs: string[];
@@ -329,9 +338,11 @@ export interface UseAgentTabsResult {
  * mutation is pending flush so it can't clobber newer local state.
  *
  * The persisted record (AgentSidebarState) also carries the shared
- * open-sidebar `width`; the strip never MANAGES width (a host-side width
- * persistence owns the read/write — see api-client-shared), but it preserves
- * the hydrated width through every reducer so a tab PUT never drops it.
+ * open-sidebar `width`. The strip is the SINGLE writer of the whole record:
+ * `setWidth` folds a width change into the same debounced PUT as open/tabs, and
+ * every reducer preserves the hydrated width — so width and open/tabs can never
+ * race or clobber each other (the host's width-persistence `set` routes here
+ * instead of doing its own GET→merge→PUT).
  *
  * `persistence` and `resolveTabs` are read through refs — their identities
  * may change per render without retriggering fetches.
@@ -546,6 +557,15 @@ export function useAgentTabs(
     (open: boolean) => mutate((s) => (s.open === open ? s : { ...s, open })),
     [mutate],
   );
+  // Width is just another field of the one record — routing it through the same
+  // `mutate`/`schedulePut` makes the strip the SINGLE writer, so a width PUT
+  // carries the live open/tabs and an open PUT carries the live width. No second
+  // writer, no read-modify-write race (the old standalone width persister did a
+  // GET→merge→PUT that could clobber a freshly-written open).
+  const setWidth = useCallback(
+    (width: number) => mutate((s) => (s.width === width ? s : { ...s, width })),
+    [mutate],
+  );
   const selectTab = useCallback((id: string) => mutate((s) => selectTabState(s, id)), [mutate]);
   const closeTab = useCallback(
     (id: string) => mutate((s) => closeTabState(s, id, freshDraft)),
@@ -578,6 +598,8 @@ export function useAgentTabs(
   return {
     open: strip.open,
     setOpen,
+    width: strip.width,
+    setWidth,
     tabs,
     activeTabId: strip.activeTabId,
     hydrated,
