@@ -3,6 +3,19 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.16
+
+- **New `ServiceLogcat` dev component.** A service log console (promoted from
+  `web-applications`) for streaming module/service logs. Purely presentational:
+  the caller supplies `logs: LogEntry[]` (chronological, oldest first) and the
+  component owns all internal state — text filter, severity-floor filter
+  (`All` / `Warn+` / `Errors`), live-tail toggle, and a single-open accordion.
+  It reverses entries to newest-first, pins to the top while tailing, anchors
+  the reading position when new lines are prepended, and expands an access-log
+  line's request/response body (pretty-printed JSON) on click. Exports
+  `ServiceLogcat`, `ServiceLogcatProps`, and the `LogEntry` / `LogLevel` types
+  consumers use to type the array they pass in.
+
 ## 0.5.15
 
 - **Graph physics auto-parks when settled.** The force-directed `Graph`'s
