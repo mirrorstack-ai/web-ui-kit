@@ -137,6 +137,14 @@ export {
   type DevToolbarProps,
   type DevToolbarItem,
 } from "./components/ui/dev/dev-toolbar/DevToolbar";
+export {
+  ServiceLogcat,
+  type ServiceLogcatProps,
+} from "./components/ui/dev/service-logcat/ServiceLogcat";
+export type {
+  LogEntry,
+  LogLevel,
+} from "./components/ui/dev/service-logcat/types";
 
 // --- ui/display ---
 export {
