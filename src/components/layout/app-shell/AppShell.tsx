@@ -391,8 +391,11 @@ function AppShellInner({
   // viewport. Falls back to half the viewport when no wider width was ever
   // recorded (lastOpenWidth still at the MIN_WIDTH floor).
   const reopenWidth = () => {
+    // `>=`: lastOpenWidth === MIN_WIDTH is a real remembered width (user dragged
+    // to the floor), not "no saved width" — restore it instead of falling back
+    // to half-viewport. Only the seed default (0, below the floor) falls back.
     const remembered =
-      lastOpenWidth > MIN_WIDTH
+      lastOpenWidth >= MIN_WIDTH
         ? lastOpenWidth
         : (windowWidth || 1000) * 0.5;
     return Math.min(Math.max(remembered, MIN_WIDTH), maxWidthRef.current);
@@ -433,7 +436,11 @@ function AppShellInner({
     if (sidebarWidth <= MIN_WIDTH) {
       setSidebarWidth(reopenWidth());
     } else {
-      setSidebarWidth(MIN_WIDTH);
+      // Collapse via seedWidth (NOT setSidebarWidth): now that a drag to exactly
+      // MIN_WIDTH is a remembered width, collapsing to the floor must NOT record
+      // it as the open width — otherwise expanding would have nothing else to
+      // restore. seedWidth shrinks the view without touching lastOpenWidth.
+      seedWidth(MIN_WIDTH);
     }
   };
 

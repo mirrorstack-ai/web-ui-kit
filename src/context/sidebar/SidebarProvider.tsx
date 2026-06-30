@@ -168,33 +168,21 @@ export function SidebarProvider({
       // values (e.g. from a wider viewport, or a bad client) are ignored.
       if (stored === null) return;
       if (stored < min || stored > max) return;
+      // FIRST REAL WRITER WINS. Once a genuine user gesture (a drag through
+      // handleSetWidth) has recorded a width, widthHydratedRef is already true,
+      // and the late-arriving hydration read must NOT touch anything — not the
+      // rendered width AND not the remembered reopen width (lastOpenWidth).
+      // Previously `setLastOpenWidth(stored)` ran unconditionally here, so a GET
+      // that resolved just AFTER a drag overwrote the dragged size: the user
+      // dragged to B, the stale read stamped lastOpenWidth back to A, and the
+      // next reopen came back at A instead of B. A placeholder seed (seedWidth,
+      // used by AppShell's controlled-open effect on reload) does NOT set the
+      // flag, so the stored width still wins that race exactly once and reload
+      // restore keeps working.
+      if (widthHydratedRef.current) return;
+      widthHydratedRef.current = true;
       setLastOpenWidth(stored);
-      // Reconcile the fetched width into the RENDERED state, not just the
-      // reopen memory (`lastOpenWidth`). Without this the fetched width is
-      // stranded — it only surfaces on the NEXT open gesture (reopenWidth reads
-      // lastOpenWidth), which is why close-then-reopen restored it but a reload
-      // did not.
-      //
-      // The first time we apply, the fetched stored width overrides whatever is
-      // rendered — even a non-zero PLACEHOLDER seed. On reload AppShell's
-      // controlled-open effect synchronously seeds a half-viewport / floor width
-      // the instant the host's persisted open:true hydrates (lastOpenWidth is
-      // still 0 at that point, so reopenWidth() returns a placeholder, not the
-      // real saved width). That seed lands BEFORE this async GET resolves, so a
-      // plain `cur <= 0` guard would discard the real stored width. Overriding
-      // once on first hydrate makes the persisted width win that race. A genuine
-      // user drag landing before the fetch sets widthHydratedRef in
-      // handleSetWidth, so it is treated as already-hydrated and is NOT
-      // clobbered — first REAL writer wins. After the one-time hydrate, the
-      // functional updater seeds only from the default floor (`cur <= 0`). No
-      // render gate: width intentionally paints default-then-hydrate to avoid an
-      // SSR mismatch.
-      if (!widthHydratedRef.current) {
-        widthHydratedRef.current = true;
-        setSidebarWidth(stored);
-      } else {
-        setSidebarWidth((cur) => (cur <= 0 ? stored : cur));
-      }
+      setSidebarWidth(stored);
     };
 
     const persistence = persistenceRef.current;
@@ -219,10 +207,11 @@ export function SidebarProvider({
     apply(readPersistedWidth(persistKey, min, max));
   }, []);
 
-  // Persist every meaningful open width; skip closed/collapsed-to-floor states
-  // so a close OR a collapse (width === minOpenWidth) doesn't wipe the
-  // remembered size. The injected server persistence wins; the legacy
-  // localStorage `persistKey` is written only when no persistence is wired.
+  // Persist a width. Called by handleSetWidth only for real open widths
+  // (>= minOpenWidth, including a drag to the floor); a close (0) is gated out
+  // upstream and a collapse never flows here (AppShell collapses via seedWidth).
+  // The injected persistence wins; the legacy localStorage `persistKey` is
+  // written only when no persistence is wired.
   const persist = useCallback(
     (width: number) => {
       const persistence = persistenceRef.current;
@@ -252,16 +241,16 @@ export function SidebarProvider({
   const handleSetWidth = useCallback(
     (width: number) => {
       setSidebarWidth(width);
-      // Strict `>`: a width of exactly `minOpenWidth` is the collapsed floor
-      // (AppShell collapses by setting the width to MIN_WIDTH), not a real open
-      // width — recording it would erase the user's chosen drag size and make
-      // reopen fall back to the default. Only widths strictly above the floor
-      // count as the remembered open width.
-      if (width > minOpenWidth) {
-        // A real user drag landing before the async fetch resolves is the
-        // authoritative width — mark hydrated so the late-arriving stored width
-        // does NOT overwrite it (first REAL writer wins). A placeholder seed at
-        // or below the floor never reaches here, so it can't claim hydration.
+      // `>=`, not `>`: minOpenWidth is the narrowest VALID OPEN width (the drag
+      // floor), so a user dragging all the way to it (width === minOpenWidth) is
+      // a deliberate choice and MUST be remembered. Only a CLOSE (width 0, below
+      // the floor) is excluded. The collapse button does NOT come through here —
+      // it uses `seedWidth`, so collapsing to the floor never overwrites the
+      // remembered open width. (The old strict `>` dropped a drag-to-minimum,
+      // leaving lastOpenWidth at the previous size, so reopen ignored it.)
+      if (width >= minOpenWidth) {
+        // A real user drag is the authoritative width — mark hydrated so a
+        // late-arriving stored width can't overwrite it (first REAL writer wins).
         widthHydratedRef.current = true;
         setLastOpenWidth(width);
         persist(width);
