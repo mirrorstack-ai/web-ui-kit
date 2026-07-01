@@ -123,7 +123,7 @@ export function ServiceLogcat({ logs }: ServiceLogcatProps) {
   };
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center gap-2 mb-2">
         <SectionLabel>Logcat</SectionLabel>
         <button
@@ -187,11 +187,11 @@ export function ServiceLogcat({ logs }: ServiceLogcatProps) {
         />
       </div>
 
-      <Surface className="overflow-hidden">
+      <Surface className="overflow-hidden flex-1 min-h-0">
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="max-h-80 overflow-y-auto p-3 font-mono text-xs"
+          className="h-full overflow-y-auto p-3 font-mono text-xs"
         >
           {filtered.length === 0 ? (
             <p className="text-on-surface-variant/50 py-6 text-center">No matching log entries.</p>
