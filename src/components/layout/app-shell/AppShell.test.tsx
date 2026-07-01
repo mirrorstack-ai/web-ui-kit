@@ -286,6 +286,42 @@ describe("AppShell controlled sidebar open", () => {
     expect(screen.queryByLabelText("Open agent")).not.toBeInTheDocument();
   });
 
+  it("observes the body height on a reload-restore open, so the background paints", async () => {
+    // Regression for "sometimes the sidebar has no background": the body's
+    // height feeds AgentSidebarHeader's single full-window shape (the fill).
+    // On the reload-restore path open stays true from mount while the width
+    // seeds 0 → >0, so isOpen NEVER transitions. The body height observer must
+    // still attach when the body node mounts, or agentBodyH is stuck at 0, the
+    // header drops to its body-less cap, and the panel paints with no
+    // background. A callback ref (not a [isOpen]-keyed effect) attaches on the
+    // actual mount; pre-fix, that mount was missed and the body went unobserved.
+    const observed: Element[] = [];
+    class MockResizeObserver {
+      constructor(_cb: ResizeObserverCallback) {}
+      observe(el: Element) {
+        observed.push(el);
+      }
+      unobserve() {}
+      disconnect() {}
+    }
+    vi.stubGlobal("ResizeObserver", MockResizeObserver);
+    try {
+      render(
+        <AppShell open onOpenChange={() => {}}>
+          content
+        </AppShell>,
+      );
+      await act(async () => {
+        await Promise.resolve();
+      });
+      const body = document.querySelector(".flex-1.min-h-0.flex.flex-col");
+      expect(body).not.toBeNull();
+      expect(observed).toContain(body);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("paints closed (FAB shown) when open is false", () => {
     render(
       <AppShell open={false} onOpenChange={() => {}}>

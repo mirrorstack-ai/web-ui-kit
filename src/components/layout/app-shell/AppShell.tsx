@@ -1,4 +1,10 @@
-import { useState, useRef, useEffect, type ReactNode } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
@@ -309,7 +315,7 @@ function AppShellInner({
   // the window-minus-header height the AgentSidebarHeader needs to draw the
   // whole window as ONE Notch (rounded body + active-tab notch, single fill) —
   // killing the header↔body cream seam that aliases on fractional-DPI.
-  const agentBodyRef = useRef<HTMLDivElement>(null);
+  const agentBodyObserverRef = useRef<ResizeObserver | null>(null);
   const [agentBodyH, setAgentBodyH] = useState(0);
 
   useEffect(() => {
@@ -327,20 +333,27 @@ function AppShellInner({
   // (uncontrolled — behavior unchanged when `open` is undefined).
   const isOpen = open ?? sidebarWidth > 0;
 
-  // Track the agent body's own height (window height MINUS the 40px header) so
+  // Measure the agent body's own height (window height MINUS the 40px header) so
   // the single window shape always matches it through opens, drag-resize, and
-  // viewport changes. Re-runs when the sidebar mounts/unmounts (isOpen) so the
-  // observer attaches once the body element exists.
-  useEffect(() => {
-    const el = agentBodyRef.current;
-    if (!el) return;
-    if (typeof ResizeObserver === "undefined") return;
+  // viewport changes. This is a CALLBACK REF, not a ref + [isOpen] effect,
+  // because the body node mounts on `isOpen && sidebarWidth > 0` — a condition
+  // that can flip true WITHOUT isOpen changing: the reload-restore path holds
+  // open=true while the width seeds 0 → >0 (and the async width GET lands the
+  // same way). An [isOpen]-keyed effect misses that mount, so the observer never
+  // attaches, agentBodyH stays 0, the header falls back to its body-less cap, and
+  // the sidebar paints with NO background until an unrelated close+reopen toggles
+  // isOpen. A callback ref fires exactly when the node attaches/detaches, so it
+  // can never desync from the actual mount.
+  const setAgentBodyEl = useCallback((el: HTMLDivElement | null) => {
+    agentBodyObserverRef.current?.disconnect();
+    agentBodyObserverRef.current = null;
+    if (!el || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver((entries) => {
       setAgentBodyH(entries[0].contentRect.height);
     });
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [isOpen]);
+    agentBodyObserverRef.current = observer;
+  }, []);
 
   const isOverlaying =
     isOpen &&
@@ -571,7 +584,7 @@ function AppShellInner({
                   (flex/min-h-0) and drop bg-on-background + rounded-2xl so the shape
                   shows through with no abutting seam. The inner scroller and input
                   carry no opaque bg of their own, so this is the only fill to strip. */}
-              <div ref={agentBodyRef} className="flex-1 min-h-0 flex flex-col">
+              <div ref={setAgentBodyEl} className="flex-1 min-h-0 flex flex-col">
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
                   {/* The host's chat surface when wired; otherwise the
                       personalized empty-state opener under the brand logo
