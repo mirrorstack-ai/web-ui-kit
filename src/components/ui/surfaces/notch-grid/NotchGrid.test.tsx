@@ -161,6 +161,86 @@ describe("NotchGrid", () => {
     expect(container.querySelectorAll("svg")).toHaveLength(1);
   });
 
+  it("keeps two distinct, differently-themed panels from overlapping when stacked flush (gap=0 + panelBleed)", () => {
+    // Regression: two UNRELATED panels (different keys, no shared groupKey,
+    // different themes) stacked vertically with NO empty cell between them.
+    // With gap=0 + panelBleed>0 the later panel's outline used to dilate up into
+    // the earlier one (Manage's top cutting into Summary's bottom). They must
+    // (a) stay TWO separate chromes and (b) not overlap — a seam between them.
+    const items: NotchGridItem[] = [
+      {
+        key: "summary",
+        desire: { position: [0, 0], shape: M(4, 2) },
+        theme: { type: "filled", variant: "secondary" },
+        subItems: [
+          { desire: { position: [0, 0], shape: M(4, 2) }, ui: { type: "X" } },
+        ],
+      },
+      {
+        key: "manage",
+        // Directly below summary (rows 0-1) — touching at the row1/row2 seam.
+        desire: { position: [0, 2], shape: M(4, 1) },
+        theme: { type: "filled", variant: "tertiary" },
+        subItems: [
+          { desire: { position: [0, 0], shape: M(4, 1) }, ui: { type: "X" } },
+        ],
+      },
+    ];
+    const { container } = render(
+      <NotchGrid items={items} cols={4} blockMin={24} gap={0} panelBleed={4} />,
+    );
+
+    // (a) Two DISTINCT chromes — the panels are never merged into one shape.
+    const svgs = Array.from(container.querySelectorAll("svg"));
+    expect(svgs).toHaveLength(2);
+
+    // (b) Their outlines must not overlap. Each path's Y coords are local to its
+    // component wrapper (positioned at `minRow * block + nudge` via style.top,
+    // where the nudge pushes a touching component apart from its neighbour
+    // WITHOUT touching either one's own outline shape); convert to absolute and
+    // check the earlier panel's bottom sits above the later's top.
+    const absYExtent = (svg: Element) => {
+      const wrapper = svg.parentElement!.parentElement as HTMLElement;
+      const top = parseFloat(wrapper.style.top) || 0;
+      const d = svg.querySelector("path")!.getAttribute("d")!;
+      const ys: number[] = [];
+      const re = /(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(d))) ys.push(Number(m[2]) + top);
+      return { top: Math.min(...ys), bottom: Math.max(...ys) };
+    };
+    const [a, b] = svgs.map(absYExtent);
+    const [upper, lower] = a.top <= b.top ? [a, b] : [b, a];
+    // The seam must be a REAL, visible quarter-cell gap (block=24 here, so
+    // >= 6px) — not just "non-negative". A token 1-2px seam would pass a
+    // >= 0 check but still read as touching at a glance.
+    const MIN_COMPONENT_SEP_FRACTION = 0.25;
+    const block = 24;
+    expect(lower.top - upper.bottom).toBeGreaterThanOrEqual(
+      MIN_COMPONENT_SEP_FRACTION * block,
+    );
+
+    // (c) The fix must be POSITION-only: each panel's own outline (svg
+    // width/height, driven by its shape + the full panelBleed=4) is unchanged
+    // — no per-component shrinking of bleed to make room for the seam.
+    // summary's mask is 4x2 cells, manage's is 4x1; svg dims = mask*block +
+    // 2*panelBleed on each axis.
+    const dims = svgs.map((svg) => ({
+      w: Number(svg.getAttribute("width")),
+      h: Number(svg.getAttribute("height")),
+    }));
+    const expected = [
+      { w: 4 * 24 + 2 * 4, h: 2 * 24 + 2 * 4 }, // summary: 4x2
+      { w: 4 * 24 + 2 * 4, h: 1 * 24 + 2 * 4 }, // manage: 4x1
+    ];
+    for (let i = 0; i < dims.length; i++) {
+      const match = expected.some(
+        (e) => e.w === dims[i].w && e.h === dims[i].h,
+      );
+      expect(match).toBe(true);
+    }
+  });
+
   it("applies inline color from resolved theme (variant=primary)", () => {
     const items: NotchGridItem[] = [
       {

@@ -138,6 +138,16 @@ export interface NotchGridProps {
 /** Content inset inside a tile / sub-cell (8px sides, 16px top/bottom). Matches BlockShape's default. */
 const DEFAULT_CONTENT_PAD = "16px 8px";
 
+/** Minimum seam the kit guarantees between two DISTINCT components, as a
+ *  FRACTION OF ONE CELL — so it scales with `block` (the grid's live cell
+ *  size, which callers resize responsively) instead of a fixed pixel value.
+ *  `0.25` matches a quarter-cell gap, the same unit callers already use for
+ *  their own panel spacing. Enforced by NUDGING each component's rendered
+ *  POSITION apart from a touching neighbour (see `computeComponentNudges`) —
+ *  every component's own outline shape (`gap`/`panelBleed`) stays exactly as
+ *  the caller configured it; only where it sits shifts. */
+const MIN_COMPONENT_SEP_FRACTION = 0.25;
+
 /** Pointer capture, tolerant of test envs (jsdom) that lack the API. */
 function safePointerCapture(el: Element, pointerId: number): void {
   try {
@@ -350,6 +360,103 @@ export function findConnectedComponents<T>(
     out.push(comp);
   }
   return out;
+}
+
+/** A component's outer bounding box, in cell units (half-open: `maxCol`/`maxRow`
+ *  are one past the last occupied cell — matching `NotchComponent`'s own bbox
+ *  math). */
+interface ComponentBBox {
+  minCol: number;
+  minRow: number;
+  maxCol: number;
+  maxRow: number;
+}
+
+function componentBBox(
+  members: ReadonlyArray<Placement<NotchGridItem>>,
+): ComponentBBox {
+  let minCol = Infinity;
+  let minRow = Infinity;
+  let maxCol = 0;
+  let maxRow = 0;
+  for (const m of members) {
+    minCol = Math.min(minCol, m.col);
+    minRow = Math.min(minRow, m.row);
+    maxCol = Math.max(maxCol, m.col + m.cols);
+    maxRow = Math.max(maxRow, m.row + m.rows);
+  }
+  return { minCol, minRow, maxCol, maxRow };
+}
+
+/** Per-component pixel nudge (`[dx, dy]`) that keeps distinct components from
+ *  rendering flush/overlapping, WITHOUT touching either component's own
+ *  outline shape (`gap`/`panelBleed` stay exactly as the caller configured —
+ *  see the module doc for `MIN_COMPONENT_SEP_FRACTION`).
+ *
+ *  `panelBleed` dilates each component's outline OUTWARD by a KNOWN, constant
+ *  amount, and `gap=0` applies no counter-erosion, so two distinct components
+ *  on touching (0-cell-gap) cells overlap by `2·panelBleed` px. Rather than
+ *  shrink either component's bleed to compensate (a "shape" fix — the frame
+ *  itself would look thinner near a neighbour than elsewhere), this shifts
+ *  each component's rendered POSITION apart by enough to (a) cancel out its
+ *  own share of that dilation and (b) add the `MIN_COMPONENT_SEP_FRACTION`
+ *  seam on top — `panelBleed` is READ here only to compute how far to move,
+ *  never changed. Nudges along whichever axis the pair is touching on
+ *  (vertically stacked ↔ nudge Y; horizontally adjacent ↔ nudge X). Handles
+ *  the common axis-aligned touching case (the reported bug: two panels
+ *  stacked with zero empty cells between them); a component touching
+ *  multiple neighbours on the SAME axis (a middle panel sandwiched between
+ *  two others) may net out with a smaller total nudge than a from-scratch
+ *  solve would give — a real limitation, not silently wrong, and not the
+ *  scenario this fixes. */
+function computeComponentNudges(
+  components: ReadonlyArray<ReadonlyArray<Placement<NotchGridItem>>>,
+  block: number,
+  gap: number,
+  panelBleed: number,
+): ReadonlyArray<readonly [number, number]> {
+  const boxes = components.map(componentBBox);
+  const minSep = MIN_COMPONENT_SEP_FRACTION * block;
+  // Net outward dilation per side, mirroring BlockShape's own erosion formula
+  // (`erosion = min(gap, cell-2)/2 - bleed`): `gap`'s own counter-erosion
+  // already claws back some of `bleed`'s outward reach, so only the leftover
+  // (floored at 0 — a caller-configured gap can already fully cover it) needs
+  // a nudge, plus half the desired seam on top.
+  const netDilation = Math.max(0, panelBleed - Math.min(gap, block - 2) / 2);
+  const perSide = netDilation + minSep / 2;
+  const nudgeX = new Array<number>(components.length).fill(0);
+  const nudgeY = new Array<number>(components.length).fill(0);
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      const a = boxes[i];
+      const b = boxes[j];
+      const colsOverlap = a.minCol < b.maxCol && b.minCol < a.maxCol;
+      const rowsOverlap = a.minRow < b.maxRow && b.minRow < a.maxRow;
+      // Vertically stacked & touching: share some column range, rows meet
+      // edge-to-edge (0 empty cells between them).
+      if (colsOverlap) {
+        if (a.maxRow === b.minRow) {
+          nudgeY[i] -= perSide;
+          nudgeY[j] += perSide;
+        } else if (b.maxRow === a.minRow) {
+          nudgeY[j] -= perSide;
+          nudgeY[i] += perSide;
+        }
+      }
+      // Horizontally adjacent & touching: share some row range, columns meet
+      // edge-to-edge.
+      if (rowsOverlap) {
+        if (a.maxCol === b.minCol) {
+          nudgeX[i] -= perSide;
+          nudgeX[j] += perSide;
+        } else if (b.maxCol === a.minCol) {
+          nudgeX[j] -= perSide;
+          nudgeX[i] += perSide;
+        }
+      }
+    }
+  }
+  return components.map((_, i) => [nudgeX[i], nudgeY[i]] as const);
 }
 
 /** Bucket placements by their effective group (from `groupOf`, keyed by item
@@ -776,6 +883,16 @@ export function NotchGrid({
     };
   }, [keyedItems, resolvedCols, nest, overrides, promoted]);
 
+  // Per-component position nudge (pushes a component apart from a touching
+  // distinct neighbour — see `computeComponentNudges`) — memoised separately
+  // from the solve so it only recomputes on resize (block change), not on
+  // every drag tick. Each component's own outline (`gap`/`panelBleed`) is
+  // untouched; only where it renders shifts.
+  const componentNudges = useMemo(
+    () => computeComponentNudges(components, block, gap, panelBleed),
+    [components, block, gap, panelBleed],
+  );
+
   const unfitKey = layout?.unfit.join(",") ?? "";
   useEffect(() => {
     if (isDev && layout && layout.unfit.length > 0) {
@@ -796,8 +913,12 @@ export function NotchGrid({
         ...style,
       }}
     >
-      {components.map((members) => {
+      {components.map((members, compIndex) => {
         const compKey = members.map((m) => m.key).join("|");
+        // Static position nudge — pushes this component away from a touching
+        // distinct neighbour. Its own outline shape (gap/panelBleed, passed
+        // through unchanged below) never varies by neighbour.
+        const nudge = componentNudges[compIndex] ?? ([0, 0] as const);
         // Outer-drag offset, if a member of this component is being dragged.
         const dragMember = drag ? members.find((m) => m.key === drag.key) : undefined;
         const dragOffset: readonly [number, number] | undefined =
@@ -815,6 +936,7 @@ export function NotchGrid({
             members={members}
             block={block}
             gap={gap}
+            nudge={nudge}
             contentPad={contentPad}
             panelBleed={panelBleed}
             primitives={primitives}
@@ -931,6 +1053,10 @@ interface NotchComponentProps {
   members: Placement<NotchGridItem>[];
   block: number;
   gap: number;
+  /** Static [dx, dy] px offset (see `computeComponentNudges`) that pushes this
+   *  component away from a touching distinct neighbour. Applied to its
+   *  rendered position only — never affects `gap`/`panelBleed`. */
+  nudge?: readonly [number, number];
   contentPad: number | string;
   panelBleed: number;
   primitives?: PrimitiveRegistry;
@@ -971,6 +1097,7 @@ const NotchComponent = memo(function NotchComponent({
   members,
   block,
   gap,
+  nudge,
   contentPad,
   panelBleed,
   primitives,
@@ -1080,8 +1207,8 @@ const NotchComponent = memo(function NotchComponent({
 
   const wrapperStyle: CSSProperties = {
     position: "absolute",
-    left: minCol * block,
-    top: minRow * block,
+    left: minCol * block + (nudge?.[0] ?? 0),
+    top: minRow * block + (nudge?.[1] ?? 0),
     color: resolved.color,
   };
   if (wrapperMoves && dragOffset) {
