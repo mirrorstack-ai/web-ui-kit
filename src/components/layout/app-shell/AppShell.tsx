@@ -1,4 +1,10 @@
-import { useState, useRef, useEffect, type ReactNode } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  type ReactNode,
+} from "react";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
@@ -331,9 +337,21 @@ function AppShellInner({
   // the single window shape always matches it through opens, drag-resize, and
   // viewport changes. Re-runs when the sidebar mounts/unmounts (isOpen) so the
   // observer attaches once the body element exists.
-  useEffect(() => {
+  //
+  // `useLayoutEffect` + a synchronous `getBoundingClientRect()` seed — NOT
+  // `useEffect` relying on the observer's own first callback — because
+  // ResizeObserver callbacks are spec'd to fire asynchronously even for the
+  // very first observation. That left a real (if usually brief) window on
+  // every open where `agentBodyH` was still its initial 0, `windowBodyHeight`
+  // was omitted below, and the transparent body — which depends entirely on
+  // AgentSidebarHeader's single-shape fill reaching down over it — rendered
+  // with NO background at all until the async callback finally landed.
+  // Seeding synchronously before paint closes that gap; the observer still
+  // owns every SUBSEQUENT resize (drag, viewport changes, content growth).
+  useLayoutEffect(() => {
     const el = agentBodyRef.current;
     if (!el) return;
+    setAgentBodyH(el.getBoundingClientRect().height);
     if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver((entries) => {
       setAgentBodyH(entries[0].contentRect.height);
