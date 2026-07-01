@@ -3,18 +3,20 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
-## 0.5.17
+## 0.6.0
 
-- **Fix: `NotchGrid` no longer lets distinct panels overlap at `gap=0`.** Two
-  unrelated components (different keys, no shared `groupKey`, different themes)
-  placed on touching cells used to render with their outlines overlapping by
-  `2·panelBleed` px — the later-painted panel visually cutting up into the one
-  above it — because `panelBleed` dilates every outline outward and `gap=0`
-  applies no counter-erosion. `NotchGrid` now caps each component's outward
-  bleed at half the empty space to its nearest distinct neighbour and forces a
-  small seam when a neighbour is flush, so distinct components always stay
-  visually separated regardless of the `gap` prop. Components with room to
-  spare keep the full `panelBleed`, so well-separated layouts are unchanged.
+- **Fix: `NotchGrid` no longer lets distinct panels overlap or render flush at
+  `gap=0`.** Two unrelated components (different keys, no shared `groupKey`,
+  different themes) placed on touching cells used to render with their
+  outlines overlapping by `2·panelBleed` px — the later-painted panel visually
+  cutting up into the one above it — because `panelBleed` dilates every
+  outline outward and `gap=0` applies no counter-erosion. `NotchGrid` now
+  nudges each component's rendered POSITION apart from a touching distinct
+  neighbour by enough to cancel that dilation plus a guaranteed
+  quarter-cell seam, along whichever axis the pair is touching on. Every
+  component's own outline shape (`gap`/`panelBleed`) is left exactly as
+  configured — nothing about how an individual panel renders changes, only
+  where it sits. Components with room to spare are unaffected.
 
 ## 0.5.16
 
