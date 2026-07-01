@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { ServiceLogcat } from "./ServiceLogcat";
 import type { LogEntry } from "./types";
@@ -64,4 +65,54 @@ export const WithRequestResponseDetail: Story = {
 
 export const Empty: Story = {
   args: { logs: [] },
+};
+
+// Older pages are generated on demand, seq-keyed, and appended at the OLD end
+// (the bottom). Scroll near the bottom or click the row to load a page.
+const PAGE_SIZE = 20;
+const TOTAL_OLDER = 60;
+
+function olderPage(before: number): LogEntry[] {
+  return Array.from({ length: PAGE_SIZE }, (_, i): LogEntry => {
+    const seq = before - PAGE_SIZE + i;
+    const sec = String(seq % 60).padStart(2, "0");
+    return {
+      seq,
+      ts: `2026-06-30T16:22:${sec}.000000000Z`,
+      level: seq % 13 === 0 ? "warn" : "info",
+      msg: `GET /api/items?page=${seq} 200 ${5 + (seq % 20)}ms`,
+      duration_ms: 5 + (seq % 20),
+    };
+  });
+}
+
+function LoadOlderDemo() {
+  const [logs, setLogs] = useState<LogEntry[]>(() =>
+    SAMPLE_LOGS.map((l, i) => ({ ...l, seq: TOTAL_OLDER + i })),
+  );
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const oldestSeq = logs[0]?.seq ?? TOTAL_OLDER;
+
+  const onLoadOlder = () => {
+    setLoadingOlder(true);
+    setTimeout(() => {
+      setLogs((cur) => [...olderPage(oldestSeq), ...cur]);
+      setLoadingOlder(false);
+    }, 800);
+  };
+
+  return (
+    <div className="h-96">
+      <ServiceLogcat
+        logs={logs}
+        onLoadOlder={onLoadOlder}
+        hasOlder={oldestSeq > 0}
+        loadingOlder={loadingOlder}
+      />
+    </div>
+  );
+}
+
+export const LoadOlder: Story = {
+  render: () => <LoadOlderDemo />,
 };

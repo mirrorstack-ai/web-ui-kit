@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Badge, type BadgeVariant } from "@/components/ui/feedback/badge/Badge";
 import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
@@ -19,12 +19,18 @@ import {
 export const meta: ComponentMeta = {
   name: "ServiceLogcat",
   description:
-    "Service log console with severity-floor filter, text filter, live-tail toggle, copy, and an expandable request/response detail per line",
+    "Service log console with severity-floor filter, text filter, live-tail toggle, copy, load-older paging, and an expandable request/response detail per line",
 };
 
 export interface ServiceLogcatProps {
   /** Log entries, chronological (oldest first); the console reverses them so the newest line sits at the top. */
   logs: LogEntry[];
+  /** Load the next page of older entries. With `hasOlder`, renders a load-older row at the old end (bottom) that also auto-fires when the user scrolls near it. */
+  onLoadOlder?: () => void;
+  /** Whether older entries exist beyond the current `logs` window. */
+  hasOlder?: boolean;
+  /** Older page currently loading — shows the row in a loading state and suppresses re-fire. */
+  loadingOlder?: boolean;
 }
 
 const LEVEL_BADGE: Record<LogLevel, BadgeVariant> = {
@@ -54,6 +60,16 @@ function fmtTs(ts: string): string {
   return m ? `${m[1]} ${m[2]}.${m[3]}` : ts;
 }
 
+// Auto-fire distance from the bottom (old end) for load-older, mirroring the
+// 24px pinned-at-top threshold with room for the load-older row itself.
+const LOAD_OLDER_NEAR_PX = 48;
+
+// Stable row key: the source's sequence number when present; otherwise the
+// ts/msg/filtered-index composite (ts+msg alone collides on repeated lines).
+function rowKey(l: LogEntry, i: number): string {
+  return l.seq != null ? `${l.seq}` : `${l.ts}-${l.msg}-${i}`;
+}
+
 /**
  * ServiceLogcat — the module service log console. A severity-floor filter, a
  * text filter, a live-tail toggle, copy, and a mono scroll surface that pins to
@@ -61,7 +77,12 @@ function fmtTs(ts: string): string {
  * `logs` array (mock today; a live stream tomorrow) and the co-located
  * `useLogcat` hook owns all internal state.
  */
-export function ServiceLogcat({ logs }: ServiceLogcatProps) {
+export function ServiceLogcat({
+  logs,
+  onLoadOlder,
+  hasOlder = false,
+  loadingOlder = false,
+}: ServiceLogcatProps) {
   const { query, setQuery, floor, setFloor, tailing, setTailing, filtered, total } =
     useLogcat(logs);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -80,9 +101,17 @@ export function ServiceLogcat({ logs }: ServiceLogcatProps) {
     pinnedRef.current = true;
   };
 
+  // One-shot latch so a burst of scroll events fires onLoadOlder once; rearmed
+  // when the caller reacts (loadingOlder toggles or new entries arrive).
+  const loadOlderFiredRef = useRef(false);
+  useEffect(() => {
+    loadOlderFiredRef.current = false;
+  }, [loadingOlder, logs]);
+
   // Track whether the view is at the top. A programmatic scroll-to-top is
   // ignored (guarded by programmaticRef). No auto-pause: tailing stays on; we
   // just stop following while the user is scrolled away from the top.
+  // Scrolling near the bottom (the OLD end) auto-fires load-older.
   const onScroll = () => {
     const el = scrollRef.current;
     if (!el) return;
@@ -91,22 +120,37 @@ export function ServiceLogcat({ logs }: ServiceLogcatProps) {
       return;
     }
     pinnedRef.current = el.scrollTop < 24;
+    if (
+      onLoadOlder &&
+      hasOlder &&
+      !loadingOlder &&
+      !loadOlderFiredRef.current &&
+      el.scrollHeight - el.scrollTop - el.clientHeight < LOAD_OLDER_NEAR_PX
+    ) {
+      loadOlderFiredRef.current = true;
+      onLoadOlder();
+    }
   };
 
   // Newest sits at the TOP. When tailing + pinned, follow to the top. Otherwise,
   // if new lines were prepended above while the user is reading lower down, they
   // would shove the view down — so offset scrollTop by the added height to keep
-  // the user anchored to the line they're reading. openKey is a dep so the
-  // height baseline updates after an expand/collapse too (no false offset).
+  // the user anchored to the line they're reading. Older pages append at the
+  // BOTTOM (the top row's key is unchanged) — content below the viewport never
+  // moves scrollTop, so no offset there. openKey is a dep so the height
+  // baseline updates after an expand/collapse too (no false offset).
   const prevLenRef = useRef(filtered.length);
   const prevHeightRef = useRef(0);
+  const prevTopKeyRef = useRef(filtered.length > 0 ? rowKey(filtered[0], 0) : null);
   useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const grew = filtered.length > prevLenRef.current;
+    const topKey = filtered.length > 0 ? rowKey(filtered[0], 0) : null;
+    const grewAbove =
+      filtered.length > prevLenRef.current && topKey !== prevTopKeyRef.current;
     if (tailing && pinnedRef.current) {
       scrollToTop();
-    } else if (grew) {
+    } else if (grewAbove) {
       const added = el.scrollHeight - prevHeightRef.current;
       if (added > 0) {
         programmaticRef.current = true;
@@ -115,7 +159,8 @@ export function ServiceLogcat({ logs }: ServiceLogcatProps) {
     }
     prevLenRef.current = filtered.length;
     prevHeightRef.current = el.scrollHeight;
-  }, [tailing, filtered.length, openKey]);
+    prevTopKeyRef.current = topKey;
+  }, [tailing, filtered, openKey]);
 
   const copyAll = () => {
     const text = filtered.map((l) => `${l.ts} ${l.level.toUpperCase()} ${l.msg}`).join("\n");
@@ -197,8 +242,8 @@ export function ServiceLogcat({ logs }: ServiceLogcatProps) {
             <p className="text-on-surface-variant/50 py-6 text-center">No matching log entries.</p>
           ) : (
             <div className="space-y-0.5">
-              {filtered.map((l) => {
-                const key = `${l.ts}-${l.msg}`;
+              {filtered.map((l, i) => {
+                const key = rowKey(l, i);
                 const hasDetail =
                   l.method != null || l.req_body != null || l.res_body != null;
                 const open = openKey === key;
@@ -240,6 +285,23 @@ export function ServiceLogcat({ logs }: ServiceLogcatProps) {
                 );
               })}
             </div>
+          )}
+          {onLoadOlder && hasOlder && (
+            <button
+              type="button"
+              disabled={loadingOlder}
+              onClick={onLoadOlder}
+              className={cn(
+                "mt-1 flex w-full items-center justify-center gap-2 rounded py-1.5",
+                "text-on-surface-variant/60 hover:bg-surface-container hover:text-on-surface",
+                loadingOlder && "pointer-events-none",
+              )}
+            >
+              {loadingOlder && (
+                <span className="inline-block w-3 h-3 rounded-full border-2 border-on-surface-variant/30 border-t-on-surface-variant animate-spin" />
+              )}
+              {loadingOlder ? "Loading older entries…" : "Load older entries"}
+            </button>
           )}
         </div>
       </Surface>
