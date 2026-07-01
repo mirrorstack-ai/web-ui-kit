@@ -195,9 +195,10 @@ describe("NotchGrid", () => {
     expect(svgs).toHaveLength(2);
 
     // (b) Their outlines must not overlap. Each path's Y coords are local to its
-    // component wrapper (positioned at `minRow * block` via style.top); convert
-    // to absolute and check the earlier panel's bottom sits above the later's
-    // top (a positive seam, not a negative overlap).
+    // component wrapper (positioned at `minRow * block + nudge` via style.top,
+    // where the nudge pushes a touching component apart from its neighbour
+    // WITHOUT touching either one's own outline shape); convert to absolute and
+    // check the earlier panel's bottom sits above the later's top.
     const absYExtent = (svg: Element) => {
       const wrapper = svg.parentElement!.parentElement as HTMLElement;
       const top = parseFloat(wrapper.style.top) || 0;
@@ -218,6 +219,26 @@ describe("NotchGrid", () => {
     expect(lower.top - upper.bottom).toBeGreaterThanOrEqual(
       MIN_COMPONENT_SEP_FRACTION * block,
     );
+
+    // (c) The fix must be POSITION-only: each panel's own outline (svg
+    // width/height, driven by its shape + the full panelBleed=4) is unchanged
+    // — no per-component shrinking of bleed to make room for the seam.
+    // summary's mask is 4x2 cells, manage's is 4x1; svg dims = mask*block +
+    // 2*panelBleed on each axis.
+    const dims = svgs.map((svg) => ({
+      w: Number(svg.getAttribute("width")),
+      h: Number(svg.getAttribute("height")),
+    }));
+    const expected = [
+      { w: 4 * 24 + 2 * 4, h: 2 * 24 + 2 * 4 }, // summary: 4x2
+      { w: 4 * 24 + 2 * 4, h: 1 * 24 + 2 * 4 }, // manage: 4x1
+    ];
+    for (let i = 0; i < dims.length; i++) {
+      const match = expected.some(
+        (e) => e.w === dims[i].w && e.h === dims[i].h,
+      );
+      expect(match).toBe(true);
+    }
   });
 
   it("applies inline color from resolved theme (variant=primary)", () => {
