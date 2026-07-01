@@ -161,6 +161,59 @@ describe("NotchGrid", () => {
     expect(container.querySelectorAll("svg")).toHaveLength(1);
   });
 
+  it("keeps two distinct, differently-themed panels from overlapping when stacked flush (gap=0 + panelBleed)", () => {
+    // Regression: two UNRELATED panels (different keys, no shared groupKey,
+    // different themes) stacked vertically with NO empty cell between them.
+    // With gap=0 + panelBleed>0 the later panel's outline used to dilate up into
+    // the earlier one (Manage's top cutting into Summary's bottom). They must
+    // (a) stay TWO separate chromes and (b) not overlap — a seam between them.
+    const items: NotchGridItem[] = [
+      {
+        key: "summary",
+        desire: { position: [0, 0], shape: M(4, 2) },
+        theme: { type: "filled", variant: "secondary" },
+        subItems: [
+          { desire: { position: [0, 0], shape: M(4, 2) }, ui: { type: "X" } },
+        ],
+      },
+      {
+        key: "manage",
+        // Directly below summary (rows 0-1) — touching at the row1/row2 seam.
+        desire: { position: [0, 2], shape: M(4, 1) },
+        theme: { type: "filled", variant: "tertiary" },
+        subItems: [
+          { desire: { position: [0, 0], shape: M(4, 1) }, ui: { type: "X" } },
+        ],
+      },
+    ];
+    const { container } = render(
+      <NotchGrid items={items} cols={4} blockMin={24} gap={0} panelBleed={4} />,
+    );
+
+    // (a) Two DISTINCT chromes — the panels are never merged into one shape.
+    const svgs = Array.from(container.querySelectorAll("svg"));
+    expect(svgs).toHaveLength(2);
+
+    // (b) Their outlines must not overlap. Each path's Y coords are local to its
+    // component wrapper (positioned at `minRow * block` via style.top); convert
+    // to absolute and check the earlier panel's bottom sits above the later's
+    // top (a positive seam, not a negative overlap).
+    const absYExtent = (svg: Element) => {
+      const wrapper = svg.parentElement!.parentElement as HTMLElement;
+      const top = parseFloat(wrapper.style.top) || 0;
+      const d = svg.querySelector("path")!.getAttribute("d")!;
+      const ys: number[] = [];
+      const re = /(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(d))) ys.push(Number(m[2]) + top);
+      return { top: Math.min(...ys), bottom: Math.max(...ys) };
+    };
+    const [a, b] = svgs.map(absYExtent);
+    const [upper, lower] = a.top <= b.top ? [a, b] : [b, a];
+    // Seam >= 0: the upper panel's outline bottom does not cross the lower's top.
+    expect(lower.top).toBeGreaterThanOrEqual(upper.bottom);
+  });
+
   it("applies inline color from resolved theme (variant=primary)", () => {
     const items: NotchGridItem[] = [
       {

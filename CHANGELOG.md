@@ -3,6 +3,19 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.5.17
+
+- **Fix: `NotchGrid` no longer lets distinct panels overlap at `gap=0`.** Two
+  unrelated components (different keys, no shared `groupKey`, different themes)
+  placed on touching cells used to render with their outlines overlapping by
+  `2·panelBleed` px — the later-painted panel visually cutting up into the one
+  above it — because `panelBleed` dilates every outline outward and `gap=0`
+  applies no counter-erosion. `NotchGrid` now caps each component's outward
+  bleed at half the empty space to its nearest distinct neighbour and forces a
+  small seam when a neighbour is flush, so distinct components always stay
+  visually separated regardless of the `gap` prop. Components with room to
+  spare keep the full `panelBleed`, so well-separated layouts are unchanged.
+
 ## 0.5.16
 
 - **New `ServiceLogcat` dev component.** A service log console (promoted from

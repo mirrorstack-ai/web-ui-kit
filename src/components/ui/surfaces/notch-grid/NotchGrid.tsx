@@ -138,6 +138,12 @@ export interface NotchGridProps {
 /** Content inset inside a tile / sub-cell (8px sides, 16px top/bottom). Matches BlockShape's default. */
 const DEFAULT_CONTENT_PAD = "16px 8px";
 
+/** Minimum px seam the kit guarantees between two DISTINCT components' outlines,
+ *  so they never render overlapping or fully flush — even at `gap=0` with a
+ *  `panelBleed` that would otherwise dilate them into each other. Small enough
+ *  to read as a hairline; the differing per-panel fills do the rest. */
+const MIN_COMPONENT_SEP = 2;
+
 /** Pointer capture, tolerant of test envs (jsdom) that lack the API. */
 function safePointerCapture(el: Element, pointerId: number): void {
   try {
@@ -350,6 +356,67 @@ export function findConnectedComponents<T>(
     out.push(comp);
   }
   return out;
+}
+
+/** Minimum Chebyshev cell distance between two components' filled cells.
+ *  `1` = touching (edge OR diagonal); larger = that-many-plus empty cells apart.
+ *  Short-circuits at 1 — the closest two non-overlapping components can sit. */
+function minComponentCheb(
+  a: ReadonlyArray<readonly [number, number]>,
+  b: ReadonlyArray<readonly [number, number]>,
+): number {
+  let best = Infinity;
+  for (const [ax, ay] of a) {
+    for (const [bx, by] of b) {
+      const d = Math.max(Math.abs(ax - bx), Math.abs(ay - by));
+      if (d < best) {
+        best = d;
+        if (best <= 1) return best;
+      }
+    }
+  }
+  return best;
+}
+
+/** Per-component outline geometry that GUARANTEES distinct components never
+ *  render with overlapping (or fully flush) outlines — the frame separation a
+ *  caller would otherwise have to hand-maintain by leaving empty cells between
+ *  panels.
+ *
+ *  `panelBleed` dilates each component's outline OUTWARD, and `gap=0` applies no
+ *  counter-erosion, so two distinct components on touching cells overlap by
+ *  `2·panelBleed` px (the later-painted one visually cutting into the earlier).
+ *  Here each component's outward bleed is capped at half the empty-pixel space
+ *  to its nearest distinct neighbour, and a flush neighbour forces a small
+ *  inward erosion (`MIN_COMPONENT_SEP`) so a seam always shows. Components with
+ *  room to spare keep the full `panelBleed`, so nothing changes for layouts that
+ *  already separate their panels. */
+function computeComponentOutlines(
+  components: ReadonlyArray<ReadonlyArray<Placement<NotchGridItem>>>,
+  block: number,
+  gap: number,
+  panelBleed: number,
+): Array<{ gap: number; bleed: number }> {
+  const cells = components.map((members) =>
+    members.flatMap((m) => placedCells(m)),
+  );
+  return components.map((_, i) => {
+    let minCheb = Infinity;
+    for (let j = 0; j < components.length; j++) {
+      if (j === i) continue;
+      const d = minComponentCheb(cells[i], cells[j]);
+      if (d < minCheb) minCheb = d;
+    }
+    if (minCheb === Infinity) return { gap, bleed: panelBleed };
+    const emptyPx = Math.max(0, minCheb - 1) * block;
+    // Symmetric outward offset each component may take while still leaving a
+    // MIN_COMPONENT_SEP seam between the two (both offset toward the seam).
+    const offset = Math.min(panelBleed, emptyPx / 2 - MIN_COMPONENT_SEP / 2);
+    if (offset >= 0) return { gap, bleed: offset };
+    // Flush / near neighbour: drop the outward bleed and erode inward instead,
+    // so the two outlines pull apart into a visible seam (erosion = |offset|).
+    return { gap: Math.max(gap, -2 * offset), bleed: 0 };
+  });
 }
 
 /** Bucket placements by their effective group (from `groupOf`, keyed by item
@@ -776,6 +843,14 @@ export function NotchGrid({
     };
   }, [keyedItems, resolvedCols, nest, overrides, promoted]);
 
+  // Per-component outline geometry (bleed capped / seam enforced against the
+  // nearest distinct neighbour) — memoised separately from the solve so it only
+  // recomputes on resize (block change), not on every drag tick.
+  const componentOutlines = useMemo(
+    () => computeComponentOutlines(components, block, gap, panelBleed),
+    [components, block, gap, panelBleed],
+  );
+
   const unfitKey = layout?.unfit.join(",") ?? "";
   useEffect(() => {
     if (isDev && layout && layout.unfit.length > 0) {
@@ -796,8 +871,11 @@ export function NotchGrid({
         ...style,
       }}
     >
-      {components.map((members) => {
+      {components.map((members, compIndex) => {
         const compKey = members.map((m) => m.key).join("|");
+        // Neighbour-aware outline params: bleed capped (and a seam eroded) so
+        // this component can't overlap a distinct one that ended up flush.
+        const outline = componentOutlines[compIndex] ?? { gap, bleed: panelBleed };
         // Outer-drag offset, if a member of this component is being dragged.
         const dragMember = drag ? members.find((m) => m.key === drag.key) : undefined;
         const dragOffset: readonly [number, number] | undefined =
@@ -814,9 +892,9 @@ export function NotchGrid({
             key={compKey}
             members={members}
             block={block}
-            gap={gap}
+            gap={outline.gap}
             contentPad={contentPad}
-            panelBleed={panelBleed}
+            panelBleed={outline.bleed}
             primitives={primitives}
             onItemError={onItemError}
             draggable={draggable}
