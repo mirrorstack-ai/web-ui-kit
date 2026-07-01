@@ -210,8 +210,14 @@ describe("NotchGrid", () => {
     };
     const [a, b] = svgs.map(absYExtent);
     const [upper, lower] = a.top <= b.top ? [a, b] : [b, a];
-    // Seam >= 0: the upper panel's outline bottom does not cross the lower's top.
-    expect(lower.top).toBeGreaterThanOrEqual(upper.bottom);
+    // The seam must be a REAL, visible quarter-cell gap (block=24 here, so
+    // >= 6px) — not just "non-negative". A token 1-2px seam would pass a
+    // >= 0 check but still read as touching at a glance.
+    const MIN_COMPONENT_SEP_FRACTION = 0.25;
+    const block = 24;
+    expect(lower.top - upper.bottom).toBeGreaterThanOrEqual(
+      MIN_COMPONENT_SEP_FRACTION * block,
+    );
   });
 
   it("applies inline color from resolved theme (variant=primary)", () => {

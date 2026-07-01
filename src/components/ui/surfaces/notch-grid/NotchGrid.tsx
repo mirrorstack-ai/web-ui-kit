@@ -138,11 +138,15 @@ export interface NotchGridProps {
 /** Content inset inside a tile / sub-cell (8px sides, 16px top/bottom). Matches BlockShape's default. */
 const DEFAULT_CONTENT_PAD = "16px 8px";
 
-/** Minimum px seam the kit guarantees between two DISTINCT components' outlines,
- *  so they never render overlapping or fully flush — even at `gap=0` with a
- *  `panelBleed` that would otherwise dilate them into each other. Small enough
- *  to read as a hairline; the differing per-panel fills do the rest. */
-const MIN_COMPONENT_SEP = 2;
+/** Minimum seam the kit guarantees between two DISTINCT components' outlines,
+ *  as a FRACTION OF ONE CELL — so it scales with `block` (the grid's live cell
+ *  size, which callers resize responsively) instead of staying a fixed pixel
+ *  value that reads as imperceptible at typical block sizes. `0.25` matches a
+ *  quarter-cell gap, the same unit callers already use for their own panel
+ *  spacing (e.g. `gap` in visual-tile callers), so a component never renders
+ *  closer to a distinct neighbour than that — even at `gap=0` with a
+ *  `panelBleed` that would otherwise dilate them into each other. */
+const MIN_COMPONENT_SEP_FRACTION = 0.25;
 
 /** Pointer capture, tolerant of test envs (jsdom) that lack the API. */
 function safePointerCapture(el: Element, pointerId: number): void {
@@ -387,8 +391,9 @@ function minComponentCheb(
  *  counter-erosion, so two distinct components on touching cells overlap by
  *  `2·panelBleed` px (the later-painted one visually cutting into the earlier).
  *  Here each component's outward bleed is capped at half the empty-pixel space
- *  to its nearest distinct neighbour, and a flush neighbour forces a small
- *  inward erosion (`MIN_COMPONENT_SEP`) so a seam always shows. Components with
+ *  to its nearest distinct neighbour, and a flush/near neighbour forces a small
+ *  inward erosion so a seam of at least `MIN_COMPONENT_SEP_FRACTION * block`
+ *  (a quarter-cell, not a fixed pixel value) always shows. Components with
  *  room to spare keep the full `panelBleed`, so nothing changes for layouts that
  *  already separate their panels. */
 function computeComponentOutlines(
@@ -400,6 +405,7 @@ function computeComponentOutlines(
   const cells = components.map((members) =>
     members.flatMap((m) => placedCells(m)),
   );
+  const minSep = MIN_COMPONENT_SEP_FRACTION * block;
   return components.map((_, i) => {
     let minCheb = Infinity;
     for (let j = 0; j < components.length; j++) {
@@ -410,8 +416,8 @@ function computeComponentOutlines(
     if (minCheb === Infinity) return { gap, bleed: panelBleed };
     const emptyPx = Math.max(0, minCheb - 1) * block;
     // Symmetric outward offset each component may take while still leaving a
-    // MIN_COMPONENT_SEP seam between the two (both offset toward the seam).
-    const offset = Math.min(panelBleed, emptyPx / 2 - MIN_COMPONENT_SEP / 2);
+    // minSep seam between the two (both offset toward the seam).
+    const offset = Math.min(panelBleed, emptyPx / 2 - minSep / 2);
     if (offset >= 0) return { gap, bleed: offset };
     // Flush / near neighbour: drop the outward bleed and erode inward instead,
     // so the two outlines pull apart into a visible seam (erosion = |offset|).
