@@ -51,7 +51,7 @@ describe("ServiceLogcat load-older", () => {
     const { container } = render(
       <ServiceLogcat logs={LOGS} onLoadOlder={onLoadOlder} hasOlder loadingOlder />,
     );
-    const row = screen.getByText("Loading older entries…");
+    const row = screen.getByText("Load older entries");
     expect(row.closest("button")).toBeDisabled();
     fireEvent.click(row);
     // Near-bottom scroll must not fire either while a page is in flight.

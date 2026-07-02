@@ -1,5 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Badge, type BadgeVariant } from "@/components/ui/feedback/badge/Badge";
+import { Button } from "@/components/ui/actions/button/Button";
 import { FloatingLabelInput } from "@/components/ui/inputs/floating-label-input/FloatingLabelInput";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 import { SectionLabel } from "@/components/ui/display/section-label/SectionLabel";
@@ -64,10 +65,28 @@ function fmtTs(ts: string): string {
 // 24px pinned-at-top threshold with room for the load-older row itself.
 const LOAD_OLDER_NEAR_PX = 48;
 
-// Stable row key: the source's sequence number when present; otherwise the
-// ts/msg/filtered-index composite (ts+msg alone collides on repeated lines).
-function rowKey(l: LogEntry, i: number): string {
-  return l.seq != null ? `${l.seq}` : `${l.ts}-${l.msg}-${i}`;
+// Stable row keys for one filtered window: the source's sequence number when
+// present; otherwise ts+msg plus a duplicate-occurrence suffix (ts+msg alone
+// collides on repeated lines, and an index suffix would re-key every row each
+// time a new line prepends). Occurrences count from the OLD end so existing
+// rows keep their keys as newer lines arrive; seq-less sources don't page
+// older (seq is what the cursor API provides), so bottom-appends can't shift
+// them in practice.
+function rowKeysFor(filtered: LogEntry[]): string[] {
+  const seen = new Map<string, number>();
+  const keys = new Array<string>(filtered.length);
+  for (let i = filtered.length - 1; i >= 0; i--) {
+    const l = filtered[i];
+    if (l.seq != null) {
+      keys[i] = `${l.seq}`;
+      continue;
+    }
+    const base = `${l.ts}-${l.msg}`;
+    const n = seen.get(base) ?? 0;
+    seen.set(base, n + 1);
+    keys[i] = n === 0 ? base : `${base}-${n}`;
+  }
+  return keys;
 }
 
 /**
@@ -85,6 +104,7 @@ export function ServiceLogcat({
 }: ServiceLogcatProps) {
   const { query, setQuery, floor, setFloor, tailing, setTailing, filtered, total } =
     useLogcat(logs);
+  const rowKeys = useMemo(() => rowKeysFor(filtered), [filtered]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true); // is the view currently pinned at the top?
   const programmaticRef = useRef(false);
@@ -141,11 +161,11 @@ export function ServiceLogcat({
   // baseline updates after an expand/collapse too (no false offset).
   const prevLenRef = useRef(filtered.length);
   const prevHeightRef = useRef(0);
-  const prevTopKeyRef = useRef(filtered.length > 0 ? rowKey(filtered[0], 0) : null);
+  const prevTopKeyRef = useRef<string | null>(rowKeys[0] ?? null);
   useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const topKey = filtered.length > 0 ? rowKey(filtered[0], 0) : null;
+    const topKey = rowKeys[0] ?? null;
     const grewAbove =
       filtered.length > prevLenRef.current && topKey !== prevTopKeyRef.current;
     if (tailing && pinnedRef.current) {
@@ -160,7 +180,7 @@ export function ServiceLogcat({
     prevLenRef.current = filtered.length;
     prevHeightRef.current = el.scrollHeight;
     prevTopKeyRef.current = topKey;
-  }, [tailing, filtered, openKey]);
+  }, [tailing, filtered, rowKeys, openKey]);
 
   const copyAll = () => {
     const text = filtered.map((l) => `${l.ts} ${l.level.toUpperCase()} ${l.msg}`).join("\n");
@@ -243,7 +263,7 @@ export function ServiceLogcat({
           ) : (
             <div className="space-y-0.5">
               {filtered.map((l, i) => {
-                const key = rowKey(l, i);
+                const key = rowKeys[i];
                 const hasDetail =
                   l.method != null || l.req_body != null || l.res_body != null;
                 const open = openKey === key;
@@ -287,21 +307,16 @@ export function ServiceLogcat({
             </div>
           )}
           {onLoadOlder && hasOlder && (
-            <button
-              type="button"
-              disabled={loadingOlder}
+            <Button
+              variant="text"
+              size="xs"
+              fullWidth
+              loading={loadingOlder}
               onClick={onLoadOlder}
-              className={cn(
-                "mt-1 flex w-full items-center justify-center gap-2 rounded py-1.5",
-                "text-on-surface-variant/60 hover:bg-surface-container hover:text-on-surface",
-                loadingOlder && "pointer-events-none",
-              )}
+              className="mt-1"
             >
-              {loadingOlder && (
-                <span className="inline-block w-3 h-3 rounded-full border-2 border-on-surface-variant/30 border-t-on-surface-variant animate-spin" />
-              )}
-              {loadingOlder ? "Loading older entries…" : "Load older entries"}
-            </button>
+              Load older entries
+            </Button>
           )}
         </div>
       </Surface>
