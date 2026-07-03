@@ -118,6 +118,11 @@ export {
   type StatusLevel,
 } from "./components/ui/blocks/status-indicator/StatusIndicator";
 export {
+  TrendChart,
+  type TrendChartProps,
+  type TrendChartOverlay,
+} from "./components/ui/blocks/trend-chart/TrendChart";
+export {
   StarRating,
   type StarRatingProps,
 } from "./components/ui/blocks/star-rating/StarRating";
