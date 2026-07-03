@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/75 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/75 infos</a><span class="filter-pill ok" aria-disabled="true">308 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/75 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/75 infos</a><span class="filter-pill ok" aria-disabled="true">311 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -10753,7 +10753,7 @@ title: string</code></pre>
       <div class="badges">
         <label for="c-55-ui-inputs-segmentedbutton-props" class="badge ok as-toggle">9 prop types</label>
         <label for="c-55-ui-inputs-segmentedbutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-55-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-55-ui-inputs-segmentedbutton-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -10913,6 +10913,22 @@ variant?: &quot;pills&quot; | &quot;boxed&quot; = &quot;pills&quot;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
+                <span class="ex-name">With Badge</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A small red count badge anchored to an option&#39;s corner (e.g. an open-items count)</div>
+              <pre><code>const WithBadge = () =&gt; &lt;SegmentedButton
+    options={[
+      { value: &quot;list&quot;, label: &quot;List&quot; },
+      { value: &quot;issues&quot;, label: &quot;Issues&quot;, badge: 4 },
+    ]}
+    value=&quot;list&quot;
+    aria-label=&quot;Select view&quot;
+    disabled={false} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
                 <span class="ex-name">Boxed</span>
                 <span class="badge ok">story ok</span>
               </div>
@@ -10953,7 +10969,7 @@ variant?: &quot;pills&quot; | &quot;boxed&quot; = &quot;pills&quot;</code></pre>
       <div class="badges">
         <label for="c-56-ui-dev-servicelogcat-props" class="badge ok as-toggle">6 prop types</label>
         
-        <label for="c-56-ui-dev-servicelogcat-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-56-ui-dev-servicelogcat-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -11059,6 +11075,49 @@ onLoadOlder?: () =&gt; void</code></pre>
               
               
               <pre><code>const Empty = () =&gt; &lt;ServiceLogcat logs={[]} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Initial Query</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Seeds the text filter box on mount — e.g. landing pre-filtered from a deep link.</div>
+              <pre><code>const WithInitialQuery = () =&gt; &lt;ServiceLogcat logs={SAMPLE_LOGS} initialQuery=&quot;users&quot; /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Localized</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Every user-facing string overridden — e.g. for a non-English locale.</div>
+              <pre><code>const Localized = () =&gt; &lt;ServiceLogcat
+    logs={SAMPLE_LOGS}
+    labels={{
+      title: &quot;日誌&quot;,
+      live: &quot;即時&quot;,
+      paused: &quot;已暫停&quot;,
+      floorAll: &quot;全部&quot;,
+      floorWarn: &quot;警告以上&quot;,
+      floorError: &quot;錯誤&quot;,
+      filterAriaLabel: &quot;依層級篩選&quot;,
+      filterPlaceholder: &quot;篩選紀錄&quot;,
+      clearFilterAriaLabel: &quot;清除篩選&quot;,
+      copyAriaLabel: &quot;複製紀錄&quot;,
+      noMatchingEntries: &quot;沒有符合的紀錄。&quot;,
+      request: &quot;請求&quot;,
+      response: &quot;回應&quot;,
+      noRequestResponseBody: &quot;沒有請求或回應內容。&quot;,
+      loadOlderEntries: &quot;載入較舊的紀錄&quot;,
+      entriesLabel: (filteredCount, total, query) =&gt; {
+        const base =
+          filteredCount === total ? `共 ${total} 筆` : `${total} 筆中的 ${filteredCount} 筆`;
+        return query ? `${base} · &quot;${query}&quot;` : base;
+      },
+      tailingStatus: &quot;即時追蹤中&quot;,
+      pausedStatus: &quot;已暫停&quot;,
+    }} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
