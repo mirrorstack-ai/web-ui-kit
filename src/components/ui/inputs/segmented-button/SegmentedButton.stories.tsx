@@ -82,6 +82,18 @@ export const Disabled: Story = {
   },
 };
 
+/** A small red count badge anchored to an option's corner (e.g. an open-items count) */
+export const WithBadge: Story = {
+  args: {
+    options: [
+      { value: "list", label: "List" },
+      { value: "issues", label: "Issues", badge: 4 },
+    ],
+    value: "list",
+    "aria-label": "Select view",
+  },
+};
+
 /** Boxed/connected track with an inset selected pill */
 export const Boxed: Story = {
   render: (args) => {
