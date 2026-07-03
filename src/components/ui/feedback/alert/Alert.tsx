@@ -7,7 +7,7 @@ import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 export const meta: ComponentMeta = {
   name: "Alert",
   description:
-    "Dismissible inline alert banner with error/success/warning/primary/secondary variants",
+    "Dismissible inline alert banner with error/success/warning/primary/secondary variants and an optional trailing action slot",
 };
 
 export type AlertVariant =
@@ -30,6 +30,9 @@ export interface AlertProps {
   /** Hide the leading icon entirely. Useful when the alert sits inside a
    * dialog or section that already conveys severity. */
   hideIcon?: boolean;
+  /** Optional trailing action (e.g. a Button), vertically centered against the
+   * whole banner. Sits before the dismiss control when both are present. */
+  action?: ReactNode;
 }
 
 const variantStyles: Record<AlertVariant, string> = {
@@ -57,6 +60,7 @@ export function Alert({
   icon,
   iconSize,
   hideIcon,
+  action,
 }: AlertProps) {
   return (
     <div
@@ -79,6 +83,7 @@ export function Alert({
           {title && <h3 className="text-sm font-medium">{title}</h3>}
           <div className={cn("text-sm", title && "mt-1.5")}>{children}</div>
         </div>
+        {action && <div className="ml-3 shrink-0">{action}</div>}
         {onDismiss && (
           <IconButton
             icon="close"

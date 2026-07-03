@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Alert, type AlertVariant } from "./Alert";
+import { Button } from "@/components/ui/actions/button/Button";
 
 const meta: Meta<typeof Alert> = {
   title: "UI/Feedback/Alert",
@@ -47,6 +48,19 @@ export const Dismissible: Story = {
     title: "Connection unstable",
     children: "Some features may not work correctly.",
     onDismiss: () => {},
+  },
+};
+
+export const WithAction: Story = {
+  args: {
+    variant: "warning",
+    title: "Update available",
+    children: "Version 1.4.0 is ready to install.",
+    action: (
+      <Button variant="filled" color="warning" size="sm">
+        Update
+      </Button>
+    ),
   },
 };
 

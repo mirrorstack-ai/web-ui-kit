@@ -42,6 +42,15 @@ describe("Alert", () => {
     expect(screen.queryByLabelText("Dismiss")).not.toBeInTheDocument();
   });
 
+  it("renders the action node when provided", () => {
+    render(
+      <Alert variant="warning" title="Update available" action={<button>Update</button>}>
+        Version 1.4.0 is ready.
+      </Alert>,
+    );
+    expect(screen.getByRole("button", { name: "Update" })).toBeInTheDocument();
+  });
+
   it("applies custom className", () => {
     render(
       <Alert variant="success" className="mt-4">
