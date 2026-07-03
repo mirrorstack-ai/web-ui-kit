@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/75 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">74/75 infos</a><span class="filter-pill ok" aria-disabled="true">308 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/76 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">75/76 infos</a><span class="filter-pill ok" aria-disabled="true">314 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -14476,14 +14476,262 @@ export const LiveShape: StoryObj = {
   no-story-error
   no-doc-error"
   role="listitem"
+  aria-label="TrendChart">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> TrendChart</h2>
+      <div class="badges">
+        <label for="c-73-ui-blocks-trendchart-props" class="badge ok as-toggle">12 prop types</label>
+        <label for="c-73-ui-blocks-trendchart-info" class="badge info as-toggle">1 info</label>
+        <label for="c-73-ui-blocks-trendchart-stories" class="badge ok as-toggle">6 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/blocks/trend-chart/TrendChart.stories.tsx">ui-blocks-trendchart · ./src/components/ui/blocks/trend-chart/TrendChart.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="c-73-ui-blocks-trendchart-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-73-ui-blocks-trendchart-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  <input id="c-73-ui-blocks-trendchart-props" class="tg tg-props" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+        <div class="panel panel-props">
+          <div class="note ok">
+            <div class="row">
+              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
+              <span class="badge ok">12 prop types</span>
+            </div>
+            <pre><code>Component: src/components/ui/blocks/trend-chart/TrendChart.tsx::TrendChart</code></pre>
+            <pre><code>Props:</code></pre>
+            <pre><code>/**
+ * Extra classes on the chart&#39;s outer wrapper `div`.
+ */
+className?: string
+
+/**
+ * Tailwind text-color utility class for the main series (e.g.
+ *  &quot;text-primary&quot;), applied via `currentColor` — matches Sparkline&#39;s
+ *  color convention. Never a raw hex/CSS color, so the chart follows the
+ *  design system&#39;s light/dark tokens automatically.
+ */
+color: string
+
+/**
+ * Unique id for this chart&#39;s SVG gradient `&lt;defs&gt;`. Auto-generated via
+ *  `useId()` when omitted — pass explicitly only if you need a stable,
+ *  predictable id (e.g. snapshot tests).
+ */
+fillId?: string
+
+/**
+ * SVG viewBox height in px. Default `140`.
+ */
+height?: number = 140
+
+/**
+ * When `showXAxisLabels` is true, render only every Nth label. Default `4`.
+ */
+labelEvery?: number = 4
+
+/**
+ * One label per value. Used for x-axis ticks (when `showXAxisLabels`) and
+ *  as the hover-tooltip heading.
+ */
+labels: string[]
+
+/**
+ * Zero or more additional dashed series drawn over the main line, each
+ *  with its own hover dot and tooltip row.
+ */
+overlays?: TrendChartOverlay[]
+
+/**
+ * Render the gradient area fill beneath the main line. Default `true`.
+ */
+showArea?: boolean = true
+
+/**
+ * Render x-axis time labels below the chart (every `labelEvery`-th
+ *  label). Default `true`. Set `false` for compact tiles where axis
+ *  labels add noise without adding information — the chart reclaims the
+ *  bottom margin those labels would otherwise occupy.
+ */
+showXAxisLabels?: boolean = true
+
+/**
+ * Draw a dashed threshold line at this y-value, with red-tinted shading
+ *  above it (the shading only renders when `showArea` is also true; the
+ *  dashed line itself always renders). Omit for no threshold.
+ */
+thresholdY?: number
+
+/**
+ * Unit suffix appended to the main series&#39; y-axis tick labels and
+ *  tooltip value. Default `&quot;&quot;`.
+ */
+unit?: string = &quot;&quot;
+
+/**
+ * Main series values — plotted as the solid line (+ area fill if `showArea`).
+ */
+values: number[]</code></pre>
+          </div>
+        </div>
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { TrendChart } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">The base chart — a smooth line with an area fill and x-axis labels.</div>
+              <pre><code>const Playground = () =&gt; &lt;div
+    className=&quot;w-[520px] rounded-2xl border border-outline-variant bg-surface-container-low p-4 text-primary&quot;&gt;
+    &lt;TrendChart
+        values={REQUESTS}
+        labels={LABELS}
+        color=&quot;text-primary&quot;
+        fillId=&quot;trend-chart-story-fill&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Overlay</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A single dashed overlay sharing the main series&#39; auto-scaled axis (e.g. p50 read alongside p95, both in ms).</div>
+              <pre><code>const WithOverlay = () =&gt; &lt;div
+    className=&quot;w-[420px] rounded-2xl border border-outline-variant bg-surface-container-low p-4 text-primary&quot;&gt;
+    &lt;TrendChart
+        values={P95}
+        labels={LABELS}
+        color=&quot;text-primary&quot;
+        fillId=&quot;trend-chart-story-p95&quot;
+        unit=&quot;ms&quot;
+        showArea={false}
+        overlays={[{ values: P50, color: &quot;text-secondary&quot;, label: &quot;p50&quot; }]} /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Fixed Max Overlays</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Multiple overlays, each pinned to its own `fixedMax` — 4xx/5xx rates (%) overlaid on a request-count chart. Auto-scaling a stable ~1-3% rate to fill the whole height would exaggerate it into a dramatic-looking wave.</div>
+              <pre><code>const WithFixedMaxOverlays = () =&gt; &lt;div
+    className=&quot;w-[420px] rounded-2xl border border-outline-variant bg-surface-container-low p-4 text-primary&quot;&gt;
+    &lt;TrendChart
+        values={REQUESTS}
+        labels={LABELS}
+        color=&quot;text-primary&quot;
+        fillId=&quot;trend-chart-story-requests&quot;
+        overlays={[
+          { values: RATE_4XX, color: &quot;text-warning&quot;, label: &quot;4xx&quot;, fixedMax: 10, unit: &quot;%&quot; },
+          { values: RATE_5XX, color: &quot;text-error&quot;, label: &quot;5xx&quot;, fixedMax: 10, unit: &quot;%&quot; },
+        ]} /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Threshold</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A dashed threshold line with red-tinted shading above it — the shading only renders when `showArea` is also true; the line itself always renders.</div>
+              <pre><code>const WithThreshold = () =&gt; &lt;div
+    className=&quot;w-[420px] rounded-2xl border border-outline-variant bg-surface-container-low p-4 text-warning&quot;&gt;
+    &lt;TrendChart
+        values={COLD_START}
+        labels={LABELS}
+        color=&quot;text-warning&quot;
+        fillId=&quot;trend-chart-story-cold-start&quot;
+        unit=&quot;ms&quot;
+        thresholdY={300} /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">No Axis Labels</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Compact tile look: no x-axis labels, tighter bottom margin. Used by dashboard tiles where axis labels would add noise without information.</div>
+              <pre><code>const NoAxisLabels = () =&gt; &lt;div
+    className=&quot;w-80 rounded-2xl border border-outline-variant bg-surface-container-low p-4 text-primary&quot;&gt;
+    &lt;TrendChart
+        values={REQUESTS}
+        labels={LABELS}
+        color=&quot;text-primary&quot;
+        fillId=&quot;trend-chart-story-compact&quot;
+        height={100}
+        showXAxisLabels={false} /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Empty Data</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Fewer than 2 points (e.g. data still loading) renders an empty chart frame instead of throwing.</div>
+              <pre><code>const EmptyData = () =&gt; &lt;div
+    className=&quot;w-80 rounded-2xl border border-outline-variant bg-surface-container-low p-4 text-primary&quot;&gt;
+    &lt;TrendChart
+        values={[]}
+        labels={[]}
+        color=&quot;text-primary&quot;
+        fillId=&quot;trend-chart-story-empty&quot; /&gt;
+&lt;/div&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  no-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
   aria-label="TypeToConfirmDialog">
   <div class="head">
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> TypeToConfirmDialog</h2>
       <div class="badges">
-        <label for="c-73-ui-surfaces-typetoconfirmdialog-props" class="badge ok as-toggle">11 prop types</label>
-        <label for="c-73-ui-surfaces-typetoconfirmdialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-73-ui-surfaces-typetoconfirmdialog-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-74-ui-surfaces-typetoconfirmdialog-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-74-ui-surfaces-typetoconfirmdialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-74-ui-surfaces-typetoconfirmdialog-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -14495,10 +14743,10 @@ export const LiveShape: StoryObj = {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-73-ui-surfaces-typetoconfirmdialog-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-73-ui-surfaces-typetoconfirmdialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-74-ui-surfaces-typetoconfirmdialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-74-ui-surfaces-typetoconfirmdialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-73-ui-surfaces-typetoconfirmdialog-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-74-ui-surfaces-typetoconfirmdialog-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -14724,9 +14972,9 @@ warnTitle: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> VerificationCodeInput</h2>
       <div class="badges">
-        <label for="c-74-ui-inputs-verificationcodeinput-props" class="badge ok as-toggle">7 prop types</label>
-        <label for="c-74-ui-inputs-verificationcodeinput-info" class="badge info as-toggle">1 info</label>
-        <label for="c-74-ui-inputs-verificationcodeinput-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-75-ui-inputs-verificationcodeinput-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-75-ui-inputs-verificationcodeinput-info" class="badge info as-toggle">1 info</label>
+        <label for="c-75-ui-inputs-verificationcodeinput-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
@@ -14738,10 +14986,10 @@ warnTitle: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-74-ui-inputs-verificationcodeinput-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-74-ui-inputs-verificationcodeinput-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-75-ui-inputs-verificationcodeinput-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-75-ui-inputs-verificationcodeinput-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-74-ui-inputs-verificationcodeinput-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-75-ui-inputs-verificationcodeinput-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
