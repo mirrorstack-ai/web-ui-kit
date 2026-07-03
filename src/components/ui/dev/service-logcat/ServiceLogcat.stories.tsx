@@ -67,6 +67,42 @@ export const Empty: Story = {
   args: { logs: [] },
 };
 
+/** Seeds the text filter box on mount — e.g. landing pre-filtered from a deep link. */
+export const WithInitialQuery: Story = {
+  args: { logs: SAMPLE_LOGS, initialQuery: "users" },
+};
+
+/** Every user-facing string overridden — e.g. for a non-English locale. */
+export const Localized: Story = {
+  args: {
+    logs: SAMPLE_LOGS,
+    labels: {
+      title: "日誌",
+      live: "即時",
+      paused: "已暫停",
+      floorAll: "全部",
+      floorWarn: "警告以上",
+      floorError: "錯誤",
+      filterAriaLabel: "依層級篩選",
+      filterPlaceholder: "篩選紀錄",
+      clearFilterAriaLabel: "清除篩選",
+      copyAriaLabel: "複製紀錄",
+      noMatchingEntries: "沒有符合的紀錄。",
+      request: "請求",
+      response: "回應",
+      noRequestResponseBody: "沒有請求或回應內容。",
+      loadOlderEntries: "載入較舊的紀錄",
+      entriesLabel: (filteredCount, total, query) => {
+        const base =
+          filteredCount === total ? `共 ${total} 筆` : `${total} 筆中的 ${filteredCount} 筆`;
+        return query ? `${base} · "${query}"` : base;
+      },
+      tailingStatus: "即時追蹤中",
+      pausedStatus: "已暫停",
+    },
+  },
+};
+
 // Older pages are generated on demand, seq-keyed, and appended at the OLD end
 // (the bottom). Scroll near the bottom or click the row to load a page.
 const PAGE_SIZE = 20;

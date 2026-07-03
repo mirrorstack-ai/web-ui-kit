@@ -32,8 +32,8 @@ export interface UseLogcatResult {
  * first); the hook reverses them to newest-first so the console shows the
  * latest line at the top.
  */
-export function useLogcat(logs: LogEntry[]): UseLogcatResult {
-  const [query, setQuery] = useState("");
+export function useLogcat(logs: LogEntry[], initialQuery = ""): UseLogcatResult {
+  const [query, setQuery] = useState(initialQuery);
   const [floor, setFloor] = useState<LevelFloor>("all");
   const [tailing, setTailing] = useState(true);
 

@@ -23,6 +23,53 @@ export const meta: ComponentMeta = {
     "Service log console with severity-floor filter, text filter, live-tail toggle, copy, load-older paging, and an expandable request/response detail per line",
 };
 
+/** Every user-facing string ServiceLogcat renders, for callers that need it
+ *  in a locale other than English — all optional, defaulting to the current
+ *  English copy, so passing nothing is fully backward compatible. */
+export interface ServiceLogcatLabels {
+  /** Default: "Logcat" */
+  title?: string;
+  /** Live-tail toggle when on. Default: "Live" */
+  live?: string;
+  /** Live-tail toggle when off. Default: "Paused" */
+  paused?: string;
+  /** Severity-floor option: no filter. Default: "All" */
+  floorAll?: string;
+  /** Severity-floor option: warn and above. Default: "Warn+" */
+  floorWarn?: string;
+  /** Severity-floor option: errors only. Default: "Errors" */
+  floorError?: string;
+  /** aria-label on the severity-floor segmented control. Default: "Filter by level" */
+  filterAriaLabel?: string;
+  /** Text-filter input label. Default: "Filter logs" */
+  filterPlaceholder?: string;
+  /** aria-label on the clear-filter button. Default: "Clear filter" */
+  clearFilterAriaLabel?: string;
+  /** aria-label on the copy-logs button. Default: "Copy logs" */
+  copyAriaLabel?: string;
+  /** Shown when the filter matches nothing. Default: "No matching log entries." */
+  noMatchingEntries?: string;
+  /** Expanded-row request section heading. Default: "Request" */
+  request?: string;
+  /** Expanded-row response section heading. Default: "Response" */
+  response?: string;
+  /** Expanded-row body when neither request nor response is present.
+   *  Default: "No request or response body." */
+  noRequestResponseBody?: string;
+  /** Load-older-entries row label. Default: "Load older entries" */
+  loadOlderEntries?: string;
+  /** Footer entry-count line, e.g. "42 entries" or "5 of 42" plus the active
+   *  query. Called with (filteredCount, total, query). */
+  entriesLabel?: (filteredCount: number, total: number, query: string) => string;
+  /** Footer status when tailing. Default: "tailing" */
+  tailingStatus?: string;
+  /** Footer status when paused. Default: "paused" */
+  pausedStatus?: string;
+}
+
+const defaultEntriesLabel = (filteredCount: number, total: number, query: string) =>
+  `${filteredCount === total ? `${total} entries` : `${filteredCount} of ${total}`}${query ? ` · "${query}"` : ""}`;
+
 export interface ServiceLogcatProps {
   /** Log entries, chronological (oldest first); the console reverses them so the newest line sits at the top. */
   logs: LogEntry[];
@@ -32,6 +79,12 @@ export interface ServiceLogcatProps {
   hasOlder?: boolean;
   /** Older page currently loading — shows the row in a loading state and suppresses re-fire. */
   loadingOlder?: boolean;
+  /** Seeds the text filter box on mount (e.g. a module slug, to land pre-filtered
+   *  from a deep link) — after that, the input is normal uncontrolled state. */
+  initialQuery?: string;
+  /** Override any/all of the component's own strings for i18n. Unset fields
+   *  fall back to the English default. */
+  labels?: ServiceLogcatLabels;
 }
 
 const LEVEL_BADGE: Record<LogLevel, BadgeVariant> = {
@@ -47,12 +100,6 @@ const LEVEL_TEXT: Record<LogLevel, string> = {
   warn: "text-warning",
   error: "text-error",
 };
-
-const FLOOR_OPTIONS: readonly { value: LevelFloor; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "warn", label: "Warn+" },
-  { value: "error", label: "Errors" },
-];
 
 // Compact single-line timestamp: "2026-06-30T16:23:45.225373081Z" ->
 // "2026-06-30 16:23:45.225" (drop the T, nanoseconds, and trailing Z).
@@ -101,9 +148,16 @@ export function ServiceLogcat({
   onLoadOlder,
   hasOlder = false,
   loadingOlder = false,
+  initialQuery,
+  labels,
 }: ServiceLogcatProps) {
+  const floorOptions: readonly { value: LevelFloor; label: string }[] = [
+    { value: "all", label: labels?.floorAll ?? "All" },
+    { value: "warn", label: labels?.floorWarn ?? "Warn+" },
+    { value: "error", label: labels?.floorError ?? "Errors" },
+  ];
   const { query, setQuery, floor, setFloor, tailing, setTailing, filtered, total } =
-    useLogcat(logs);
+    useLogcat(logs, initialQuery);
   const rowKeys = useMemo(() => rowKeysFor(filtered), [filtered]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true); // is the view currently pinned at the top?
@@ -190,7 +244,7 @@ export function ServiceLogcat({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center gap-2 mb-2">
-        <SectionLabel>Logcat</SectionLabel>
+        <SectionLabel>{labels?.title ?? "Logcat"}</SectionLabel>
         <button
           type="button"
           onClick={() => {
@@ -212,14 +266,14 @@ export function ServiceLogcat({
               tailing ? "bg-success animate-pulse" : "bg-on-surface-variant/40",
             )}
           />
-          {tailing ? "Live" : "Paused"}
+          {tailing ? (labels?.live ?? "Live") : (labels?.paused ?? "Paused")}
         </button>
       </div>
 
       <div className="flex items-center gap-2 mb-3">
         <SegmentedButton
-          aria-label="Filter by level"
-          options={FLOOR_OPTIONS}
+          aria-label={labels?.filterAriaLabel ?? "Filter by level"}
+          options={floorOptions}
           value={floor}
           onChange={setFloor}
           size="sm"
@@ -227,7 +281,7 @@ export function ServiceLogcat({
         <div className="flex-1">
           <FloatingLabelInput
             id="logcat-filter"
-            label="Filter logs"
+            label={labels?.filterPlaceholder ?? "Filter logs"}
             size="sm"
             hideLabel
             value={query}
@@ -236,7 +290,7 @@ export function ServiceLogcat({
         </div>
         <IconButton
           icon="close"
-          aria-label="Clear filter"
+          aria-label={labels?.clearFilterAriaLabel ?? "Clear filter"}
           variant="filled"
           size="md"
           disabled={!query}
@@ -244,7 +298,7 @@ export function ServiceLogcat({
         />
         <IconButton
           icon="content_copy"
-          aria-label="Copy logs"
+          aria-label={labels?.copyAriaLabel ?? "Copy logs"}
           variant="tonal"
           size="md"
           disabled={filtered.length === 0}
@@ -259,7 +313,7 @@ export function ServiceLogcat({
           className="h-full overflow-y-auto p-3 font-mono text-xs"
         >
           {filtered.length === 0 ? (
-            <p className="text-on-surface-variant/50 py-6 text-center">No matching log entries.</p>
+            <p className="text-on-surface-variant/50 py-6 text-center">{labels?.noMatchingEntries ?? "No matching log entries."}</p>
           ) : (
             <div className="space-y-0.5">
               {filtered.map((l, i) => {
@@ -294,10 +348,12 @@ export function ServiceLogcat({
                     </div>
                     {open && (
                       <div className="mb-1 mt-0.5 ml-4 space-y-1.5 border-l border-outline-variant/40 pl-3">
-                        {l.req_body ? <LogDetail label="Request" body={l.req_body} /> : null}
-                        {l.res_body ? <LogDetail label="Response" body={l.res_body} /> : null}
+                        {l.req_body ? <LogDetail label={labels?.request ?? "Request"} body={l.req_body} /> : null}
+                        {l.res_body ? <LogDetail label={labels?.response ?? "Response"} body={l.res_body} /> : null}
                         {!l.req_body && !l.res_body ? (
-                          <p className="text-on-surface-variant/40">No request or response body.</p>
+                          <p className="text-on-surface-variant/40">
+                            {labels?.noRequestResponseBody ?? "No request or response body."}
+                          </p>
                         ) : null}
                       </div>
                     )}
@@ -315,7 +371,7 @@ export function ServiceLogcat({
               onClick={onLoadOlder}
               className="mt-1"
             >
-              Load older entries
+              {labels?.loadOlderEntries ?? "Load older entries"}
             </Button>
           )}
         </div>
@@ -323,10 +379,9 @@ export function ServiceLogcat({
 
       <div className="flex items-center justify-between mt-2 px-1 text-xs text-on-surface-variant/50">
         <span>
-          {filtered.length === total ? `${total} entries` : `${filtered.length} of ${total}`}
-          {query && ` · “${query}”`}
+          {(labels?.entriesLabel ?? defaultEntriesLabel)(filtered.length, total, query)}
         </span>
-        <span className={cn(tailing && "text-success/70")}>{tailing ? "tailing" : "paused"}</span>
+        <span className={cn(tailing && "text-success/70")}>{tailing ? (labels?.tailingStatus ?? "tailing") : (labels?.pausedStatus ?? "paused")}</span>
       </div>
     </div>
   );
