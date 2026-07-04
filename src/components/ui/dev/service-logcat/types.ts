@@ -13,6 +13,8 @@ export interface LogEntry {
   ts: string;
   level: LogLevel;
   msg: string;
+  /** Monotonic sequence number from the log source; used as a stable row key when present. */
+  seq?: number;
   // Optional request/response detail — present on access-log lines captured by
   // the dev-proxy, absent on plain log lines. Keys match the dispatch ring
   // Entry JSON (snake_case).

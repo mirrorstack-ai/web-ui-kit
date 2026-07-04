@@ -21,6 +21,9 @@ export interface SegmentedButtonOption<T extends string = string> {
   readonly icon?: string;
   /** Visual tone for the unselected state. Defaults to "default". */
   readonly tone?: SegmentedButtonOptionTone;
+  /** Small red count badge anchored to the option's top-right corner (e.g. an
+   *  open-items count). Omit for no badge. */
+  readonly badge?: string | number;
 }
 
 export type SegmentedButtonSize = "sm" | "md";
@@ -139,7 +142,7 @@ export function SegmentedButton<T extends string = string>({
           disabled={disabled}
           aria-pressed={value === opt.value}
           className={cn(
-            "font-medium transition-colors inline-flex items-center justify-center gap-1.5",
+            "relative font-medium transition-colors inline-flex items-center justify-center gap-1.5",
             isBoxed ? boxedSizeStyles[size] : sizeStyles[size],
             isBoxed
               ? boxedButtonStyle(value === opt.value, inverse)
@@ -151,6 +154,14 @@ export function SegmentedButton<T extends string = string>({
         >
           {opt.icon && <Icon name={opt.icon} size={size === "sm" ? 16 : 18} />}
           {opt.label}
+          {opt.badge != null && (
+            <span
+              aria-hidden="true"
+              className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold leading-none text-on-error"
+            >
+              {opt.badge}
+            </span>
+          )}
         </button>
       ))}
     </div>
