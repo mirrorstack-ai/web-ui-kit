@@ -32,6 +32,22 @@ const SAMPLE_LOGS: LogEntry[] = [
     res_body: '{"error":"db_connection_refused","detail":"dial tcp 10.0.1.4:5432: connect: connection refused"}',
   },
   { ts: "2026-06-30T16:23:49.330114000Z", level: "info", msg: "GET /api/users 200 12ms", duration_ms: 12 },
+  // Status-driven severity: logged at "info" but a structured 500 — the badge +
+  // row escalate to error, and the row is expandable (per-log copy demo).
+  {
+    ts: "2026-06-30T16:23:50.771244000Z",
+    level: "info",
+    msg: "POST /public/complete 500",
+    method: "POST",
+    path: "/public/complete",
+    status: 500,
+    duration_ms: 132,
+    req_body: '{"code":"authz_grant_9f","state":"xR7"}',
+    res_body: '{"error":"internal","detail":"token exchange failed: upstream 503"}',
+  },
+  // Status-driven severity: "info" line whose only status signal is a trailing
+  // 4xx code in the message — escalates to warn.
+  { ts: "2026-06-30T16:23:51.402990000Z", level: "info", msg: "GET /api/items/nope 404", duration_ms: 6 },
 ];
 
 const meta: Meta<typeof ServiceLogcat> = {
@@ -87,6 +103,8 @@ export const Localized: Story = {
       filterPlaceholder: "篩選紀錄",
       clearFilterAriaLabel: "清除篩選",
       copyAriaLabel: "複製紀錄",
+      copyEntryAriaLabel: "複製此紀錄",
+      copiedAriaLabel: "已複製",
       noMatchingEntries: "沒有符合的紀錄。",
       request: "請求",
       response: "回應",
