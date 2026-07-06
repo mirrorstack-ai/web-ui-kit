@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import type {
-  LogEntry,
-  LogLevel,
+import {
+  effectiveLevel,
+  type LogEntry,
+  type LogLevel,
 } from "@/components/ui/dev/service-logcat/types";
 
 /**
@@ -44,8 +45,12 @@ export function useLogcat(logs: LogEntry[], initialQuery = ""): UseLogcatResult 
     // the latest line sits at the TOP and the console follows upward.
     return logs
       .filter((l) => {
-        if (LEVEL_RANK[l.level] < minRank) return false;
-        if (q && !l.msg.toLowerCase().includes(q) && !l.level.includes(q)) return false;
+        // Rank and match on the EFFECTIVE severity (escalated by HTTP status),
+        // not the raw level — otherwise an "info" line carrying a 500 renders
+        // a red error badge yet vanishes under the "Errors" floor.
+        const level = effectiveLevel(l);
+        if (LEVEL_RANK[level] < minRank) return false;
+        if (q && !l.msg.toLowerCase().includes(q) && !level.includes(q)) return false;
         return true;
       })
       .reverse();

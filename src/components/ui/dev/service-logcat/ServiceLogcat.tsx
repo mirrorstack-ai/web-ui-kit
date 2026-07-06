@@ -8,9 +8,10 @@ import { SegmentedButton } from "@/components/ui/inputs/segmented-button/Segment
 import { Surface } from "@/components/ui/surfaces/surface/Surface";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
-import type {
-  LogEntry,
-  LogLevel,
+import {
+  effectiveLevel,
+  type LogEntry,
+  type LogLevel,
 } from "@/components/ui/dev/service-logcat/types";
 import {
   useLogcat,
@@ -47,6 +48,10 @@ export interface ServiceLogcatLabels {
   clearFilterAriaLabel?: string;
   /** aria-label on the copy-logs button. Default: "Copy logs" */
   copyAriaLabel?: string;
+  /** aria-label on an expanded row's copy-this-entry button. Default: "Copy this log entry" */
+  copyEntryAriaLabel?: string;
+  /** aria-label on a copy-this-entry button in its just-copied state. Default: "Copied" */
+  copiedAriaLabel?: string;
   /** Shown when the filter matches nothing. Default: "No matching log entries." */
   noMatchingEntries?: string;
   /** Expanded-row request section heading. Default: "Request" */
@@ -108,6 +113,22 @@ function fmtTs(ts: string): string {
   return m ? `${m[1]} ${m[2]}.${m[3]}` : ts;
 }
 
+// Header line shared by per-log copy and copy-all: timestamp + effective
+// severity (not the raw level — an HTTP failure logged at "info" still reads
+// as an error) + message.
+function formatHeader(l: LogEntry): string {
+  return `${l.ts} ${effectiveLevel(l).toUpperCase()} ${l.msg}`;
+}
+
+// Single-entry copy payload: header line plus any expanded request/response
+// bodies, pretty-printed to match the detail view.
+function formatEntry(l: LogEntry): string {
+  const parts = [formatHeader(l)];
+  if (l.req_body) parts.push(`Request:\n${prettyJson(l.req_body)}`);
+  if (l.res_body) parts.push(`Response:\n${prettyJson(l.res_body)}`);
+  return parts.join("\n");
+}
+
 // Auto-fire distance from the bottom (old end) for load-older, mirroring the
 // 24px pinned-at-top threshold with room for the load-older row itself.
 const LOAD_OLDER_NEAR_PX = 48;
@@ -166,6 +187,27 @@ export function ServiceLogcat({
   // Accordion: only one row open at a time.
   const [openKey, setOpenKey] = useState<string | null>(null);
   const toggleRow = (key: string) => setOpenKey((cur) => (cur === key ? null : key));
+
+  // Per-log copy: which row last copied (drives its check/text-success flash),
+  // cleared ~2s later. Mirrors the copy affordance in ReadOnlyField.
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  useEffect(
+    () => () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    },
+    [],
+  );
+  const copyEntry = (key: string, l: LogEntry) => {
+    navigator.clipboard
+      ?.writeText(formatEntry(l))
+      .then(() => {
+        setCopiedKey(key);
+        if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+        copyTimerRef.current = setTimeout(() => setCopiedKey(null), 2000);
+      })
+      .catch(() => {});
+  };
 
   const scrollToTop = () => {
     const el = scrollRef.current;
@@ -237,7 +279,7 @@ export function ServiceLogcat({
   }, [tailing, filtered, rowKeys, openKey]);
 
   const copyAll = () => {
-    const text = filtered.map((l) => `${l.ts} ${l.level.toUpperCase()} ${l.msg}`).join("\n");
+    const text = filtered.map(formatHeader).join("\n");
     void navigator.clipboard?.writeText(text);
   };
 
@@ -310,6 +352,13 @@ export function ServiceLogcat({
         <div
           ref={scrollRef}
           onScroll={onScroll}
+          // overflow-anchor:none — the browser's own scroll anchoring would also
+          // shift scrollTop when new lines prepend at the TOP, double-counting the
+          // manual compensation in the layout effect below and jumping the view;
+          // we own that offset. Load-older pages append at the BOTTOM (below the
+          // viewport, where anchoring never adjusts), so paging keeps the read
+          // position untouched either way.
+          style={{ overflowAnchor: "none" }}
           className="h-full overflow-y-auto p-3 font-mono text-xs"
         >
           {filtered.length === 0 ? (
@@ -321,6 +370,9 @@ export function ServiceLogcat({
                 const hasDetail =
                   l.method != null || l.req_body != null || l.res_body != null;
                 const open = openKey === key;
+                // Escalate badge + row colour by HTTP status (a 500 logged at
+                // "info" still reads as an error), falling back to entry.level.
+                const level = effectiveLevel(l);
                 return (
                   <div key={key}>
                     <div
@@ -335,11 +387,11 @@ export function ServiceLogcat({
                         {fmtTs(l.ts)}
                       </span>
                       <span className="shrink-0">
-                        <Badge variant={LEVEL_BADGE[l.level]} size="sm">
-                          {l.level}
+                        <Badge variant={LEVEL_BADGE[level]} size="sm">
+                          {level}
                         </Badge>
                       </span>
-                      <span className={cn("flex-1 break-all", LEVEL_TEXT[l.level])}>{l.msg}</span>
+                      <span className={cn("flex-1 break-all", LEVEL_TEXT[level])}>{l.msg}</span>
                       {l.duration_ms != null && (
                         <span className="text-on-surface-variant/40 shrink-0 tabular-nums">
                           {l.duration_ms}ms
@@ -348,6 +400,26 @@ export function ServiceLogcat({
                     </div>
                     {open && (
                       <div className="mb-1 mt-0.5 ml-4 space-y-1.5 border-l border-outline-variant/40 pl-3">
+                        {/* Copy just this entry. Lives in the detail region — a
+                            sibling of the toggle above, not inside it — so copying
+                            never collapses the row. Global copy-all is unchanged. */}
+                        <div className="flex justify-end">
+                          <IconButton
+                            icon={copiedKey === key ? "check" : "content_copy"}
+                            variant="text"
+                            size="sm"
+                            aria-label={
+                              copiedKey === key
+                                ? (labels?.copiedAriaLabel ?? "Copied")
+                                : (labels?.copyEntryAriaLabel ?? "Copy this log entry")
+                            }
+                            onClick={() => copyEntry(key, l)}
+                            className={cn(
+                              "shrink-0",
+                              copiedKey === key ? "text-success" : "text-on-surface-variant",
+                            )}
+                          />
+                        </div>
                         {l.req_body ? <LogDetail label={labels?.request ?? "Request"} body={l.req_body} /> : null}
                         {l.res_body ? <LogDetail label={labels?.response ?? "Response"} body={l.res_body} /> : null}
                         {!l.req_body && !l.res_body ? (
