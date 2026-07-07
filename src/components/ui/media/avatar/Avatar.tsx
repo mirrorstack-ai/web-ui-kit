@@ -70,6 +70,14 @@ export interface AvatarProps {
    * an AvatarStack) need this to fully occlude what's beneath them.
    */
   opaque?: boolean;
+  /**
+   * Drop the decorative frame — the primary tint background and the primary
+   * border — leaving only the normalized fixed-size box. For using the avatar
+   * as a bare, consistently-sized slot for a brand logo (`src`) or a centered
+   * icon (`overlay`), e.g. a leading glyph beside a page heading. Images fit
+   * with object-contain (not cropped) in this mode.
+   */
+  plain?: boolean;
   overlay?: ReactNode;
   className?: string;
 }
@@ -83,6 +91,7 @@ export function Avatar({
   accept = "image/jpeg,image/png,image/gif,image/webp",
   square = false,
   opaque = false,
+  plain = false,
   overlay,
   className,
 }: AvatarProps) {
@@ -119,14 +128,19 @@ export function Avatar({
       src={src}
       alt=""
       onError={() => setImgFailed(true)}
-      className={cn(s.container, radius, "object-cover border-2 border-primary")}
+      className={cn(
+        s.container,
+        radius,
+        plain ? "object-contain" : "object-cover border-2 border-primary",
+      )}
     />
   ) : (
     <div
       className={cn(
         s.container,
         radius,
-        "bg-primary/20 flex items-center justify-center border-2 border-primary",
+        "flex items-center justify-center",
+        !plain && "bg-primary/20 border-2 border-primary",
       )}
     >
       {showInitial && initials && (
