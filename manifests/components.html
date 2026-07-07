@@ -1612,7 +1612,7 @@ logo: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Avatar</h2>
       <div class="badges">
-        <label for="c-5-ui-media-avatar-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-5-ui-media-avatar-props" class="badge ok as-toggle">11 prop types</label>
         <label for="c-5-ui-media-avatar-info" class="badge info as-toggle">1 info</label>
         <label for="c-5-ui-media-avatar-stories" class="badge ok as-toggle">9 stories</label>
         
@@ -1646,7 +1646,7 @@ logo: ReactNode</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">10 prop types</span>
+              <span class="badge ok">11 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/media/avatar/Avatar.tsx::Avatar</code></pre>
             <pre><code>Props:</code></pre>
@@ -1668,6 +1668,15 @@ onFileSelect?: (file: File) =&gt; void
 opaque?: boolean = false
 
 overlay?: ReactNode
+
+/**
+ * Drop the decorative frame — the primary tint background and the primary
+ * border — leaving only the normalized fixed-size box. For using the avatar
+ * as a bare, consistently-sized slot for a brand logo (`src`) or a centered
+ * icon (`overlay`), e.g. a leading glyph beside a page heading. Images fit
+ * with object-contain (not cropped) in this mode.
+ */
+plain?: boolean = false
 
 size?: &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot; | &quot;xl&quot; = &quot;md&quot;
 
