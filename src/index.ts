@@ -227,6 +227,18 @@ export {
   EmptyState,
   type EmptyStateProps,
 } from "./components/ui/feedback/empty-state/EmptyState";
+export {
+  ErrorScene,
+  type ErrorSceneProps,
+} from "./components/ui/feedback/error-scene/ErrorScene";
+export {
+  NotFoundScene,
+  type NotFoundSceneProps,
+} from "./components/ui/feedback/not-found-scene/NotFoundScene";
+export type {
+  FireSceneMember,
+  NotFoundSceneStrings,
+} from "./components/ui/feedback/error-scene/FireScene";
 
 // --- ui/graph ---
 export {
