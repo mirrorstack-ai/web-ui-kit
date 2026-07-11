@@ -146,19 +146,19 @@ export function FireScene({
       <style>{SCENE_CSS}</style>
       <div className="w-full max-w-4xl">
         <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-4">
-            <span className="text-7xl leading-none">{code}</span>
-            <Logo className="-mt-3 h-16 w-16" />
+          <div className="flex items-start gap-3 sm:gap-4">
+            <span className="text-5xl leading-none sm:text-7xl">{code}</span>
+            <Logo className="-mt-2 h-10 w-10 sm:-mt-3 sm:h-16 sm:w-16" />
           </div>
-          <h1 className="mb-6 text-2xl font-bold text-balance">{strings.title}</h1>
+          <h1 className="mb-4 text-xl font-bold text-balance sm:mb-6 sm:text-2xl">{strings.title}</h1>
         </div>
 
-        <div className="flex flex-col gap-2 text-lg text-on-surface">
+        <div className="flex flex-col gap-2 text-base text-on-surface sm:text-lg">
           <span>{strings.blame}</span>
           <span>{strings.pick}</span>
         </div>
 
-        <div className="mt-8 mb-6 grid grid-cols-2 gap-6 sm:grid-cols-4">
+        <div className="mt-6 mb-4 grid grid-cols-2 gap-3 sm:mt-8 sm:mb-6 sm:grid-cols-4 sm:gap-6">
           {members.map((member) => {
             const pressed = !dismissing && selection?.name === member.name;
             return (
@@ -168,7 +168,7 @@ export function FireScene({
                 aria-pressed={pressed}
                 onClick={() => pick(member.name)}
                 className={cn(
-                  "flex flex-col items-center rounded-2xl border-2 p-6 transition-all",
+                  "flex flex-col items-center rounded-2xl border-2 p-4 transition-all sm:p-6",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                   pressed
                     ? "cursor-default border-primary bg-surface-container-highest text-on-surface"
@@ -177,16 +177,16 @@ export function FireScene({
               >
                 <span
                   className={cn(
-                    "flex h-24 w-24 items-center justify-center rounded-full border-2 border-secondary transition-[filter] duration-300",
+                    "flex h-16 w-16 items-center justify-center rounded-full border-2 border-secondary transition-[filter] duration-300 sm:h-24 sm:w-24",
                     pressed && "grayscale",
                   )}
                   style={{ backgroundColor: member.iconBg }}
                 >
-                  <span className="flex h-13 w-13 items-center justify-center" aria-hidden="true">
+                  <span className="flex h-9 w-9 items-center justify-center sm:h-13 sm:w-13" aria-hidden="true">
                     {member.icon}
                   </span>
                 </span>
-                <span className="mt-3 text-sm font-medium">{member.name}</span>
+                <span className="mt-2 text-xs font-medium sm:mt-3 sm:text-sm">{member.name}</span>
               </button>
             );
           })}
