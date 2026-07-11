@@ -137,7 +137,12 @@ export function FireScene({
   };
 
   return (
-    <main className={cn("flex min-h-screen items-center justify-center p-6", className)}>
+    // No viewport-height claim: the scene renders inside AppShell's inner
+    // scroll container (main is viewport MINUS shell chrome + gutters), where
+    // `min-h-screen` guaranteed ~9rem of phantom scroll on a page that fits.
+    // Natural height composes anywhere; a standalone full-page consumer can
+    // pass `className="min-h-screen"` (cn/tailwind-merge lets it win).
+    <main className={cn("flex items-center justify-center p-6", className)}>
       <style>{SCENE_CSS}</style>
       <div className="w-full max-w-4xl">
         <div className="flex flex-col gap-4">
