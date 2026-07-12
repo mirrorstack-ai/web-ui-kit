@@ -76,4 +76,28 @@ describe("ThemeProvider", () => {
       "useTheme must be used within a ThemeProvider",
     );
   });
+
+  it("resolves to dark on mount when OS prefers dark and no preference is stored (incognito repro)", () => {
+    (window.matchMedia as ReturnType<typeof vi.fn>).mockImplementation(
+      (query: string) => ({
+        matches: query === "(prefers-color-scheme: dark)",
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }),
+    );
+
+    render(
+      <ThemeProvider>
+        <TestConsumer />
+      </ThemeProvider>,
+    );
+
+    expect(screen.getByTestId("resolved").textContent).toBe("dark");
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+  });
 });
