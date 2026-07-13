@@ -31,6 +31,10 @@ export type AgentSidebarQuestion =
       multiline?: boolean;
       placeholder?: string;
       defaultValue?: string;
+      /** When true, drop the heading label and let the input show its own
+       *  floating label (the field's `label` becomes the floating label). Use
+       *  for compact forms where a separate heading would be redundant. */
+      floatLabel?: boolean;
     })
   | (QuestionBase & {
       type: "toggle";
@@ -150,8 +154,8 @@ function renderField(
       return (
         <FloatingLabelInput
           id={fieldId}
-          label={q.placeholder ?? q.label}
-          hideLabel
+          label={q.floatLabel ? q.label : (q.placeholder ?? q.label)}
+          hideLabel={!q.floatLabel}
           multiline
           size="sm"
           rows={3}
@@ -165,8 +169,8 @@ function renderField(
     return (
       <FloatingLabelInput
         id={fieldId}
-        label={q.placeholder ?? q.label}
-        hideLabel
+        label={q.floatLabel ? q.label : (q.placeholder ?? q.label)}
+        hideLabel={!q.floatLabel}
         size="sm"
         value={typeof value === "string" ? value : ""}
         onChange={(e) => setAnswer(q.id, e.target.value)}
@@ -485,19 +489,21 @@ export function AgentSidebarMultiQuestion({
                   key={q.id}
                   className="rounded-md border border-outline-variant/20 px-3 py-2.5 flex flex-col gap-2"
                 >
-                  <div>
-                    <label
-                      htmlFor={q.type === "text" ? fieldId : undefined}
-                      className="text-sm font-medium text-inverse-on-surface block leading-snug"
-                    >
-                      {q.label}
-                    </label>
-                    {q.description && (
-                      <span className="text-xs text-inverse-on-surface/55 block mt-0.5 leading-relaxed">
-                        {q.description}
-                      </span>
-                    )}
-                  </div>
+                  {!(q.type === "text" && q.floatLabel) && (
+                    <div>
+                      <label
+                        htmlFor={q.type === "text" ? fieldId : undefined}
+                        className="text-sm font-medium text-inverse-on-surface block leading-snug"
+                      >
+                        {q.label}
+                      </label>
+                      {q.description && (
+                        <span className="text-xs text-inverse-on-surface/55 block mt-0.5 leading-relaxed">
+                          {q.description}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   {renderField(q, value, setAnswer, submitted)}
                 </div>
               );
