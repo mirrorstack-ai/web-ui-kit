@@ -16,7 +16,7 @@ import { useMenuKeyNav } from "@/hooks/useMenuKeyNav";
 
 const DD_NOTCH_W = 52;
 const DD_NOTCH_H = 46;
-const DD_R = 16;
+const DD_R = 12;
 const DD_IR = 10;
 const DD_SW = 1.5;
 
@@ -70,7 +70,7 @@ export interface DropdownMenuProps {
   notchWidth?: number;
   /** Height of the notch tab (SVG units). Default `46`. */
   notchHeight?: number;
-  /** Corner radius of the notch outline (SVG units). Default `16`. Lower it to
+  /** Corner radius of the notch outline (SVG units). Default `12`. Lower it to
    *  match a small trigger's own radius for a less-rounded head (e.g. an icon
    *  button with an 8px radius). */
   notchRadius?: number;
@@ -277,7 +277,7 @@ export function DropdownMenu({
             // so the menu grows upward instead of down.
             [openUp ? "bottom" : "top"]: useNotch ? -7 : "calc(100% + 8px)",
             [fromEnd ? "right" : "left"]: useNotch
-              ? (fromEnd ? -6 : -7) - Math.abs(offset)
+              ? (fromEnd ? -8 : -7) - Math.abs(offset)
               : -Math.abs(offset),
             filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
           }}
