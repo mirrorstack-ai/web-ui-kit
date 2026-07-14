@@ -29,10 +29,6 @@ jobs:
 
       - run: pnpm build-storybook
 
-      - name: Save PR number
-        if: github.event_name == 'pull_request'
-        run: echo "${{ github.event.pull_request.number }}" > storybook-static/PR_NUMBER
-
       - name: Upload Storybook build
         uses: actions/upload-artifact@v6
         with:
