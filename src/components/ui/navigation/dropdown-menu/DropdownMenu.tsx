@@ -277,7 +277,7 @@ export function DropdownMenu({
             // so the menu grows upward instead of down.
             [openUp ? "bottom" : "top"]: useNotch ? -7 : "calc(100% + 8px)",
             [fromEnd ? "right" : "left"]: useNotch
-              ? (fromEnd ? -5 : -7) - Math.abs(offset)
+              ? (fromEnd ? -6 : -7) - Math.abs(offset)
               : -Math.abs(offset),
             filter: "drop-shadow(0 4px 12px rgb(0 0 0 / 0.12))",
           }}
