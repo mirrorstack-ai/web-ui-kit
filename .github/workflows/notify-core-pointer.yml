@@ -1,0 +1,45 @@
+name: Notify core pointer
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: notify-core-pointer-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: >-
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint core-only workflow dispatcher token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.POINTER_DISPATCH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.POINTER_DISPATCH_APP_PRIVATE_KEY }}
+          owner: mirrorstack-ai
+          repositories: mirrorstack-core-v2
+
+      - name: Dispatch commit-bound pointer update
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          COMPONENT: web-ui-kit
+          COMPONENT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          gh workflow run pointer-bumps.yml \
+            --repo mirrorstack-ai/mirrorstack-core-v2 \
+            --ref main \
+            -f component="$COMPONENT" \
+            -f component_sha="$COMPONENT_SHA" \
+            -f dry_run=false
+          echo "Dispatched $COMPONENT@$COMPONENT_SHA to mirrorstack-core-v2"
