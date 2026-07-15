@@ -3,10 +3,19 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+
+// useEffect fires after the browser paints; useLayoutEffect fires synchronously
+// before it. The mount correction below must run before paint so it never
+// visibly overrides what the pre-paint <head> script already applied to
+// document.documentElement (SSR has no window, so fall back to useEffect there
+// to avoid React's "useLayoutEffect does nothing on the server" warning).
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export type Theme = "auto" | "light" | "dark";
 
@@ -65,7 +74,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     applyClass(resolved);
   }, []);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const stored = normalize(getCookie() ?? localStorage.getItem(STORAGE_KEY));
     setThemeState(stored);
     localStorage.setItem(STORAGE_KEY, stored);
