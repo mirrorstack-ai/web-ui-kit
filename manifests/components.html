@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1370,7 +1370,7 @@ onSelectAgentTab?: AgentSidebarHeaderProps[&quot;onSelectTab&quot;]
  *  the state the user left it — without it the shell derives visibility from
  *  width alone and always paints closed on reload. When `true` while the
  *  width is still 0 (fresh open, or restored-open before the width fetch
- *  lands) the shell seeds the width from the remembered/half-viewport size;
+ *  lands) the shell seeds the width from the remembered/~30%-viewport size;
  *  when `false` while open it collapses to 0. Omit it (undefined) to keep the
  *  uncontrolled width-derived behavior unchanged.
  */
