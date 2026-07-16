@@ -79,4 +79,18 @@ describe("Graph", () => {
       "fill-on-surface-variant",
     );
   });
+
+  it("renders a dashed edge with stroke-dasharray and leaves plain edges solid", () => {
+    const mixedEdges: GraphEdge[] = [
+      { source: "a", target: "b", dashed: true },
+      { source: "b", target: "c" },
+    ];
+    const { container } = render(<Graph nodes={nodes} edges={mixedEdges} />);
+    const dashArrays = Array.from(container.querySelectorAll("line")).map((l) =>
+      l.getAttribute("stroke-dasharray"),
+    );
+    // Exactly one edge is dashed; the other stays solid (no dasharray).
+    expect(dashArrays.filter((d) => d != null)).toHaveLength(1);
+    expect(dashArrays.filter((d) => d == null)).toHaveLength(1);
+  });
 });
