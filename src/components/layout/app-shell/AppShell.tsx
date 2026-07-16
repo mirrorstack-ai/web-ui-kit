@@ -39,6 +39,10 @@ export const meta: ComponentMeta = {
 
 const MIN_WIDTH = 350;
 const PADDING = 20;
+// Fresh-account default: with no persisted width, the agent sidebar opens at
+// ~30% of the viewport (then clamped to [MIN_WIDTH, viewport]). A saved width
+// always wins over this — see reopenWidth().
+const DEFAULT_OPEN_WIDTH_RATIO = 0.3;
 
 export interface AppShellProps {
   children: ReactNode;
@@ -70,7 +74,7 @@ export interface AppShellProps {
    *  the state the user left it — without it the shell derives visibility from
    *  width alone and always paints closed on reload. When `true` while the
    *  width is still 0 (fresh open, or restored-open before the width fetch
-   *  lands) the shell seeds the width from the remembered/half-viewport size;
+   *  lands) the shell seeds the width from the remembered/~30%-viewport size;
    *  when `false` while open it collapses to 0. Omit it (undefined) to keep the
    *  uncontrolled width-derived behavior unchanged. */
   open?: boolean;
@@ -401,16 +405,16 @@ function AppShellInner({
   useEffect(() => { dragWidthRef.current = sidebarWidth; }, [sidebarWidth]);
 
   // Reopen to the user's remembered (persisted) width, clamped to the live
-  // viewport. Falls back to half the viewport when no wider width was ever
+  // viewport. Falls back to ~30% of the viewport when no wider width was ever
   // recorded (lastOpenWidth still at the MIN_WIDTH floor).
   const reopenWidth = () => {
     // `>=`: lastOpenWidth === MIN_WIDTH is a real remembered width (user dragged
     // to the floor), not "no saved width" — restore it instead of falling back
-    // to half-viewport. Only the seed default (0, below the floor) falls back.
+    // to ~30% of the viewport. Only the seed default (0, below the floor) falls back.
     const remembered =
       lastOpenWidth >= MIN_WIDTH
         ? lastOpenWidth
-        : (windowWidth || 1000) * 0.5;
+        : (windowWidth || 1000) * DEFAULT_OPEN_WIDTH_RATIO;
     return Math.min(Math.max(remembered, MIN_WIDTH), maxWidthRef.current);
   };
 
@@ -423,7 +427,7 @@ function AppShellInner({
   // On reload this seed is a PLACEHOLDER: the persisted open:true hydrates
   // synchronously while the async width GET (SidebarProvider) is still in
   // flight, and lastOpenWidth is still 0 at that instant, so reopenWidth()
-  // returns the half-viewport fallback — not the user's saved drag. We seed
+  // returns the ~30%-viewport fallback — not the user's saved drag. We seed
   // through `seedWidth`, NOT `setSidebarWidth`, so this placeholder does NOT
   // mark the width hydrated; the fetched stored width then overrides it exactly
   // once when the GET lands (SidebarProvider). A genuine user drag still goes
