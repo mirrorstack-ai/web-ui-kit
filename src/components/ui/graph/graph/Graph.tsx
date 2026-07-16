@@ -32,6 +32,13 @@ export type GraphEdge = {
   source: string;
   target: string;
   weight?: number;
+  /**
+   * Render this edge as a dashed line instead of solid. Lets consumers
+   * distinguish a second edge kind (e.g. a "provides"/contributes relation
+   * alongside solid "depends on" edges) without any other styling change.
+   * Defaults to solid.
+   */
+  dashed?: boolean;
 };
 
 export interface GraphHandle {
@@ -879,6 +886,9 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                   x2={b.x}
                   y2={b.y}
                   strokeWidth={((lit ? 1.5 : 1) * lineSize) / view.zoom}
+                  strokeDasharray={
+                    e.dashed ? `${6 / view.zoom} ${4 / view.zoom}` : undefined
+                  }
                   strokeOpacity={lit ? 0.7 : 0.15}
                   opacity={visible ? 1 : 0}
                   style={REVEAL_TRANSITION_STYLE}
