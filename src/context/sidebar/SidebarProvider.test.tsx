@@ -427,7 +427,7 @@ describe("SidebarProvider injected server persistence (docs 12.4 + 13b)", () => 
   //
   // On reload SidebarProvider mounts with defaultWidth 0, so sidebarWidth and
   // lastOpenWidth are both 0. A NON-ZERO placeholder writer then runs BEFORE the
-  // async width GET resolves — either AppShell's controlled-open half-viewport
+  // async width GET resolves — either AppShell's controlled-open ~30%-viewport
   // seed, or (in web-applications) AgentSessionBridge's setSidebarWidth(350)
   // clobber. The old reconcile only seeded a default-0 width
   // (`cur <= 0 ? stored : cur`), so any non-zero placeholder won the race and

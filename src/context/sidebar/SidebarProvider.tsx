@@ -49,7 +49,7 @@ export interface SidebarContextType {
   setSidebarWidth: (width: number) => void;
   /** Set a PLACEHOLDER width that must yield to the persisted width once it is
    *  fetched. Use for the open-flag-driven seed (AppShell's controlled-open
-   *  effect, which on reload derives a half-viewport / floor value because the
+   *  effect, which on reload derives a ~30%-viewport / floor value because the
    *  real width hasn't hydrated yet) — NOT for a user gesture. Unlike
    *  `setSidebarWidth`, it never marks the width hydrated, so the async-fetched
    *  stored width overrides it exactly once on first hydrate (first REAL writer
@@ -146,7 +146,7 @@ export function SidebarProvider({
   // async-fetched stored width landed (apply() below) OR a genuine user drag
   // recorded an open width before the fetch resolved. Until then, an open-flag
   // PLACEHOLDER seed (AppShell's controlled-open effect, which derives a
-  // half-viewport / floor width because lastOpenWidth is still 0 mid-restore)
+  // ~30%-viewport / floor width because lastOpenWidth is still 0 mid-restore)
   // does NOT count as hydrated, so the fetched stored width may overwrite it
   // exactly once. This makes the persisted width authoritative for the hydrate
   // window regardless of which writer seeded a non-zero placeholder first.

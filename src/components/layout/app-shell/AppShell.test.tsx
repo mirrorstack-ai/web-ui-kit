@@ -395,23 +395,36 @@ describe("AppShell sidebar width persistence", () => {
       await Promise.resolve();
     });
     fireEvent.click(screen.getByLabelText("Open agent"));
-    // No 500px panel — reopen fell back to the 50%-of-viewport default.
+    // No 500px panel — reopen fell back to the 30%-of-viewport default.
     expect(document.querySelector('[style*="width: 500px"]')).toBeNull();
   });
 
   it("writes the dragged width back through the injected persistence", async () => {
-    const set = vi.fn();
-    const widthPersistence = { get: () => 0, set };
-    render(
-      <AppShell sidebarWidthPersistence={widthPersistence}>content</AppShell>,
-    );
-    await act(async () => {
-      await Promise.resolve();
+    const originalInnerWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 2000,
     });
-    // Open the sidebar — the reopen width (50% of the 1024 viewport = 512) is a
-    // real open width strictly above the 350 floor, so it persists.
-    fireEvent.click(screen.getByLabelText("Open agent"));
-    expect(set).toHaveBeenCalledWith(512);
+
+    try {
+      const set = vi.fn();
+      const widthPersistence = { get: () => 0, set };
+      render(
+        <AppShell sidebarWidthPersistence={widthPersistence}>content</AppShell>,
+      );
+      await act(async () => {
+        await Promise.resolve();
+      });
+      // Open the sidebar — 30% of the 2000 viewport = 600, safely above the
+      // 350 floor.
+      fireEvent.click(screen.getByLabelText("Open agent"));
+      expect(set).toHaveBeenCalledWith(600);
+    } finally {
+      Object.defineProperty(window, "innerWidth", {
+        configurable: true,
+        value: originalInnerWidth,
+      });
+    }
   });
 
   it("works with no persistence injected (in-memory only, never touches localStorage)", () => {
