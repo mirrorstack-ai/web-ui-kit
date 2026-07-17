@@ -225,6 +225,11 @@ const DEFAULT_H = 400;
 // when revealedRef changes.
 const REVEAL_TRANSITION_STYLE = { transition: "opacity 200ms ease" };
 
+// Single source of the edge-element map key. The render callback-ref registers
+// under this key and the rAF fast path looks it up per frame — if the two ever
+// drift, edges silently stop animating, so both sites MUST go through here.
+const edgeKey = (e: GraphEdge, i: number) => `${e.source}-${e.target}-${i}`;
+
 // Base font size for node labels. Multiplied by nodeSize so labels grow
 // in step with circles when the consumer bumps node size — the per-frame
 // style object is memoised below in the component so we still avoid
@@ -503,7 +508,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
         const lines = edgeEls.current;
         for (let i = 0; i < es.length; i++) {
           const e = es[i];
-          const l = lines.get(`${e.source}-${e.target}-${i}`);
+          const l = lines.get(edgeKey(e, i));
           if (!l) continue;
           const a = byId.get(e.source);
           const b = byId.get(e.target);
@@ -902,7 +907,7 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
               const visible =
                 revealedRef.current.has(e.source) &&
                 revealedRef.current.has(e.target);
-              const k = `${e.source}-${e.target}-${i}`;
+              const k = edgeKey(e, i);
               return (
                 <line
                   key={k}
