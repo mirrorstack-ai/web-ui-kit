@@ -225,6 +225,11 @@ const DEFAULT_H = 400;
 // when revealedRef changes.
 const REVEAL_TRANSITION_STYLE = { transition: "opacity 200ms ease" };
 
+// Single source of the edge-element map key. The render callback-ref registers
+// under this key and the rAF fast path looks it up per frame — if the two ever
+// drift, edges silently stop animating, so both sites MUST go through here.
+const edgeKey = (e: GraphEdge, i: number) => `${e.source}-${e.target}-${i}`;
+
 // Base font size for node labels. Multiplied by nodeSize so labels grow
 // in step with circles when the consumer bumps node size — the per-frame
 // style object is memoised below in the component so we still avoid
@@ -285,6 +290,8 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
 ) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const nodeGroupEls = useRef<Map<string, SVGGElement>>(new Map());
+  const edgeEls = useRef<Map<string, SVGLineElement>>(new Map());
 
   const [size, setSize] = useState<{ w: number; h: number }>({
     w: DEFAULT_W,
@@ -407,7 +414,6 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
     seededFor.current = { nodes: allNodes, edges: allEdges };
   }
 
-  const [, setFrame] = useState(0);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   // Ref mirror of draggingId so the window-level safety listener (which is
@@ -488,7 +494,30 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
           repulsionRef.current,
           linkDistanceRef.current,
         );
-        setFrame((f) => f + 1);
+        // Node group translate (1 attr write/node) + edge endpoints (4/edge).
+        // Runs only while the sim is active; a parked graph does zero
+        // per-frame DOM work.
+        const groups = nodeGroupEls.current;
+        for (let i = 0; i < ns.length; i++) {
+          const n = ns[i];
+          const g = groups.get(n.id);
+          if (g) g.setAttribute("transform", `translate(${n.x} ${n.y})`);
+        }
+        const es = edgesRef.current;
+        const byId = byIdRef.current;
+        const lines = edgeEls.current;
+        for (let i = 0; i < es.length; i++) {
+          const e = es[i];
+          const l = lines.get(edgeKey(e, i));
+          if (!l) continue;
+          const a = byId.get(e.source);
+          const b = byId.get(e.target);
+          if (!a || !b) continue;
+          l.setAttribute("x1", String(a.x));
+          l.setAttribute("y1", String(a.y));
+          l.setAttribute("x2", String(b.x));
+          l.setAttribute("y2", String(b.y));
+        }
         // Park once the cluster has settled and nothing is driving motion, so
         // an at-rest graph stops re-running physics + reconciling its SVG every
         // frame for the life of the page. Checked AFTER step() so a just-
@@ -878,9 +907,15 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
               const visible =
                 revealedRef.current.has(e.source) &&
                 revealedRef.current.has(e.target);
+              const k = edgeKey(e, i);
               return (
                 <line
-                  key={`${e.source}-${e.target}-${i}`}
+                  key={k}
+                  ref={(el) => {
+                    const m = edgeEls.current;
+                    if (el) m.set(k, el);
+                    else m.delete(k);
+                  }}
                   x1={a.x}
                   y1={a.y}
                   x2={b.x}
@@ -916,6 +951,12 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                 <g
                   key={n.id}
                   data-node-id={n.id}
+                  ref={(el) => {
+                    const m = nodeGroupEls.current;
+                    if (el) m.set(n.id, el);
+                    else m.delete(n.id);
+                  }}
+                  transform={`translate(${n.x} ${n.y})`}
                   className="cursor-grab active:cursor-grabbing"
                   onPointerDown={handleNodePointerDown(n.id)}
                   onPointerEnter={() => setHoveredId(n.id)}
@@ -926,16 +967,16 @@ export const Graph = forwardRef<GraphHandle, GraphProps>(function Graph(
                   style={REVEAL_TRANSITION_STYLE}
                 >
                   <circle
-                    cx={n.x}
-                    cy={n.y}
+                    cx={0}
+                    cy={0}
                     r={r}
                     className={circleClass}
                     strokeWidth={isTagNode ? 1.25 / view.zoom : undefined}
                     style={isTagNode ? undefined : nodeStyle}
                   />
                   <text
-                    x={n.x}
-                    y={n.y + r + LABEL_BASE_FONT_SIZE * textSize}
+                    x={0}
+                    y={r + LABEL_BASE_FONT_SIZE * textSize}
                     textAnchor="middle"
                     className="fill-on-surface-variant pointer-events-none"
                     style={labelTextStyle}
