@@ -632,7 +632,7 @@ function AppShellInner({
       {/* Agent toggle button */}
       {!isOpen && (
         <IconButton
-          icon="smart_toy"
+          icon="robot_2"
           variant="tonal"
           size="md"
           className="fixed top-2 right-2 z-50"
