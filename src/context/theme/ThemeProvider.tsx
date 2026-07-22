@@ -30,8 +30,31 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const STORAGE_KEY = "theme";
 const COOKIE_KEY = "ms-theme";
 
+// Registrable parent domain so the theme cookie is shared across sibling
+// subdomains (account.mirrorstack.ai + apps.mirrorstack.ai → .mirrorstack.ai,
+// admin.acme.com + apps.acme.com → .acme.com). Strip the leftmost label; keep
+// the cookie host-only for localhost, bare IPs, and single-label hosts (dev),
+// where a Domain attribute is invalid or rejected.
+export function parentDomain(
+  host: string = window.location.hostname,
+): string | undefined {
+  if (host === "localhost" || /^[0-9.]+$/.test(host) || !host.includes(".")) {
+    return undefined;
+  }
+  const parts = host.split(".");
+  if (parts.length <= 2) return host; // apex, e.g. mirrorstack.ai
+  return parts.slice(1).join("."); // apps.mirrorstack.ai → mirrorstack.ai
+}
+
 function setCookie(theme: Theme) {
-  document.cookie = `${COOKIE_KEY}=${theme}; path=/; max-age=31536000; SameSite=Lax`;
+  const domain = parentDomain();
+  if (domain) {
+    // Expire any legacy host-only cookie first so it cannot shadow the shared,
+    // parent-domain cookie in document.cookie reads.
+    document.cookie = `${COOKIE_KEY}=; path=/; max-age=0; SameSite=Lax`;
+  }
+  const domainAttr = domain ? `; Domain=${domain}` : "";
+  document.cookie = `${COOKIE_KEY}=${theme}; path=/; max-age=31536000; SameSite=Lax${domainAttr}`;
 }
 
 function getCookie(): string | null {

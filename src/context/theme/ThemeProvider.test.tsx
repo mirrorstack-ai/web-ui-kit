@@ -1,6 +1,6 @@
 import { cleanup, render, screen, fireEvent, act } from "@testing-library/react";
 import { describe, expect, it, afterEach, beforeEach, vi } from "vitest";
-import { ThemeProvider, useTheme } from "./ThemeProvider";
+import { ThemeProvider, useTheme, parentDomain } from "./ThemeProvider";
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
@@ -99,5 +99,24 @@ describe("ThemeProvider", () => {
 
     expect(screen.getByTestId("resolved").textContent).toBe("dark");
     expect(document.documentElement.classList.contains("dark")).toBe(true);
+  });
+});
+
+describe("parentDomain (theme cookie sharing)", () => {
+  it("strips the leftmost label so siblings share the cookie", () => {
+    expect(parentDomain("apps.mirrorstack.ai")).toBe("mirrorstack.ai");
+    expect(parentDomain("account.mirrorstack.ai")).toBe("mirrorstack.ai");
+    expect(parentDomain("admin.acme.com")).toBe("acme.com");
+    expect(parentDomain("apps.acme.co.uk")).toBe("acme.co.uk");
+  });
+
+  it("returns the host unchanged for an apex domain", () => {
+    expect(parentDomain("mirrorstack.ai")).toBe("mirrorstack.ai");
+  });
+
+  it("stays host-only (undefined) for localhost, IPs, and single-label hosts", () => {
+    expect(parentDomain("localhost")).toBeUndefined();
+    expect(parentDomain("127.0.0.1")).toBeUndefined();
+    expect(parentDomain("host")).toBeUndefined();
   });
 });
