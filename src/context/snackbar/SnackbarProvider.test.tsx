@@ -79,6 +79,46 @@ describe("SnackbarProvider", () => {
     expect(screen.queryByText("Saved")).not.toBeInTheDocument();
   });
 
+  it("keeps a snackbar shown between a double dismiss and its exit timer", () => {
+    // Regression: two dismisses back-to-back (the module-mount unsaved bridge
+    // emits set(null) twice on a save) used to orphan the first exit timer —
+    // it would fire through a success toast shown in between and wipe it.
+    function Trigger() {
+      const { showSnackbar, dismissSnackbar } = useSnackbar();
+      return (
+        <>
+          <button
+            onClick={() => {
+              dismissSnackbar();
+              dismissSnackbar();
+              setTimeout(() => showSnackbar({ message: "Saved" }), 50);
+            }}
+          >
+            save
+          </button>
+          <button onClick={() => showSnackbar({ message: "Unsaved changes" })}>
+            show
+          </button>
+        </>
+      );
+    }
+    render(
+      <SnackbarProvider>
+        <Trigger />
+      </SnackbarProvider>,
+    );
+    act(() => {
+      fireEvent.click(screen.getByText("show"));
+    });
+    act(() => {
+      fireEvent.click(screen.getByText("save"));
+    });
+    act(() => {
+      vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100);
+    });
+    expect(screen.getByText("Saved")).toBeInTheDocument();
+  });
+
   it("patches in-flight options via updateSnackbar", () => {
     function Trigger() {
       const { showSnackbar, updateSnackbar } = useSnackbar();

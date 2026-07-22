@@ -50,6 +50,14 @@ export function SnackbarProvider({ children }: SnackbarProviderProps) {
 
   const dismissSnackbar = useCallback(() => {
     setOpen(false);
+    // A second dismiss before the first exit timer fires must supersede it —
+    // overwriting the ref without clearing would orphan the first timer, and
+    // its setCurrent(null) would later wipe whatever a showSnackbar in
+    // between put up (the show only clears the timer the ref still points
+    // at).
+    if (cleanupTimerRef.current) {
+      clearTimeout(cleanupTimerRef.current);
+    }
     cleanupTimerRef.current = setTimeout(() => {
       setCurrent(null);
       cleanupTimerRef.current = null;
