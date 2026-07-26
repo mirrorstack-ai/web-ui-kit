@@ -1,0 +1,6 @@
+# Normalize line endings so Windows checkouts do not get CRLF-corrupted
+# shebangs or diff noise. LF everywhere, in the repo and the working tree.
+* text=auto eol=lf
+
+# Shell scripts must stay LF or the shebang breaks under Git Bash / WSL.
+*.sh text eol=lf

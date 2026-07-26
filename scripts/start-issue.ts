@@ -9,6 +9,22 @@ function run(cmd: string): string {
   return execSync(cmd, { encoding: "utf-8" }).trim();
 }
 
+/**
+ * Run a GraphQL query through `gh api graphql`.
+ *
+ * The query travels on stdin as a JSON request body rather than inside a
+ * shell-quoted `-f query='...'` argument: single quotes are not quoting
+ * characters in cmd.exe, and PowerShell strips them differently again, so the
+ * inline form arrives mangled on Windows. stdin has no quoting rules at all.
+ */
+function graphql(query: string): any {
+  const out = execSync("gh api graphql --input -", {
+    input: JSON.stringify({ query }),
+    encoding: "utf-8",
+  });
+  return JSON.parse(out);
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -71,7 +87,7 @@ function main() {
 function setProjectStatus(issueNumber: string, statusName: string) {
   try {
     // Get project item ID for this issue
-    const itemQuery = run(`gh api graphql -f query='
+    const itemData = graphql(`
       query {
         repository(owner: "${ORG}", name: "${REPO.split("/")[1]}") {
           issue(number: ${issueNumber}) {
@@ -84,9 +100,8 @@ function setProjectStatus(issueNumber: string, statusName: string) {
           }
         }
       }
-    '`);
+    `);
 
-    const itemData = JSON.parse(itemQuery);
     const items = itemData.data.repository.issue.projectItems.nodes;
     const projectItem = items.find((i: any) => i.project.number === PROJECT_NUMBER);
 
@@ -96,7 +111,7 @@ function setProjectStatus(issueNumber: string, statusName: string) {
     }
 
     // Get Status field and option IDs
-    const fieldQuery = run(`gh api graphql -f query='
+    const fieldData = graphql(`
       query {
         organization(login: "${ORG}") {
           projectV2(number: ${PROJECT_NUMBER}) {
@@ -110,9 +125,8 @@ function setProjectStatus(issueNumber: string, statusName: string) {
           }
         }
       }
-    '`);
+    `);
 
-    const fieldData = JSON.parse(fieldQuery);
     const project = fieldData.data.organization.projectV2;
     const field = project.field;
     const option = field.options.find((o: any) => o.name === statusName);
@@ -123,7 +137,7 @@ function setProjectStatus(issueNumber: string, statusName: string) {
     }
 
     // Update status
-    run(`gh api graphql -f query='
+    graphql(`
       mutation {
         updateProjectV2ItemFieldValue(input: {
           projectId: "${project.id}"
@@ -134,7 +148,7 @@ function setProjectStatus(issueNumber: string, statusName: string) {
           projectV2Item { id }
         }
       }
-    '`);
+    `);
 
     console.log(`Project status → ${statusName}`);
   } catch (e: any) {
@@ -145,7 +159,7 @@ function setProjectStatus(issueNumber: string, statusName: string) {
 function setProjectDate(issueNumber: string, fieldName: string) {
   const today = new Date().toISOString().split("T")[0];
   try {
-    const itemQuery = run(`gh api graphql -f query='
+    const itemData = graphql(`
       query {
         repository(owner: "${ORG}", name: "${REPO.split("/")[1]}") {
           issue(number: ${issueNumber}) {
@@ -155,13 +169,13 @@ function setProjectDate(issueNumber: string, fieldName: string) {
           }
         }
       }
-    '`);
+    `);
 
-    const items = JSON.parse(itemQuery).data.repository.issue.projectItems.nodes;
+    const items = itemData.data.repository.issue.projectItems.nodes;
     const projectItem = items.find((i: any) => i.project.number === PROJECT_NUMBER);
     if (!projectItem) return;
 
-    const fieldQuery = run(`gh api graphql -f query='
+    const fieldData = graphql(`
       query {
         organization(login: "${ORG}") {
           projectV2(number: ${PROJECT_NUMBER}) {
@@ -172,13 +186,12 @@ function setProjectDate(issueNumber: string, fieldName: string) {
           }
         }
       }
-    '`);
+    `);
 
-    const fieldData = JSON.parse(fieldQuery);
     const project = fieldData.data.organization.projectV2;
     const field = project.field;
 
-    run(`gh api graphql -f query='
+    graphql(`
       mutation {
         updateProjectV2ItemFieldValue(input: {
           projectId: "${project.id}"
@@ -189,7 +202,7 @@ function setProjectDate(issueNumber: string, fieldName: string) {
           projectV2Item { id }
         }
       }
-    '`);
+    `);
 
     console.log(`${fieldName} → ${today}`);
   } catch (e: any) {
