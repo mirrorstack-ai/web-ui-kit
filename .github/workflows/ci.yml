@@ -10,16 +10,33 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Runner selection is data: unset RUNNER_LABELS falls back to GitHub-hosted ubuntu-24.04-arm; shared runner-group labels intentionally let any online box pick up the job.
+    runs-on: ${{ fromJSON(vars.RUNNER_LABELS || '["ubuntu-24.04-arm"]') }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+      # TEMPORARY (removed before merge): prove what this fleet actually has.
+      # release.yml and notify-core-pointer.yml shell out to `gh`, which is
+      # preinstalled on GitHub's images but not guaranteed on a bare runner.
+      - name: Runner capability probe
+        run: |
+          echo "arch=$(uname -m) kernel=$(uname -sr)"
+          echo "gh=$(command -v gh || echo MISSING)"
+          gh --version 2>/dev/null || true
+          echo "git=$(command -v git) $(git --version)"
+          echo "docker=$(command -v docker || echo MISSING)"
+          echo "system node=$(command -v node || echo MISSING) $(node -v 2>/dev/null || true)"
 
+      # Install Node first: self-hosted boxes have ancient system Node; this is a harmless no-op on hosted runners.
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-          cache: pnpm
+
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 10.29.3
+          run_install: false
+          standalone: true
 
       - run: pnpm install --frozen-lockfile
 
