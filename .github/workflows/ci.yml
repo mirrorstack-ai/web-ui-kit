@@ -19,18 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      # TEMPORARY (removed before merge): prove what this fleet actually has.
-      # release.yml and notify-core-pointer.yml shell out to `gh`, which is
-      # preinstalled on GitHub's images but not guaranteed on a bare runner.
-      - name: Runner capability probe
-        run: |
-          echo "arch=$(uname -m) kernel=$(uname -sr)"
-          echo "gh=$(command -v gh || echo MISSING)"
-          gh --version 2>/dev/null || true
-          echo "git=$(command -v git) $(git --version)"
-          echo "docker=$(command -v docker || echo MISSING)"
-          echo "system node=$(command -v node || echo MISSING) $(node -v 2>/dev/null || true)"
-
       # setup-node MUST precede pnpm/action-setup: the self-hosted boxes carry
       # an ancient system Node whose npm crashes on `node:path`, so pnpm has to
       # install under the Node 24 below. On hosted runners the system Node is

@@ -16,11 +16,8 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_branch == 'main'
-    # Runner selection is data, not code. RUNNER_LABELS is an org variable;
-    # unset falls back to the GitHub-hosted ubuntu-24.04-arm literal below.
-    # It targets the labels shared by every runner group rather than one
-    # group's label on purpose, so whichever box is online picks the job up
-    # and a group returning to the fleet needs no change here.
+    # Runner selection is data, not code — see ci.yml for the rationale.
+    # Unset RUNNER_LABELS falls back to the GitHub-hosted literal below.
     runs-on: ${{ fromJSON(vars.RUNNER_LABELS || '["ubuntu-24.04-arm"]') }}
     permissions:
       actions: read
