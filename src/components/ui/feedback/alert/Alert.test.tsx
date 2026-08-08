@@ -1,4 +1,4 @@
-import { cleanup, render, screen, fireEvent } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent, within } from "@testing-library/react";
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { Alert } from "./Alert";
 
@@ -49,6 +49,94 @@ describe("Alert", () => {
       </Alert>,
     );
     expect(screen.getByRole("button", { name: "Update" })).toBeInTheDocument();
+  });
+
+  it("renders the reload control when onReload is set", () => {
+    render(
+      <Alert variant="error" onReload={() => {}}>
+        Could not load data
+      </Alert>,
+    );
+    expect(screen.getByRole("button", { name: "Reload" })).toBeInTheDocument();
+    expect(screen.getByText("refresh")).toBeInTheDocument();
+  });
+
+  it("does not render the reload control when onReload is absent", () => {
+    render(<Alert variant="error">Could not load data</Alert>);
+    expect(screen.queryByRole("button", { name: "Reload" })).not.toBeInTheDocument();
+  });
+
+  it("fires onReload once when the reload control is clicked", () => {
+    const onReload = vi.fn();
+    render(
+      <Alert variant="error" onReload={onReload}>
+        Could not load data
+      </Alert>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Reload" }));
+    expect(onReload).toHaveBeenCalledOnce();
+  });
+
+  it("disables the reload control and does not fire onReload when reloadPending", () => {
+    const onReload = vi.fn();
+    render(
+      <Alert variant="error" onReload={onReload} reloadPending>
+        Could not load data
+      </Alert>,
+    );
+    const reload = screen.getByRole("button", { name: "Reload" });
+    expect(reload).toBeDisabled();
+    expect(screen.queryByText("refresh")).not.toBeInTheDocument();
+    fireEvent.click(reload);
+    expect(onReload).not.toHaveBeenCalled();
+  });
+
+  it("uses the default reload accessible name and supports a custom reloadLabel", () => {
+    const { rerender } = render(
+      <Alert variant="error" onReload={() => {}}>
+        Could not load data
+      </Alert>,
+    );
+    expect(screen.getByRole("button", { name: "Reload" })).toBeInTheDocument();
+
+    rerender(
+      <Alert variant="error" onReload={() => {}} reloadLabel="Try again">
+        Could not load data
+      </Alert>,
+    );
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reload" })).not.toBeInTheDocument();
+  });
+
+  it("keeps action, reload, and dismiss controls individually addressable", () => {
+    const onAction = vi.fn();
+    const onReload = vi.fn();
+    const onDismiss = vi.fn();
+    render(
+      <Alert
+        variant="error"
+        action={<button onClick={onAction}>View details</button>}
+        onReload={onReload}
+        reloadLabel="Try again"
+        onDismiss={onDismiss}
+      >
+        Could not load data
+      </Alert>,
+    );
+
+    const buttons = within(screen.getByRole("alert")).getAllByRole("button");
+    expect(buttons).toHaveLength(3);
+    expect(buttons[0]).toHaveAccessibleName("View details");
+    expect(buttons[1]).toHaveAccessibleName("Try again");
+    expect(buttons[2]).toHaveAccessibleName("Dismiss");
+
+    fireEvent.click(screen.getByRole("button", { name: "View details" }));
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+
+    expect(onAction).toHaveBeenCalledOnce();
+    expect(onReload).toHaveBeenCalledOnce();
+    expect(onDismiss).toHaveBeenCalledOnce();
   });
 
   it("applies custom className", () => {
