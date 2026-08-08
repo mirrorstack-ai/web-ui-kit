@@ -10,7 +10,11 @@ permissions:
 
 jobs:
   check:
-    # Runner selection is data: unset RUNNER_LABELS falls back to GitHub-hosted ubuntu-24.04-arm; shared runner-group labels intentionally let any online box pick up the job.
+    # Runner selection is data, not code. RUNNER_LABELS is an org variable;
+    # unset falls back to the GitHub-hosted ubuntu-24.04-arm literal below.
+    # It targets the labels shared by every runner group rather than one
+    # group's label on purpose, so whichever box is online picks the job up
+    # and a group returning to the fleet needs no change here.
     runs-on: ${{ fromJSON(vars.RUNNER_LABELS || '["ubuntu-24.04-arm"]') }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -27,7 +31,12 @@ jobs:
           echo "docker=$(command -v docker || echo MISSING)"
           echo "system node=$(command -v node || echo MISSING) $(node -v 2>/dev/null || true)"
 
-      # Install Node first: self-hosted boxes have ancient system Node; this is a harmless no-op on hosted runners.
+      # setup-node MUST precede pnpm/action-setup: the self-hosted boxes carry
+      # an ancient system Node whose npm crashes on `node:path`, so pnpm has to
+      # install under the Node 24 below. On hosted runners the system Node is
+      # modern and the ordering is a no-op, so this works under either
+      # RUNNER_LABELS value. `cache: pnpm` is dropped because it would need
+      # pnpm on PATH before setup-node runs — the very ordering being fixed.
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
