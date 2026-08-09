@@ -170,7 +170,7 @@ export function Dialog({
             {title && (
               <h3
                 id={titleId}
-                className="text-lg font-semibold text-on-surface mb-4 pr-8"
+                className="text-lg font-semibold text-on-surface mb-3 pr-8"
               >
                 {title}
               </h3>

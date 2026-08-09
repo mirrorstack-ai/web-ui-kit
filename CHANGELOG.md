@@ -3,6 +3,14 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.6.19
+
+- **`Dialog` title sits closer to its body.** The title's bottom margin drops
+  from `mb-4` to `mb-3`. At `mb-4` a short title read as detached from the
+  content it introduces, particularly in confirm dialogs where the body is a
+  single line. Affects every `Dialog` and everything built on it
+  (`TypeToConfirmDialog`, `ReauthDialog`).
+
 ## 0.6.0
 
 - **Fix: `NotchGrid` no longer lets distinct panels overlap or render flush at
