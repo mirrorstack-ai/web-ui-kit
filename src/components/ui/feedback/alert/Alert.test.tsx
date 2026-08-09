@@ -42,6 +42,27 @@ describe("Alert", () => {
     expect(screen.queryByLabelText("Dismiss")).not.toBeInTheDocument();
   });
 
+  it("uses the default dismiss accessible name and supports a custom dismissLabel", () => {
+    const onDismiss = vi.fn();
+    const { rerender } = render(
+      <Alert variant="warning" onDismiss={onDismiss}>
+        Warning
+      </Alert>,
+    );
+    expect(screen.getByRole("button", { name: "Dismiss" })).toBeInTheDocument();
+
+    rerender(
+      <Alert variant="warning" onDismiss={onDismiss} dismissLabel="關閉">
+        Warning
+      </Alert>,
+    );
+    const dismiss = screen.getByRole("button", { name: "關閉" });
+    expect(dismiss).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Dismiss" })).not.toBeInTheDocument();
+    fireEvent.click(dismiss);
+    expect(onDismiss).toHaveBeenCalledOnce();
+  });
+
   it("renders the action node when provided", () => {
     render(
       <Alert variant="warning" title="Update available" action={<button>Update</button>}>

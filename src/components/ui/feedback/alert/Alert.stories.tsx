@@ -51,6 +51,18 @@ export const Dismissible: Story = {
   },
 };
 
+/** The dismiss control's accessible name is localizable via `dismissLabel`,
+ *  mirroring `reloadLabel`. Omit it and the name defaults to "Dismiss". */
+export const DismissibleLocalized: Story = {
+  args: {
+    variant: "warning",
+    title: "連線不穩定",
+    children: "部分功能可能無法正常運作。",
+    onDismiss: () => {},
+    dismissLabel: "關閉",
+  },
+};
+
 export const WithAction: Story = {
   args: {
     variant: "warning",

@@ -23,6 +23,8 @@ export interface AlertProps {
   children: ReactNode;
   className?: string;
   onDismiss?: () => void;
+  /** Accessible name for the dismiss control. Defaults to "Dismiss". */
+  dismissLabel?: string;
   /** Override the default icon for this variant. */
   icon?: string;
   /** Override the default icon size (default: 20). */
@@ -64,6 +66,7 @@ export function Alert({
   children,
   className,
   onDismiss,
+  dismissLabel = "Dismiss",
   icon,
   iconSize,
   hideIcon,
@@ -112,7 +115,7 @@ export function Alert({
             size="sm"
             className="-my-1 ml-auto text-current"
             onClick={onDismiss}
-            aria-label="Dismiss"
+            aria-label={dismissLabel}
           />
         )}
       </div>
