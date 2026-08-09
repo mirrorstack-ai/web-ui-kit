@@ -7,7 +7,7 @@ import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
 export const meta: ComponentMeta = {
   name: "Alert",
   description:
-    "Dismissible inline alert banner with error/success/warning/primary/secondary variants and an optional trailing action slot",
+    "Dismissible inline alert banner with error/success/warning/primary/secondary variants, an optional trailing action slot, and an optional reload control",
 };
 
 export type AlertVariant =
@@ -33,6 +33,13 @@ export interface AlertProps {
   /** Optional trailing action (e.g. a Button), vertically centered against the
    * whole banner. Sits before the dismiss control when both are present. */
   action?: ReactNode;
+  /** When set, renders a trailing reload icon button. Use for an alert that reports a failed
+   *  READ, where re-running the fetch is the recovery. */
+  onReload?: () => void;
+  /** Accessible name for the reload control. Defaults to "Reload". */
+  reloadLabel?: string;
+  /** Disables the reload control and shows a pending spinner while a refetch is in flight. */
+  reloadPending?: boolean;
 }
 
 const variantStyles: Record<AlertVariant, string> = {
@@ -61,6 +68,9 @@ export function Alert({
   iconSize,
   hideIcon,
   action,
+  onReload,
+  reloadLabel = "Reload",
+  reloadPending,
 }: AlertProps) {
   return (
     <div
@@ -84,6 +94,17 @@ export function Alert({
           <div className={cn("text-sm", title && "mt-1.5")}>{children}</div>
         </div>
         {action && <div className="ml-3 shrink-0">{action}</div>}
+        {onReload && (
+          <IconButton
+            icon="refresh"
+            variant="text"
+            size="sm"
+            className="-my-1 ml-1 text-current"
+            onClick={onReload}
+            aria-label={reloadLabel}
+            loading={reloadPending}
+          />
+        )}
         {onDismiss && (
           <IconButton
             icon="close"

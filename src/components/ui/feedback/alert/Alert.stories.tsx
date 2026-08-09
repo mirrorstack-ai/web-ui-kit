@@ -64,6 +64,30 @@ export const WithAction: Story = {
   },
 };
 
+export const WithReload: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      <Alert
+        variant="error"
+        title="Could not load activity"
+        onReload={() => {}}
+        onDismiss={() => {}}
+      >
+        The latest activity could not be fetched. Reload to try again.
+      </Alert>
+      <Alert
+        variant="error"
+        title="Reloading activity"
+        onReload={() => {}}
+        reloadPending
+        onDismiss={() => {}}
+      >
+        Fetching the latest activity. The reload control is disabled while the request is pending.
+      </Alert>
+    </div>
+  ),
+};
+
 export const WithCustomIcon: Story = {
   args: {
     variant: "primary",
