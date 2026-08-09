@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/78 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">77/78 infos</a><span class="filter-pill ok" aria-disabled="true">325 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/78 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">77/78 infos</a><span class="filter-pill ok" aria-disabled="true">326 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -970,9 +970,9 @@ subtitle?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Alert</h2>
       <div class="badges">
-        <label for="c-2-ui-feedback-alert-props" class="badge ok as-toggle">9 prop types</label>
+        <label for="c-2-ui-feedback-alert-props" class="badge ok as-toggle">12 prop types</label>
         <label for="c-2-ui-feedback-alert-info" class="badge info as-toggle">1 info</label>
-        <label for="c-2-ui-feedback-alert-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-2-ui-feedback-alert-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -1004,7 +1004,7 @@ subtitle?: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">9 prop types</span>
+              <span class="badge ok">12 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/feedback/alert/Alert.tsx::Alert</code></pre>
             <pre><code>Props:</code></pre>
@@ -1035,6 +1035,22 @@ icon?: string
 iconSize?: number
 
 onDismiss?: () =&gt; void
+
+/**
+ * When set, renders a trailing reload icon button. Use for an alert that reports a failed
+ *  READ, where re-running the fetch is the recovery.
+ */
+onReload?: () =&gt; void
+
+/**
+ * Accessible name for the reload control. Defaults to &quot;Reload&quot;.
+ */
+reloadLabel?: string = &quot;Reload&quot;
+
+/**
+ * Disables the reload control and shows a pending spinner while a refetch is in flight.
+ */
+reloadPending?: boolean
 
 title?: string
 
@@ -1114,6 +1130,35 @@ variant: | &quot;error&quot;
     title=&quot;Update available&quot;
     action={(&lt;Button variant=&quot;filled&quot; color=&quot;warning&quot; size=&quot;sm&quot;&gt;Update
             &lt;/Button&gt;)}&gt;Version 1.4.0 is ready to install.&lt;/Alert&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Reload</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithReload = () =&gt; (
+  &lt;div className=&quot;flex flex-col gap-3&quot;&gt;
+    &lt;Alert
+      variant=&quot;error&quot;
+      title=&quot;Could not load activity&quot;
+      onReload={() =&gt; {}}
+      onDismiss={() =&gt; {}}
+    &gt;
+      The latest activity could not be fetched. Reload to try again.
+    &lt;/Alert&gt;
+    &lt;Alert
+      variant=&quot;error&quot;
+      title=&quot;Reloading activity&quot;
+      onReload={() =&gt; {}}
+      reloadPending
+      onDismiss={() =&gt; {}}
+    &gt;
+      Fetching the latest activity. The reload control is disabled while the request is pending.
+    &lt;/Alert&gt;
+  &lt;/div&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
