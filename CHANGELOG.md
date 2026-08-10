@@ -3,6 +3,21 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.6.22
+
+- **`Popover`** — a generic anchored overlay primitive. Opens on hover **and**
+  on focus, so it is reachable by keyboard rather than pointer-only, and closes
+  on Escape and on outside interaction.
+
+- **`UserIdentityCard`** — the standard way to render a person. Always shows
+  name, email and avatar together, and the name is a real link rather than a
+  span styled to look like one, so it survives middle-click, copy-link, and
+  assistive navigation.
+
+  Paired with `Popover`, this replaces the pattern of printing a bare actor
+  UUID in audit and provenance surfaces: show the person's name, and let the
+  card carry the detail on hover or focus.
+
 ## 0.6.21
 
 `AppShell`'s mobile bottom nav no longer forces full width below 640px. It was
