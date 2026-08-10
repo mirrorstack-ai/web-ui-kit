@@ -40,14 +40,26 @@ export function formatRelativeDate(dateStr: string, locale?: string): string {
 
   const now = new Date();
   // Compare civil dates as ordinals rather than measuring elapsed time between
-  // two local midnights. The components read here are already local; `Date.UTC`
-  // is only an encoder, and because UTC has no offset changes its result is an
-  // exact multiple of a day, so the difference is an exact integer. Measuring
-  // the gap between local midnights instead would carry that day's UTC offset
-  // shift into the quotient, which no amount of rounding fixes once an offset
-  // moves by more than half a day (a date-line change moves it by a full day).
-  const civilDay = (value: Date) =>
-    Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()) / 86400000;
+  // two local midnights. Measuring that gap carries the day's UTC offset shift
+  // into the quotient, which no amount of rounding fixes once an offset moves
+  // by more than half a day — a date-line change moves it by a full day.
+  //
+  // The components read here are already local; the UTC epoch is only an
+  // encoder, and since UTC has no offset changes the result is an exact
+  // multiple of a day, so the difference is an exact integer everywhere.
+  // `Date.UTC` cannot be that encoder: it maps years 0-99 onto 1900-1999, so a
+  // year below 100 silently lands nearly 700,000 days away. `setUTCFullYear`
+  // applies no such mapping.
+  const civilDay = (value: Date) => {
+    const ordinal = new Date(0);
+    ordinal.setUTCFullYear(
+      value.getFullYear(),
+      value.getMonth(),
+      value.getDate(),
+    );
+    ordinal.setUTCHours(0, 0, 0, 0);
+    return ordinal.getTime() / 86400000;
+  };
   const diffDays = civilDay(now) - civilDay(date);
 
   if (diffDays < 7) {

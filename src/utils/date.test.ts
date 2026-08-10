@@ -28,14 +28,27 @@ describe("formatDate", () => {
     "falls back to the runtime locale for locale tag %s",
     (locale) => {
       expect(() => formatDate("2026-04-29T12:00:00Z", locale)).not.toThrow();
-      // Assert the fallback IS the runtime default, not merely that it is
-      // non-empty: hard-coding any particular locale in the catch branch would
-      // still return a non-empty string and pass a weaker check.
       expect(formatDate("2026-04-29T12:00:00Z", locale)).toBe(
         formatDate("2026-04-29T12:00:00Z"),
       );
     },
   );
+
+  // Comparing output against the no-locale call is not sufficient on its own:
+  // on a runner whose default is en-US, hard-coding "en-US" in the catch branch
+  // produces a byte-identical string. Only "!!!" is structurally invalid enough
+  // to throw and actually reach the fallback ("xx-Fake" is a well-formed tag and
+  // is passed straight through), so the contract is asserted here directly:
+  // the fallback must hand the formatter `undefined`.
+  it("passes undefined to the formatter when falling back", () => {
+    const spy = vi.spyOn(Date.prototype, "toLocaleDateString");
+    try {
+      formatDate("2026-04-29T12:00:00Z", "!!!");
+      expect(spy.mock.calls.at(-1)?.[0]).toBeUndefined();
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });
 
 describe("formatRelativeDate", () => {
@@ -94,6 +107,13 @@ describe("formatRelativeDate", () => {
     expect(formatRelativeDate("1969-09-30T12:00:00+11:00", "en")).toBe(
       "yesterday",
     );
+  });
+
+  it("returns 'yesterday' across the year-100 boundary", () => {
+    // Guards the Date.UTC two-digit-year mapping: Date.UTC(99, ...) means 1999,
+    // which would put these two consecutive days ~700,000 days apart.
+    setNow("0100-01-01T12:00:00Z", "UTC");
+    expect(formatRelativeDate("0099-12-31T12:00:00Z", "en")).toBe("yesterday");
   });
 
   it("returns 'yesterday' across a 25-hour fall-back DST day", () => {
@@ -167,6 +187,36 @@ describe("formatRelativeDate", () => {
       );
     },
   );
+
+  // Same contract as formatDate above. vi.spyOn cannot be used on
+  // Intl.RelativeTimeFormat: it wraps the class in a plain call, so `new` raises
+  // a TypeError instead of the RangeError the fallback keys on. A hand-rolled
+  // function wrapper is constructible and preserves the original's throwing.
+  it("passes undefined to the formatter when falling back", () => {
+    setNow("2026-04-28T12:00:00Z");
+    // `Intl.RelativeTimeFormat` is readonly in the lib types, so reach it
+    // through a mutable view rather than suppressing the error at each site.
+    const intl = Intl as unknown as {
+      RelativeTimeFormat: typeof Intl.RelativeTimeFormat;
+    };
+    const Original = intl.RelativeTimeFormat;
+    const seen: (string | string[] | undefined)[] = [];
+    intl.RelativeTimeFormat = function (
+      this: unknown,
+      locales?: string | string[],
+      options?: Intl.RelativeTimeFormatOptions,
+    ) {
+      seen.push(locales);
+      return new Original(locales, options);
+    } as unknown as typeof Intl.RelativeTimeFormat;
+    try {
+      formatRelativeDate("2026-04-27T12:00:00Z", "!!!");
+      expect(seen.at(0)).toBe("!!!");
+      expect(seen.at(-1)).toBeUndefined();
+    } finally {
+      intl.RelativeTimeFormat = Original;
+    }
+  });
 
   it("formats relative dates in Traditional Chinese", () => {
     setNow("2026-04-28T12:00:00Z");
