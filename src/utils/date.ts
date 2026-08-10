@@ -39,8 +39,13 @@ export function formatRelativeDate(dateStr: string, locale?: string): string {
   if (Number.isNaN(date.getTime())) return "";
 
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const startOfDay = (value: Date) =>
+    new Date(
+      value.getFullYear(),
+      value.getMonth(),
+      value.getDate(),
+    ).getTime();
+  const diffDays = Math.round((startOfDay(now) - startOfDay(date)) / 86400000);
 
   if (diffDays < 7) {
     return withLocaleFallback(locale, (resolvedLocale) =>

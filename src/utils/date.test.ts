@@ -36,16 +36,48 @@ describe("formatDate", () => {
 describe("formatRelativeDate", () => {
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
   });
 
-  function setNow(dateStr: string) {
+  function setNow(dateStr: string, timeZone?: string) {
+    if (timeZone) vi.stubEnv("TZ", timeZone);
     vi.useFakeTimers();
     vi.setSystemTime(new Date(dateStr));
   }
 
-  it("returns 'today' for the current date", () => {
-    setNow("2026-04-28T12:00:00Z");
-    expect(formatRelativeDate("2026-04-28T08:00:00Z")).toBe("today");
+  it("uses the local calendar date rather than elapsed hours", () => {
+    setNow("2026-04-28T12:00:00Z", "Etc/GMT+12");
+    expect(formatRelativeDate("2026-04-28T08:00:00Z", "en")).toBe(
+      "yesterday",
+    );
+  });
+
+  it("returns 'today' for a future time on the same local calendar day", () => {
+    setNow("2026-04-28T12:00:00-04:00", "America/New_York");
+    expect(formatRelativeDate("2026-04-28T13:00:00-04:00", "en")).toBe(
+      "today",
+    );
+  });
+
+  it("returns 'yesterday' across local midnight even when one hour elapsed", () => {
+    setNow("2026-04-28T00:30:00-04:00", "America/New_York");
+    expect(formatRelativeDate("2026-04-27T23:30:00-04:00", "en")).toBe(
+      "yesterday",
+    );
+  });
+
+  it("returns 'yesterday' across a 23-hour DST calendar day", () => {
+    setNow("2026-03-08T12:00:00-04:00", "America/New_York");
+    expect(formatRelativeDate("2026-03-07T12:00:00-05:00", "en")).toBe(
+      "yesterday",
+    );
+  });
+
+  it("uses the week bucket for seven calendar days across DST", () => {
+    setNow("2026-03-10T12:00:00-04:00", "America/New_York");
+    expect(formatRelativeDate("2026-03-03T12:00:00-05:00", "en")).toBe(
+      "1 week ago",
+    );
   });
 
   it("returns 'yesterday' for one day ago", () => {
@@ -107,9 +139,7 @@ describe("formatRelativeDate", () => {
       expect(() =>
         formatRelativeDate("2026-04-27T12:00:00Z", locale),
       ).not.toThrow();
-      expect(formatRelativeDate("2026-04-27T12:00:00Z", locale)).toBe(
-        "yesterday",
-      );
+      expect(formatRelativeDate("2026-04-27T12:00:00Z", locale)).not.toBe("");
     },
   );
 

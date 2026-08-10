@@ -22,6 +22,13 @@ width, so a two-item nav stays narrow. This also retires the `sm:!w-auto`
   `3 days ago`. Invalid dates now return an empty UI label, invalid locale tags
   fall back safely to the runtime default, and future dates use relative text.
 
+  Relative wording is bucketed by **local calendar day**, not by elapsed hours.
+  That distinction is load-bearing: a time later the same day reads `today`
+  rather than `tomorrow`, a moment thirty minutes past midnight reads
+  `yesterday` rather than `today`, and a DST transition no longer collapses two
+  calendar days into one or pushes a seven-day span into the `6 days ago`
+  bucket.
+
 ## 0.6.20
 
 - **Shared skeleton-loading primitives.** Adds `skeletonPreview()` for an
