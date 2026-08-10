@@ -28,7 +28,12 @@ describe("formatDate", () => {
     "falls back to the runtime locale for locale tag %s",
     (locale) => {
       expect(() => formatDate("2026-04-29T12:00:00Z", locale)).not.toThrow();
-      expect(formatDate("2026-04-29T12:00:00Z", locale)).not.toBe("");
+      // Assert the fallback IS the runtime default, not merely that it is
+      // non-empty: hard-coding any particular locale in the catch branch would
+      // still return a non-empty string and pass a weaker check.
+      expect(formatDate("2026-04-29T12:00:00Z", locale)).toBe(
+        formatDate("2026-04-29T12:00:00Z"),
+      );
     },
   );
 });
@@ -77,6 +82,24 @@ describe("formatRelativeDate", () => {
     setNow("2026-03-10T12:00:00-04:00", "America/New_York");
     expect(formatRelativeDate("2026-03-03T12:00:00-05:00", "en")).toBe(
       "1 week ago",
+    );
+  });
+
+  it("returns 'yesterday' across a date-line offset change", () => {
+    // Pacific/Kwajalein moved across the date line, so these two consecutive
+    // local dates have midnights 47 hours apart. Any approach that divides the
+    // elapsed gap between local midnights lands on 1.96 and rounds to 2 days;
+    // only comparing civil dates as ordinals gets this right.
+    setNow("1969-10-01T12:00:00-12:00", "Pacific/Kwajalein");
+    expect(formatRelativeDate("1969-09-30T12:00:00+11:00", "en")).toBe(
+      "yesterday",
+    );
+  });
+
+  it("returns 'yesterday' across a 25-hour fall-back DST day", () => {
+    setNow("2026-11-02T12:00:00-05:00", "America/New_York");
+    expect(formatRelativeDate("2026-11-01T12:00:00-04:00", "en")).toBe(
+      "yesterday",
     );
   });
 
@@ -139,7 +162,9 @@ describe("formatRelativeDate", () => {
       expect(() =>
         formatRelativeDate("2026-04-27T12:00:00Z", locale),
       ).not.toThrow();
-      expect(formatRelativeDate("2026-04-27T12:00:00Z", locale)).not.toBe("");
+      expect(formatRelativeDate("2026-04-27T12:00:00Z", locale)).toBe(
+        formatRelativeDate("2026-04-27T12:00:00Z"),
+      );
     },
   );
 

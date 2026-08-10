@@ -39,13 +39,16 @@ export function formatRelativeDate(dateStr: string, locale?: string): string {
   if (Number.isNaN(date.getTime())) return "";
 
   const now = new Date();
-  const startOfDay = (value: Date) =>
-    new Date(
-      value.getFullYear(),
-      value.getMonth(),
-      value.getDate(),
-    ).getTime();
-  const diffDays = Math.round((startOfDay(now) - startOfDay(date)) / 86400000);
+  // Compare civil dates as ordinals rather than measuring elapsed time between
+  // two local midnights. The components read here are already local; `Date.UTC`
+  // is only an encoder, and because UTC has no offset changes its result is an
+  // exact multiple of a day, so the difference is an exact integer. Measuring
+  // the gap between local midnights instead would carry that day's UTC offset
+  // shift into the quotient, which no amount of rounding fixes once an offset
+  // moves by more than half a day (a date-line change moves it by a full day).
+  const civilDay = (value: Date) =>
+    Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()) / 86400000;
+  const diffDays = civilDay(now) - civilDay(date);
 
   if (diffDays < 7) {
     return withLocaleFallback(locale, (resolvedLocale) =>
