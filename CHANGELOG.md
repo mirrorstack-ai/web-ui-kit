@@ -3,6 +3,32 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.6.21
+
+`AppShell`'s mobile bottom nav no longer forces full width below 640px. It was
+`w-full` there and content-width from `sm` up, so the pill stretched edge to edge
+on a phone and read as a bar welded across the viewport rather than the floating
+pill it is on every wider screen. `max-w-full` alone caps it without dictating a
+width, so a two-item nav stays narrow. This also retires the `sm:!w-auto`
+`!important` that existed only to beat a module bundle's injected global
+`.w-full` — with no `w-full` class on the element, that rule has nothing to match.
+
+- **Relative dates now follow the caller's locale.** `formatRelativeDate` and
+  `formatDate` accept an optional locale and use the platform's `Intl`
+  formatting, including localized relative terms such as today and yesterday.
+  Omitting the locale still uses the runtime default, but its English relative
+  strings deliberately change from capitalized abbreviations such as `Today`
+  and `3d ago` to Intl's lowercase, spelled-out wording such as `today` and
+  `3 days ago`. Invalid dates now return an empty UI label, invalid locale tags
+  fall back safely to the runtime default, and future dates use relative text.
+
+  Relative wording is bucketed by **local calendar day**, not by elapsed hours.
+  That distinction is load-bearing: a time later the same day reads `today`
+  rather than `tomorrow`, a moment thirty minutes past midnight reads
+  `yesterday` rather than `today`, and a DST transition no longer collapses two
+  calendar days into one or pushes a seven-day span into the `6 days ago`
+  bucket.
+
 ## 0.6.20
 
 - **Shared skeleton-loading primitives.** Adds `skeletonPreview()` for an
