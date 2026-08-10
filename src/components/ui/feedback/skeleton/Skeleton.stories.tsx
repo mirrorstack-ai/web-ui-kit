@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Skeleton } from "./Skeleton";
+import { SkeletonRegion } from "./SkeletonRegion";
 
 const meta: Meta<typeof Skeleton> = {
   title: "UI/Feedback/Skeleton",
@@ -45,5 +46,17 @@ export const CardPlaceholder: Story = {
       <Skeleton width="w-3/4" height="h-5" />
       <Skeleton lines={3} />
     </div>
+  ),
+};
+
+export const Region: Story = {
+  render: () => (
+    <SkeletonRegion label="Loading profile">
+      <div className="w-80 space-y-3 rounded-lg border border-outline-variant p-4">
+        <Skeleton width="w-12" height="h-12" className="rounded-full" />
+        <Skeleton width="w-2/3" height="h-5" />
+        <Skeleton lines={3} />
+      </div>
+    </SkeletonRegion>
   ),
 };

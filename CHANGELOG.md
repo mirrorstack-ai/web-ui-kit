@@ -3,6 +3,14 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.6.20
+
+- **Shared skeleton-loading primitives.** Adds `skeletonPreview()` for an
+  SSR-safe, call-time `?skeleton` design-preview branch and `SkeletonRegion`
+  for localized loading announcements that hide decorative placeholder boxes
+  from assistive technology. Both primitives and `SkeletonRegionProps` are
+  exported from the package root.
+
 ## 0.6.19
 
 - **`Dialog` title sits closer to its body.** The title's bottom margin drops
