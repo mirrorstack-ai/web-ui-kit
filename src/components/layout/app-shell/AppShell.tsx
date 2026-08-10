@@ -256,10 +256,23 @@ function BottomNavRegion({ children }: { children: ReactNode }) {
         snackbarVisible && "invisible translate-y-[150%] opacity-0",
       )}
     >
-      {/* Full-width pill only on tight phone widths (<640px); content-width
-          and centered from sm up. pointer-events re-enable only while shown —
-          the wrapper's `none` is the inherited default. */}
-      <div className={cn("w-full sm:!w-auto max-w-full", !snackbarVisible && "pointer-events-auto")}>
+      {/* Content-width and centered at EVERY breakpoint, capped at the container.
+          Below 640px this used to force `w-full`, stretching the pill edge to
+          edge — which reads as a bar welded across the viewport rather than the
+          floating pill it is on every wider screen. `max-w-full` alone keeps it
+          from ever overflowing without dictating a width, so a two-item nav
+          stays narrow instead of spanning the phone.
+
+          Dropping our own `w-full` also retires the `sm:!w-auto` !important that
+          sat here: that existed only because a mounted module bundle injects its
+          own global Tailwind `.w-full` after the host stylesheet and would win
+          over the responsive variant. With no `w-full` class on this element,
+          a global `.w-full` rule has nothing to match, so the override is moot.
+          The wrapper above still needs its `lg:!hidden` for the same reason.
+
+          pointer-events re-enable only while shown — the wrapper's `none` is the
+          inherited default. */}
+      <div className={cn("max-w-full", !snackbarVisible && "pointer-events-auto")}>
         {children}
       </div>
     </div>
