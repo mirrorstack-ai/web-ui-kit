@@ -3,6 +3,17 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.6.21
+
+- **Relative dates now follow the caller's locale.** `formatRelativeDate` and
+  `formatDate` accept an optional locale and use the platform's `Intl`
+  formatting, including localized relative terms such as today and yesterday.
+  Omitting the locale still uses the runtime default, but its English relative
+  strings deliberately change from capitalized abbreviations such as `Today`
+  and `3d ago` to Intl's lowercase, spelled-out wording such as `today` and
+  `3 days ago`. Invalid dates now return an empty UI label, invalid locale tags
+  fall back safely to the runtime default, and future dates use relative text.
+
 ## 0.6.20
 
 - **Shared skeleton-loading primitives.** Adds `skeletonPreview()` for an
