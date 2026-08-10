@@ -187,6 +187,10 @@ export {
   type ActivityListProps,
   type ActivityItem,
 } from "./components/ui/display/activity-list/ActivityList";
+export {
+  UserIdentityCard,
+  type UserIdentityCardProps,
+} from "./components/ui/display/user-identity-card/UserIdentityCard";
 
 // --- ui/feedback ---
 export {
@@ -417,6 +421,10 @@ export {
   type DialogProps,
   type DialogAction,
 } from "./components/ui/surfaces/dialog/Dialog";
+export {
+  Popover,
+  type PopoverProps,
+} from "./components/ui/surfaces/popover/Popover";
 export {
   TypeToConfirmDialog,
   type TypeToConfirmDialogProps,
