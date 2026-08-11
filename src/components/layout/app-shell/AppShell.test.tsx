@@ -31,6 +31,22 @@ describe("AppShell mobile navigation", () => {
     expect(dialog).toHaveTextContent("Drawer nav");
   });
 
+  // The nav rail's hover label overflows the rail and must paint above the
+  // content column — which is position:relative and comes LATER in DOM order.
+  // The z-index has to live on THIS column: putting it on NavigationRail only
+  // orders it inside this (static) column, so the label still painted under
+  // content. Verified in a live page before this test was written.
+  it("gives the desktop nav column a stacking context above the content column", () => {
+    const { container } = render(
+      <AppShell navigation={<span>Desktop nav</span>}>content</AppShell>,
+    );
+    const column = container.querySelector("div.lg\\:flex.shrink-0");
+
+    expect(column).not.toBeNull();
+    expect(column).toHaveClass("relative");
+    expect(column).toHaveClass("z-30");
+  });
+
   it("drawer prefers mobileNavigation content over navigation", () => {
     render(
       <AppShell
