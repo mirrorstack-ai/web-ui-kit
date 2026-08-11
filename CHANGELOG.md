@@ -3,6 +3,34 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.6.22
+
+- **`Popover`** — a generic anchored overlay primitive. Hover and focus are
+  independent reasons for it to remain open, so leaving with the pointer does
+  not close a popover the keyboard still has focused. Escape and outside
+  interaction clear every open reason and close it immediately.
+
+  Click and tap activation are supported as well. On touch, the first tap
+  reveals the card and suppresses the trigger link's navigation; the second tap
+  follows the link. A mouse click opens the popover without ever suppressing
+  navigation, because mouse users can already preview the card by hovering.
+
+  React 18 is genuinely supported under the existing `react: ">=18"` peer
+  range. Positioning, focus restoration, and observation now use a
+  layout-neutral wrapper owned by `Popover`, rather than a ref injected into
+  the caller's element. A dedicated `react18` Vitest project runs the popover
+  against a real React 18 renderer so this cannot regress unseen.
+
+- **`UserIdentityCard`** — the standard way to render a person. Always shows
+  name, email and avatar together. It now takes `href` and renders the anchor
+  itself instead of trusting the caller to pass one; both the trigger and the
+  name inside the card are real links, so they support middle-click, copy-link,
+  and assistive navigation.
+
+  Paired with `Popover`, this replaces the pattern of printing a bare actor
+  UUID in audit and provenance surfaces: show the person's name, and let the
+  card carry the detail on hover or focus.
+
 ## 0.6.21
 
 `AppShell`'s mobile bottom nav no longer forces full width below 640px. It was

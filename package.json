@@ -1,7 +1,7 @@
 {
   "name": "@mirrorstack-ai/web-ui-kit",
   "packageManager": "pnpm@10.29.3",
-  "version": "0.6.21",
+  "version": "0.6.22",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -27,7 +27,7 @@
     "build-storybook": "storybook build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "vitest run && vitest run -c vitest.react18.config.ts",
     "test:watch": "vitest"
   },
   "peerDependencies": {

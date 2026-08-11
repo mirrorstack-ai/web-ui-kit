@@ -1,0 +1,11 @@
+{
+  "name": "@mirrorstack-ai/web-ui-kit-react18-runtime",
+  "private": true,
+  "version": "0.0.0",
+  "description": "React 18 runtime used only by the `react18` vitest project, so the package's `react: >=18` peer range is actually exercised.",
+  "dependencies": {
+    "@testing-library/react": "^16.0.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}
