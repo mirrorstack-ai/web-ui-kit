@@ -519,8 +519,8 @@ function AppShellInner({
               </div>
             )}
 
-            <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative py-4">
-              <main className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+            <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative">
+              <main className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-4">
                 <div
                   className={cn(
                     // Responsive gutters — tight on phones, roomier as the
