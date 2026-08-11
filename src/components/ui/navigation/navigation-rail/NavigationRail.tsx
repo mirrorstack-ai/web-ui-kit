@@ -33,7 +33,14 @@ export function NavigationRail({
   const horizontal = orientation === "horizontal";
   return (
     <div
-      className={cn("overflow-visible", horizontal ? "px-2 pb-2" : "pl-2 py-4", className)}
+      className={cn(
+        // relative + z-30: the hover label pill overflows the rail, and without a
+        // stacking context of its own it paints UNDER main content. Stays below
+        // the z-50 overlay tier so dialogs and snackbars still win.
+        "relative z-30 overflow-visible",
+        horizontal ? "px-2 pb-2" : "pl-2 py-4",
+        className,
+      )}
     >
       <div
         className={cn(

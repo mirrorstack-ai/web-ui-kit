@@ -10,6 +10,19 @@ describe("NavigationRail", () => {
     expect(screen.getByText("Nav")).toBeInTheDocument();
   });
 
+  // The hover label pill overflows the rail. overflow-visible stops it being
+  // CLIPPED, but without a stacking context of its own it still paints UNDER
+  // main content — which is how the label ended up half-hidden behind the page.
+  it("establishes a stacking context so the overflowing label paints above content", () => {
+    const { container } = render(<NavigationRail><span>Nav</span></NavigationRail>);
+    const root = container.firstElementChild;
+
+    expect(root).toHaveClass("relative");
+    expect(root).toHaveClass("z-30");
+    // Must stay under the z-50 overlay tier or the rail covers dialogs.
+    expect(root).not.toHaveClass("z-50");
+  });
+
   it("renders logo and header", () => {
     render(
       <NavigationRail logo={<span>Logo</span>} header={<span>Header</span>}>
