@@ -64,7 +64,11 @@ export function UserIdentityCard({
     >
       <div className="flex min-w-0 items-center gap-3">
         <Avatar src={avatarUrl} fallback={displayName} size="lg" />
-        <div className="min-w-0 flex-1">
+        {/* space-y-1: the name and email are two distinct facts, and stacking
+            them flush reads as one wrapped line. A consumer cannot fix this
+            from the outside — it needs a descendant selector, and arbitrary
+            variants do not compile into the modules' scoped CSS bundles. */}
+        <div className="min-w-0 flex-1 space-y-1">
           <a
             href={href}
             className="block truncate text-sm font-semibold text-on-surface"
