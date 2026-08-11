@@ -21,10 +21,22 @@ Notable API additions and breaking changes. For the full commit log, see
   `--ui-autofill-ink` as a per-surface override. One rule set covers both themes
   because the tokens inherit from `<html>`.
 
-  While a field remains in the autofill state, it does not take the
-  `focus:text-primary` tint because `-webkit-text-fill-color` must remain a fixed
-  token. Its border and focus ring still respond, and typing clears the autofill
-  state.
+  `transition` is a shorthand, so that freeze would otherwise replace the whole
+  transition list and stop `transition-colors` from animating on an autofilled
+  field. It therefore re-declares the colour properties a field animates —
+  `border-color`, `outline-color`, `text-decoration-color`, `fill`, `stroke` —
+  at the field's own duration and easing. Only `background-color` and `color`
+  stay frozen, so an autofilled field does not take the `focus:text-primary`
+  tint; typing clears the autofill state.
+
+  `FloatingLabelInput`'s `inverse` variant sets `--ui-autofill-ink` to
+  `--color-inverse-on-surface`, so an autofilled field on an inverse surface
+  keeps its contrast instead of falling back to `--color-on-surface`.
+
+  There is no automated test. jsdom matches `:-webkit-autofill` on an ordinary
+  input and models neither the UA's `!important` paint nor the delayed
+  transition, so a jsdom test would pin nothing and give false confidence. This
+  is verified with real Chrome/WebKit autofill in both themes.
 
 ## 0.6.22
 

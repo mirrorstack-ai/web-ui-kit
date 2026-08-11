@@ -164,7 +164,24 @@ textarea:-webkit-autofill, textarea:-webkit-autofill:hover, textarea:-webkit-aut
 select:-webkit-autofill, select:-webkit-autofill:hover, select:-webkit-autofill:focus, select:-webkit-autofill:active {
   -webkit-text-fill-color: var(--ui-autofill-ink, var(--color-on-surface));
   caret-color: var(--ui-autofill-ink, var(--color-on-surface));
-  transition: background-color 0s 600000s, color 0s 600000s;
+  /* `transition` is a shorthand: it replaces the element's WHOLE transition
+     list, so freezing alone would also cancel the kit's `transition-colors` on
+     an autofilled field — the OTP field's border-color, for one. Every colour
+     property `transition-colors` animates on a field is therefore re-declared
+     below (Tailwind's `--tw-gradient-*` entries are omitted: a text field has
+     no gradient to animate). The timing mirrors what `transition-colors` itself
+     emits, so a field carrying `duration-*` / `ease-*` keeps its own. */
+  --ui-autofill-timing:
+    var(--tw-duration, var(--default-transition-duration, 150ms))
+    var(--tw-ease, var(--default-transition-timing-function, cubic-bezier(0.4, 0, 0.2, 1)));
+  transition:
+    background-color 0s 600000s,
+    color 0s 600000s,
+    border-color var(--ui-autofill-timing),
+    outline-color var(--ui-autofill-timing),
+    text-decoration-color var(--ui-autofill-timing),
+    fill var(--ui-autofill-timing),
+    stroke var(--ui-autofill-timing);
 }
 
 /* The autofilled VALUE is rendered by the UA in its own font metrics unless
