@@ -10,30 +10,50 @@ function renderCard(
 ) {
   return render(
     <UserIdentityCard
+      href="/users/ada"
       name="Ada Lovelace"
       email="ada@example.com"
       avatarUrl="https://example.com/ada.jpg"
       missingNameLabel="Deleted user"
       missingEmailLabel="Email unavailable"
       {...props}
-    >
-      <a href="/users/ada">Ada profile</a>
-    </UserIdentityCard>,
+    />,
   );
 }
 
-function openCard() {
-  fireEvent.focus(screen.getByRole("link", { name: "Ada profile" }));
+function openCard(triggerName = "Ada Lovelace") {
+  fireEvent.focus(screen.getByRole("link", { name: triggerName }));
   return document.querySelector<HTMLElement>("[data-popover-content]")!;
 }
 
 describe("UserIdentityCard", () => {
-  it("uses the caller's children as the real profile trigger", () => {
+  it("renders its own trigger as a real link", () => {
     renderCard();
-    const trigger = screen.getByRole("link", { name: "Ada profile" });
 
-    expect(trigger).toHaveAttribute("href", "/users/ada");
-    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(
+      screen.getByRole("link", { name: "Ada Lovelace" }),
+    ).toHaveAttribute("href", "/users/ada");
+  });
+
+  it("renders the name inside the card as a real link", () => {
+    renderCard();
+    const card = openCard();
+
+    expect(
+      within(card).getByRole("link", { name: "Ada Lovelace" }),
+    ).toHaveAttribute("href", "/users/ada");
+  });
+
+  it.each([
+    ["plain text", "Audit actor"],
+    ["an element", <span key="actor">Audit actor</span>],
+  ])("wraps %s children in its own trigger link", (_, children) => {
+    renderCard({ children });
+
+    expect(screen.getByRole("link", { name: "Audit actor" })).toHaveAttribute(
+      "href",
+      "/users/ada",
+    );
   });
 
   it("always shows avatar, display name, and email", () => {
@@ -65,7 +85,7 @@ describe("UserIdentityCard", () => {
 
   it("renders an honest caller-localized identity when the name is missing", () => {
     renderCard({ name: null, avatarUrl: null, missingNameLabel: "Former user" });
-    const card = openCard();
+    const card = openCard("Former user");
 
     expect(within(card).getByText("Former user")).toBeInTheDocument();
     expect(within(card).getByText("FOR")).toBeInTheDocument();
@@ -75,7 +95,7 @@ describe("UserIdentityCard", () => {
     const longName = "A very long display name that should never widen the card";
     const longEmail = "a-very-long-email-address@an-extremely-long-domain.example";
     renderCard({ name: longName, email: longEmail });
-    const card = openCard();
+    const card = openCard(longName);
 
     expect(within(card).getByText(longName)).toHaveClass("truncate");
     expect(within(card).getByText(longEmail)).toHaveClass("truncate");

@@ -7,11 +7,8 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type FocusEventHandler,
-  type MouseEventHandler,
   type ReactElement,
   type ReactNode,
-  type Ref,
 } from "react";
 import { createPortal } from "react-dom";
 
@@ -33,13 +30,7 @@ const CLOSE_DELAY_MS = 150;
 type Placement = "top" | "bottom";
 
 interface PopoverTriggerProps {
-  ref?: Ref<HTMLElement>;
   "aria-describedby"?: string;
-  onBlur?: FocusEventHandler<HTMLElement>;
-  onClick?: MouseEventHandler<HTMLElement>;
-  onFocus?: FocusEventHandler<HTMLElement>;
-  onMouseEnter?: MouseEventHandler<HTMLElement>;
-  onMouseLeave?: MouseEventHandler<HTMLElement>;
 }
 
 export interface PopoverProps {
@@ -57,13 +48,7 @@ interface PopoverPosition {
   top: number;
 }
 
-function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
-  if (typeof ref === "function") {
-    ref(value);
-  } else if (ref) {
-    ref.current = value;
-  }
-}
+type OpenReason = "focus" | "hover" | "tap";
 
 function isInside(
   target: EventTarget | null,
@@ -74,19 +59,40 @@ function isInside(
 
 export function Popover({ trigger, children, className }: PopoverProps) {
   const contentId = useId();
-  const triggerRef = useRef<HTMLElement>(null);
+  const wrapperRef = useRef<HTMLSpanElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<number | null>(null);
   const ignoreNextFocusRef = useRef(false);
+  const openReasonsRef = useRef<Record<OpenReason, boolean>>({
+    focus: false,
+    hover: false,
+    tap: false,
+  });
+  const lastPointerTypeRef = useRef<string | null>(null);
+  const revealedByTouchRef = useRef(false);
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<PopoverPosition | null>(null);
   const hasContent = children != null;
+
+  const getAnchor = useCallback(
+    () =>
+      (wrapperRef.current?.firstElementChild as HTMLElement | null) ?? null,
+    [],
+  );
 
   useEffect(() => {
     if (isDev && !hasContent) {
       console.warn("[Popover] children must contain the floating content.");
     }
   }, [hasContent]);
+
+  useEffect(() => {
+    if (isDev && !getAnchor()) {
+      console.warn(
+        "[Popover] trigger must render an element so the floating content can be positioned.",
+      );
+    }
+  }, [getAnchor, trigger]);
 
   const clearCloseTimer = useCallback(() => {
     if (closeTimerRef.current != null) {
@@ -104,15 +110,18 @@ export function Popover({ trigger, children, className }: PopoverProps) {
   const closePopover = useCallback(
     (restoreFocus = false) => {
       clearCloseTimer();
+      openReasonsRef.current = { focus: false, hover: false, tap: false };
+      revealedByTouchRef.current = false;
+      lastPointerTypeRef.current = null;
       setOpen(false);
       setPosition(null);
 
       if (restoreFocus && contentRef.current?.contains(document.activeElement)) {
         ignoreNextFocusRef.current = true;
-        triggerRef.current?.focus();
+        getAnchor()?.focus();
       }
     },
-    [clearCloseTimer],
+    [clearCloseTimer, getAnchor],
   );
 
   const scheduleClose = useCallback(() => {
@@ -123,8 +132,38 @@ export function Popover({ trigger, children, className }: PopoverProps) {
     }, CLOSE_DELAY_MS);
   }, [clearCloseTimer, closePopover]);
 
+  const syncOpenState = useCallback(
+    (delayWhenClosed = false) => {
+      const reasons = openReasonsRef.current;
+      if (reasons.hover || reasons.focus || reasons.tap) {
+        openPopover();
+      } else if (delayWhenClosed) {
+        scheduleClose();
+      } else {
+        closePopover();
+      }
+    },
+    [closePopover, openPopover, scheduleClose],
+  );
+
+  const holdReason = useCallback(
+    (reason: OpenReason) => {
+      openReasonsRef.current[reason] = true;
+      syncOpenState();
+    },
+    [syncOpenState],
+  );
+
+  const releaseReason = useCallback(
+    (reason: OpenReason, delayWhenClosed = false) => {
+      openReasonsRef.current[reason] = false;
+      syncOpenState(delayWhenClosed);
+    },
+    [syncOpenState],
+  );
+
   const updatePosition = useCallback(() => {
-    const triggerElement = triggerRef.current;
+    const triggerElement = getAnchor();
     const contentElement = contentRef.current;
     if (!triggerElement || !contentElement) return;
 
@@ -156,7 +195,7 @@ export function Popover({ trigger, children, className }: PopoverProps) {
     // axes. This keeps the layer on-screen without a dependency and behaves
     // predictably even when neither side can fit the content at full height.
     setPosition({ left, placement, top });
-  }, []);
+  }, [getAnchor]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -174,7 +213,8 @@ export function Popover({ trigger, children, className }: PopoverProps) {
       typeof ResizeObserver === "undefined"
         ? null
         : new ResizeObserver(() => updatePosition());
-    if (triggerRef.current) resizeObserver?.observe(triggerRef.current);
+    const anchor = getAnchor();
+    if (anchor) resizeObserver?.observe(anchor);
     if (contentRef.current) resizeObserver?.observe(contentRef.current);
 
     return () => {
@@ -182,12 +222,12 @@ export function Popover({ trigger, children, className }: PopoverProps) {
       window.removeEventListener("scroll", update, true);
       resizeObserver?.disconnect();
     };
-  }, [open, updatePosition]);
+  }, [getAnchor, open, updatePosition]);
 
   useEffect(() => clearCloseTimer, [clearCloseTimer]);
 
   useClickOutside({
-    refs: [triggerRef, contentRef],
+    refs: [wrapperRef, contentRef],
     enabled: open,
     closeOnEscape: false,
     onDismiss: () => closePopover(),
@@ -202,9 +242,8 @@ export function Popover({ trigger, children, className }: PopoverProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [closePopover, open]);
 
-  if (!isValidElement(trigger)) return null;
-
-  const originalProps = trigger.props;
+  const validTrigger = isValidElement<PopoverTriggerProps>(trigger);
+  const originalProps = validTrigger ? trigger.props : {};
   const describedBy = [
     originalProps["aria-describedby"],
     hasContent ? contentId : undefined,
@@ -212,41 +251,9 @@ export function Popover({ trigger, children, className }: PopoverProps) {
     .filter(Boolean)
     .join(" ") || undefined;
 
-  const triggerElement = cloneElement(trigger, {
-    ref: (node: HTMLElement | null) => {
-      triggerRef.current = node;
-      assignRef(originalProps.ref, node);
-    },
-    "aria-describedby": describedBy,
-    onBlur: (event) => {
-      originalProps.onBlur?.(event);
-      if (
-        !isInside(event.relatedTarget, triggerRef.current, contentRef.current)
-      ) {
-        closePopover();
-      }
-    },
-    onClick: (event) => {
-      originalProps.onClick?.(event);
-      openPopover();
-    },
-    onFocus: (event) => {
-      originalProps.onFocus?.(event);
-      if (ignoreNextFocusRef.current) {
-        ignoreNextFocusRef.current = false;
-        return;
-      }
-      openPopover();
-    },
-    onMouseEnter: (event) => {
-      originalProps.onMouseEnter?.(event);
-      openPopover();
-    },
-    onMouseLeave: (event) => {
-      originalProps.onMouseLeave?.(event);
-      scheduleClose();
-    },
-  });
+  const triggerElement = validTrigger
+    ? cloneElement(trigger, { "aria-describedby": describedBy })
+    : null;
 
   const content =
     open && hasContent && typeof document !== "undefined"
@@ -269,16 +276,16 @@ export function Popover({ trigger, children, className }: PopoverProps) {
               if (
                 !isInside(
                   event.relatedTarget,
-                  triggerRef.current,
+                  wrapperRef.current,
                   contentRef.current,
                 )
               ) {
-                closePopover();
+                releaseReason("focus");
               }
             }}
-            onFocus={clearCloseTimer}
-            onMouseEnter={clearCloseTimer}
-            onMouseLeave={scheduleClose}
+            onFocus={() => holdReason("focus")}
+            onMouseEnter={() => holdReason("hover")}
+            onMouseLeave={() => releaseReason("hover", true)}
           >
             {children}
           </div>,
@@ -288,7 +295,58 @@ export function Popover({ trigger, children, className }: PopoverProps) {
 
   return (
     <>
-      {triggerElement}
+      <span
+        ref={wrapperRef}
+        style={{ display: "contents" }}
+        onBlur={(event) => {
+          if (
+            !isInside(
+              event.relatedTarget,
+              wrapperRef.current,
+              contentRef.current,
+            )
+          ) {
+            releaseReason("focus");
+          }
+        }}
+        onClick={(event) => {
+          const pointerType = lastPointerTypeRef.current;
+          const touchActivation =
+            pointerType === "touch" ||
+            pointerType === "pen" ||
+            (pointerType == null &&
+              typeof window.PointerEvent === "undefined" &&
+              window.matchMedia?.("(hover: none)")?.matches === true);
+          lastPointerTypeRef.current = null;
+
+          if (
+            touchActivation &&
+            !revealedByTouchRef.current &&
+            !event.defaultPrevented
+          ) {
+            event.preventDefault();
+            revealedByTouchRef.current = true;
+            holdReason("tap");
+            return;
+          }
+
+          openPopover();
+        }}
+        onFocus={() => {
+          if (ignoreNextFocusRef.current) {
+            ignoreNextFocusRef.current = false;
+            return;
+          }
+          holdReason("focus");
+        }}
+        onMouseEnter={() => holdReason("hover")}
+        onMouseLeave={() => releaseReason("hover", true)}
+        onPointerDown={(event) => {
+          lastPointerTypeRef.current = event.pointerType;
+        }}
+      >
+        {triggerElement}
+      </span>
       {content}
     </>
   );

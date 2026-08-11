@@ -11,11 +11,7 @@ const meta: Meta<typeof UserIdentityCard> = {
     avatarUrl: "https://i.pravatar.cc/150?img=47",
     missingNameLabel: "Deleted user",
     missingEmailLabel: "Email unavailable",
-    children: (
-      <a className="font-medium text-primary underline" href="#ada-profile">
-        Ada Lovelace
-      </a>
-    ),
+    href: "#ada-profile",
   },
   decorators: [
     (Story) => (
@@ -42,11 +38,8 @@ export const DeletedUser: Story = {
     name: null,
     email: null,
     avatarUrl: null,
-    children: (
-      <a className="font-medium text-primary underline" href="#audit-entry">
-        2d7f52a1-830e-4b55-a224-6553bcb8f8dd
-      </a>
-    ),
+    href: "#audit-entry",
+    children: "2d7f52a1-830e-4b55-a224-6553bcb8f8dd",
   },
 };
 

@@ -27,7 +27,7 @@
     "build-storybook": "storybook build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "vitest run && vitest run -c vitest.react18.config.ts",
     "test:watch": "vitest"
   },
   "peerDependencies": {

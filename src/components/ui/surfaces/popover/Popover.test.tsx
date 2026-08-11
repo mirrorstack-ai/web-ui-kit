@@ -1,9 +1,40 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  act,
+  cleanup,
+  createEvent,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { Popover } from "./Popover";
 
 const CLOSE_DELAY_MS = 150;
+const originalPointerEvent = window.PointerEvent;
+
+class TestPointerEvent extends MouseEvent {
+  readonly pointerType: string;
+
+  constructor(type: string, init: PointerEventInit = {}) {
+    super(type, init);
+    this.pointerType = init.pointerType ?? "";
+  }
+}
+
+beforeAll(() => {
+  Object.defineProperty(window, "PointerEvent", {
+    configurable: true,
+    value: TestPointerEvent,
+  });
+});
+
+afterAll(() => {
+  Object.defineProperty(window, "PointerEvent", {
+    configurable: true,
+    value: originalPointerEvent,
+  });
+});
 
 function rect({
   bottom,
@@ -74,11 +105,81 @@ describe("Popover", () => {
     outside.remove();
   });
 
+  it("stays open when the pointer leaves while the trigger still has focus", () => {
+    vi.useFakeTimers();
+    renderPopover();
+    const trigger = screen.getByRole("button", { name: "Person" });
+
+    fireEvent.focus(trigger);
+    fireEvent.mouseEnter(trigger);
+    fireEvent.mouseLeave(trigger);
+    act(() => vi.advanceTimersByTime(CLOSE_DELAY_MS + 1));
+
+    expect(screen.getByText("Identity details")).toBeInTheDocument();
+  });
+
+  it("stays open when focus leaves while the pointer is still over it", () => {
+    vi.useFakeTimers();
+    renderPopover();
+    const trigger = screen.getByRole("button", { name: "Person" });
+    const outside = document.createElement("button");
+    document.body.append(outside);
+
+    fireEvent.mouseEnter(trigger);
+    fireEvent.focus(trigger);
+    fireEvent.blur(trigger, { relatedTarget: outside });
+    expect(screen.getByText("Identity details")).toBeInTheDocument();
+
+    fireEvent.mouseLeave(trigger);
+    act(() => vi.advanceTimersByTime(CLOSE_DELAY_MS + 1));
+    expect(screen.queryByText("Identity details")).not.toBeInTheDocument();
+    outside.remove();
+  });
+
   it("opens on click for touch and pointer activation", () => {
     renderPopover();
 
     fireEvent.click(screen.getByRole("button", { name: "Person" }));
 
+    expect(screen.getByText("Identity details")).toBeInTheDocument();
+  });
+
+  it("reveals on the first touch tap and allows the second tap to navigate", () => {
+    render(
+      <Popover trigger={<a href="/users/ada">Ada</a>}>
+        <div>Identity details</div>
+      </Popover>,
+    );
+    const trigger = screen.getByRole("link", { name: "Ada" });
+
+    fireEvent.pointerDown(trigger, { pointerType: "touch" });
+    const firstClick = createEvent.click(trigger);
+    fireEvent(trigger, firstClick);
+
+    expect(firstClick.defaultPrevented).toBe(true);
+    expect(screen.getByText("Identity details")).toBeInTheDocument();
+
+    fireEvent.pointerDown(trigger, { pointerType: "touch" });
+    const secondClick = createEvent.click(trigger);
+    fireEvent(trigger, secondClick);
+
+    expect(secondClick.defaultPrevented).toBe(false);
+    expect(screen.getByText("Identity details")).toBeInTheDocument();
+  });
+
+  it("never prevents a mouse click", () => {
+    render(
+      <Popover trigger={<a href="/users/ada">Ada</a>}>
+        <div>Identity details</div>
+      </Popover>,
+    );
+    const trigger = screen.getByRole("link", { name: "Ada" });
+
+    fireEvent.pointerDown(trigger, { pointerType: "mouse" });
+    const click = createEvent.click(trigger);
+    fireEvent(trigger, click);
+
+    expect(click.defaultPrevented).toBe(false);
     expect(screen.getByText("Identity details")).toBeInTheDocument();
   });
 

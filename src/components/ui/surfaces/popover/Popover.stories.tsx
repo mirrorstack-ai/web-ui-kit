@@ -8,7 +8,7 @@ const meta: Meta<typeof Popover> = {
   title: "UI/Surfaces/Popover",
   component: Popover,
   args: {
-    trigger: <Button variant="filled">Hover or focus me</Button>,
+    trigger: <Button variant="filled">Hover, focus, or tap me</Button>,
     children: (
       <div className="w-64 rounded-xl border border-outline-variant bg-surface-container-low p-4 shadow-lg">
         <p className="font-medium text-on-surface">Arbitrary content</p>
@@ -37,7 +37,10 @@ export const InteractiveContent: Story = {
     trigger: <a href="#profile">Account details</a>,
     children: (
       <div className="w-64 rounded-xl border border-outline-variant bg-surface-container-low p-4 shadow-lg">
-        <p className="text-sm text-on-surface">The popover does not trap focus.</p>
+        <p className="text-sm text-on-surface">
+          The popover does not trap focus. On touch, the first tap reveals this
+          card and the second follows the profile link.
+        </p>
         <Button className="mt-3" size="sm">
           Secondary action
         </Button>
