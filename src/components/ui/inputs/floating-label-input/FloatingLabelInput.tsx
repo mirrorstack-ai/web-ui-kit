@@ -131,7 +131,7 @@ export function FloatingLabelInput(props: FloatingLabelInputProps) {
     // render their own flat clear button if needed.
     "[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
     inverse
-      ? "text-inverse-on-surface placeholder:text-inverse-on-surface/40"
+      ? "text-inverse-on-surface placeholder:text-inverse-on-surface/40 [--ui-autofill-ink:var(--color-inverse-on-surface)]"
       : "text-on-surface",
     error
       ? "focus:text-error"

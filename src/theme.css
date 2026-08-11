@@ -151,6 +151,46 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Autofill — Chrome/WebKit paints its own background and ink on
+   `:-webkit-autofill`, which discards the design tokens. The background is not
+   directly overridable, so the standard workaround is a transition with a 0s
+   duration and a ~7-day delay: the UA's background-color change is queued and
+   never actually paints. Ink and caret are forced back onto the token.
+   `--ui-autofill-ink` is an opt-out hook for surfaces whose text color is not
+   `--color-on-surface`. One rule set serves both themes — the tokens inherit
+   from `<html>`, so no `.dark` duplicate is needed. */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active,
+textarea:-webkit-autofill, textarea:-webkit-autofill:hover, textarea:-webkit-autofill:focus, textarea:-webkit-autofill:active,
+select:-webkit-autofill, select:-webkit-autofill:hover, select:-webkit-autofill:focus, select:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--ui-autofill-ink, var(--color-on-surface));
+  caret-color: var(--ui-autofill-ink, var(--color-on-surface));
+  /* `transition` is a shorthand: it replaces the element's WHOLE transition
+     list, so freezing alone would also cancel the kit's `transition-colors` on
+     an autofilled field — the OTP field's border-color, for one. Every colour
+     property `transition-colors` animates on a field is therefore re-declared
+     below (Tailwind's `--tw-gradient-*` entries are omitted: a text field has
+     no gradient to animate). The timing mirrors what `transition-colors` itself
+     emits, so a field carrying `duration-*` / `ease-*` keeps its own. */
+  --ui-autofill-timing:
+    var(--tw-duration, var(--default-transition-duration, 150ms))
+    var(--tw-ease, var(--default-transition-timing-function, cubic-bezier(0.4, 0, 0.2, 1)));
+  transition:
+    background-color 0s 600000s,
+    color 0s 600000s,
+    border-color var(--ui-autofill-timing),
+    outline-color var(--ui-autofill-timing),
+    text-decoration-color var(--ui-autofill-timing),
+    fill var(--ui-autofill-timing),
+    stroke var(--ui-autofill-timing);
+}
+
+/* The autofilled VALUE is rendered by the UA in its own font metrics unless
+   ::first-line inherits them explicitly. Without this the value renders in the
+   UA default face at the UA default size rather than the field's own type. */
+input:-webkit-autofill::first-line, textarea:-webkit-autofill::first-line, select:-webkit-autofill::first-line {
+  font-family: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit;
+}
+
 /* Progress indicator animations */
 @keyframes progress-bar-1 {
   0% {

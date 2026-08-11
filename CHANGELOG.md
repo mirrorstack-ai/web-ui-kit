@@ -3,6 +3,41 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.1
+
+- **Autofilled fields keep the design system's tokens.** Chrome/WebKit painted
+  its own background and ink on `:-webkit-autofill`, so autofilled inputs,
+  textareas, and selects showed the UA's yellow background with UA-colored text.
+  The result was illegible in the dark theme and off-system in the light theme.
+
+  The ink and caret are now pinned to `--color-on-surface` with
+  `-webkit-text-fill-color`, because the UA applies its `color` with
+  `!important` and `color` alone cannot win. The UA background is neutralised
+  with a zero-duration, seven-day-delay `background-color` transition because
+  it cannot be overridden directly. The autofilled value's `::first-line`
+  inherits the field's font, so it renders in the field's own type and size.
+
+  Surfaces whose field text does not use `--color-on-surface` can set
+  `--ui-autofill-ink` as a per-surface override. One rule set covers both themes
+  because the tokens inherit from `<html>`.
+
+  `transition` is a shorthand, so that freeze would otherwise replace the whole
+  transition list and stop `transition-colors` from animating on an autofilled
+  field. It therefore re-declares the colour properties a field animates —
+  `border-color`, `outline-color`, `text-decoration-color`, `fill`, `stroke` —
+  at the field's own duration and easing. Only `background-color` and `color`
+  stay frozen, so an autofilled field does not take the `focus:text-primary`
+  tint; typing clears the autofill state.
+
+  `FloatingLabelInput`'s `inverse` variant sets `--ui-autofill-ink` to
+  `--color-inverse-on-surface`, so an autofilled field on an inverse surface
+  keeps its contrast instead of falling back to `--color-on-surface`.
+
+  There is no automated test. jsdom matches `:-webkit-autofill` on an ordinary
+  input and models neither the UA's `!important` paint nor the delayed
+  transition, so a jsdom test would pin nothing and give false confidence. This
+  is verified with real Chrome/WebKit autofill in both themes.
+
 ## 0.6.22
 
 - **`Popover`** — a generic anchored overlay primitive. Hover and focus are
