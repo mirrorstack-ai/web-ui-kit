@@ -156,10 +156,7 @@ export interface AppShellProps {
   agentInputLabels?: AgentSidebarInputProps["labels"];
 }
 
-export function AppShell({
-  sidebarWidthPersistence,
-  ...props
-}: AppShellProps) {
+export function AppShell({ sidebarWidthPersistence, ...props }: AppShellProps) {
   return (
     // Start closed (0); persist the drag-resized OPEN width so it survives
     // reload AND carries across hosts. Width lives in the injected server
@@ -210,7 +207,10 @@ function MobileNavDrawerRegion({ children }: { children: ReactNode }) {
 
       {open && (
         <div className="fixed inset-0 z-40">
-          <div className="absolute inset-0 bg-black/20" onClick={() => setOpen(false)} />
+          <div
+            className="absolute inset-0 bg-black/20"
+            onClick={() => setOpen(false)}
+          />
           <div
             ref={panelRef}
             role="dialog"
@@ -223,7 +223,8 @@ function MobileNavDrawerRegion({ children }: { children: ReactNode }) {
             // A tap that activates a link or button inside is a navigation
             // selection — dismiss the drawer with it (M3 modal drawer behavior).
             onClickCapture={(e) => {
-              if ((e.target as HTMLElement).closest("a, button")) setOpen(false);
+              if ((e.target as HTMLElement).closest("a, button"))
+                setOpen(false);
             }}
           >
             {children}
@@ -272,7 +273,9 @@ function BottomNavRegion({ children }: { children: ReactNode }) {
 
           pointer-events re-enable only while shown — the wrapper's `none` is the
           inherited default. */}
-      <div className={cn("max-w-full", !snackbarVisible && "pointer-events-auto")}>
+      <div
+        className={cn("max-w-full", !snackbarVisible && "pointer-events-auto")}
+      >
         {children}
       </div>
     </div>
@@ -373,9 +376,7 @@ function AppShellInner({
   }, []);
 
   const isOverlaying =
-    isOpen &&
-    windowWidth > 0 &&
-    windowWidth < sidebarWidth + 800;
+    isOpen && windowWidth > 0 && windowWidth < sidebarWidth + 800;
 
   const startResize = (e: React.MouseEvent) => {
     setIsResizing(true);
@@ -390,7 +391,10 @@ function AppShellInner({
 
     const onMove = (e: MouseEvent) => {
       const diff = startX.current - e.clientX;
-      const next = Math.min(Math.max(startWidth.current + diff, MIN_WIDTH), maxWidthRef.current);
+      const next = Math.min(
+        Math.max(startWidth.current + diff, MIN_WIDTH),
+        maxWidthRef.current,
+      );
       dragWidthRef.current = next;
       if (sidebarElRef.current) {
         sidebarElRef.current.style.width = `${next}px`;
@@ -415,7 +419,9 @@ function AppShellInner({
   }, [isResizing, setSidebarWidth]);
 
   // Keep dragWidthRef in sync when sidebar opens
-  useEffect(() => { dragWidthRef.current = sidebarWidth; }, [sidebarWidth]);
+  useEffect(() => {
+    dragWidthRef.current = sidebarWidth;
+  }, [sidebarWidth]);
 
   // Reopen to the user's remembered (persisted) width, clamped to the live
   // viewport. Falls back to ~30% of the viewport when no wider width was ever
@@ -486,17 +492,29 @@ function AppShellInner({
         <div className={cn("mx-auto w-full h-full relative", className)}>
           {appSwitcher && (
             <div className="absolute top-2 left-0 right-0 z-20 pointer-events-none">
-              <div className={cn("mx-auto w-full px-1 lg:px-2 xl:px-4", appSwitcherClassName)}>
-                <div className="pointer-events-auto w-fit">
-                  {appSwitcher}
-                </div>
+              <div
+                className={cn(
+                  "mx-auto w-full px-1 lg:px-2 xl:px-4",
+                  appSwitcherClassName,
+                )}
+              >
+                <div className="pointer-events-auto w-fit">{appSwitcher}</div>
               </div>
             </div>
           )}
 
           <div className="h-full flex">
             {navigation && (
-              <div className={cn("hidden lg:flex flex-col h-full shrink-0 justify-center", navClassName)}>
+              <div
+                className={cn(
+                  // relative z-30: the rail column must out-rank the CONTENT column, which is
+                  // position:relative and comes later in DOM order. Putting the z-index on
+                  // NavigationRail itself does not work — that only orders it inside this
+                  // static column, so the rail's hover label still painted under content.
+                  "relative z-30 hidden lg:flex flex-col h-full shrink-0 justify-center",
+                  navClassName,
+                )}
+              >
                 {navigation}
               </div>
             )}
@@ -572,7 +590,10 @@ function AppShellInner({
             <div
               ref={sidebarElRef}
               className="overflow-hidden relative my-2 mr-2 flex flex-col"
-              style={{ width: `${sidebarWidth}px`, height: "calc(100vh - 1rem)" }}
+              style={{
+                width: `${sidebarWidth}px`,
+                height: "calc(100vh - 1rem)",
+              }}
             >
               <AgentSidebarHeader
                 sidebarWidth={sidebarWidth}
@@ -601,7 +622,10 @@ function AppShellInner({
                   (flex/min-h-0) and drop bg-on-background + rounded-2xl so the shape
                   shows through with no abutting seam. The inner scroller and input
                   carry no opaque bg of their own, so this is the only fill to strip. */}
-              <div ref={setAgentBodyEl} className="flex-1 min-h-0 flex flex-col">
+              <div
+                ref={setAgentBodyEl}
+                className="flex-1 min-h-0 flex flex-col"
+              >
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
                   {/* The host's chat surface when wired; otherwise the
                       personalized empty-state opener under the brand logo
