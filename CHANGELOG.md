@@ -3,6 +3,29 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.1
+
+- **Autofilled fields keep the design system's tokens.** Chrome/WebKit painted
+  its own background and ink on `:-webkit-autofill`, so autofilled inputs,
+  textareas, and selects showed the UA's yellow background with UA-colored text.
+  The result was illegible in the dark theme and off-system in the light theme.
+
+  The ink and caret are now pinned to `--color-on-surface` with
+  `-webkit-text-fill-color`, because the UA applies its `color` with
+  `!important` and `color` alone cannot win. The UA background is neutralised
+  with a zero-duration, seven-day-delay `background-color` transition because
+  it cannot be overridden directly. The autofilled value's `::first-line`
+  inherits the field's font, so it renders in the field's own type and size.
+
+  Surfaces whose field text does not use `--color-on-surface` can set
+  `--ui-autofill-ink` as a per-surface override. One rule set covers both themes
+  because the tokens inherit from `<html>`.
+
+  While a field remains in the autofill state, it does not take the
+  `focus:text-primary` tint because `-webkit-text-fill-color` must remain a fixed
+  token. Its border and focus ring still respond, and typing clears the autofill
+  state.
+
 ## 0.6.22
 
 - **`Popover`** — a generic anchored overlay primitive. Hover and focus are
