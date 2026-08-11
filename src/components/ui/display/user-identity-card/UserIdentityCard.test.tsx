@@ -68,6 +68,17 @@ describe("UserIdentityCard", () => {
     );
   });
 
+  // A consumer cannot restore this from the outside: it needs a descendant
+  // selector, and arbitrary variants do not compile into the app modules'
+  // scoped CSS bundles. So the separation has to be owned here.
+  it("separates the name from the email rather than stacking them flush", () => {
+    renderCard();
+    const card = openCard();
+
+    const email = within(card).getByText("ada@example.com");
+    expect(email.parentElement).toHaveClass("space-y-1");
+  });
+
   it("falls back through Avatar when no avatar URL is available", () => {
     renderCard({ avatarUrl: null });
     const card = openCard();
