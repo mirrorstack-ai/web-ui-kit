@@ -69,6 +69,7 @@ export function Popover({ trigger, children, className }: PopoverProps) {
     tap: false,
   });
   const lastPointerTypeRef = useRef<string | null>(null);
+  const suppressNextClickRef = useRef(false);
   const revealedByTouchRef = useRef(false);
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<PopoverPosition | null>(null);
@@ -113,6 +114,7 @@ export function Popover({ trigger, children, className }: PopoverProps) {
       openReasonsRef.current = { focus: false, hover: false, tap: false };
       revealedByTouchRef.current = false;
       lastPointerTypeRef.current = null;
+      suppressNextClickRef.current = false;
       setOpen(false);
       setPosition(null);
 
@@ -309,7 +311,15 @@ export function Popover({ trigger, children, className }: PopoverProps) {
             releaseReason("focus");
           }
         }}
-        onClick={(event) => {
+        onClickCapture={(event) => {
+          if (event.detail === 0) {
+            // Keyboard-generated clicks have no preceding pointer event.
+            // Never let an abandoned pointer sequence consume one.
+            lastPointerTypeRef.current = null;
+            suppressNextClickRef.current = false;
+            return;
+          }
+
           const pointerType = lastPointerTypeRef.current;
           const touchActivation =
             pointerType === "touch" ||
@@ -317,19 +327,26 @@ export function Popover({ trigger, children, className }: PopoverProps) {
             (pointerType == null &&
               typeof window.PointerEvent === "undefined" &&
               window.matchMedia?.("(hover: none)")?.matches === true);
-          lastPointerTypeRef.current = null;
 
           if (
-            touchActivation &&
-            !revealedByTouchRef.current &&
-            !event.defaultPrevented
+            suppressNextClickRef.current ||
+            (touchActivation && !revealedByTouchRef.current)
           ) {
             event.preventDefault();
-            revealedByTouchRef.current = true;
-            holdReason("tap");
-            return;
-          }
+            event.stopPropagation();
+            suppressNextClickRef.current = false;
 
+            // Older browsers without Pointer Events can only be identified
+            // at click capture, which still runs before the trigger handler.
+            if (!revealedByTouchRef.current) {
+              revealedByTouchRef.current = true;
+              holdReason("tap");
+            }
+          }
+        }}
+        onClick={() => {
+          lastPointerTypeRef.current = null;
+          suppressNextClickRef.current = false;
           openPopover();
         }}
         onFocus={() => {
@@ -343,6 +360,29 @@ export function Popover({ trigger, children, className }: PopoverProps) {
         onMouseLeave={() => releaseReason("hover", true)}
         onPointerDown={(event) => {
           lastPointerTypeRef.current = event.pointerType;
+
+          if (
+            (event.pointerType === "touch" || event.pointerType === "pen") &&
+            !revealedByTouchRef.current
+          ) {
+            revealedByTouchRef.current = true;
+            suppressNextClickRef.current = true;
+            holdReason("tap");
+          } else {
+            suppressNextClickRef.current = false;
+          }
+        }}
+        onPointerUp={() => {
+          lastPointerTypeRef.current = null;
+        }}
+        onPointerCancel={() => {
+          lastPointerTypeRef.current = null;
+          suppressNextClickRef.current = false;
+
+          if (revealedByTouchRef.current) {
+            revealedByTouchRef.current = false;
+            releaseReason("tap");
+          }
         }}
       >
         {triggerElement}

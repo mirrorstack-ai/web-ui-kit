@@ -153,18 +153,73 @@ describe("Popover", () => {
     const trigger = screen.getByRole("link", { name: "Ada" });
 
     fireEvent.pointerDown(trigger, { pointerType: "touch" });
-    const firstClick = createEvent.click(trigger);
+    const firstClick = createEvent.click(trigger, { detail: 1 });
     fireEvent(trigger, firstClick);
 
     expect(firstClick.defaultPrevented).toBe(true);
     expect(screen.getByText("Identity details")).toBeInTheDocument();
 
     fireEvent.pointerDown(trigger, { pointerType: "touch" });
-    const secondClick = createEvent.click(trigger);
+    const secondClick = createEvent.click(trigger, { detail: 1 });
     fireEvent(trigger, secondClick);
 
     expect(secondClick.defaultPrevented).toBe(false);
     expect(screen.getByText("Identity details")).toBeInTheDocument();
+  });
+
+  it("reveals before a touch trigger handler can route", () => {
+    const route = vi.fn();
+    render(
+      <Popover
+        trigger={
+          <a
+            href="/users/ada"
+            onClick={(event) => {
+              event.preventDefault();
+              route();
+            }}
+          >
+            Ada
+          </a>
+        }
+      >
+        <div>Identity details</div>
+      </Popover>,
+    );
+    const trigger = screen.getByRole("link", { name: "Ada" });
+
+    fireEvent.pointerDown(trigger, { pointerType: "touch" });
+    fireEvent.pointerUp(trigger, { pointerType: "touch" });
+    const firstClick = createEvent.click(trigger, { detail: 1 });
+    fireEvent(trigger, firstClick);
+
+    expect(firstClick.defaultPrevented).toBe(true);
+    expect(route).not.toHaveBeenCalled();
+    expect(screen.getByText("Identity details")).toBeInTheDocument();
+  });
+
+  it("allows keyboard activation after a canceled touch pointer", () => {
+    const route = vi.fn();
+    render(
+      <Popover
+        trigger={
+          <a href="/users/ada" onClick={route}>
+            Ada
+          </a>
+        }
+      >
+        <div>Identity details</div>
+      </Popover>,
+    );
+    const trigger = screen.getByRole("link", { name: "Ada" });
+
+    fireEvent.pointerDown(trigger, { pointerType: "touch" });
+    fireEvent.pointerCancel(trigger, { pointerType: "touch" });
+    const keyboardClick = createEvent.click(trigger, { detail: 0 });
+    fireEvent(trigger, keyboardClick);
+
+    expect(keyboardClick.defaultPrevented).toBe(false);
+    expect(route).toHaveBeenCalledOnce();
   });
 
   it("never prevents a mouse click", () => {
