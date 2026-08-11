@@ -10282,7 +10282,7 @@ trigger: ReactElement&lt;PopoverTriggerProps&gt;</code></pre>
               </div>
               
               
-              <pre><code>const Playground = () =&gt; &lt;Popover trigger={&lt;Button variant=&quot;filled&quot;&gt;Hover or focus me&lt;/Button&gt;}&gt;(&lt;div className=&quot;w-64 rounded-xl border border-outline-variant bg-surface-container-low p-4 shadow-lg&quot;&gt;
+              <pre><code>const Playground = () =&gt; &lt;Popover trigger={&lt;Button variant=&quot;filled&quot;&gt;Hover, focus, or tap me&lt;/Button&gt;}&gt;(&lt;div className=&quot;w-64 rounded-xl border border-outline-variant bg-surface-container-low p-4 shadow-lg&quot;&gt;
       &lt;p className=&quot;font-medium text-on-surface&quot;&gt;Arbitrary content&lt;/p&gt;
       &lt;p className=&quot;mt-1 text-sm text-on-surface-variant&quot;&gt;
         This layer is not limited to a list of actions.
@@ -10297,7 +10297,10 @@ trigger: ReactElement&lt;PopoverTriggerProps&gt;</code></pre>
               
               
               <pre><code>const InteractiveContent = () =&gt; &lt;Popover trigger={&lt;a href=&quot;#profile&quot;&gt;Account details&lt;/a&gt;}&gt;(&lt;div className=&quot;w-64 rounded-xl border border-outline-variant bg-surface-container-low p-4 shadow-lg&quot;&gt;
-      &lt;p className=&quot;text-sm text-on-surface&quot;&gt;The popover does not trap focus.&lt;/p&gt;
+      &lt;p className=&quot;text-sm text-on-surface&quot;&gt;
+        The popover does not trap focus. On touch, the first tap reveals this
+        card and the second follows the profile link.
+      &lt;/p&gt;
       &lt;Button className=&quot;mt-3&quot; size=&quot;sm&quot;&gt;
         Secondary action
       &lt;/Button&gt;
@@ -10310,7 +10313,7 @@ trigger: ReactElement&lt;PopoverTriggerProps&gt;</code></pre>
               </div>
               
               
-              <pre><code>const NearViewportEdge = () =&gt; &lt;Popover trigger={&lt;Button variant=&quot;filled&quot;&gt;Hover or focus me&lt;/Button&gt;}&gt;(&lt;div className=&quot;w-64 rounded-xl border border-outline-variant bg-surface-container-low p-4 shadow-lg&quot;&gt;
+              <pre><code>const NearViewportEdge = () =&gt; &lt;Popover trigger={&lt;Button variant=&quot;filled&quot;&gt;Hover, focus, or tap me&lt;/Button&gt;}&gt;(&lt;div className=&quot;w-64 rounded-xl border border-outline-variant bg-surface-container-low p-4 shadow-lg&quot;&gt;
       &lt;p className=&quot;font-medium text-on-surface&quot;&gt;Arbitrary content&lt;/p&gt;
       &lt;p className=&quot;mt-1 text-sm text-on-surface-variant&quot;&gt;
         This layer is not limited to a list of actions.
@@ -15569,7 +15572,7 @@ warnTitle: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> UserIdentityCard</h2>
       <div class="badges">
-        <label for="c-78-ui-display-useridentitycard-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-78-ui-display-useridentitycard-props" class="badge ok as-toggle">9 prop types</label>
         
         <label for="c-78-ui-display-useridentitycard-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -15596,16 +15599,16 @@ warnTitle: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">7 prop types</span>
+              <span class="badge ok">9 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/display/user-identity-card/UserIdentityCard.tsx::UserIdentityCard</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>avatarUrl?: string | null
 
 /**
- * The caller-owned trigger, normally a link to the user&#39;s full profile.
+ * Trigger link content. Defaults to the display name.
  */
-children: ReactElement
+children?: ReactNode
 
 /**
  * Applied to the identity card surface.
@@ -15613,6 +15616,11 @@ children: ReactElement
 className?: string
 
 email?: string | null
+
+/**
+ * Destination for the trigger link and for the name inside the card.
+ */
+href: string
 
 /**
  * Already-localized text shown when the user&#39;s email is unavailable.
@@ -15624,7 +15632,12 @@ missingEmailLabel: string
  */
 missingNameLabel: string
 
-name?: string | null</code></pre>
+name?: string | null
+
+/**
+ * Applied to the trigger link.
+ */
+triggerClassName?: string</code></pre>
           </div>
         </div>
     
@@ -15652,8 +15665,8 @@ name?: string | null</code></pre>
     email=&quot;ada.lovelace@example.com&quot;
     avatarUrl=&quot;https://i.pravatar.cc/150?img=47&quot;
     missingNameLabel=&quot;Deleted user&quot;
-    missingEmailLabel=&quot;Email unavailable&quot;&gt;(&lt;a className=&quot;font-medium text-primary underline&quot; href=&quot;#ada-profile&quot;&gt;Ada Lovelace
-            &lt;/a&gt;)&lt;/UserIdentityCard&gt;;</code></pre>
+    missingEmailLabel=&quot;Email unavailable&quot;
+    href=&quot;#ada-profile&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -15667,8 +15680,8 @@ name?: string | null</code></pre>
     email=&quot;ada.lovelace@example.com&quot;
     avatarUrl={null}
     missingNameLabel=&quot;Deleted user&quot;
-    missingEmailLabel=&quot;Email unavailable&quot;&gt;(&lt;a className=&quot;font-medium text-primary underline&quot; href=&quot;#ada-profile&quot;&gt;Ada Lovelace
-            &lt;/a&gt;)&lt;/UserIdentityCard&gt;;</code></pre>
+    missingEmailLabel=&quot;Email unavailable&quot;
+    href=&quot;#ada-profile&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -15682,8 +15695,8 @@ name?: string | null</code></pre>
     email={null}
     avatarUrl={null}
     missingNameLabel=&quot;Deleted user&quot;
-    missingEmailLabel=&quot;Email unavailable&quot;&gt;(&lt;a className=&quot;font-medium text-primary underline&quot; href=&quot;#audit-entry&quot;&gt;2d7f52a1-830e-4b55-a224-6553bcb8f8dd
-            &lt;/a&gt;)&lt;/UserIdentityCard&gt;;</code></pre>
+    missingEmailLabel=&quot;Email unavailable&quot;
+    href=&quot;#audit-entry&quot;&gt;2d7f52a1-830e-4b55-a224-6553bcb8f8dd&lt;/UserIdentityCard&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -15697,8 +15710,8 @@ name?: string | null</code></pre>
     email=&quot;alexandria-cassandra.montgomery-smythe@international.example&quot;
     avatarUrl=&quot;https://i.pravatar.cc/150?img=47&quot;
     missingNameLabel=&quot;Deleted user&quot;
-    missingEmailLabel=&quot;Email unavailable&quot;&gt;(&lt;a className=&quot;font-medium text-primary underline&quot; href=&quot;#ada-profile&quot;&gt;Ada Lovelace
-            &lt;/a&gt;)&lt;/UserIdentityCard&gt;;</code></pre>
+    missingEmailLabel=&quot;Email unavailable&quot;
+    href=&quot;#ada-profile&quot; /&gt;;</code></pre>
             </div>
         </div>
     
