@@ -29,6 +29,33 @@ src/hooks/                                   Hooks
 src/utils/                                   Helpers
 ```
 
+## Publishing a release
+
+🔴 **A merged PR does NOT publish.** `.github/workflows/release.yml` only runs when the PR
+carries the **`release` label**:
+
+```yaml
+if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+```
+
+Without the label the job reports **skipped**, which is not a failure and shows up green — so
+the version silently stays where it was while everything looks fine. Bumping `package.json` is
+not enough on its own.
+
+Two things that make this hard to notice:
+
+- The workflow triggers on `pull_request: closed`, so its runs are tagged with the **head
+  branch**, not `main`. `gh run list --branch main` shows nothing and looks like it never ran.
+- Adding the label *after* merging and re-running does **not** work: the re-run replays the
+  original event payload, so the label is still absent and it skips again. Land a new PR that
+  has the label from the start.
+
+Verify a release by the published version, never by a green run:
+
+```bash
+npm view @mirrorstack-ai/web-ui-kit version
+```
+
 ## Core manifest pointer automation
 
 After a PR merges to protected `main`, a successful terminal `CI` run triggers
