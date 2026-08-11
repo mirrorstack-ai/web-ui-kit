@@ -68,7 +68,7 @@ export function UserIdentityCard({
             them flush reads as one wrapped line. A consumer cannot fix this
             from the outside — it needs a descendant selector, and arbitrary
             variants do not compile into the modules' scoped CSS bundles. */}
-        <div className="min-w-0 flex-1 space-y-1">
+        <div className="min-w-0 flex-1 space-y-1.5">
           <a
             href={href}
             className="block truncate text-sm font-semibold text-on-surface"

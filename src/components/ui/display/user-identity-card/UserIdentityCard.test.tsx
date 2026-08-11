@@ -76,7 +76,7 @@ describe("UserIdentityCard", () => {
     const card = openCard();
 
     const email = within(card).getByText("ada@example.com");
-    expect(email.parentElement).toHaveClass("space-y-1");
+    expect(email.parentElement).toHaveClass("space-y-1.5");
   });
 
   it("falls back through Avatar when no avatar URL is available", () => {
