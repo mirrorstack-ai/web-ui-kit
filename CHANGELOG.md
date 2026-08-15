@@ -3,6 +3,26 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.2
+
+- **The app switcher is clickable again.** 0.6.25 gave the desktop nav column
+  `relative z-30` so the navigation rail's hover label would paint above the
+  content column. The `AppShell` band that hosts the app switcher sits at
+  `absolute top-2` — deliberately over the nav column's top-left corner, which
+  is why that column is `justify-center` — but it was still at `z-20`. The
+  column therefore won hit-testing across the whole corner: it is a full-height
+  box that paints nothing there, so clicking the switcher trigger, or any item
+  in its open dropdown, hit the column and did nothing. On a host with a
+  `w-72` `NavDrawer` (account.mirrorstack.ai) the trigger was completely dead;
+  with a narrower rail, only its left part was.
+
+  The band moves to `z-40`, above the column and below the `z-50` overlay tier
+  (dropdowns, agent sidebar) and `z-[60]` dialogs. It keeps
+  `pointer-events-none`, with `pointer-events-auto` only on the switcher itself,
+  so out-ranking the column cannot blanket-block the navigation underneath. The
+  overlaying agent sidebar moves `z-30` → `z-50`, matching its docked branch, so
+  it still covers the switcher while its scrim is up.
+
 ## 0.7.1
 
 - **Autofilled fields keep the design system's tokens.** Chrome/WebKit painted
