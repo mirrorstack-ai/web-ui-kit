@@ -491,7 +491,16 @@ function AppShellInner({
       <div className="flex-1 min-w-0 h-dvh overflow-hidden">
         <div className={cn("mx-auto w-full h-full relative", className)}>
           {appSwitcher && (
-            <div className="absolute top-2 left-0 right-0 z-20 pointer-events-none">
+            // z-40: this band overlays the TOP-LEFT corner of the nav column
+            // (which is why that column is justify-center — the corner belongs
+            // to the switcher). It therefore has to out-rank the column's
+            // `relative z-30`, or the column — a full-height box with nothing
+            // painted in that corner — wins hit-testing and swallows every
+            // click on the trigger AND on the open dropdown's items. Below the
+            // z-50 overlay tier (dropdowns, agent sidebar) and z-[60] dialogs,
+            // and below the mobile nav drawer, which shares this tier but comes
+            // later in DOM order.
+            <div className="absolute top-2 left-0 right-0 z-40 pointer-events-none">
               <div
                 className={cn(
                   "mx-auto w-full px-1 lg:px-2 xl:px-4",
@@ -568,7 +577,12 @@ function AppShellInner({
           className={cn(
             "flex justify-end shrink-0 starting:!w-0",
             isOverlaying
-              ? "fixed top-0 right-0 h-screen z-30"
+              ? // z-50, matching the docked branch: overlaying means the sidebar
+                // is covering the app with a scrim, so it must stay above the
+                // app-switcher band (z-40) the way it used to sit above the
+                // z-20 band. (The fixed agent toggle also uses z-50, but the
+                // two never render together.)
+                "fixed top-0 right-0 h-screen z-50"
               : "relative z-50",
             !isResizing && "transition-all duration-300",
           )}

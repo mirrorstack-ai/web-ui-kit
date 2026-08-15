@@ -4,6 +4,14 @@ import { AppShell } from "./AppShell";
 
 afterEach(cleanup);
 
+/** Numeric value of an element's `z-<n>` utility class (0 when it has none).
+ *  The shell's chrome layers only stack correctly relative to each other, so
+ *  the tests assert those relationships instead of pinning literal tiers. */
+function zTier(el: Element | null | undefined): number {
+  const cls = Array.from(el?.classList ?? []).find((c) => /^z-\d+$/.test(c));
+  return cls ? Number(cls.slice(2)) : 0;
+}
+
 describe("AppShell content spacing", () => {
   it("keeps vertical space inside the scrollport instead of shrinking it outside", () => {
     render(<AppShell>content</AppShell>);
@@ -54,7 +62,38 @@ describe("AppShell mobile navigation", () => {
 
     expect(column).not.toBeNull();
     expect(column).toHaveClass("relative");
-    expect(column).toHaveClass("z-30");
+    // Any positive tier beats the content column (position:relative, z-auto);
+    // the exact number is not the contract — out-ranking content is.
+    expect(zTier(column)).toBeGreaterThan(0);
+  });
+
+  // The band that hosts the app switcher overlays the TOP-LEFT corner of the
+  // nav column, so it must out-rank that column. When it did not (band z-20 vs
+  // column z-30, kit 0.6.25 → 0.7.1) the column — a full-height box painting
+  // nothing in that corner — won hit-testing and every click on the switcher,
+  // and on its open dropdown, went nowhere. Verified with elementFromPoint in a
+  // real browser: the top element at the trigger's centre was the nav column.
+  it("keeps the app switcher above the desktop nav column so it stays clickable", () => {
+    const { container } = render(
+      <AppShell
+        navigation={<span>Desktop nav</span>}
+        appSwitcher={<button type="button">Switch app</button>}
+      >
+        content
+      </AppShell>,
+    );
+    const column = container.querySelector("div.lg\\:flex.shrink-0");
+    const band = screen.getByText("Switch app").closest("div.absolute");
+
+    expect(band).not.toBeNull();
+    expect(zTier(band)).toBeGreaterThan(zTier(column));
+    // The band spans the full width, so only the switcher itself may take
+    // pointer events — otherwise out-ranking the column would blanket-block it.
+    expect(band).toHaveClass("pointer-events-none");
+    expect(screen.getByText("Switch app").parentElement).toHaveClass(
+      "pointer-events-auto",
+      "w-fit",
+    );
   });
 
   it("drawer prefers mobileNavigation content over navigation", () => {
