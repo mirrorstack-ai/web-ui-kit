@@ -1,4 +1,5 @@
 import { useEffect, useRef, useId, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Button, type ButtonProps } from "@/components/ui/actions/button/Button";
@@ -134,15 +135,37 @@ export function Dialog({
   }, [open]);
 
   if (!open) return null;
+  // No document during SSR; the dialog is client-only by nature (focus trap,
+  // scroll lock, Escape handling all need a live DOM).
+  if (typeof document === "undefined") return null;
 
-  return (
+  // PORTALLED TO document.body, and that is load-bearing rather than tidiness.
+  //
+  // Rendered inline, these two `fixed` divs are still LAYOUT CHILDREN of
+  // whatever container happened to render the dialog. Under Tailwind v4,
+  // `space-y-*` compiles to `:where(& > :not(:last-child)) { margin-block-end }`
+  // — margin on every child EXCEPT the last. So opening a dialog inside a
+  // `space-y-6` container appends two children, the element that used to be
+  // last stops being last, and it silently GAINS 1.5rem of bottom margin. The
+  // container grows and the page shifts, with nothing in the dialog's own
+  // styles to blame.
+  //
+  // The `!m-0` these divs used to carry could not fix that: it zeroed THEIR
+  // margin while v4 puts the margin on the sibling instead. It was written
+  // against v3's `~`-combinator form, which put margin-top on later siblings,
+  // and it has looked like it was working ever since.
+  //
+  // Portalling makes the whole class of bug structurally impossible for every
+  // consumer: a modal is not part of any parent's flow, so no parent's spacing
+  // selectors can see it.
+  return createPortal(
     <>
       <div
         aria-hidden="true"
-        className="!m-0 fixed inset-0 z-[60] bg-black/50"
+        className="fixed inset-0 z-[60] bg-black/50"
         onClick={() => onClose?.()}
       />
-      <div className="!m-0 fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
         <div
           className={cn(
             "relative pointer-events-auto max-w-sm w-full mx-4",
@@ -197,6 +220,7 @@ export function Dialog({
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 }

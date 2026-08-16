@@ -3,6 +3,31 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.3
+
+### Fixed
+
+- **Dialog no longer shifts the page it is opened from.** The dialog rendered its
+  two `fixed` divs inline, so they were layout children of whatever container
+  held the call site. Under Tailwind v4 `space-y-*` compiles to
+  `:where(& > :not(:last-child)) { margin-block-end }` — margin on every child
+  except the last — so opening a dialog inside a `space-y-*` container changed
+  which element matched `:last-child`, and the previously-last element silently
+  gained bottom margin. The container grew and the content moved, with nothing
+  in the dialog's own styles to blame.
+
+  The `!m-0` the dialog carried could not help: it zeroed the dialog's own
+  margin while v4 puts the margin on the sibling. It was written against v3's
+  `~`-combinator form (margin-top on later siblings) and had looked correct ever
+  since. It is removed rather than left as load-bearing cargo.
+
+  Dialogs now render through `createPortal` to `document.body`, which makes the
+  whole class of bug structurally impossible for every consumer instead of
+  requiring each call site to avoid spacing containers.
+
+  Consumers can drop any local `scrollbar-gutter`/spacing workarounds added for
+  this; none is needed now.
+
 ## 0.7.2
 
 - **The app switcher is clickable again.** 0.6.25 gave the desktop nav column
