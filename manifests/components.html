@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/80 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">78/80 infos</a><span class="filter-pill ok" aria-disabled="true">335 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">6/80 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">78/80 infos</a><span class="filter-pill ok" aria-disabled="true">335 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3822,7 +3822,7 @@ value: string</code></pre>
 </article>
 <article
   class="card 
-  no-error 
+  has-error 
   has-info 
   no-story-error
   no-doc-error"
@@ -3830,9 +3830,9 @@ value: string</code></pre>
   aria-label="Dialog">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> Dialog</h2>
+      <h2><span class="status-dot dot-err"></span> Dialog</h2>
       <div class="badges">
-        <label for="c-18-ui-surfaces-dialog-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-18-ui-surfaces-dialog-err" class="badge err as-toggle">prop type error</label>
         <label for="c-18-ui-surfaces-dialog-info" class="badge info as-toggle">1 info</label>
         <label for="c-18-ui-surfaces-dialog-stories" class="badge ok as-toggle">6 stories</label>
         
@@ -3845,14 +3845,252 @@ value: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  
+  <input id="c-18-ui-surfaces-dialog-err" class="tg tg-err" type="checkbox" hidden />
   <input id="c-18-ui-surfaces-dialog-info" class="tg tg-info" type="checkbox" hidden />
   <input id="c-18-ui-surfaces-dialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-18-ui-surfaces-dialog-props" class="tg tg-props" type="checkbox" hidden />
+  
 
   <div class="panels">
     
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/runner/work/web-ui-kit/web-ui-kit/src/components/ui/surfaces/dialog/Dialog.tsx
+Error:
+No suitable component definition found.
+You can debug your component file in this playground: https://react-docgen.dev/playground
+Code:
+import { useEffect, useRef, useId, type ReactNode } from &quot;react&quot;;
+import { createPortal } from &quot;react-dom&quot;;
+import { cn } from &quot;@/utils/cn&quot;;
+import type { ComponentMeta } from &quot;@/types/component-meta&quot;;
+import { Button, type ButtonProps } from &quot;@/components/ui/actions/button/Button&quot;;
+import { IconButton } from &quot;@/components/ui/actions/icon-button/IconButton&quot;;
+
+export const meta: ComponentMeta = {
+  name: &quot;Dialog&quot;,
+  description:
+    &quot;Modal dialog with backdrop, focus trap, scroll locking, and declarative action buttons&quot;,
+};
+
+export interface DialogAction {
+  label: string;
+  onClick: () =&gt; void;
+  variant?: ButtonProps[&quot;variant&quot;];
+  color?: ButtonProps[&quot;color&quot;];
+  loading?: boolean;
+  disabled?: boolean;
+}
+
+export interface DialogProps {
+  open: boolean;
+  onClose?: () =&gt; void;
+  title?: string;
+  children?: ReactNode;
+  actions?: DialogAction[];
+  className?: string;
+  /** Hide the built-in X close button in the top-right corner. The X is
+   *  rendered by default whenever `onClose` is provided. */
+  hideCloseButton?: boolean;
+}
+
+let scrollLockCount = 0;
+
+// Reserve the scrollbar gutter as right-padding while scroll is
+// locked, otherwise the page reflows by the gutter width (≈15px on
+// macOS Safari/Chrome) the moment overflow flips to hidden and the
+// scrollbar disappears. Pages that already opt into
+// `scrollbar-gutter: stable` at the html level will see gutter === 0
+// and skip the padding adjustment.
+function lockScroll() {
+  if (typeof document === &quot;undefined&quot;) return;
+  scrollLockCount++;
+  if (scrollLockCount !== 1) return;
+  const gutter = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.overflow = &quot;hidden&quot;;
+  if (gutter &gt; 0) document.body.style.paddingRight = `${gutter}px`;
+}
+
+function unlockScroll() {
+  if (typeof document === &quot;undefined&quot;) return;
+  scrollLockCount = Math.max(0, scrollLockCount - 1);
+  if (scrollLockCount !== 0) return;
+  document.body.style.overflow = &quot;&quot;;
+  document.body.style.paddingRight = &quot;&quot;;
+}
+
+export function Dialog({
+  open,
+  onClose,
+  title,
+  children,
+  actions,
+  className,
+  hideCloseButton = false,
+}: DialogProps) {
+  const titleId = useId();
+  const dialogRef = useRef&lt;HTMLDivElement&gt;(null);
+  const triggerRef = useRef&lt;Element | null&gt;(null);
+
+  useEffect(() =&gt; {
+    if (open) {
+      triggerRef.current = document.activeElement;
+    }
+  }, [open]);
+
+  useEffect(() =&gt; {
+    if (!open) return;
+    lockScroll();
+    return unlockScroll;
+  }, [open]);
+
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() =&gt; {
+    if (!open) return;
+
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    dialog.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) =&gt; {
+      if (e.key === &quot;Escape&quot;) {
+        onCloseRef.current?.();
+        return;
+      }
+
+      if (e.key !== &quot;Tab&quot;) return;
+
+      const focusable = dialog.querySelectorAll&lt;HTMLElement&gt;(
+        &#39;a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex=&quot;-1&quot;])&#39;,
+      );
+      if (focusable.length === 0) {
+        e.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey &amp;&amp; document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey &amp;&amp; document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener(&quot;keydown&quot;, handleKeyDown);
+    return () =&gt; document.removeEventListener(&quot;keydown&quot;, handleKeyDown);
+  }, [open]);
+
+  useEffect(() =&gt; {
+    if (open) return;
+    if (triggerRef.current instanceof HTMLElement) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
+    }
+  }, [open]);
+
+  if (!open) return null;
+  // No document during SSR; the dialog is client-only by nature (focus trap,
+  // scroll lock, Escape handling all need a live DOM).
+  if (typeof document === &quot;undefined&quot;) return null;
+
+  // PORTALLED TO document.body, and that is load-bearing rather than tidiness.
+  //
+  // Rendered inline, these two `fixed` divs are still LAYOUT CHILDREN of
+  // whatever container happened to render the dialog. Under Tailwind v4,
+  // `space-y-*` compiles to `:where(&amp; &gt; :not(:last-child)) { margin-block-end }`
+  // — margin on every child EXCEPT the last. So opening a dialog inside a
+  // `space-y-6` container appends two children, the element that used to be
+  // last stops being last, and it silently GAINS 1.5rem of bottom margin. The
+  // container grows and the page shifts, with nothing in the dialog&#39;s own
+  // styles to blame.
+  //
+  // The `!m-0` these divs used to carry could not fix that: it zeroed THEIR
+  // margin while v4 puts the margin on the sibling instead. It was written
+  // against v3&#39;s `~`-combinator form, which put margin-top on later siblings,
+  // and it has looked like it was working ever since.
+  //
+  // Portalling makes the whole class of bug structurally impossible for every
+  // consumer: a modal is not part of any parent&#39;s flow, so no parent&#39;s spacing
+  // selectors can see it.
+  return createPortal(
+    &lt;&gt;
+      &lt;div
+        aria-hidden=&quot;true&quot;
+        className=&quot;fixed inset-0 z-[60] bg-black/50&quot;
+        onClick={() =&gt; onClose?.()}
+      /&gt;
+      &lt;div className=&quot;fixed inset-0 z-[60] flex items-center justify-center pointer-events-none&quot;&gt;
+        &lt;div
+          className={cn(
+            &quot;relative pointer-events-auto max-w-sm w-full mx-4&quot;,
+            className,
+          )}
+        &gt;
+          {onClose &amp;&amp; !hideCloseButton &amp;&amp; (
+            &lt;IconButton
+              icon=&quot;close&quot;
+              variant=&quot;filled&quot;
+              size=&quot;sm&quot;
+              className=&quot;absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 z-10 shadow-md&quot;
+              aria-label=&quot;Close&quot;
+              onClick={onClose}
+            /&gt;
+          )}
+          &lt;div
+            ref={dialogRef}
+            tabIndex={-1}
+            className=&quot;bg-surface rounded-2xl border border-outline-variant p-6 shadow-xl outline-none max-h-[90vh] overflow-y-auto&quot;
+            role=&quot;dialog&quot;
+            aria-modal=&quot;true&quot;
+            aria-labelledby={title ? titleId : undefined}
+          &gt;
+            {title &amp;&amp; (
+              &lt;h3
+                id={titleId}
+                className=&quot;text-lg font-semibold text-on-surface mb-3 pr-8&quot;
+              &gt;
+                {title}
+              &lt;/h3&gt;
+            )}
+
+            {children}
+
+            {actions &amp;&amp; actions.length &gt; 0 &amp;&amp; (
+              &lt;div className=&quot;flex justify-end gap-3 mt-4&quot;&gt;
+                {actions.map((action, i) =&gt; (
+                  &lt;Button
+                    key={`${i}-${action.label}`}
+                    variant={action.variant ?? &quot;text&quot;}
+                    color={action.color}
+                    onClick={action.onClick}
+                    loading={action.loading}
+                    disabled={action.disabled}
+                  &gt;
+                    {action.label}
+                  &lt;/Button&gt;
+                ))}
+              &lt;/div&gt;
+            )}
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/&gt;,
+    document.body,
+  );
+}
+</code></pre></div>
+    </div>
+        </div>
     
         <div class="panel panel-info">
           
@@ -3862,33 +4100,6 @@ value: string</code></pre>
     </div>
         </div>
     
-        <div class="panel panel-props">
-          <div class="note ok">
-            <div class="row">
-              <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">7 prop types</span>
-            </div>
-            <pre><code>Component: src/components/ui/surfaces/dialog/Dialog.tsx::Dialog</code></pre>
-            <pre><code>Props:</code></pre>
-            <pre><code>actions?: DialogAction[]
-
-children?: ReactNode
-
-className?: string
-
-/**
- * Hide the built-in X close button in the top-right corner. The X is
- *  rendered by default whenever `onClose` is provided.
- */
-hideCloseButton?: boolean = false
-
-onClose?: () =&gt; void
-
-open: boolean
-
-title?: string</code></pre>
-          </div>
-        </div>
     
         <div class="panel panel-stories">
           
@@ -18173,9 +18384,424 @@ export const LiveShape: StoryObj = {
           <label for="no-component-definition-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component definition found</span>
-            <span class="group-count">1</span>
+            <span class="group-count">2</span>
           </label>
           <div class="group-cards">
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Dialog">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Dialog</h2>
+      <div class="badges">
+        <label for="c-error-0-ui-surfaces-dialog-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-0-ui-surfaces-dialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-0-ui-surfaces-dialog-stories" class="badge ok as-toggle">6 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/ui/surfaces/dialog/Dialog.stories.tsx">ui-surfaces-dialog · ./src/components/ui/surfaces/dialog/Dialog.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-0-ui-surfaces-dialog-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-0-ui-surfaces-dialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-0-ui-surfaces-dialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/runner/work/web-ui-kit/web-ui-kit/src/components/ui/surfaces/dialog/Dialog.tsx
+Error:
+No suitable component definition found.
+You can debug your component file in this playground: https://react-docgen.dev/playground
+Code:
+import { useEffect, useRef, useId, type ReactNode } from &quot;react&quot;;
+import { createPortal } from &quot;react-dom&quot;;
+import { cn } from &quot;@/utils/cn&quot;;
+import type { ComponentMeta } from &quot;@/types/component-meta&quot;;
+import { Button, type ButtonProps } from &quot;@/components/ui/actions/button/Button&quot;;
+import { IconButton } from &quot;@/components/ui/actions/icon-button/IconButton&quot;;
+
+export const meta: ComponentMeta = {
+  name: &quot;Dialog&quot;,
+  description:
+    &quot;Modal dialog with backdrop, focus trap, scroll locking, and declarative action buttons&quot;,
+};
+
+export interface DialogAction {
+  label: string;
+  onClick: () =&gt; void;
+  variant?: ButtonProps[&quot;variant&quot;];
+  color?: ButtonProps[&quot;color&quot;];
+  loading?: boolean;
+  disabled?: boolean;
+}
+
+export interface DialogProps {
+  open: boolean;
+  onClose?: () =&gt; void;
+  title?: string;
+  children?: ReactNode;
+  actions?: DialogAction[];
+  className?: string;
+  /** Hide the built-in X close button in the top-right corner. The X is
+   *  rendered by default whenever `onClose` is provided. */
+  hideCloseButton?: boolean;
+}
+
+let scrollLockCount = 0;
+
+// Reserve the scrollbar gutter as right-padding while scroll is
+// locked, otherwise the page reflows by the gutter width (≈15px on
+// macOS Safari/Chrome) the moment overflow flips to hidden and the
+// scrollbar disappears. Pages that already opt into
+// `scrollbar-gutter: stable` at the html level will see gutter === 0
+// and skip the padding adjustment.
+function lockScroll() {
+  if (typeof document === &quot;undefined&quot;) return;
+  scrollLockCount++;
+  if (scrollLockCount !== 1) return;
+  const gutter = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.overflow = &quot;hidden&quot;;
+  if (gutter &gt; 0) document.body.style.paddingRight = `${gutter}px`;
+}
+
+function unlockScroll() {
+  if (typeof document === &quot;undefined&quot;) return;
+  scrollLockCount = Math.max(0, scrollLockCount - 1);
+  if (scrollLockCount !== 0) return;
+  document.body.style.overflow = &quot;&quot;;
+  document.body.style.paddingRight = &quot;&quot;;
+}
+
+export function Dialog({
+  open,
+  onClose,
+  title,
+  children,
+  actions,
+  className,
+  hideCloseButton = false,
+}: DialogProps) {
+  const titleId = useId();
+  const dialogRef = useRef&lt;HTMLDivElement&gt;(null);
+  const triggerRef = useRef&lt;Element | null&gt;(null);
+
+  useEffect(() =&gt; {
+    if (open) {
+      triggerRef.current = document.activeElement;
+    }
+  }, [open]);
+
+  useEffect(() =&gt; {
+    if (!open) return;
+    lockScroll();
+    return unlockScroll;
+  }, [open]);
+
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() =&gt; {
+    if (!open) return;
+
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    dialog.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) =&gt; {
+      if (e.key === &quot;Escape&quot;) {
+        onCloseRef.current?.();
+        return;
+      }
+
+      if (e.key !== &quot;Tab&quot;) return;
+
+      const focusable = dialog.querySelectorAll&lt;HTMLElement&gt;(
+        &#39;a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex=&quot;-1&quot;])&#39;,
+      );
+      if (focusable.length === 0) {
+        e.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey &amp;&amp; document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey &amp;&amp; document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener(&quot;keydown&quot;, handleKeyDown);
+    return () =&gt; document.removeEventListener(&quot;keydown&quot;, handleKeyDown);
+  }, [open]);
+
+  useEffect(() =&gt; {
+    if (open) return;
+    if (triggerRef.current instanceof HTMLElement) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
+    }
+  }, [open]);
+
+  if (!open) return null;
+  // No document during SSR; the dialog is client-only by nature (focus trap,
+  // scroll lock, Escape handling all need a live DOM).
+  if (typeof document === &quot;undefined&quot;) return null;
+
+  // PORTALLED TO document.body, and that is load-bearing rather than tidiness.
+  //
+  // Rendered inline, these two `fixed` divs are still LAYOUT CHILDREN of
+  // whatever container happened to render the dialog. Under Tailwind v4,
+  // `space-y-*` compiles to `:where(&amp; &gt; :not(:last-child)) { margin-block-end }`
+  // — margin on every child EXCEPT the last. So opening a dialog inside a
+  // `space-y-6` container appends two children, the element that used to be
+  // last stops being last, and it silently GAINS 1.5rem of bottom margin. The
+  // container grows and the page shifts, with nothing in the dialog&#39;s own
+  // styles to blame.
+  //
+  // The `!m-0` these divs used to carry could not fix that: it zeroed THEIR
+  // margin while v4 puts the margin on the sibling instead. It was written
+  // against v3&#39;s `~`-combinator form, which put margin-top on later siblings,
+  // and it has looked like it was working ever since.
+  //
+  // Portalling makes the whole class of bug structurally impossible for every
+  // consumer: a modal is not part of any parent&#39;s flow, so no parent&#39;s spacing
+  // selectors can see it.
+  return createPortal(
+    &lt;&gt;
+      &lt;div
+        aria-hidden=&quot;true&quot;
+        className=&quot;fixed inset-0 z-[60] bg-black/50&quot;
+        onClick={() =&gt; onClose?.()}
+      /&gt;
+      &lt;div className=&quot;fixed inset-0 z-[60] flex items-center justify-center pointer-events-none&quot;&gt;
+        &lt;div
+          className={cn(
+            &quot;relative pointer-events-auto max-w-sm w-full mx-4&quot;,
+            className,
+          )}
+        &gt;
+          {onClose &amp;&amp; !hideCloseButton &amp;&amp; (
+            &lt;IconButton
+              icon=&quot;close&quot;
+              variant=&quot;filled&quot;
+              size=&quot;sm&quot;
+              className=&quot;absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 z-10 shadow-md&quot;
+              aria-label=&quot;Close&quot;
+              onClick={onClose}
+            /&gt;
+          )}
+          &lt;div
+            ref={dialogRef}
+            tabIndex={-1}
+            className=&quot;bg-surface rounded-2xl border border-outline-variant p-6 shadow-xl outline-none max-h-[90vh] overflow-y-auto&quot;
+            role=&quot;dialog&quot;
+            aria-modal=&quot;true&quot;
+            aria-labelledby={title ? titleId : undefined}
+          &gt;
+            {title &amp;&amp; (
+              &lt;h3
+                id={titleId}
+                className=&quot;text-lg font-semibold text-on-surface mb-3 pr-8&quot;
+              &gt;
+                {title}
+              &lt;/h3&gt;
+            )}
+
+            {children}
+
+            {actions &amp;&amp; actions.length &gt; 0 &amp;&amp; (
+              &lt;div className=&quot;flex justify-end gap-3 mt-4&quot;&gt;
+                {actions.map((action, i) =&gt; (
+                  &lt;Button
+                    key={`${i}-${action.label}`}
+                    variant={action.variant ?? &quot;text&quot;}
+                    color={action.color}
+                    onClick={action.onClick}
+                    loading={action.loading}
+                    disabled={action.disabled}
+                  &gt;
+                    {action.label}
+                  &lt;/Button&gt;
+                ))}
+              &lt;/div&gt;
+            )}
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/&gt;,
+    document.body,
+  );
+}
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Button, Dialog } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Playground</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Playground = () =&gt; &lt;Dialog
+    open
+    title=&quot;Confirm action&quot;
+    actions={[
+      { label: &quot;Cancel&quot;, onClick: () =&gt; {} },
+      { label: &quot;Confirm&quot;, onClick: () =&gt; {}, variant: &quot;filled&quot; },
+    ]}&gt;Are you sure you want to proceed? This action cannot be undone.&lt;/Dialog&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Actions</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const WithActions = () =&gt; {
+  const [open, setOpen] = useState(false);
+  return (
+    &lt;&gt;
+      &lt;Button onClick={() =&gt; setOpen(true)}&gt;Open Dialog&lt;/Button&gt;
+      &lt;Dialog
+        open={open}
+        onClose={() =&gt; setOpen(false)}
+        title=&quot;Delete item?&quot;
+        actions={[
+          { label: &quot;Cancel&quot;, onClick: () =&gt; setOpen(false) },
+          {
+            label: &quot;Delete&quot;,
+            onClick: () =&gt; setOpen(false),
+            variant: &quot;filled&quot;,
+            color: &quot;error&quot;,
+          },
+        ]}
+      &gt;
+        &lt;p className=&quot;text-on-surface-variant text-sm&quot;&gt;
+          This will permanently delete the item. You cannot undo this action.
+        &lt;/p&gt;
+      &lt;/Dialog&gt;
+    &lt;/&gt;
+  );
+};</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Loading Action</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const LoadingAction = () =&gt; &lt;Dialog
+    open
+    title=&quot;Saving changes&quot;
+    actions={[
+      { label: &quot;Cancel&quot;, onClick: () =&gt; {}, disabled: true },
+      { label: &quot;Saving...&quot;, onClick: () =&gt; {}, variant: &quot;filled&quot;, loading: true },
+    ]}&gt;Please wait while your changes are being saved...&lt;/Dialog&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">No Title</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const NoTitle = () =&gt; &lt;Dialog
+    open
+    title={undefined}
+    actions={[{ label: &quot;OK&quot;, onClick: () =&gt; {}, variant: &quot;filled&quot; }]}&gt;A simple message dialog without a title heading.&lt;/Dialog&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Close Button</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">The built-in X close button renders at the top-right whenever `onClose` is provided. It anchors to the outer wrapper, not the scrollable inner box, so it never gets clipped when the body overflows.</div>
+              <pre><code>const WithCloseButton = () =&gt; &lt;Dialog
+    open
+    title=&quot;Module detail&quot;
+    onClose={() =&gt; {}}
+    actions={[
+      { label: &quot;Close&quot;, onClick: () =&gt; {} },
+      { label: &quot;Install&quot;, onClick: () =&gt; {}, variant: &quot;filled&quot; },
+    ]}&gt;(&lt;p className=&quot;text-on-surface-variant text-sm&quot;&gt;The close affordance in the corner is provided by Dialog itself — no
+              extra JSX required at the call site. Pass &lt;code className=&quot;font-mono&quot;&gt;onClose&lt;/code&gt;and it appears.
+            &lt;/p&gt;)&lt;/Dialog&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Hide Close Button</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Pass `hideCloseButton` to suppress the built-in X — useful for hard-confirm flows where Escape / backdrop dismissal is also disabled and the only valid exit is one of the action buttons.</div>
+              <pre><code>const HideCloseButton = () =&gt; &lt;Dialog
+    open
+    title=&quot;Confirm permanent deletion&quot;
+    onClose={() =&gt; {}}
+    hideCloseButton
+    actions={[
+      { label: &quot;Cancel&quot;, onClick: () =&gt; {} },
+      {
+        label: &quot;Delete&quot;,
+        onClick: () =&gt; {},
+        variant: &quot;filled&quot;,
+        color: &quot;error&quot;,
+      },
+    ]}&gt;(&lt;p className=&quot;text-on-surface-variant text-sm&quot;&gt;With &lt;code className=&quot;font-mono&quot;&gt;hideCloseButton&lt;/code&gt;the user must
+              choose one of the actions — no X in the corner.
+            &lt;/p&gt;)&lt;/Dialog&gt;;</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
 <article
   class="card 
   has-error 
@@ -18188,9 +18814,9 @@ export const LiveShape: StoryObj = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> MetricBlock</h2>
       <div class="badges">
-        <label for="c-error-0-ui-blocks-metric-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-0-ui-blocks-metric-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-ui-blocks-metric-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-1-ui-blocks-metric-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-1-ui-blocks-metric-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-1-ui-blocks-metric-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -18201,9 +18827,9 @@ export const LiveShape: StoryObj = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-0-ui-blocks-metric-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-0-ui-blocks-metric-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-0-ui-blocks-metric-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-1-ui-blocks-metric-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-1-ui-blocks-metric-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-1-ui-blocks-metric-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
