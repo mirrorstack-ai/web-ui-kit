@@ -7,7 +7,10 @@ import {
   linearBarHeights, waveContainerHeights, defaultSvgStroke,
   clamp, isFourColor,
 } from "./types";
-import { indetWave, detWave, waveShift, WAVE_VB_H } from "./wave-paths";
+import {
+  indetWave, detWave, waveShift, WAVE_VB_H,
+  indetPeriods, detPeriods, scaledWave, scaledShift,
+} from "./wave-paths";
 
 export function LinearProgress({
   color = "primary",
@@ -15,12 +18,18 @@ export function LinearProgress({
   size = "md",
   value,
   lineWidth,
+  waveScale = 1,
   progressive,
   intermediate,
   "aria-label": ariaLabel,
   className,
 }: ProgressProps) {
   const sw = lineWidth ?? defaultSvgStroke[size];
+  // Scaling recomputes the geometry; the unscaled tables stay the fast path so
+  // every existing caller renders byte-identical output.
+  const indet = waveScale === 1 ? indetWave[size] : scaledWave(indetPeriods[size], waveScale);
+  const det = waveScale === 1 ? detWave[size] : scaledWave(detPeriods[size], waveScale);
+  const shiftFor = waveScale === 1 ? waveShift[size] : scaledShift(indetPeriods[size], waveScale);
   const indeterminate = intermediate || value === undefined;
   const label = ariaLabel ?? (indeterminate ? "Loading" : `${clamp(value ?? 0)}% complete`);
 
@@ -38,12 +47,12 @@ export function LinearProgress({
           className={cn("relative w-full overflow-hidden", waveContainerHeights[size], colorClass, className)}
         >
           <svg
-            viewBox={`0 0 ${indetWave[size].vbW} ${WAVE_VB_H}`}
+            viewBox={`0 0 ${indet.vbW} ${WAVE_VB_H}`}
             preserveAspectRatio="none"
             className="absolute top-0 left-0 h-full animate-progress-wave-flow"
-            style={{ width: "200%", "--wave-shift": waveShift[size] } as CSSProperties}
+            style={{ width: "200%", "--wave-shift": shiftFor } as CSSProperties}
           >
-            <path d={indetWave[size].path} stroke="currentColor" strokeWidth={sw} fill="none" />
+            <path d={indet.path} stroke="currentColor" strokeWidth={sw} fill="none" />
           </svg>
         </div>
       );
@@ -70,7 +79,7 @@ export function LinearProgress({
 
   /* ── Progressive wave ── */
   if (progressive && variant === "wave") {
-    const shift = waveShift[size];
+    const shift = shiftFor;
     return (
       <div
         role="progressbar"
@@ -81,12 +90,12 @@ export function LinearProgress({
         className={cn("relative w-full overflow-hidden", waveContainerHeights[size], fc && "animate-progress-four-color", className)}
       >
         <svg
-          viewBox={`0 0 ${indetWave[size].vbW} ${WAVE_VB_H}`}
+          viewBox={`0 0 ${indet.vbW} ${WAVE_VB_H}`}
           preserveAspectRatio="none"
           className="absolute top-0 left-0 h-full animate-progress-wave-flow"
           style={{ width: "200%", "--wave-shift": shift } as CSSProperties}
         >
-          <path d={indetWave[size].path} className={strokeTrackColors[color]} strokeWidth={sw} fill="none" />
+          <path d={indet.path} className={strokeTrackColors[color]} strokeWidth={sw} fill="none" />
         </svg>
         <div
           className="absolute top-0 left-0 h-full w-full"
@@ -96,12 +105,12 @@ export function LinearProgress({
           }}
         >
           <svg
-            viewBox={`0 0 ${indetWave[size].vbW} ${WAVE_VB_H}`}
+            viewBox={`0 0 ${indet.vbW} ${WAVE_VB_H}`}
             preserveAspectRatio="none"
             className="absolute top-0 left-0 h-full animate-progress-wave-flow"
             style={{ width: "200%", "--wave-shift": shift } as CSSProperties}
           >
-            <path d={indetWave[size].path} stroke={fc ? "currentColor" : undefined} className={fc ? undefined : strokeIndicatorColors[color]} strokeWidth={sw} fill="none" />
+            <path d={indet.path} stroke={fc ? "currentColor" : undefined} className={fc ? undefined : strokeIndicatorColors[color]} strokeWidth={sw} fill="none" />
           </svg>
         </div>
       </div>
@@ -145,13 +154,13 @@ export function LinearProgress({
         className={cn("relative w-full overflow-hidden", waveContainerHeights[size], fc && "animate-progress-four-color", className)}
       >
         <svg
-          viewBox={`0 0 ${detWave[size].vbW} ${WAVE_VB_H}`}
+          viewBox={`0 0 ${det.vbW} ${WAVE_VB_H}`}
           preserveAspectRatio="none"
           className="absolute top-0 left-0 h-full w-full"
         >
-          <path d={detWave[size].path} className={strokeTrackColors[color]} strokeWidth={sw} fill="none" />
+          <path d={det.path} className={strokeTrackColors[color]} strokeWidth={sw} fill="none" />
           <path
-            d={detWave[size].path}
+            d={det.path}
             stroke={fc ? "currentColor" : undefined}
             className={fc ? undefined : strokeIndicatorColors[color]}
             strokeWidth={sw}
