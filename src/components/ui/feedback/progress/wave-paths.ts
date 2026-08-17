@@ -42,6 +42,29 @@ export const waveShift: Record<ProgressSize, string> = Object.fromEntries(
   (["sm", "md", "lg"] as const).map(s => [s, `-${(100 / INDET_PERIODS[s]).toFixed(4)}%`]),
 ) as Record<ProgressSize, string>;
 
+// waveScale stretches the WAVELENGTH without touching the bar's height or
+// stroke, which `size` cannot do — size drives period count, container height
+// and default stroke together, so asking for a calmer wave also made a thicker
+// slab of a bar.
+//
+// A scale of 2 draws half as many periods across the same width: sin(x) becomes
+// sin(x/2). Below 1 it tightens them. Periods stay at least 1, because a wave
+// with none is a straight line and callers would have quietly lost the variant
+// they asked for.
+export function scaledWave(base: number, scale: number): WaveConfig {
+  const periods = Math.max(1, Math.round(base / scale));
+  return { path: buildLinearWave(periods), vbW: periods * WAVE_PW };
+}
+
+// The indeterminate animation slides the SVG by exactly one period, so the shift
+// has to be recomputed from the SCALED count or the loop visibly jumps.
+export function scaledShift(base: number, scale: number): string {
+  return `-${(100 / Math.max(1, Math.round(base / scale))).toFixed(4)}%`;
+}
+
+export const indetPeriods = INDET_PERIODS;
+export const detPeriods = DET_PERIODS;
+
 /* ── circular wave geometry ── */
 
 const SVG_VIEWBOX = 48;

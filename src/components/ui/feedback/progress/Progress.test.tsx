@@ -133,3 +133,45 @@ describe("Progress", () => {
     });
   });
 });
+
+describe("waveScale", () => {
+  // The whole point of the prop: a calmer wave WITHOUT the bar getting taller or
+  // thicker. Reaching for `size` did both at once, which is why this exists.
+  it("halves the period count without touching height or stroke", () => {
+    const { container: plain } = render(
+      <Progress type="linear" variant="wave" size="lg" value={50} />,
+    );
+    const { container: scaled } = render(
+      <Progress type="linear" variant="wave" size="lg" value={50} waveScale={2} />,
+    );
+
+    const box = (root: HTMLElement) => root.querySelector("[role=progressbar]")!;
+    expect(box(scaled).className).toBe(box(plain).className);
+
+    const stroke = (root: HTMLElement) =>
+      root.querySelector("path")!.getAttribute("stroke-width");
+    expect(stroke(scaled)).toBe(stroke(plain));
+
+    // One period is TWO cubic segments — the crest and the trough — so the "C"
+    // count is halved to get periods. Asserting the geometry rather than a
+    // viewBox number that could change for unrelated reasons.
+    const periods = (root: HTMLElement) =>
+      (root.querySelector("path")!.getAttribute("d")!.match(/C/g) ?? []).length / 2;
+    expect(periods(scaled)).toBe(Math.round(periods(plain) / 2));
+  });
+
+  it("keeps a wave at extreme scales rather than flattening to a line", () => {
+    const { container } = render(
+      <Progress type="linear" variant="wave" size="sm" value={50} waveScale={999} />,
+    );
+    expect(container.querySelector("path")!.getAttribute("d")).toContain("C");
+  });
+
+  it("leaves unscaled output byte-identical", () => {
+    const { container: a } = render(<Progress type="linear" variant="wave" value={40} />);
+    const { container: b } = render(
+      <Progress type="linear" variant="wave" value={40} waveScale={1} />,
+    );
+    expect(b.innerHTML).toBe(a.innerHTML);
+  });
+});

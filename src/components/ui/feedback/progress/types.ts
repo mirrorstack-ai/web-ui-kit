@@ -14,6 +14,16 @@ export interface ProgressProps {
   value?: number;
   /** Stroke / line thickness. Defaults by size. */
   lineWidth?: number;
+  /**
+   * Stretches the wave's WAVELENGTH without changing the bar's height or
+   * stroke. 2 draws half as many periods across the same width — sin(x) becomes
+   * sin(x/2) — and values below 1 tighten it. Defaults to 1.
+   *
+   * Separate from `size` on purpose: size drives period count, container height
+   * and default stroke at once, so reaching for a calmer wave through it also
+   * made the bar thicker. Only affects `variant="wave"`.
+   */
+  waveScale?: number;
   /** Animated determinate: shows wave/bar animation clipped to value%. */
   progressive?: boolean;
   /** Force indeterminate animation regardless of value. */
