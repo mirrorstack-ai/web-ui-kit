@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -10547,7 +10547,7 @@ trigger: ReactElement&lt;PopoverTriggerProps&gt;</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Progress</h2>
       <div class="badges">
-        <label for="c-53-ui-feedback-progress-props" class="badge ok as-toggle">12 prop types</label>
+        <label for="c-53-ui-feedback-progress-props" class="badge ok as-toggle">13 prop types</label>
         <label for="c-53-ui-feedback-progress-info" class="badge info as-toggle">1 info</label>
         <label for="c-53-ui-feedback-progress-stories" class="badge ok as-toggle">8 stories</label>
         
@@ -10581,7 +10581,7 @@ trigger: ReactElement&lt;PopoverTriggerProps&gt;</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">12 prop types</span>
+              <span class="badge ok">13 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/feedback/progress/Progress.tsx::Progress</code></pre>
             <pre><code>Props:</code></pre>
@@ -10619,7 +10619,18 @@ type?: &quot;linear&quot; | &quot;circular&quot;
  */
 value?: number
 
-variant?: &quot;normal&quot; | &quot;wave&quot;</code></pre>
+variant?: &quot;normal&quot; | &quot;wave&quot;
+
+/**
+ * Stretches the wave&#39;s WAVELENGTH without changing the bar&#39;s height or
+ * stroke. 2 draws half as many periods across the same width — sin(x) becomes
+ * sin(x/2) — and values below 1 tighten it. Defaults to 1.
+ * 
+ * Separate from `size` on purpose: size drives period count, container height
+ * and default stroke at once, so reaching for a calmer wave through it also
+ * made the bar thicker. Only affects `variant=&quot;wave&quot;`.
+ */
+waveScale?: number</code></pre>
           </div>
         </div>
     
