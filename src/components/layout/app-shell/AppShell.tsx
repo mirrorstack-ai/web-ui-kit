@@ -375,6 +375,71 @@ function AppShellInner({
     agentBodyObserverRef.current = observer;
   }, []);
 
+  // SCROLLPORT BLEED — how far the capped box's right edge sits from the left
+  // column's, i.e. the width a host's `max-w-*` on `className` gives away.
+  //
+  // 🔴 WHY THIS EXISTS. `className` lands on a box that is an ANCESTOR of <main>,
+  // the scroll owner. Capping it (web-account passes `max-w-7xl`) shrinks the
+  // scrollport, so the vertical scrollbar renders at the cap's right edge —
+  // ~219px inside a 1728px window — with the fixed agent toggle floating to the
+  // right of it. It reads as broken chrome.
+  //
+  // The fix below gives <main> `margin-inline-end: -bleed` and an equal
+  // `padding-inline-end`. A classic scrollbar is laid out at the inline-end of
+  // the PADDING box, against the border edge, so the padding sits to the LEFT of
+  // the scrollbar rather than between it and the window:
+  //
+  //   border box   C + bleed   → reaches the window edge, so the scrollbar does
+  //   content box  C − gutter  → EXACTLY what it is today, so nothing moves
+  //
+  // ONE MEASURED QUANTITY, not two configured ones. It never learns the cap
+  // (80rem) or the nav rail's width — both are already encoded in the two rects,
+  // and a kit that had to be told either would silently desync from the host.
+  //
+  // Inert by construction, with no prop and no default to get wrong: an uncapped
+  // host makes the capped box the left column itself, so bleed === 0 and both
+  // values are 0. Below the cap's binding width it is 0 for the same reason —
+  // the change cannot act on any viewport that does not have the bug.
+  const leftColRef = useRef<HTMLDivElement | null>(null);
+  const cappedBoxRef = useRef<HTMLDivElement | null>(null);
+  const [bleed, setBleed] = useState(0);
+
+  useEffect(() => {
+    const leftCol = leftColRef.current;
+    const cappedBox = cappedBoxRef.current;
+    if (!leftCol || !cappedBox) return;
+
+    const measure = () => {
+      // max(0, …) because only a cap can make these differ. A negative value
+      // would mean the inner box is WIDER than its parent, which no layout here
+      // produces — and bleeding on it would push content off-screen.
+      setBleed(
+        Math.max(
+          0,
+          leftCol.getBoundingClientRect().right -
+            cappedBox.getBoundingClientRect().right,
+        ),
+      );
+    };
+    measure();
+
+    // 🔴 MEASURE FIRST, OBSERVE SECOND — the order is load-bearing. Gating the
+    // whole effect on ResizeObserver would leave a browser without it (and
+    // jsdom) with no bleed at all, i.e. silently unfixed, which is exactly the
+    // shape of bug this component has shipped before. The observer only keeps a
+    // correct value correct; it is not what makes it correct.
+    if (typeof ResizeObserver === "undefined") return;
+
+    // Both boxes are observed: the left column changes when the agent sidebar
+    // docks or is drag-resized, the capped box when the viewport crosses the
+    // cap's binding width. Watching only one leaves the bleed stale through the
+    // sidebar's 300ms width transition.
+    const observer = new ResizeObserver(measure);
+    observer.observe(leftCol);
+    observer.observe(cappedBox);
+    return () => observer.disconnect();
+  }, []);
+
   const isOverlaying =
     isOpen && windowWidth > 0 && windowWidth < sidebarWidth + 800;
 
@@ -488,8 +553,11 @@ function AppShellInner({
   return (
     <div className="h-dvh flex bg-background text-on-background overflow-hidden">
       {/* Left: app content area */}
-      <div className="flex-1 min-w-0 h-dvh overflow-hidden">
-        <div className={cn("mx-auto w-full h-full relative", className)}>
+      <div ref={leftColRef} className="flex-1 min-w-0 h-dvh overflow-hidden">
+        <div
+          ref={cappedBoxRef}
+          className={cn("mx-auto w-full h-full relative", className)}
+        >
           {appSwitcher && (
             // z-40: this band overlays the TOP-LEFT corner of the nav column
             // (which is why that column is justify-center — the corner belongs
@@ -528,8 +596,24 @@ function AppShellInner({
               </div>
             )}
 
-            <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative">
-              <main className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-4">
+            {/* NO overflow-hidden HERE — it would clip <main>'s bleed back to
+                the cap and undo the fix. Nothing needs it: every other child of
+                this column is absolutely positioned with inset-x-0/left-2 and a
+                capped width, and the mobile drawer is `fixed inset-0`, so it
+                escapes any ancestor regardless. The clip boundary that actually
+                matters is still the left column above, which is
+                `h-dvh overflow-hidden` — i.e. the window edge. */}
+            <div className="flex-1 min-w-0 flex flex-col h-full relative">
+              <main
+                className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-4"
+                // INLINE, deliberately not a utility class. The value is
+                // measured, so Tailwind's static scanner could not emit it as an
+                // arbitrary value anyway — and an inline style outranks the
+                // global Tailwind that mounted modules inject after the host
+                // sheet, which is the same hazard BottomNavRegion's `lg:!hidden`
+                // exists for.
+                style={{ marginInlineEnd: -bleed, paddingInlineEnd: bleed }}
+              >
                 <div
                   className={cn(
                     // Responsive gutters — tight on phones, roomier as the

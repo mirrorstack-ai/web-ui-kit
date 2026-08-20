@@ -22,6 +22,85 @@ describe("AppShell content spacing", () => {
   });
 });
 
+describe("AppShell scrollport bleed", () => {
+  // A host `max-w-*` on `className` lands on an ANCESTOR of <main>, the scroll
+  // owner — so it shrinks the scrollport and the vertical scrollbar renders
+  // inside the window (~219px in, on web-account's max-w-7xl at 1728px), with
+  // the fixed agent toggle floating to its right.
+  //
+  // <main> compensates with `margin-inline-end: -bleed` + an equal
+  // `padding-inline-end`: the border box reaches the window edge so the
+  // scrollbar does, while the content box is unchanged so nothing moves.
+  //
+  // jsdom has no layout — getBoundingClientRect returns zeros — so these assert
+  // the WIRING (are the two values measured and applied as exact negations)
+  // rather than the geometry. The geometry is verified in a real browser.
+  function stubRects(leftColRight: number, cappedRight: number) {
+    const proto = Element.prototype;
+    const original = proto.getBoundingClientRect;
+    proto.getBoundingClientRect = function (this: Element) {
+      const has = (...c: string[]) => c.every((x) => this.classList.contains(x));
+      // Matched on the classes the shell ALWAYS puts on these two boxes, never
+      // on the host's max-w-* — the uncapped case has no such class, and keying
+      // on it made that test measure the capped box as 0 and report a 1718px
+      // bleed. The distinguishing pair is h-dvh (left column) vs mx-auto
+      // (the box the host's className lands on).
+      if (has("flex-1", "min-w-0", "h-dvh")) {
+        return { right: leftColRight } as DOMRect;
+      }
+      if (has("mx-auto", "w-full", "h-full", "relative")) {
+        return { right: cappedRight } as DOMRect;
+      }
+      return { right: 0 } as DOMRect;
+    };
+    return () => {
+      proto.getBoundingClientRect = original;
+    };
+  }
+
+  it("bleeds <main> to the window edge when a host caps the shell", () => {
+    const restore = stubRects(1718, 1499);
+    try {
+      render(<AppShell className="max-w-7xl">content</AppShell>);
+      const main = screen.getByRole("main");
+      // Exact negation is the whole invariant: any drift between the two moves
+      // the content box, which is what must NOT happen.
+      expect(main.style.marginInlineEnd).toBe("-219px");
+      expect(main.style.paddingInlineEnd).toBe("219px");
+    } finally {
+      restore();
+    }
+  });
+
+  // 🔴 THE BACKWARDS-COMPATIBILITY CONTRACT, executable. web-applications
+  // passes no className, so the capped box IS the left column and the bleed
+  // measures 0 — the change is inert there by measurement rather than by a flag
+  // someone has to remember to set.
+  it("is inert for a host that passes no className", () => {
+    const restore = stubRects(1718, 1718);
+    try {
+      render(<AppShell>content</AppShell>);
+      const main = screen.getByRole("main");
+      // React serialises a unitless zero as "0", not "0px".
+      expect(main.style.marginInlineEnd).toBe("0");
+      expect(main.style.paddingInlineEnd).toBe("0");
+    } finally {
+      restore();
+    }
+  });
+
+  // 🔴 Re-adding overflow-hidden here silently clips the bleed back to the cap
+  // and restores the bug, with every other test still green. The clip boundary
+  // that matters is the left column (h-dvh overflow-hidden) — i.e. the window
+  // edge — not this one.
+  it("does not clip the content column, which would undo the bleed", () => {
+    render(<AppShell className="max-w-7xl">content</AppShell>);
+    expect(screen.getByRole("main").parentElement).not.toHaveClass(
+      "overflow-hidden",
+    );
+  });
+});
+
 describe("AppShell mobile navigation", () => {
   it("hosts mobileNavigation as a pinned bar by default", () => {
     render(
