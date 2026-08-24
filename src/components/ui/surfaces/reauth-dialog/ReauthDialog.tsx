@@ -11,6 +11,70 @@ function errorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
 }
 
+/**
+ * Every string this dialog renders that is NOT already a prop.
+ *
+ * The kit ships English defaults and holds no message catalog — an app that
+ * has one passes its own. Optional per key so a caller can translate the
+ * dialog without restating the parts it is happy with, and so adding a key
+ * here never breaks a call site.
+ *
+ * `title` and `description` stay top-level props: they are the two strings a
+ * caller overrides for CONTEXT ("verify before deleting this app"), not for
+ * language, and they predate this object.
+ */
+export interface ReauthDialogLabels {
+  /** Above the passkey button. */
+  passkeyPrompt?: string;
+  passkeyCta?: string;
+  /** Switch links between the two methods. */
+  useEmailInstead?: string;
+  usePasskeyInstead?: string;
+  /** Above the send-code button. */
+  emailPrompt?: string;
+  emailSendCta?: string;
+  /** Above the 6-digit input, once a code is out. */
+  codePrompt?: string;
+  verifying?: string;
+  resendCta?: string;
+  sending?: string;
+  /** The passkey-setup nudge: a link, then the rest of the sentence. Split in
+   *  two because the link sits INSIDE the sentence and the kit has no rich-text
+   *  formatter; a locale that needs the other order can put the whole clause in
+   *  `passkeySetupHint` and a bare verb in the CTA. */
+  passkeySetupCta?: string;
+  passkeySetupHint?: string;
+  /** Failure copy. These surface a thrown error's own message when it has one,
+   *  so they are the fallback, not the whole story. */
+  sendFailed?: string;
+  invalidCode?: string;
+  passkeyFailed?: string;
+  emailNotConfigured?: string;
+  passkeyNotConfigured?: string;
+}
+
+/** English defaults, resolved once per render so the JSX below reads as text
+ *  rather than as a wall of `??`. */
+const DEFAULT_LABELS: Required<ReauthDialogLabels> = {
+  passkeyPrompt: "Use your passkey to verify",
+  passkeyCta: "Verify with passkey",
+  useEmailInstead: "Use email verification instead",
+  usePasskeyInstead: "Use passkey instead",
+  emailPrompt: "We'll send a 6-digit verification code to your email",
+  emailSendCta: "Send verification code",
+  codePrompt: "Enter the 6-digit code sent to your email",
+  verifying: "Verifying...",
+  resendCta: "Resend code",
+  sending: "Sending...",
+  passkeySetupCta: "Set up a passkey",
+  passkeySetupHint: " for faster verification next time",
+  sendFailed: "Failed to send code",
+  invalidCode: "Invalid code",
+  passkeyFailed: "Passkey verification failed",
+  emailNotConfigured: "Email verification not configured",
+  passkeyNotConfigured: "Passkey verification not configured",
+};
+
 export const meta: ComponentMeta = {
   name: "ReauthDialog",
   description:
@@ -32,6 +96,9 @@ export interface ReauthDialogProps {
   onPasskeyVerify?: () => Promise<string>;
   /** Optional. When provided and the user has no passkey, surfaces a setup recommendation in the email flow. */
   onPasskeySetup?: () => void;
+  /** Translations for everything below the title. Omitted keys fall back to
+   *  English — see {@link ReauthDialogLabels}. */
+  labels?: ReauthDialogLabels;
   className?: string;
 }
 
@@ -46,8 +113,10 @@ export function ReauthDialog({
   onEmailVerifyCode,
   onPasskeyVerify,
   onPasskeySetup,
+  labels,
   className,
 }: ReauthDialogProps) {
+  const l = { ...DEFAULT_LABELS, ...labels };
   const hasPasskey = methods.includes("passkey");
   const hasEmail = methods.includes("email");
   const showPasskeySetup = !hasPasskey && !!onPasskeySetup;
@@ -86,11 +155,11 @@ export function ReauthDialog({
     setIsSending(true);
     try {
       if (!onEmailSendCode)
-        throw new Error("Email verification not configured");
+        throw new Error(l.emailNotConfigured);
       const id = await onEmailSendCode();
       setChallengeId(id);
     } catch (err) {
-      setError(errorMessage(err, "Failed to send code"));
+      setError(errorMessage(err, l.sendFailed));
     } finally {
       setIsSending(false);
     }
@@ -102,12 +171,12 @@ export function ReauthDialog({
     setIsVerifying(true);
     try {
       if (!onEmailVerifyCode)
-        throw new Error("Email verification not configured");
+        throw new Error(l.emailNotConfigured);
       const token = await onEmailVerifyCode(challengeId, verifyCode);
       reset();
       onSuccess(token);
     } catch (err) {
-      setError(errorMessage(err, "Invalid code"));
+      setError(errorMessage(err, l.invalidCode));
       setCode("");
       setIsVerifying(false);
     }
@@ -118,14 +187,14 @@ export function ReauthDialog({
     setIsVerifying(true);
     try {
       if (!onPasskeyVerify)
-        throw new Error("Passkey verification not configured");
+        throw new Error(l.passkeyNotConfigured);
       const token = await onPasskeyVerify();
       reset();
       onSuccess(token);
     } catch (err) {
       // NotAllowedError = user cancelled the passkey prompt
       if (!(err instanceof DOMException && err.name === "NotAllowedError")) {
-        setError(errorMessage(err, "Passkey verification failed"));
+        setError(errorMessage(err, l.passkeyFailed));
       }
       setIsVerifying(false);
     }
@@ -154,14 +223,14 @@ export function ReauthDialog({
             <Icon name="passkey" size={32} className="text-primary" />
           </div>
           <p className="text-sm text-on-surface-variant text-center">
-            Use your passkey to verify
+            {l.passkeyPrompt}
           </p>
           <Button
             onClick={handlePasskeyVerify}
             loading={isVerifying}
             fullWidth
           >
-            Verify with passkey
+            {l.passkeyCta}
           </Button>
           {hasEmail && (
             <button
@@ -173,7 +242,7 @@ export function ReauthDialog({
               disabled={isVerifying}
               className={linkCls}
             >
-              Use email verification instead
+              {l.useEmailInstead}
             </button>
           )}
         </div>
@@ -185,14 +254,14 @@ export function ReauthDialog({
             <Icon name="mail" size={32} className="text-primary" />
           </div>
           <p className="text-sm text-on-surface-variant text-center">
-            We'll send a 6-digit verification code to your email
+            {l.emailPrompt}
           </p>
           <Button
             onClick={handleSendCode}
             loading={isSending}
             fullWidth
           >
-            Send verification code
+            {l.emailSendCta}
           </Button>
           {hasPasskey && (
             <button
@@ -204,7 +273,7 @@ export function ReauthDialog({
               disabled={isSending}
               className={linkCls}
             >
-              Use passkey instead
+              {l.usePasskeyInstead}
             </button>
           )}
         </div>
@@ -213,7 +282,7 @@ export function ReauthDialog({
       {showingEmail && codeSent && (
         <div className="flex flex-col items-center gap-3">
           <p className="text-sm text-on-surface-variant text-center mb-1">
-            Enter the 6-digit code sent to your email
+            {l.codePrompt}
           </p>
           <VerificationCodeInput
             value={code}
@@ -223,7 +292,7 @@ export function ReauthDialog({
             error={!!error}
           />
           {isVerifying && (
-            <p className="text-xs text-on-surface-variant">Verifying...</p>
+            <p className="text-xs text-on-surface-variant">{l.verifying}</p>
           )}
           <button
             type="button"
@@ -231,7 +300,7 @@ export function ReauthDialog({
             disabled={isSending || isVerifying}
             className={cn(linkCls, "text-xs")}
           >
-            {isSending ? "Sending..." : "Resend code"}
+            {isSending ? l.sending : l.resendCta}
           </button>
           {hasPasskey && (
             <button
@@ -240,7 +309,7 @@ export function ReauthDialog({
               disabled={isVerifying}
               className={cn(linkCls, "text-xs")}
             >
-              Use passkey instead
+              {l.usePasskeyInstead}
             </button>
           )}
         </div>
@@ -253,9 +322,9 @@ export function ReauthDialog({
             onClick={onPasskeySetup}
             className="text-primary underline underline-offset-2 hover:text-primary/80"
           >
-            Set up a passkey
+            {l.passkeySetupCta}
           </button>
-          {" for faster verification next time"}
+          {l.passkeySetupHint}
         </Alert>
       )}
 

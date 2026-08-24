@@ -432,6 +432,7 @@ export {
 export {
   ReauthDialog,
   type ReauthDialogProps,
+  type ReauthDialogLabels,
 } from "./components/ui/surfaces/reauth-dialog/ReauthDialog";
 export {
   Surface,

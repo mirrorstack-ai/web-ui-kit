@@ -104,6 +104,37 @@ describe("ReauthDialog", () => {
     ).not.toBeInTheDocument();
   });
 
+  // i18n — every string below the title comes from `labels`, and a key the
+  // caller omits keeps its English default. Both halves matter: the apps
+  // translate the dialog by passing an object built from their own catalog,
+  // and a NEW key added here must not blank out an existing call site.
+  it("renders every label from `labels` when one is passed", () => {
+    render(
+      <ReauthDialog
+        {...defaultProps}
+        onPasskeySetup={vi.fn()}
+        methods={["email"]}
+        labels={{
+          emailPrompt: "寄送驗證碼到你的電子郵件",
+          emailSendCta: "傳送驗證碼",
+          passkeySetupCta: "設定 Passkey",
+          passkeySetupHint: "，下次驗證更快",
+        }}
+      />,
+    );
+    expect(screen.getByText("寄送驗證碼到你的電子郵件")).toBeInTheDocument();
+    expect(screen.getByText("傳送驗證碼")).toBeInTheDocument();
+    expect(screen.getByText("設定 Passkey")).toBeInTheDocument();
+    expect(screen.getByText("，下次驗證更快")).toBeInTheDocument();
+  });
+
+  it("falls back to English for keys `labels` omits", () => {
+    render(<ReauthDialog {...defaultProps} labels={{ passkeyCta: "以 Passkey 驗證" }} />);
+    expect(screen.getByText("以 Passkey 驗證")).toBeInTheDocument();
+    // Untranslated key — still English rather than blank.
+    expect(screen.getByText("Use email verification instead")).toBeInTheDocument();
+  });
+
   it("does not show passkey setup recommendation when callback omitted", () => {
     render(<ReauthDialog {...defaultProps} methods={["email"]} />);
     expect(
