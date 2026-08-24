@@ -3,6 +3,22 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.6
+
+### Added
+
+- **`ReauthDialog` accepts `labels`.** Every string below the title — the two
+  method prompts, both CTAs, the switch links, the resend line, the passkey-setup
+  nudge, and the five error fallbacks — was hardcoded English, so a Chinese
+  console popped an English dialog in front of the one action that most needs to
+  be understood. `title` and `description` were already props and stay props:
+  those two are overridden for CONTEXT ("verify before deleting this app"), not
+  for language.
+
+  Every key is optional and falls back to the previous English, so existing call
+  sites are unchanged and a key added here later cannot blank one out. See
+  `ReauthDialogLabels`.
+
 ## 0.7.3
 
 ### Fixed
