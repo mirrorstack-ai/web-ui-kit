@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -10985,7 +10985,7 @@ value: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> ReauthDialog</h2>
       <div class="badges">
-        <label for="c-55-ui-surfaces-reauthdialog-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-55-ui-surfaces-reauthdialog-props" class="badge ok as-toggle">12 prop types</label>
         <label for="c-55-ui-surfaces-reauthdialog-info" class="badge info as-toggle">1 info</label>
         <label for="c-55-ui-surfaces-reauthdialog-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -11019,13 +11019,19 @@ value: string</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">11 prop types</span>
+              <span class="badge ok">12 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/reauth-dialog/ReauthDialog.tsx::ReauthDialog</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>className?: string
 
 description?: string = &quot;For your security, please verify your identity before continuing.&quot;
+
+/**
+ * Translations for everything below the title. Omitted keys fall back to
+ *  English — see {@link ReauthDialogLabels}.
+ */
+labels?: ReauthDialogLabels
 
 methods?: (&quot;email&quot; | &quot;passkey&quot;)[] = [&quot;passkey&quot;, &quot;email&quot;]
 
