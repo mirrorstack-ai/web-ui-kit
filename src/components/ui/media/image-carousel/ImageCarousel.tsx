@@ -172,7 +172,18 @@ export function ImageCarousel({ images: rawImages }: ImageCarouselProps) {
               />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
                 <h3 className="text-lg font-bold mb-1">{image.title}</h3>
-                <p className="text-sm">{image.description}</p>
+                {/* `whitespace-pre-line` because `description` is PROSE
+                    SOMEONE TYPED, and HTML collapses the newlines they typed
+                    into single spaces. An org writing a multi-line caption for
+                    its login page got one run-on line — in the console's own
+                    preview and in production alike — with nothing on screen to
+                    explain why. pre-line keeps the line breaks and still
+                    collapses runs of spaces, so a stray double space does not
+                    become a visible gap.
+
+                    The TITLE is deliberately left collapsing: it is one line by
+                    design, and the two are not the same kind of text. */}
+                <p className="text-sm whitespace-pre-line">{image.description}</p>
               </div>
             </div>
           );
