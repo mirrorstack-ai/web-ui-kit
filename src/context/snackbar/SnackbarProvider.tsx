@@ -143,8 +143,26 @@ export function useSnackbarVisible() {
 export interface UseUnsavedSnackbarOptions {
   snapshot: string;
   message?: string;
-  onSave: () => void;
+  /**
+   * Persist the pending edits.
+   *
+   * 🔴 RETURN A PROMISE AND THE CONFIRMATION WAITS FOR IT. Without one this
+   * hook has no way to know whether the save happened, so it assumes it did:
+   * it marks the form clean and toasts "Saved" on the next tick. For anything
+   * that can be interrupted — a step-up reauth dialog, a slow request, a 403 —
+   * that means success is announced before the write, and a FAILED save leaves
+   * the bar dismissed with the edits unretryable.
+   *
+   * A void return keeps the old fire-and-forget behaviour.
+   */
+  onSave: () => void | Promise<unknown>;
   onReset: () => void;
+  /**
+   * Text for the confirmation toast. `null` suppresses it — for callers that
+   * announce their own outcome (localized, or distinguishing what was saved),
+   * so the user does not get two toasts for one action.
+   */
+  savedMessage?: string | null;
 }
 
 export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
@@ -177,13 +195,34 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
         action: {
           label: "Save",
           onClick: () => {
+            // Held so a failed save can put the bar back exactly as it was.
+            const previousBaseline = savedRef.current;
             savedRef.current = optionsRef.current.snapshot;
             prevDirty.current = false;
-            optionsRef.current.onSave();
             dismissSnackbar();
-            setTimeout(() => {
-              showSnackbar({ message: "Saved", variant: "success" });
-            }, 50);
+
+            const confirm = () => {
+              const saved = optionsRef.current.savedMessage;
+              // null = the caller announces its own outcome.
+              if (saved === null) return;
+              setTimeout(() => {
+                showSnackbar({ message: saved ?? "Saved", variant: "success" });
+              }, 50);
+            };
+            // 🔴 A FAILED SAVE MUST LEAVE THE EDITS ON SCREEN. Restoring the
+            // baseline makes the form dirty again, which brings the bar back so
+            // the work can be retried — dismissing it and keeping the draft
+            // would strand edits with no way to submit them.
+            const restore = () => {
+              savedRef.current = previousBaseline;
+            };
+
+            const result = optionsRef.current.onSave();
+            if (result && typeof (result as Promise<unknown>).then === "function") {
+              void (result as Promise<unknown>).then(confirm, restore);
+            } else {
+              confirm();
+            }
           },
         },
         secondaryAction: {
