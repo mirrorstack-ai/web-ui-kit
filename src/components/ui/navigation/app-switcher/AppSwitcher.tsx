@@ -34,6 +34,22 @@ export interface AppSwitcherProps {
 
 const R = 16;
 
+/**
+ * The floor on how wide the open panel is, independent of the trigger.
+ *
+ * 🔴 THE TRIGGER USED TO SET THE MENU'S WIDTH, and the trigger is a product
+ * name. The container is `w-fit`, so a switcher labelled 帳號 opened a menu
+ * about that wide: every row's label hit `truncate` and every description hit
+ * `line-clamp-1`, so a menu whose entire job is to describe the places you can
+ * go described none of them. The narrower the current app's name, the less
+ * legible the menu — exactly backwards.
+ *
+ * A floor rather than a fixed width: a long app name still widens the tab, and
+ * the panel follows it rather than wrapping under it. 17rem fits an icon, a
+ * label and a one-line description at the padding these rows already use.
+ */
+const MENU_MIN_W = "17rem";
+
 function buildOutline(tw: number, th: number, cw: number, ch: number) {
   if (tw + R + R >= cw) {
     return [
@@ -142,7 +158,10 @@ export function AppSwitcher({
       </button>
 
       {open && filteredApps.length > 0 && (
-        <div className="relative z-10 rounded-b-2xl rounded-tr-2xl shadow-lg">
+        <div
+          className="relative z-10 rounded-b-2xl rounded-tr-2xl shadow-lg"
+          style={{ minWidth: MENU_MIN_W }}
+        >
           <nav id={menuId} aria-label="Switch application" className="px-2 pb-2">
             <ul>
               {filteredApps.map((app) => (

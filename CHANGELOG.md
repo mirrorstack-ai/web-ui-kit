@@ -3,6 +3,21 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.9
+
+### Fixed
+
+- **The `AppSwitcher` menu is no longer sized by the trigger's label.** The
+  container is `w-fit`, so a switcher whose current app is called 帳號 opened a
+  menu about that wide: every row's label hit `truncate` and every description
+  hit `line-clamp-1`. A menu whose entire job is to describe the places you can
+  go described none of them, and the shorter the current app's name the worse it
+  got — exactly backwards.
+
+  The open panel now holds a 17rem floor. A floor rather than a fixed width, so
+  a long app name still widens the tab and the panel follows it instead of
+  wrapping under it.
+
 ## 0.7.8
 
 ### Fixed
