@@ -3,6 +3,21 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.7
+
+### Fixed
+
+- **`ImageCarousel` caption descriptions keep the line breaks their author
+  typed.** The description rendered in a plain `<p>`, so HTML collapsed every
+  newline into a single space: an org that wrote a multi-line caption for its
+  login page got one run-on line, in the console's own preview and in
+  production alike, with nothing on screen to explain why. `whitespace-pre-line`
+  keeps the breaks and still collapses runs of spaces, so a stray double space
+  does not become a visible gap.
+
+  The title is deliberately unchanged — it is one line by design, and the two
+  are not the same kind of text.
+
 ## 0.7.6
 
 ### Added
