@@ -3,6 +3,31 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.8
+
+### Fixed
+
+- **`useUnsavedSnackbar` no longer announces a save it did not wait for.** The
+  Save action marked the form clean, called `onSave()` without awaiting it, and
+  toasted "Saved" 50ms later — unconditionally. For any save that can be
+  interrupted (a step-up reauth dialog, a slow request, a 403) success was
+  announced *before* the write: web-account's org members page reported
+  "群組已更新" the instant Save was clicked, while the reauth prompt was still
+  on screen.
+
+  A **failed** save was worse: the bar had already been dismissed and the form
+  marked clean, so the edits stayed on screen with no way to submit them.
+
+### Added
+
+- `onSave` may now return a promise. The confirmation waits for it; a rejection
+  restores the previous baseline so the unsaved bar comes back and the work can
+  be retried. A void return keeps the old fire-and-forget behaviour, so existing
+  callers are unchanged.
+- `savedMessage` — text for the confirmation toast, or `null` to suppress it for
+  callers that announce their own localized outcome. (The built-in string is
+  hardcoded English, so anything localized wanted this.)
+
 ## 0.7.7
 
 ### Fixed

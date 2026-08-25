@@ -217,6 +217,102 @@ describe("useUnsavedSnackbar", () => {
     );
   }
 
+  /**
+   * A harness whose save is asynchronous and controllable — the shape every
+   * real caller has (a request, a step-up dialog) and the one the old
+   * fire-and-forget contract could not represent.
+   */
+  function AsyncHarness({
+    save,
+    savedMessage,
+  }: {
+    save: () => Promise<unknown>;
+    savedMessage?: string | null;
+  }) {
+    const [value, setValue] = useState("a");
+    useUnsavedSnackbar({
+      snapshot: value,
+      savedMessage,
+      onSave: () => save().then(() => setValue("a")),
+      onReset: () => setValue("a"),
+    });
+    return <button onClick={() => setValue("b")}>change</button>;
+  }
+
+  function clickSave(container: HTMLElement) {
+    const btn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "Save",
+    ) as HTMLButtonElement;
+    act(() => {
+      fireEvent.click(btn);
+    });
+  }
+
+  /**
+   * 🔴 THE BUG THIS PINS. The hook used to mark the form clean, call onSave
+   * without awaiting, and toast "Saved" 50ms later — so a save gated behind a
+   * step-up reauth dialog announced success before the user had even
+   * authenticated, let alone before the write landed.
+   */
+  it("waits for an async save before confirming", async () => {
+    let release: (v?: unknown) => void = () => {};
+    const save = vi.fn(() => new Promise((res) => { release = res; }));
+    const { container } = render(
+      <SnackbarProvider>
+        <AsyncHarness save={save} />
+      </SnackbarProvider>,
+    );
+    act(() => { vi.advanceTimersByTime(0); });
+    act(() => { fireEvent.click(screen.getByText("change")); });
+    clickSave(container);
+
+    // The save is still in flight — nothing may claim it succeeded.
+    act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
+    expect(screen.queryByText("Saved")).not.toBeInTheDocument();
+
+    await act(async () => { release(); });
+    act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
+    expect(screen.getByText("Saved")).toBeInTheDocument();
+  });
+
+  // A cancelled step-up or a 403 must leave the edits on screen AND reachable.
+  // Dismissing the bar while keeping the draft strands work with no way to
+  // submit it.
+  it("brings the bar back when the save fails", async () => {
+    const save = vi.fn(() => Promise.reject(new Error("403")));
+    const { container } = render(
+      <SnackbarProvider>
+        <AsyncHarness save={save} />
+      </SnackbarProvider>,
+    );
+    act(() => { vi.advanceTimersByTime(0); });
+    act(() => { fireEvent.click(screen.getByText("change")); });
+    clickSave(container);
+
+    await act(async () => { await Promise.resolve(); });
+    act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
+
+    expect(screen.queryByText("Saved")).not.toBeInTheDocument();
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+  });
+
+  // Callers that announce their own localized outcome must not get two toasts.
+  it("suppresses its own confirmation when savedMessage is null", async () => {
+    const save = vi.fn(() => Promise.resolve());
+    const { container } = render(
+      <SnackbarProvider>
+        <AsyncHarness save={save} savedMessage={null} />
+      </SnackbarProvider>,
+    );
+    act(() => { vi.advanceTimersByTime(0); });
+    act(() => { fireEvent.click(screen.getByText("change")); });
+    clickSave(container);
+
+    await act(async () => { await Promise.resolve(); });
+    act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
+    expect(screen.queryByText("Saved")).not.toBeInTheDocument();
+  });
+
   it("shows when snapshot differs and dismisses on save", () => {
     const onSave = vi.fn();
     const onReset = vi.fn();
