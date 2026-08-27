@@ -40,7 +40,7 @@ describe("AppSwitcher", () => {
     fireEvent.click(screen.getByRole("button", { name: /Current app/ }));
     const panel = screen.getByRole("navigation", { name: "Switch application" })
       .parentElement as HTMLElement;
-    expect(panel.style.minWidth).toBe("17rem");
+    expect(panel.style.minWidth).toBe("16rem"); // 256px
   });
 
   it("closes on Escape", () => {

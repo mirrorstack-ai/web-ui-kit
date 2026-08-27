@@ -3,6 +3,16 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.10
+
+### Changed
+
+- **`AppSwitcher` menu floor is 256px (16rem), was 272px (17rem).** The extra
+  rem bought nothing at the row padding in use and left the panel wider than
+  every other dropdown on the surface. Still a `min-width` FLOOR rather than a
+  fixed width, so 0.7.9's fix stands: a long app name widens the panel, and the
+  trigger's label still cannot shrink it.
+
 ## 0.7.9
 
 ### Fixed
