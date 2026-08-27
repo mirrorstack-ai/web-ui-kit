@@ -45,10 +45,16 @@ const R = 16;
  * legible the menu — exactly backwards.
  *
  * A floor rather than a fixed width: a long app name still widens the tab, and
- * the panel follows it rather than wrapping under it. 17rem fits an icon, a
+ * the panel follows it rather than wrapping under it. 16rem fits an icon, a
  * label and a one-line description at the padding these rows already use.
+ *
+ * 16rem = 256px, the design system's standard menu width. It was 17rem (272px);
+ * the extra rem bought nothing at the row padding in use and made the panel sit
+ * wider than every other dropdown on the surface. Kept as a FLOOR, not a fixed
+ * width, so the original defect this constant exists to prevent — the trigger's
+ * app name deciding how legible the menu is — stays fixed.
  */
-const MENU_MIN_W = "17rem";
+const MENU_MIN_W = "16rem";
 
 function buildOutline(tw: number, th: number, cw: number, ch: number) {
   if (tw + R + R >= cw) {
