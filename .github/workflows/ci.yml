@@ -25,6 +25,8 @@ jobs:
 
       - run: pnpm typecheck
 
+      - run: pnpm check:package
+
       - run: pnpm test
 
       - run: pnpm components validate
