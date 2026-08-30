@@ -26,7 +26,7 @@ Import the theme tokens in your app's `globals.css`:
 ```css
 @import "tailwindcss";
 @source "@mirrorstack-ai/web-ui-kit/src/components";
-@import "@mirrorstack-ai/web-ui-kit/src/theme.css";
+@import "@mirrorstack-ai/web-ui-kit/theme.css";
 ```
 
 Add the Material Symbols font in your HTML `<head>`:
@@ -127,6 +127,10 @@ src/
   assets/        SVGs and icons
   theme.css      MD3 design tokens (light + dark)
 ```
+
+`formatDate(value, locale?, options?)` uses a numeric year, short month, and
+numeric day by default. It accepts `Intl.DateTimeFormatOptions` when a surface
+needs a custom date or time representation.
 
 ## Tech stack
 

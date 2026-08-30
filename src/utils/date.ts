@@ -12,18 +12,26 @@ function withLocaleFallback(
 
 /**
  * Formats a date for display in the requested locale, or the runtime default
- * when no locale is supplied. Invalid date strings return an empty UI label.
+ * when no locale is supplied. Custom Intl options replace the default
+ * year/month/day format. Invalid date strings return an empty UI label.
  */
-export function formatDate(dateStr: string, locale?: string): string {
+export function formatDate(
+  dateStr: string,
+  locale?: string,
+  options?: Intl.DateTimeFormatOptions,
+): string {
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return "";
 
   return withLocaleFallback(locale, (resolvedLocale) =>
-    date.toLocaleDateString(resolvedLocale, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }),
+    new Intl.DateTimeFormat(
+      resolvedLocale,
+      options ?? {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      },
+    ).format(date),
   );
 }
 

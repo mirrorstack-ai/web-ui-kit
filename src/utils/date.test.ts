@@ -20,6 +20,16 @@ describe("formatDate", () => {
     expect(formatDate("2026-04-29T12:00:00Z", "zh-TW")).toContain("月");
   });
 
+  it("accepts custom Intl date and time options", () => {
+    const result = formatDate("2026-04-29T12:34:00Z", "en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "UTC",
+    });
+    expect(result).toContain("Apr 29, 2026");
+    expect(result).toContain("12:34");
+  });
+
   it("returns an empty string for an unparseable date", () => {
     expect(formatDate("not-a-date")).toBe("");
   });
@@ -41,12 +51,25 @@ describe("formatDate", () => {
   // is passed straight through), so the contract is asserted here directly:
   // the fallback must hand the formatter `undefined`.
   it("passes undefined to the formatter when falling back", () => {
-    const spy = vi.spyOn(Date.prototype, "toLocaleDateString");
+    const intl = Intl as unknown as {
+      DateTimeFormat: typeof Intl.DateTimeFormat;
+    };
+    const Original = intl.DateTimeFormat;
+    const seen: (string | string[] | undefined)[] = [];
+    intl.DateTimeFormat = function (
+      this: unknown,
+      locales?: string | string[],
+      options?: Intl.DateTimeFormatOptions,
+    ) {
+      seen.push(locales);
+      return new Original(locales, options);
+    } as unknown as typeof Intl.DateTimeFormat;
     try {
       formatDate("2026-04-29T12:00:00Z", "!!!");
-      expect(spy.mock.calls.at(-1)?.[0]).toBeUndefined();
+      expect(seen.at(0)).toBe("!!!");
+      expect(seen.at(-1)).toBeUndefined();
     } finally {
-      spy.mockRestore();
+      intl.DateTimeFormat = Original;
     }
   });
 });
