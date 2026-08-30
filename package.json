@@ -22,7 +22,8 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && node scripts/finalize-source-maps.mjs",
+    "check:package": "pnpm build && pnpm pack --dry-run",
     "prepublishOnly": "pnpm build",
     "components": "tsx scripts/components.ts",
     "start-issue": "tsx scripts/start-issue.ts",
