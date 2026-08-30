@@ -3,6 +3,28 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.11
+
+### Added
+
+- **`formatDate` accepts `Intl.DateTimeFormatOptions`.** Callers can request a
+  date-and-time representation without maintaining a module-local formatter;
+  omitting options preserves the existing numeric-day/short-month default.
+- **`Dialog` accepts `initialFocusRef`.** Destructive and form dialogs can
+  identify the first intentional focus target without racing the portal.
+
+### Fixed
+
+- **Dialogs are isolated to the document and module mount that rendered them.**
+  Portals no longer escape a module boundary, scroll locks are per document,
+  and a single topmost-dialog stack owns Escape, focus trapping, and opener
+  restoration for nested and sibling dialogs.
+
+### Changed
+
+- **Only CSS is marked side-effectful.** JavaScript remains tree-shakeable while
+  package-owned theme styles survive module CSS compilation and packaging.
+
 ## 0.7.10
 
 ### Changed
