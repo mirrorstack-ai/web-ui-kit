@@ -7,7 +7,7 @@ import { toneBorderClass, type Tone } from "@/types/tone";
 export const meta: ComponentMeta = {
   name: "SettingRow",
   description:
-    "Title + optional description on the left, control slot on the right. Used to compose settings forms; supports an optional Tone border accent (primary, secondary, tertiary, error, warning, or success).",
+    "Optional leading mark, title + optional description, control slot on the right. Used to compose settings forms; supports an optional Tone border accent (primary, secondary, tertiary, error, warning, or success).",
 };
 
 export interface SettingRowProps {
@@ -15,6 +15,21 @@ export interface SettingRowProps {
   title: string;
   /** Optional supporting copy, rendered below the title. */
   description?: string;
+  /**
+   * Optional mark, icon or badge rendered IN FRONT of the text.
+   *
+   * For a row whose subject is a thing rather than a setting — the recipient of
+   * a pending transfer, the member a permission belongs to — where the mark
+   * identifies what the row is about. `title` and `description` are plain
+   * strings, so without this slot a caller has no way to put one there and ends
+   * up either attaching it to `control` (where it reads as decoration on the
+   * action) or rebuilding the row by hand and drifting out of step with this
+   * one.
+   *
+   * Decorative by default: give it `aria-hidden` unless it carries meaning the
+   * title does not already say in words.
+   */
+  leading?: ReactNode;
   /** Right-aligned control — typically a Switch, Button, or status pill. */
   control: ReactNode;
   /**
@@ -28,6 +43,7 @@ export interface SettingRowProps {
 export function SettingRow({
   title,
   description,
+  leading,
   control,
   tone,
   className,
@@ -41,6 +57,15 @@ export function SettingRow({
         className,
       )}
     >
+      {/* The row's own `gap-4` spaces this from the text, so the slot adds no
+          margin of its own — a mark that carried one would sit differently here
+          than the control does on the other end. */}
+      {/* A ternary, not `leading && …`: `ReactNode` includes `number`, and
+          `0 && x` evaluates to `0`, which React renders as a bare "0" outside
+          the wrapper. */}
+      {leading ? (
+        <div className="shrink-0 flex items-center">{leading}</div>
+      ) : null}
       <div className="min-w-0 flex-1 space-y-1.5">
         <p className="text-sm font-medium text-on-surface">{title}</p>
         {description && (

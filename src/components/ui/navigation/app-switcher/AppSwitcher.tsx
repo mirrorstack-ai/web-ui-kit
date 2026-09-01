@@ -2,6 +2,7 @@ import {
   useState,
   useRef,
   useEffect,
+  useLayoutEffect,
   useCallback,
   useId,
   type ReactNode,
@@ -105,12 +106,36 @@ export function AppSwitcher({
     );
   }, []);
 
+  /**
+   * 🔴 A LAYOUT EFFECT, BECAUSE THE POINT IS TO BEAT THE PAINT. The outline
+   * used to be measured only inside `requestAnimationFrame`, which left ONE
+   * PAINTED FRAME with `outline` still empty: the card was open, the trigger
+   * had swapped to its open styling, and nothing was drawn behind either. The
+   * control blinked transparent over the page on every open, and consumers
+   * papered over it by painting their own backgrounds.
+   *
+   * `useEffect` does NOT fix that — it is passive and runs AFTER paint, so
+   * moving the call there would only have made the blank frame shorter, not
+   * absent. `useLayoutEffect` runs before the browser paints, so the first
+   * frame of the open state already has its shape.
+   *
+   * `open &&` rather than an early return: the hook must be called on every
+   * render, and the closed case has nothing to measure — the effect below
+   * clears the outline.
+   */
+  useLayoutEffect(() => {
+    if (open) updateOutline();
+  }, [open, updateOutline]);
+
   useEffect(() => {
     if (!open) {
       setOutline("");
       return;
     }
 
+    // The rAF stays as a CORRECTION, not the primary measurement: a font or an
+    // image landing in this frame changes the trigger's width after the layout
+    // effect above has already read it.
     const rafId = requestAnimationFrame(updateOutline);
 
     const handleClickOutside = (e: MouseEvent) => {
@@ -144,9 +169,27 @@ export function AppSwitcher({
         aria-controls={open ? menuId : undefined}
         className={cn(
           "relative z-10 flex items-center gap-2 cursor-pointer pl-4 pr-6 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+          // 🔴 THE CLOSED TRIGGER IS OPAQUE. It floats in a band its host
+          // renders `absolute … pointer-events-none` with no fill, so a page
+          // scrolling underneath used to show THROUGH the control. `background`
+          // rather than a surface token: the job is to occlude what passes
+          // under, and the page's own colour does that without drawing a second
+          // card on top of the notch the trigger already sits in — and it
+          // follows a themed host, which a fixed surface token cannot.
+          //
+          // 🔴 OPEN, IT MUST NOT PAINT AT ALL. The notch is one path with a 1px
+          // stroke CENTRED on it, so half the stroke falls inside the shape and
+          // the open trigger's box sits exactly on that boundary: any fill
+          // there covers the inner half and the border reads as cut away. No
+          // colour fixes it — matching the card's own fill still eats it.
+          //
+          // The transition carries the RADIUS as well as the colour, because
+          // the class swap below is instant: fading the fill while the corners
+          // snapped square showed a frame of hard corners.
+          "transition-[background-color,border-radius] duration-150",
           open
             ? "w-fit pr-6 rounded-t-2xl"
-            : "rounded-2xl hover:bg-surface-container transition-colors",
+            : "rounded-2xl bg-background hover:bg-surface-container",
         )}
       >
         {logo}

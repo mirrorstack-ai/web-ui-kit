@@ -78,9 +78,39 @@ export interface AvatarProps {
    * with object-contain (not cropped) in this mode.
    */
   plain?: boolean;
+  /**
+   * Which token pair the decorative frame is drawn from.
+   *
+   * 🔴 THE DEFAULT `primary` IS ONLY RIGHT ON A NEUTRAL SURFACE. The frame is
+   * `bg-primary/20 border-2 border-primary` with `text-primary` initials, so an
+   * avatar placed on a `primary-container` panel is drawing two tones of ONE
+   * hue on top of each other: the border does not go missing, it goes
+   * invisible — worst on exactly the palettes whose accent is palest, which is
+   * not a case a screenshot of one theme reveals. `onPrimaryContainer` is the
+   * pair guaranteed legible against that background.
+   *
+   * Consumers were reaching past this component to fix it — overriding the
+   * frame by its SIZE class, which silently stops matching the day the size
+   * changes.
+   */
+  tone?: "primary" | "onPrimaryContainer";
   overlay?: ReactNode;
   className?: string;
 }
+
+/** Frame colours per tone — border, translucent fill, and initials. */
+const TONE_FRAME = {
+  primary: {
+    border: "border-primary",
+    fill: "bg-primary/20",
+    text: "text-primary",
+  },
+  onPrimaryContainer: {
+    border: "border-on-primary-container",
+    fill: "bg-on-primary-container/10",
+    text: "text-on-primary-container",
+  },
+} as const;
 
 export function Avatar({
   src,
@@ -92,9 +122,11 @@ export function Avatar({
   square = false,
   opaque = false,
   plain = false,
+  tone = "primary",
   overlay,
   className,
 }: AvatarProps) {
+  const frame = TONE_FRAME[tone];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgFailed, setImgFailed] = useState(false);
   useEffect(() => setImgFailed(false), [src]);
@@ -131,7 +163,7 @@ export function Avatar({
       className={cn(
         s.container,
         radius,
-        plain ? "object-contain" : "object-cover border-2 border-primary",
+        plain ? "object-contain" : cn("object-cover border-2", frame.border),
       )}
     />
   ) : (
@@ -140,11 +172,11 @@ export function Avatar({
         s.container,
         radius,
         "flex items-center justify-center",
-        !plain && "bg-primary/20 border-2 border-primary",
+        !plain && cn("border-2", frame.fill, frame.border),
       )}
     >
       {showInitial && initials && (
-        <span className={cn("font-bold text-primary", textSize)}>{initials}</span>
+        <span className={cn("font-bold", frame.text, textSize)}>{initials}</span>
       )}
     </div>
   );
