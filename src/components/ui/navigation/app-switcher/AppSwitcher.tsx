@@ -111,6 +111,16 @@ export function AppSwitcher({
       return;
     }
 
+    // 🔴 MEASURE SYNCHRONOUSLY FIRST, THEN CORRECT ON THE NEXT FRAME. The rAF
+    // alone left ONE PAINTED FRAME with `outline` still empty — the card was
+    // open, the trigger had swapped to its open styling, and nothing was drawn
+    // behind either. Consumers saw the whole control blink transparent over the
+    // page on every open and worked around it with their own background.
+    // Layout is already committed by the time this effect runs, so the first
+    // measurement is usually right; the rAF stays because it is not ALWAYS
+    // right — a font or an image landing in the same frame changes the
+    // trigger's width after this runs.
+    updateOutline();
     const rafId = requestAnimationFrame(updateOutline);
 
     const handleClickOutside = (e: MouseEvent) => {
@@ -144,9 +154,27 @@ export function AppSwitcher({
         aria-controls={open ? menuId : undefined}
         className={cn(
           "relative z-10 flex items-center gap-2 cursor-pointer pl-4 pr-6 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+          // 🔴 THE CLOSED TRIGGER IS OPAQUE. It floats in a band its host
+          // renders `absolute … pointer-events-none` with no fill, so a page
+          // scrolling underneath used to show THROUGH the control. `background`
+          // rather than a surface token: the job is to occlude what passes
+          // under, and the page's own colour does that without drawing a second
+          // card on top of the notch the trigger already sits in — and it
+          // follows a themed host, which a fixed surface token cannot.
+          //
+          // 🔴 OPEN, IT MUST NOT PAINT AT ALL. The notch is one path with a 1px
+          // stroke CENTRED on it, so half the stroke falls inside the shape and
+          // the open trigger's box sits exactly on that boundary: any fill
+          // there covers the inner half and the border reads as cut away. No
+          // colour fixes it — matching the card's own fill still eats it.
+          //
+          // The transition carries the RADIUS as well as the colour, because
+          // the class swap below is instant: fading the fill while the corners
+          // snapped square showed a frame of hard corners.
+          "transition-[background-color,border-radius] duration-150",
           open
             ? "w-fit pr-6 rounded-t-2xl"
-            : "rounded-2xl hover:bg-surface-container transition-colors",
+            : "rounded-2xl bg-background hover:bg-surface-container",
         )}
       >
         {logo}

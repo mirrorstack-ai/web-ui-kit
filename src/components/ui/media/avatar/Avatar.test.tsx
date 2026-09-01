@@ -98,4 +98,51 @@ describe("Avatar", () => {
     // non-editable square stays uniform.
     expect(container.querySelector('[class*="rounded-br-"]')).not.toBeInTheDocument();
   });
+
+  /**
+   * 🔴 THE DEFAULT FRAME IS ONLY RIGHT ON A NEUTRAL SURFACE. `primary` on a
+   * `primary-container` panel is two tones of one hue stacked — the border does
+   * not go missing, it goes invisible, worst on exactly the palettes whose
+   * accent is palest. Consumers were reaching past this component to fix it,
+   * overriding the frame by its SIZE class, which stops matching the day the
+   * size changes.
+   */
+  describe("tone", () => {
+    it("frames the initials fallback from primary by default", () => {
+      const { container } = render(<Avatar fallback="E" />);
+      const box = container.querySelector(".border-2");
+      expect(box).toHaveClass("border-primary", "bg-primary/20");
+      expect(screen.getByText("E")).toHaveClass("text-primary");
+    });
+
+    it("frames the initials fallback from the on-container pair when asked", () => {
+      const { container } = render(<Avatar fallback="E" tone="onPrimaryContainer" />);
+      const box = container.querySelector(".border-2");
+      expect(box).toHaveClass(
+        "border-on-primary-container",
+        "bg-on-primary-container/10",
+      );
+      expect(screen.getByText("E")).toHaveClass("text-on-primary-container");
+      expect(box).not.toHaveClass("border-primary");
+    });
+
+    it("recolors the image border too, not just the fallback", () => {
+      const { container } = render(
+        <Avatar src="https://example.test/a.png" tone="onPrimaryContainer" />,
+      );
+      expect(container.querySelector("img")).toHaveClass(
+        "border-on-primary-container",
+      );
+    });
+
+    /** `plain` drops the frame entirely, so there is nothing left to tone. */
+    it("draws no frame at all when plain, whatever the tone", () => {
+      const { container } = render(
+        <Avatar src="https://example.test/a.png" plain tone="onPrimaryContainer" />,
+      );
+      const img = container.querySelector("img");
+      expect(img).not.toHaveClass("border-2");
+      expect(img).toHaveClass("object-contain");
+    });
+  });
 });

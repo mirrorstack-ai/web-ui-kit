@@ -3,6 +3,45 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.13
+
+### Added
+
+- **`SettingRow` accepts `leading`.** A mark, icon or badge in FRONT of the
+  text, for a row whose subject is a thing rather than a setting — the recipient
+  of a pending transfer, the member a permission belongs to. `title` and
+  `description` are plain strings, so a caller with a mark to show previously
+  had to hang it off `control`, where it reads as decoration on the action, or
+  rebuild the row by hand and drift out of step with this one.
+- **`Avatar` accepts `tone`.** `primary` (default, unchanged) or
+  `onPrimaryContainer`. The decorative frame is `bg-primary/20 border-2
+  border-primary` with `text-primary` initials, which is only legible on a
+  NEUTRAL surface — on a `primary-container` panel it draws two tones of one hue
+  on top of each other and the border goes invisible, worst on the palettes
+  whose accent is palest. Consumers were overriding the frame by its SIZE class,
+  which silently stops matching the day the size changes.
+
+### Fixed
+
+- **`AppSwitcher`'s closed trigger is opaque.** It floats in a band the host
+  renders `absolute … pointer-events-none` with no fill, so a page scrolling
+  underneath showed THROUGH the control. Filled from `background` rather than a
+  surface token: the job is to occlude what passes under, and the page's own
+  colour does that without drawing a second card on top of the notch the trigger
+  already sits in — and it follows a themed host, which a fixed token cannot.
+  The open trigger still paints nothing: the notch is one path whose 1px stroke
+  is CENTRED on it, so any fill there covers the inner half and the border reads
+  as cut away.
+- **`AppSwitcher` draws its outline in the frame that opens it.** The outline
+  was measured only inside `requestAnimationFrame`, leaving one painted frame
+  with the card open and nothing drawn behind it — the whole control blinked
+  transparent on every open. It now measures synchronously first (layout is
+  already committed when the effect runs) and keeps the rAF as a correction for
+  a font or image that lands in the same frame.
+- **`AppSwitcher` transitions its radius with its fill.** The open/closed class
+  swap is instant, so animating the colour alone showed a frame of hard bottom
+  corners as the tab opened.
+
 ## 0.7.11
 
 ### Added

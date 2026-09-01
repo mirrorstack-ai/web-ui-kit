@@ -55,6 +55,35 @@ describe("SettingRow", () => {
     expect(container.firstChild).toHaveClass(expected);
   });
 
+  /**
+   * 🔴 IN FRONT OF THE TEXT, NOT BESIDE THE CONTROL. The slot exists because
+   * `title` and `description` are plain strings: without it a caller with a
+   * mark to show either hangs it off `control`, where it reads as decoration on
+   * the action rather than as the row's subject, or rebuilds the row by hand
+   * and drifts out of step with this one.
+   */
+  it("renders the leading slot before the title", () => {
+    render(
+      <SettingRow
+        title="Transfer ownership"
+        leading={<span data-testid="mark" />}
+        control={<button type="button">Go</button>}
+      />,
+    );
+
+    const mark = screen.getByTestId("mark");
+    const title = screen.getByText("Transfer ownership");
+    expect(
+      mark.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).not.toBe(0);
+  });
+
+  /** No slot, no box — the row must not gain a gap it did not have before. */
+  it("renders no leading box when the slot is empty", () => {
+    const { container } = render(<SettingRow title="X" control={<span />} />);
+    expect(container.firstChild?.childNodes).toHaveLength(2);
+  });
+
   it("forwards the className prop", () => {
     const { container } = render(
       <SettingRow title="X" control={<span />} className="custom-class" />,
