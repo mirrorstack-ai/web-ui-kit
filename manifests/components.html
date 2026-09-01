@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -1671,7 +1671,7 @@ logo: ReactNode</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Avatar</h2>
       <div class="badges">
-        <label for="c-5-ui-media-avatar-props" class="badge ok as-toggle">11 prop types</label>
+        <label for="c-5-ui-media-avatar-props" class="badge ok as-toggle">12 prop types</label>
         <label for="c-5-ui-media-avatar-info" class="badge info as-toggle">1 info</label>
         <label for="c-5-ui-media-avatar-stories" class="badge ok as-toggle">9 stories</label>
         
@@ -1705,7 +1705,7 @@ logo: ReactNode</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">11 prop types</span>
+              <span class="badge ok">12 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/media/avatar/Avatar.tsx::Avatar</code></pre>
             <pre><code>Props:</code></pre>
@@ -1741,7 +1741,24 @@ size?: &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot; | &quot;xl&quot; = &quot
 
 square?: boolean = false
 
-src?: string | null</code></pre>
+src?: string | null
+
+/**
+ * Which token pair the decorative frame is drawn from.
+ * 
+ * 🔴 THE DEFAULT `primary` IS ONLY RIGHT ON A NEUTRAL SURFACE. The frame is
+ * `bg-primary/20 border-2 border-primary` with `text-primary` initials, so an
+ * avatar placed on a `primary-container` panel is drawing two tones of ONE
+ * hue on top of each other: the border does not go missing, it goes
+ * invisible — worst on exactly the palettes whose accent is palest, which is
+ * not a case a screenshot of one theme reveals. `onPrimaryContainer` is the
+ * pair guaranteed legible against that background.
+ * 
+ * Consumers were reaching past this component to fix it — overriding the
+ * frame by its SIZE class, which silently stops matching the day the size
+ * changes.
+ */
+tone?: &quot;primary&quot; | &quot;onPrimaryContainer&quot; = &quot;primary&quot;</code></pre>
           </div>
         </div>
     
@@ -11673,7 +11690,7 @@ onLoadOlder?: () =&gt; void</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SettingRow</h2>
       <div class="badges">
-        <label for="c-60-ui-data-settingrow-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-60-ui-data-settingrow-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-60-ui-data-settingrow-info" class="badge info as-toggle">1 info</label>
         <label for="c-60-ui-data-settingrow-stories" class="badge ok as-toggle">5 stories</label>
         
@@ -11707,7 +11724,7 @@ onLoadOlder?: () =&gt; void</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">5 prop types</span>
+              <span class="badge ok">6 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/display/setting-row/SettingRow.tsx::SettingRow</code></pre>
             <pre><code>Props:</code></pre>
@@ -11722,6 +11739,22 @@ control: ReactNode
  * Optional supporting copy, rendered below the title.
  */
 description?: string
+
+/**
+ * Optional mark, icon or badge rendered IN FRONT of the text.
+ * 
+ * For a row whose subject is a thing rather than a setting — the recipient of
+ * a pending transfer, the member a permission belongs to — where the mark
+ * identifies what the row is about. `title` and `description` are plain
+ * strings, so without this slot a caller has no way to put one there and ends
+ * up either attaching it to `control` (where it reads as decoration on the
+ * action) or rebuilding the row by hand and drifting out of step with this
+ * one.
+ * 
+ * Decorative by default: give it `aria-hidden` unless it carries meaning the
+ * title does not already say in words.
+ */
+leading?: ReactNode
 
 /**
  * Primary heading for the row.
