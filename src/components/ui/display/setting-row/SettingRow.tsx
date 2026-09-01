@@ -60,7 +60,12 @@ export function SettingRow({
       {/* The row's own `gap-4` spaces this from the text, so the slot adds no
           margin of its own — a mark that carried one would sit differently here
           than the control does on the other end. */}
-      {leading && <div className="shrink-0 flex items-center">{leading}</div>}
+      {/* A ternary, not `leading && …`: `ReactNode` includes `number`, and
+          `0 && x` evaluates to `0`, which React renders as a bare "0" outside
+          the wrapper. */}
+      {leading ? (
+        <div className="shrink-0 flex items-center">{leading}</div>
+      ) : null}
       <div className="min-w-0 flex-1 space-y-1.5">
         <p className="text-sm font-medium text-on-surface">{title}</p>
         {description && (

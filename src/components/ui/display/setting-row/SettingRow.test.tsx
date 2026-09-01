@@ -78,6 +78,19 @@ describe("SettingRow", () => {
     ).not.toBe(0);
   });
 
+  /**
+   * 🔴 `ReactNode` INCLUDES `number`, AND `0 && x` IS `0`. A `leading &&` guard
+   * therefore renders a bare "0" outside the wrapper for a legal value. Found
+   * in review, not in use — but the guard is the kind that is copied.
+   */
+  it("renders nothing for a falsy numeric leading value", () => {
+    const { container } = render(
+      <SettingRow title="X" leading={0} control={<span />} />,
+    );
+    expect(container.textContent).not.toContain("0");
+    expect(container.firstChild?.childNodes).toHaveLength(2);
+  });
+
   /** No slot, no box — the row must not gain a gap it did not have before. */
   it("renders no leading box when the slot is empty", () => {
     const { container } = render(<SettingRow title="X" control={<span />} />);

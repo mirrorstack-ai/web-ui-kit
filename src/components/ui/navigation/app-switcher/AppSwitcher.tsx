@@ -2,6 +2,7 @@ import {
   useState,
   useRef,
   useEffect,
+  useLayoutEffect,
   useCallback,
   useId,
   type ReactNode,
@@ -105,22 +106,36 @@ export function AppSwitcher({
     );
   }, []);
 
+  /**
+   * 🔴 A LAYOUT EFFECT, BECAUSE THE POINT IS TO BEAT THE PAINT. The outline
+   * used to be measured only inside `requestAnimationFrame`, which left ONE
+   * PAINTED FRAME with `outline` still empty: the card was open, the trigger
+   * had swapped to its open styling, and nothing was drawn behind either. The
+   * control blinked transparent over the page on every open, and consumers
+   * papered over it by painting their own backgrounds.
+   *
+   * `useEffect` does NOT fix that — it is passive and runs AFTER paint, so
+   * moving the call there would only have made the blank frame shorter, not
+   * absent. `useLayoutEffect` runs before the browser paints, so the first
+   * frame of the open state already has its shape.
+   *
+   * `open &&` rather than an early return: the hook must be called on every
+   * render, and the closed case has nothing to measure — the effect below
+   * clears the outline.
+   */
+  useLayoutEffect(() => {
+    if (open) updateOutline();
+  }, [open, updateOutline]);
+
   useEffect(() => {
     if (!open) {
       setOutline("");
       return;
     }
 
-    // 🔴 MEASURE SYNCHRONOUSLY FIRST, THEN CORRECT ON THE NEXT FRAME. The rAF
-    // alone left ONE PAINTED FRAME with `outline` still empty — the card was
-    // open, the trigger had swapped to its open styling, and nothing was drawn
-    // behind either. Consumers saw the whole control blink transparent over the
-    // page on every open and worked around it with their own background.
-    // Layout is already committed by the time this effect runs, so the first
-    // measurement is usually right; the rAF stays because it is not ALWAYS
-    // right — a font or an image landing in the same frame changes the
-    // trigger's width after this runs.
-    updateOutline();
+    // The rAF stays as a CORRECTION, not the primary measurement: a font or an
+    // image landing in this frame changes the trigger's width after the layout
+    // effect above has already read it.
     const rafId = requestAnimationFrame(updateOutline);
 
     const handleClickOutside = (e: MouseEvent) => {

@@ -35,9 +35,11 @@ Notable API additions and breaking changes. For the full commit log, see
 - **`AppSwitcher` draws its outline in the frame that opens it.** The outline
   was measured only inside `requestAnimationFrame`, leaving one painted frame
   with the card open and nothing drawn behind it — the whole control blinked
-  transparent on every open. It now measures synchronously first (layout is
-  already committed when the effect runs) and keeps the rAF as a correction for
-  a font or image that lands in the same frame.
+  transparent on every open. It now measures in a `useLayoutEffect`, which runs
+  BEFORE the browser paints, and keeps the rAF as a correction for a font or
+  image that lands in the same frame. (A plain `useEffect` would not have
+  fixed it — it is passive and runs after paint, so it would only have made the
+  blank frame shorter.)
 - **`AppSwitcher` transitions its radius with its fill.** The open/closed class
   swap is instant, so animating the colour alone showed a frame of hard bottom
   corners as the tab opened.
