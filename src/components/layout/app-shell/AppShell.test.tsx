@@ -4,6 +4,16 @@ import { AppShell } from "./AppShell";
 
 afterEach(cleanup);
 
+describe("AppShell content spacing", () => {
+  it("keeps vertical space inside the scrollport instead of shrinking it outside", () => {
+    render(<AppShell>content</AppShell>);
+
+    const main = screen.getByRole("main");
+    expect(main).toHaveClass("overflow-y-auto", "py-4");
+    expect(main.parentElement).not.toHaveClass("py-4");
+  });
+});
+
 describe("AppShell mobile navigation", () => {
   it("hosts mobileNavigation as a pinned bar by default", () => {
     render(
