@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { cleanup, render, screen, fireEvent, act } from "@testing-library/react";
+import { cleanup, render, renderHook, screen, fireEvent, act } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
   SnackbarOutlet,
@@ -400,38 +400,26 @@ describe("useUnsavedSnackbar", () => {
    * `isDirty` silently does nothing on every one of those paths.
    */
   it("re-derives dirtiness when a caller writes savedRef outside a render", () => {
-    let savedRef: { current: string } | null = null;
-    function ExposeHarness({ snapshot }: { snapshot: string }) {
-      const unsaved = useUnsavedSnackbar({
-        snapshot,
-        onSave: () => {},
-        onReset: () => {},
-      });
-      savedRef = unsaved.savedRef;
-      return <span data-testid="dirty">{String(unsaved.isDirty)}</span>;
-    }
-
-    const { rerender } = render(
-      <SnackbarProvider>
-        <ExposeHarness snapshot="a" />
-      </SnackbarProvider>,
+    const { result, rerender } = renderHook(
+      ({ snapshot }: { snapshot: string }) =>
+        useUnsavedSnackbar({ snapshot, onSave: () => {}, onReset: () => {} }),
+      {
+        initialProps: { snapshot: "a" },
+        wrapper: ({ children }) => <SnackbarProvider>{children}</SnackbarProvider>,
+      },
     );
     act(() => { vi.advanceTimersByTime(0); });
-    expect(screen.getByTestId("dirty")).toHaveTextContent("false");
+    expect(result.current.isDirty).toBe(false);
 
-    rerender(
-      <SnackbarProvider>
-        <ExposeHarness snapshot="b" />
-      </SnackbarProvider>,
-    );
-    expect(screen.getByTestId("dirty")).toHaveTextContent("true");
+    rerender({ snapshot: "b" });
+    expect(result.current.isDirty).toBe(true);
     expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
 
     // No prop change, no timer: the baseline write is the only event.
     act(() => {
-      savedRef!.current = "b";
+      result.current.savedRef.current = "b";
     });
-    expect(screen.getByTestId("dirty")).toHaveTextContent("false");
+    expect(result.current.isDirty).toBe(false);
 
     act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
     expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();

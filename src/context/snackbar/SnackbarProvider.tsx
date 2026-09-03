@@ -186,41 +186,38 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
    * the write now also schedules a render, so the comparison is always redone.
    */
   const [savedSnapshot, setSavedSnapshot] = useState(options.snapshot);
-  // Mirrors the state so a write is readable in the SAME tick — the Save
-  // handler reads the baseline back immediately after freezing it, and React
-  // has not re-rendered by then.
-  const savedMirror = useRef(savedSnapshot);
-  const savedRef = useMemo(
-    () => ({
-      get current() {
-        return savedMirror.current;
-      },
-      set current(next: string) {
-        savedMirror.current = next;
-        // Same value → React bails out, so a caller that rebases the baseline
-        // on every render of a clean form does not loop.
-        setSavedSnapshot(next);
-      },
-    }),
-    [],
-  );
+  /**
+   * The same value again, as a ref. Load-bearing, for two reasons:
+   *
+   *   (a) `savedRef` has to keep ONE identity — callers put it in dep arrays —
+   *       so its getter is created once and cannot close over `savedSnapshot`,
+   *       which would freeze it at the first render's value.
+   *   (b) `previousBaseline` in the Save handler below must read the LATEST
+   *       baseline. That closure is installed only on the clean→dirty
+   *       transition, so a caller that rebases the baseline while the form is
+   *       already dirty never reinstalls it, and reading state there would
+   *       restore a value two writes old.
+   */
+  const savedMirror = useRef(options.snapshot);
+  // useRef, not useMemo: an empty-dep memo is a hint React may discard, and
+  // this object's identity is part of the returned API.
+  const savedRef = useRef({
+    get current() {
+      return savedMirror.current;
+    },
+    set current(next: string) {
+      savedMirror.current = next;
+      // An equal-value write bails out, so a caller that rebases the baseline
+      // on every render of a clean form does not loop.
+      setSavedSnapshot(next);
+    },
+  }).current;
   const isDirty = options.snapshot !== savedSnapshot;
   const prevDirty = useRef(false);
-  const isFirstRender = useRef(true);
 
   // Keep latest callbacks/snapshot in refs so snackbar onClick always uses current values
   const optionsRef = useRef(options);
   optionsRef.current = options;
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      savedRef.current = options.snapshot;
-      isFirstRender.current = false;
-    }
-    // Mount-only baseline snapshot — later snapshot changes are the dirtiness
-    // signal, not a new baseline.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (isDirty && !prevDirty.current) {
@@ -250,10 +247,8 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
             // the work can be retried — dismissing it and keeping the draft
             // would strand edits with no way to submit them.
             //
-            // This runs in a rejection microtask, long after the click that
-            // scheduled it: it is the write, and nothing else, that has to put
-            // the bar back. It only does because the baseline is state — see
-            // savedSnapshot above.
+            // Runs in a rejection microtask, long after the click scheduled it:
+            // this write is the only thing left that can render the bar.
             const restore = () => {
               savedRef.current = previousBaseline;
             };
