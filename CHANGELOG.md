@@ -17,7 +17,10 @@ Notable API additions and breaking changes. For the full commit log, see
   page's `setState` closing the dialog flushes before the rejection microtask —
   so the bar stayed dismissed with the user's edits still on screen and no way
   to submit them. `savedRef` keeps its `{ current }` shape; the write now also
-  schedules a render.
+  schedules a render. An equal-value write is guarded, so a caller that rebases
+  the baseline on every clean render costs nothing — React's own same-value
+  bailout does not cover this position (after the first update one fiber of the
+  pair carries a stale lane, so an identical value still schedules a render).
 
 ## 0.7.13
 

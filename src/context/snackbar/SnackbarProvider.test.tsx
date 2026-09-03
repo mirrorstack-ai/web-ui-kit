@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cleanup, render, renderHook, screen, fireEvent, act } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
@@ -399,6 +399,46 @@ describe("useUnsavedSnackbar", () => {
    * settings/roles in web-applications all do. A write that cannot re-derive
    * `isDirty` silently does nothing on every one of those paths.
    */
+  /**
+   * 🔴 REACT'S SAME-VALUE BAILOUT DOES NOT COVER THIS, so the handle guards on
+   * equality itself. Every real caller rebases the baseline from an effect
+   * keyed on unrelated data — a query settling, a flag flipping — and after the
+   * first update one fiber of the pair carries a stale lane, so React's eager
+   * path is skipped and an identical value still schedules a render. Measured
+   * without the guard, this harness renders 1,3,5,7,9 against 1,2,3,4,5: every
+   * external update costs the whole form a second render pass.
+   */
+  it("does not re-render the form when the baseline is rewritten unchanged", () => {
+    let renders = 0;
+    function Caller() {
+      renders += 1;
+      const [tick, setTick] = useState(0);
+      const { savedRef } = useUnsavedSnackbar({
+        snapshot: "clean",
+        onSave: () => {},
+        onReset: () => {},
+      });
+      useEffect(() => {
+        savedRef.current = "clean";
+      }, [tick, savedRef]);
+      return <button onClick={() => setTick((t) => t + 1)}>tick</button>;
+    }
+
+    render(
+      <SnackbarProvider>
+        <Caller />
+      </SnackbarProvider>,
+    );
+    const mounted = renders;
+
+    for (let i = 0; i < 3; i += 1) {
+      act(() => { fireEvent.click(screen.getByText("tick")); });
+    }
+
+    // One render per external update, not two.
+    expect(renders).toBe(mounted + 3);
+  });
+
   it("re-derives dirtiness when a caller writes savedRef outside a render", () => {
     const { result, rerender } = renderHook(
       ({ snapshot }: { snapshot: string }) =>

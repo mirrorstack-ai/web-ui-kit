@@ -165,6 +165,46 @@ export interface UseUnsavedSnackbarOptions {
   savedMessage?: string | null;
 }
 
+interface BaselineHandle {
+  current: string;
+}
+
+/**
+ * The `{ current }` handle `useUnsavedSnackbar` hands back — a baseline that
+ * RENDERS when it is written.
+ *
+ * 🔴 MODULE SCOPE, NOT A CLOSURE IN THE HOOK. Accessors defined inside the hook
+ * capture the whole mount render's scope for as long as the handle lives, which
+ * pins that render's `options` — and through it the caller's `onSave`/`onReset`
+ * and everything they close over — for the lifetime of the component. Taking
+ * the two things it actually needs as arguments retains nothing else.
+ *
+ * The equality guard is not an optimization detail, it is what makes a caller
+ * that rebases the baseline on every clean render cost nothing. React's own
+ * same-value bailout does NOT cover this: after the first update one fiber of
+ * the pair always carries a stale lane, so the eager path is skipped and an
+ * identical value still schedules a render.
+ *
+ * 🔴 THE BASELINE MUST STAY A STRING. Both the guard here and `isDirty` compare
+ * with `Object.is`, so a caller re-deriving an equal snapshot settles. Widen it
+ * to an object and a caller effect with no dep array becomes an infinite loop.
+ */
+function makeBaselineHandle(
+  mirror: { current: string },
+  commit: (next: string) => void,
+): BaselineHandle {
+  return {
+    get current() {
+      return mirror.current;
+    },
+    set current(next: string) {
+      if (mirror.current === next) return;
+      mirror.current = next;
+      commit(next);
+    },
+  };
+}
+
 export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
   const { showSnackbar, dismissSnackbar } = useSnackbar();
   /**
@@ -190,8 +230,8 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
    * The same value again, as a ref. Load-bearing, for two reasons:
    *
    *   (a) `savedRef` has to keep ONE identity — callers put it in dep arrays —
-   *       so its getter is created once and cannot close over `savedSnapshot`,
-   *       which would freeze it at the first render's value.
+   *       so its accessors are created once and cannot close over
+   *       `savedSnapshot`, which would freeze them at the first render's value.
    *   (b) `previousBaseline` in the Save handler below must read the LATEST
    *       baseline. That closure is installed only on the clean→dirty
    *       transition, so a caller that rebases the baseline while the form is
@@ -199,19 +239,11 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
    *       restore a value two writes old.
    */
   const savedMirror = useRef(options.snapshot);
-  // useRef, not useMemo: an empty-dep memo is a hint React may discard, and
-  // this object's identity is part of the returned API.
-  const savedRef = useRef({
-    get current() {
-      return savedMirror.current;
-    },
-    set current(next: string) {
-      savedMirror.current = next;
-      // An equal-value write bails out, so a caller that rebases the baseline
-      // on every render of a clean form does not loop.
-      setSavedSnapshot(next);
-    },
-  }).current;
+  // Created once (useRef, not an empty-dep useMemo, which React may discard)
+  // and lazily, so the accessors are not reallocated on every render.
+  const handle = useRef<BaselineHandle | null>(null);
+  handle.current ??= makeBaselineHandle(savedMirror, setSavedSnapshot);
+  const savedRef = handle.current;
   const isDirty = options.snapshot !== savedSnapshot;
   const prevDirty = useRef(false);
 
