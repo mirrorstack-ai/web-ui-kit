@@ -7,6 +7,7 @@ on:
 jobs:
   release:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+    timeout-minutes: 10  # p95 0.6m over 17 runs (gh-hosted); 2x p95
     runs-on: ubuntu-latest
     permissions:
       contents: write
