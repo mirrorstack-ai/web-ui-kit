@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { cleanup, render, screen, fireEvent, act } from "@testing-library/react";
+import { useEffect, useState } from "react";
+import { cleanup, render, renderHook, screen, fireEvent, act } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
   SnackbarOutlet,
@@ -343,5 +343,125 @@ describe("useUnsavedSnackbar", () => {
       vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100);
     });
     expect(screen.getByText("Saved")).toBeInTheDocument();
+  });
+
+  /**
+   * 🔴 THE REJECTION IS THE LAST THING THAT HAPPENS, AND IT STILL HAS TO SHOW
+   * THE BAR. The sibling test above rejects immediately and only then advances
+   * the snackbar's exit timer — that timer changes the provider's context, which
+   * re-renders the consumer and re-derives `isDirty` for free. It therefore
+   * passed even while `restore()` did nothing but mutate a ref.
+   *
+   * The real caller does not get that gift. A step-up reauth dialog is
+   * cancelled seconds after the Save click, long after every snackbar timer has
+   * settled, and the page's own `setState` for closing the dialog flushes
+   * BEFORE the rejection microtask. So the write inside `restore()` is the last
+   * thing to happen, and nothing renders after it unless the write itself does.
+   */
+  it("brings the bar back when the save rejects after the snackbar has settled", async () => {
+    let rejectSave: (reason: unknown) => void = () => {};
+    const save = vi.fn(
+      () =>
+        new Promise((_res, rej) => {
+          rejectSave = rej;
+        }),
+    );
+    const { container } = render(
+      <SnackbarProvider>
+        <AsyncHarness save={save} />
+      </SnackbarProvider>,
+    );
+    act(() => { vi.advanceTimersByTime(0); });
+    act(() => { fireEvent.click(screen.getByText("change")); });
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+
+    clickSave(container);
+
+    // Everything the snackbar could do on its own is done: dismissed, exit
+    // animation over, `current` cleared. No further render is pending.
+    act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+
+    // Only now is the step-up cancelled.
+    await act(async () => {
+      rejectSave(new Error("step-up cancelled"));
+      await Promise.resolve();
+    });
+
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+    expect(screen.queryByText("Saved")).not.toBeInTheDocument();
+  });
+
+  /**
+   * The same invariant stated as the API contract callers actually use.
+   * Pages rebase `savedRef.current` from promise handlers and effects to say
+   * "this is the clean state now" — settings/general, settings/deployment and
+   * settings/roles in web-applications all do. A write that cannot re-derive
+   * `isDirty` silently does nothing on every one of those paths.
+   */
+  /**
+   * 🔴 REACT'S SAME-VALUE BAILOUT DOES NOT COVER THIS, so the handle guards on
+   * equality itself. Every real caller rebases the baseline from an effect
+   * keyed on unrelated data — a query settling, a flag flipping — and after the
+   * first update one fiber of the pair carries a stale lane, so React's eager
+   * path is skipped and an identical value still schedules a render. Measured
+   * without the guard, this harness renders 1,3,5,7,9 against 1,2,3,4,5: every
+   * external update costs the whole form a second render pass.
+   */
+  it("does not re-render the form when the baseline is rewritten unchanged", () => {
+    let renders = 0;
+    function Caller() {
+      renders += 1;
+      const [tick, setTick] = useState(0);
+      const { savedRef } = useUnsavedSnackbar({
+        snapshot: "clean",
+        onSave: () => {},
+        onReset: () => {},
+      });
+      useEffect(() => {
+        savedRef.current = "clean";
+      }, [tick, savedRef]);
+      return <button onClick={() => setTick((t) => t + 1)}>tick</button>;
+    }
+
+    render(
+      <SnackbarProvider>
+        <Caller />
+      </SnackbarProvider>,
+    );
+    const mounted = renders;
+
+    for (let i = 0; i < 3; i += 1) {
+      act(() => { fireEvent.click(screen.getByText("tick")); });
+    }
+
+    // One render per external update, not two.
+    expect(renders).toBe(mounted + 3);
+  });
+
+  it("re-derives dirtiness when a caller writes savedRef outside a render", () => {
+    const { result, rerender } = renderHook(
+      ({ snapshot }: { snapshot: string }) =>
+        useUnsavedSnackbar({ snapshot, onSave: () => {}, onReset: () => {} }),
+      {
+        initialProps: { snapshot: "a" },
+        wrapper: ({ children }) => <SnackbarProvider>{children}</SnackbarProvider>,
+      },
+    );
+    act(() => { vi.advanceTimersByTime(0); });
+    expect(result.current.isDirty).toBe(false);
+
+    rerender({ snapshot: "b" });
+    expect(result.current.isDirty).toBe(true);
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+
+    // No prop change, no timer: the baseline write is the only event.
+    act(() => {
+      result.current.savedRef.current = "b";
+    });
+    expect(result.current.isDirty).toBe(false);
+
+    act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
   });
 });

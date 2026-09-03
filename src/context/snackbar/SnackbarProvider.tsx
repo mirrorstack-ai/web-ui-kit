@@ -165,26 +165,91 @@ export interface UseUnsavedSnackbarOptions {
   savedMessage?: string | null;
 }
 
+interface BaselineHandle {
+  current: string;
+}
+
+/**
+ * The `{ current }` handle `useUnsavedSnackbar` hands back — a baseline that
+ * RENDERS when it is written.
+ *
+ * 🔴 MODULE SCOPE, NOT A CLOSURE IN THE HOOK. Accessors defined inside the hook
+ * capture the whole mount render's scope for as long as the handle lives, which
+ * pins that render's `options` — and through it the caller's `onSave`/`onReset`
+ * and everything they close over — for the lifetime of the component. Taking
+ * the two things it actually needs as arguments retains nothing else.
+ *
+ * The equality guard is not an optimization detail, it is what makes a caller
+ * that rebases the baseline on every clean render cost nothing. React's own
+ * same-value bailout does NOT cover this: after the first update one fiber of
+ * the pair always carries a stale lane, so the eager path is skipped and an
+ * identical value still schedules a render.
+ *
+ * 🔴 THE BASELINE MUST STAY A STRING. Both the guard here and `isDirty` compare
+ * with `Object.is`, so a caller re-deriving an equal snapshot settles. Widen it
+ * to an object and a caller effect with no dep array becomes an infinite loop.
+ */
+function makeBaselineHandle(
+  mirror: { current: string },
+  commit: (next: string) => void,
+): BaselineHandle {
+  return {
+    get current() {
+      return mirror.current;
+    },
+    set current(next: string) {
+      if (mirror.current === next) return;
+      mirror.current = next;
+      commit(next);
+    },
+  };
+}
+
 export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
   const { showSnackbar, dismissSnackbar } = useSnackbar();
-  const savedRef = useRef(options.snapshot);
-  const isDirty = options.snapshot !== savedRef.current;
+  /**
+   * The baseline the snapshot is compared against — STATE, not a ref, because
+   * writing it has to be able to bring the bar back.
+   *
+   * 🔴 A REF WRITE CANNOT RE-RUN THE `[isDirty]` EFFECT. `isDirty` is derived
+   * during render, so the only thing that re-evaluates it is a render. When
+   * the baseline lived in a plain ref, every write that happened OUTSIDE a
+   * render — `restore()` on a rejected save, or a caller rebasing
+   * `savedRef.current` from a promise handler — mutated the comparand and then
+   * waited for someone else to re-render. If nothing did, dirtiness was never
+   * recomputed and the bar stayed dismissed with the edits still on screen.
+   * That is exactly what a cancelled step-up dialog produced: the page's
+   * `setState` for closing the dialog flushed BEFORE the rejection microtask,
+   * so `restore()` was the last thing to happen and nothing rendered after it.
+   *
+   * `savedRef` below keeps the `{ current }` shape callers already write to —
+   * the write now also schedules a render, so the comparison is always redone.
+   */
+  const [savedSnapshot, setSavedSnapshot] = useState(options.snapshot);
+  /**
+   * The same value again, as a ref. Load-bearing, for two reasons:
+   *
+   *   (a) `savedRef` has to keep ONE identity — callers put it in dep arrays —
+   *       so its accessors are created once and cannot close over
+   *       `savedSnapshot`, which would freeze them at the first render's value.
+   *   (b) `previousBaseline` in the Save handler below must read the LATEST
+   *       baseline. That closure is installed only on the clean→dirty
+   *       transition, so a caller that rebases the baseline while the form is
+   *       already dirty never reinstalls it, and reading state there would
+   *       restore a value two writes old.
+   */
+  const savedMirror = useRef(options.snapshot);
+  // Created once (useRef, not an empty-dep useMemo, which React may discard)
+  // and lazily, so the accessors are not reallocated on every render.
+  const handle = useRef<BaselineHandle | null>(null);
+  handle.current ??= makeBaselineHandle(savedMirror, setSavedSnapshot);
+  const savedRef = handle.current;
+  const isDirty = options.snapshot !== savedSnapshot;
   const prevDirty = useRef(false);
-  const isFirstRender = useRef(true);
 
   // Keep latest callbacks/snapshot in refs so snackbar onClick always uses current values
   const optionsRef = useRef(options);
   optionsRef.current = options;
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      savedRef.current = options.snapshot;
-      isFirstRender.current = false;
-    }
-    // Mount-only baseline snapshot — later snapshot changes are the dirtiness
-    // signal, not a new baseline.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (isDirty && !prevDirty.current) {
@@ -213,6 +278,9 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
             // baseline makes the form dirty again, which brings the bar back so
             // the work can be retried — dismissing it and keeping the draft
             // would strand edits with no way to submit them.
+            //
+            // Runs in a rejection microtask, long after the click scheduled it:
+            // this write is the only thing left that can render the bar.
             const restore = () => {
               savedRef.current = previousBaseline;
             };
