@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   build:
+    timeout-minutes: 10  # p95 0.6m over 20 runs (gh-hosted); 2x p95
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
