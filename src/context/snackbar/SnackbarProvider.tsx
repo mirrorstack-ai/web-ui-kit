@@ -167,8 +167,44 @@ export interface UseUnsavedSnackbarOptions {
 
 export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
   const { showSnackbar, dismissSnackbar } = useSnackbar();
-  const savedRef = useRef(options.snapshot);
-  const isDirty = options.snapshot !== savedRef.current;
+  /**
+   * The baseline the snapshot is compared against — STATE, not a ref, because
+   * writing it has to be able to bring the bar back.
+   *
+   * 🔴 A REF WRITE CANNOT RE-RUN THE `[isDirty]` EFFECT. `isDirty` is derived
+   * during render, so the only thing that re-evaluates it is a render. When
+   * the baseline lived in a plain ref, every write that happened OUTSIDE a
+   * render — `restore()` on a rejected save, or a caller rebasing
+   * `savedRef.current` from a promise handler — mutated the comparand and then
+   * waited for someone else to re-render. If nothing did, dirtiness was never
+   * recomputed and the bar stayed dismissed with the edits still on screen.
+   * That is exactly what a cancelled step-up dialog produced: the page's
+   * `setState` for closing the dialog flushed BEFORE the rejection microtask,
+   * so `restore()` was the last thing to happen and nothing rendered after it.
+   *
+   * `savedRef` below keeps the `{ current }` shape callers already write to —
+   * the write now also schedules a render, so the comparison is always redone.
+   */
+  const [savedSnapshot, setSavedSnapshot] = useState(options.snapshot);
+  // Mirrors the state so a write is readable in the SAME tick — the Save
+  // handler reads the baseline back immediately after freezing it, and React
+  // has not re-rendered by then.
+  const savedMirror = useRef(savedSnapshot);
+  const savedRef = useMemo(
+    () => ({
+      get current() {
+        return savedMirror.current;
+      },
+      set current(next: string) {
+        savedMirror.current = next;
+        // Same value → React bails out, so a caller that rebases the baseline
+        // on every render of a clean form does not loop.
+        setSavedSnapshot(next);
+      },
+    }),
+    [],
+  );
+  const isDirty = options.snapshot !== savedSnapshot;
   const prevDirty = useRef(false);
   const isFirstRender = useRef(true);
 
@@ -213,6 +249,11 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
             // baseline makes the form dirty again, which brings the bar back so
             // the work can be retried — dismissing it and keeping the draft
             // would strand edits with no way to submit them.
+            //
+            // This runs in a rejection microtask, long after the click that
+            // scheduled it: it is the write, and nothing else, that has to put
+            // the bar back. It only does because the baseline is state — see
+            // savedSnapshot above.
             const restore = () => {
               savedRef.current = previousBaseline;
             };

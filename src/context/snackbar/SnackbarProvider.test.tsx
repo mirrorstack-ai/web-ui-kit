@@ -344,4 +344,96 @@ describe("useUnsavedSnackbar", () => {
     });
     expect(screen.getByText("Saved")).toBeInTheDocument();
   });
+
+  /**
+   * 🔴 THE REJECTION IS THE LAST THING THAT HAPPENS, AND IT STILL HAS TO SHOW
+   * THE BAR. The sibling test above rejects immediately and only then advances
+   * the snackbar's exit timer — that timer changes the provider's context, which
+   * re-renders the consumer and re-derives `isDirty` for free. It therefore
+   * passed even while `restore()` did nothing but mutate a ref.
+   *
+   * The real caller does not get that gift. A step-up reauth dialog is
+   * cancelled seconds after the Save click, long after every snackbar timer has
+   * settled, and the page's own `setState` for closing the dialog flushes
+   * BEFORE the rejection microtask. So the write inside `restore()` is the last
+   * thing to happen, and nothing renders after it unless the write itself does.
+   */
+  it("brings the bar back when the save rejects after the snackbar has settled", async () => {
+    let rejectSave: (reason: unknown) => void = () => {};
+    const save = vi.fn(
+      () =>
+        new Promise((_res, rej) => {
+          rejectSave = rej;
+        }),
+    );
+    const { container } = render(
+      <SnackbarProvider>
+        <AsyncHarness save={save} />
+      </SnackbarProvider>,
+    );
+    act(() => { vi.advanceTimersByTime(0); });
+    act(() => { fireEvent.click(screen.getByText("change")); });
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+
+    clickSave(container);
+
+    // Everything the snackbar could do on its own is done: dismissed, exit
+    // animation over, `current` cleared. No further render is pending.
+    act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+
+    // Only now is the step-up cancelled.
+    await act(async () => {
+      rejectSave(new Error("step-up cancelled"));
+      await Promise.resolve();
+    });
+
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+    expect(screen.queryByText("Saved")).not.toBeInTheDocument();
+  });
+
+  /**
+   * The same invariant stated as the API contract callers actually use.
+   * Pages rebase `savedRef.current` from promise handlers and effects to say
+   * "this is the clean state now" — settings/general, settings/deployment and
+   * settings/roles in web-applications all do. A write that cannot re-derive
+   * `isDirty` silently does nothing on every one of those paths.
+   */
+  it("re-derives dirtiness when a caller writes savedRef outside a render", () => {
+    let savedRef: { current: string } | null = null;
+    function ExposeHarness({ snapshot }: { snapshot: string }) {
+      const unsaved = useUnsavedSnackbar({
+        snapshot,
+        onSave: () => {},
+        onReset: () => {},
+      });
+      savedRef = unsaved.savedRef;
+      return <span data-testid="dirty">{String(unsaved.isDirty)}</span>;
+    }
+
+    const { rerender } = render(
+      <SnackbarProvider>
+        <ExposeHarness snapshot="a" />
+      </SnackbarProvider>,
+    );
+    act(() => { vi.advanceTimersByTime(0); });
+    expect(screen.getByTestId("dirty")).toHaveTextContent("false");
+
+    rerender(
+      <SnackbarProvider>
+        <ExposeHarness snapshot="b" />
+      </SnackbarProvider>,
+    );
+    expect(screen.getByTestId("dirty")).toHaveTextContent("true");
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+
+    // No prop change, no timer: the baseline write is the only event.
+    act(() => {
+      savedRef!.current = "b";
+    });
+    expect(screen.getByTestId("dirty")).toHaveTextContent("false");
+
+    act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+  });
 });

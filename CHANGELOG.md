@@ -3,6 +3,22 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.14
+
+### Fixed
+
+- **`useUnsavedSnackbar` keeps its baseline in state, so writing it brings the
+  bar back.** `isDirty` is derived during render, so only a render re-evaluates
+  it — but the baseline lived in a plain ref, and every write that mattered
+  happened OUTSIDE a render: `restore()` on a rejected save, and the effects and
+  promise handlers in which callers rebase `savedRef.current` themselves. The
+  write mutated the comparand and then waited for someone else to re-render. A
+  save cancelled at a step-up reauth dialog is the case where nobody does — the
+  page's `setState` closing the dialog flushes before the rejection microtask —
+  so the bar stayed dismissed with the user's edits still on screen and no way
+  to submit them. `savedRef` keeps its `{ current }` shape; the write now also
+  schedules a render.
+
 ## 0.7.13
 
 ### Added
