@@ -93,7 +93,7 @@ export interface AvatarProps {
    * frame by its SIZE class, which silently stops matching the day the size
    * changes.
    */
-  tone?: "primary" | "onPrimaryContainer";
+  tone?: "primary" | "onPrimaryContainer" | "warning";
   overlay?: ReactNode;
   className?: string;
 }
@@ -109,6 +109,23 @@ const TONE_FRAME = {
     border: "border-on-primary-container",
     fill: "bg-on-primary-container/10",
     text: "text-on-primary-container",
+  },
+  /**
+   * For an avatar inside a WARNING surface — a pending approval, an unfinished
+   * transfer — where the default primary frame is the one element still saying
+   * "routine".
+   *
+   * 🔴 NO FILL, DELIBERATELY. The other two tones tint because they sit on a
+   * neutral surface and have to lift off it. This one sits INSIDE an alert that
+   * is already `bg-warning/10`, so a second warning wash is one hue layered on
+   * itself — the same mistake the `onPrimaryContainer` note above describes, in
+   * the other colour. Border and initials carry the tone; the alert carries the
+   * fill.
+   */
+  warning: {
+    border: "border-warning",
+    fill: "",
+    text: "text-warning",
   },
 } as const;
 

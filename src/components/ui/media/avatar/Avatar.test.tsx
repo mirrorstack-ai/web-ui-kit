@@ -144,5 +144,29 @@ describe("Avatar", () => {
       expect(img).not.toHaveClass("border-2");
       expect(img).toHaveClass("object-contain");
     });
+
+    /**
+     * 🔴 THE WARNING TONE CARRIES NO FILL, AND THAT IS THE POINT OF IT. It
+     * exists for an avatar sitting INSIDE a warning surface — a pending
+     * approval, an unfinished transfer — which is already `bg-warning/10`. A
+     * tinted frame there is one hue washed over itself: the same failure the
+     * `onPrimaryContainer` tone was added to fix, in the other colour. Border
+     * and initials carry the tone; the surface keeps the fill.
+     */
+    it("tones the frame WITHOUT a fill under `warning`", () => {
+      const { container } = render(<Avatar fallback="W" tone="warning" />);
+      const box = container.querySelector(".border-2");
+
+      expect(box).toHaveClass("border-warning");
+      expect(box?.className).not.toMatch(/bg-warning/);
+      expect(screen.getByText("W")).toHaveClass("text-warning");
+    });
+
+    it("still fills under the tones that are meant to", () => {
+      // The control: "no fill" is a property of `warning`, not of the frame —
+      // otherwise the assertion above would pass on a frame that never fills.
+      const { container } = render(<Avatar fallback="P" tone="primary" />);
+      expect(container.querySelector(".border-2")).toHaveClass("bg-primary/20");
+    });
   });
 });
