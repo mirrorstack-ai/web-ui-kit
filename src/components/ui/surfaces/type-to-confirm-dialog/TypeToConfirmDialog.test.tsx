@@ -124,4 +124,40 @@ describe("TypeToConfirmDialog", () => {
     // it as disabled when loading is true.
     expect(screen.getByRole("button", { name: "Delete app" })).toBeDisabled();
   });
+  // 🔴 Every string this component paints must be overridable, because the kit
+  // ships one language and its consumers do not. A localized console rendered a
+  // Chinese title and consequences around an English "To confirm, type … below."
+  // and an English Cancel — mixed-language copy, unreachable from the consumer
+  // side because these had no props at all. Asserted per string: one combined
+  // render would pass with any single override still hardcoded.
+  it("lets a caller localize every string it paints", () => {
+    renderDialog({
+      cancelLabel: "取消",
+      warnActionLabel: "繼續",
+      confirmTitle: "請輸入「delete」以確認",
+      confirmInputLabel: "確認文字",
+      confirmInstruction: <>請在下方輸入 delete 以確認。</>,
+    });
+
+    expect(screen.getByRole("button", { name: "取消" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "繼續" }));
+    expect(screen.getByText("請輸入「delete」以確認")).toBeInTheDocument();
+    expect(screen.getByText("請在下方輸入 delete 以確認。")).toBeInTheDocument();
+    expect(screen.getByLabelText("確認文字")).toBeInTheDocument();
+
+    // And no English survives anywhere in the localized dialog.
+    for (const leaked of ["Cancel", "Continue", "Confirmation", "To confirm, type"]) {
+      expect(screen.queryByText(leaked)).not.toBeInTheDocument();
+    }
+  });
+
+  // The defaults still stand for a caller that passes nothing, so this is
+  // additive rather than a migration.
+  it("keeps its English defaults when no override is given", () => {
+    renderDialog({});
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByText("Type 'delete' to confirm")).toBeInTheDocument();
+    expect(screen.getByLabelText("Confirmation")).toBeInTheDocument();
+  });
 });
