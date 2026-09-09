@@ -163,6 +163,21 @@ export interface UseUnsavedSnackbarOptions {
    * so the user does not get two toasts for one action.
    */
   savedMessage?: string | null;
+  /**
+   * Labels for the bar's two buttons.
+   *
+   * 🔴 THE CALLER SUPPLIES THEM, LIKE `message` ALREADY DOES. This kit has no
+   * locale and no message catalog, by design — every other string on this bar
+   * is passed in for exactly that reason. These two were the only ones left
+   * hardcoded, so a zh-TW console rendered 「尚未儲存的變更 Reset Save」: the
+   * sentence localized, the two controls next to it not. It reads as a
+   * half-translated product, and it is the half a user has to click.
+   *
+   * Optional, defaulting to today's English, so no existing caller changes
+   * behaviour by upgrading.
+   */
+  saveLabel?: string;
+  resetLabel?: string;
 }
 
 interface BaselineHandle {
@@ -258,7 +273,7 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
         variant: "unsave",
         duration: 0,
         action: {
-          label: "Save",
+          label: options.saveLabel ?? "Save",
           onClick: () => {
             // Held so a failed save can put the bar back exactly as it was.
             const previousBaseline = savedRef.current;
@@ -294,7 +309,7 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
           },
         },
         secondaryAction: {
-          label: "Reset",
+          label: options.resetLabel ?? "Reset",
           onClick: () => {
             prevDirty.current = false;
             optionsRef.current.onReset();
@@ -308,7 +323,11 @@ export function useUnsavedSnackbar(options: UseUnsavedSnackbarOptions) {
     prevDirty.current = isDirty;
     // Show/dismiss must fire only on dirtiness transitions; callbacks and
     // message are read through optionsRef so they stay current without
-    // retriggering the effect.
+    // retriggering the effect. The three LABELS are read the same way and at
+    // the same moment as `message` — the bar is built once, on the transition
+    // into dirty, so a locale that changes mid-edit does not restyle a bar
+    // already on screen. That is the existing behaviour for `message`, and the
+    // two buttons must not diverge from the sentence beside them.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDirty, options.snapshot]);
 

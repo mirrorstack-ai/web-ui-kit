@@ -196,13 +196,19 @@ describe("useUnsavedSnackbar", () => {
   function UnsavedHarness({
     onSave,
     onReset,
+    saveLabel,
+    resetLabel,
   }: {
     onSave: () => void;
     onReset: () => void;
+    saveLabel?: string;
+    resetLabel?: string;
   }) {
     const [value, setValue] = useState("a");
     useUnsavedSnackbar({
       snapshot: value,
+      saveLabel,
+      resetLabel,
       onSave: () => {
         onSave();
         setValue("a");
@@ -463,5 +469,51 @@ describe("useUnsavedSnackbar", () => {
 
     act(() => { vi.advanceTimersByTime(SNACKBAR_EXIT_MS + 100); });
     expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+  });
+
+  /**
+   * 🔴 THE TWO BUTTONS WERE THE ONLY STRINGS ON THIS BAR THE CALLER COULD NOT
+   * SUPPLY, and a kit with no locale cannot localize them itself. A zh-TW
+   * console rendered 「尚未儲存的變更 Reset Save」 — the sentence translated,
+   * the two controls beside it not, which is the half a user has to click.
+   */
+  it("takes localized button labels, and still WORKS through them", () => {
+    const onSave = vi.fn();
+    const onReset = vi.fn();
+    const { container } = render(
+      <SnackbarProvider>
+        <UnsavedHarness onSave={onSave} onReset={onReset} saveLabel="儲存" resetLabel="重設" />
+      </SnackbarProvider>,
+    );
+    act(() => { vi.advanceTimersByTime(0); });
+    act(() => { fireEvent.click(screen.getByText("change")); });
+
+    expect(screen.getByText("儲存")).toBeInTheDocument();
+    expect(screen.getByText("重設")).toBeInTheDocument();
+    expect(screen.queryByText("Save")).toBeNull();
+    expect(screen.queryByText("Reset")).toBeNull();
+
+    // 🔴 CLICKED, not merely rendered. A label swap that detached the handler
+    // would leave a bar that reads correctly and does nothing — which is worse
+    // than the English it replaced.
+    const save = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "儲存",
+    ) as HTMLButtonElement;
+    act(() => { fireEvent.click(save); });
+    expect(onSave).toHaveBeenCalledTimes(1);
+  });
+
+  /** The default is today's English, so upgrading changes no existing caller. */
+  it("defaults to English when no labels are given", () => {
+    render(
+      <SnackbarProvider>
+        <UnsavedHarness onSave={() => {}} onReset={() => {}} />
+      </SnackbarProvider>,
+    );
+    act(() => { vi.advanceTimersByTime(0); });
+    act(() => { fireEvent.click(screen.getByText("change")); });
+
+    expect(screen.getByText("Save")).toBeInTheDocument();
+    expect(screen.getByText("Reset")).toBeInTheDocument();
   });
 });
