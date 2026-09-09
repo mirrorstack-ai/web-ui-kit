@@ -443,6 +443,12 @@ export {
   type SettingsSectionProps,
 } from "./components/ui/surfaces/settings-section/SettingsSection";
 export {
+  SettingsTransfer,
+  type SettingsTransferProps,
+  type SettingsTransferLabels,
+  type SettingsTransferError,
+} from "./components/ui/surfaces/settings-transfer/SettingsTransfer";
+export {
   Card,
   type CardProps,
 } from "./components/ui/surfaces/card/Card";

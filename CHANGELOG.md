@@ -3,6 +3,43 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.16
+
+### Added
+
+- **`SettingsTransfer`.** The copy/paste pair that moves one settings page's
+  configuration between applications — staging to production, one tenant to the
+  next — without an operator re-entering every field and getting one of them
+  subtly wrong. Five modules had grown their own copy of it; this is the shared
+  one. The caller keeps what only it can know: the envelope it copies
+  (`TExport`) and the `parse` that validates a paste back into its own settings
+  (`TImport`). Strings come in through `labels`, per key, defaulting to English
+  — the kit holds no catalog, and resolving `t("…")` at the CALL SITE is also
+  the only place an i18n usage guard can see the key, so consumers with
+  different key conventions share the component without first agreeing on one.
+
+  🔴 **Import loads the DRAFT; it does not save.** Pasting is one keystroke and
+  a settings page is a live application's behaviour, so the paste lands where
+  every other edit on that page lands — behind the save bar, next to a Reset
+  that throws it away. An "import" that wrote straight through would be the only
+  control on the page with no undo.
+
+  The paste box carries a real `id`, so its `<label>` actually names it. Every
+  module-local copy omitted one, and `FloatingLabelInput` associates through
+  `htmlFor`/`id` — the textarea those pages shipped had no accessible name at
+  all.
+
+## 0.7.15
+
+### Added
+
+- **`Avatar` accepts `tone="warning"`, which carries NO fill.** An avatar inside
+  a warning surface — a pending approval, an unfinished billing transfer — had
+  no way to stop being primary. The other two tones tint because they sit on a
+  neutral surface and must lift off it; this one sits inside an `Alert` that is
+  already `bg-warning/10`, where a tinted frame is one hue washed over itself.
+  Border and initials carry the tone; the surface keeps the fill.
+
 ## 0.7.14
 
 ### Fixed
