@@ -1,7 +1,7 @@
 {
   "name": "@mirrorstack-ai/web-ui-kit",
   "packageManager": "pnpm@10.29.3",
-  "version": "0.7.16",
+  "version": "0.7.17",
   "description": "MirrorStack Design System: shared React UI components",
   "license": "Apache-2.0",
   "repository": {

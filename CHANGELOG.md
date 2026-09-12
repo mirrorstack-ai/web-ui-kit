@@ -3,6 +3,17 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.17
+
+### Changed
+
+- **License: MIT → Apache-2.0.** The kit is now published under the Apache
+  License 2.0. Code contributed before 2026-09-12 keeps its MIT notice in
+  `NOTICE`, which ships in the package.
+- **Also published to npmjs.com.** `pnpm add @mirrorstack-ai/web-ui-kit` now
+  works without a GitHub token. GitHub Packages still receives every release,
+  so existing `.npmrc` setups keep working.
+
 ## 0.7.16
 
 ### Added
