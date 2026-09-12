@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/ci.yml)
 [![Storybook](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/storybook.yml/badge.svg)](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/storybook.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Good First Issues](https://img.shields.io/github/issues/mirrorstack-ai/web-ui-kit/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/mirrorstack-ai/web-ui-kit/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
 
 Shared React UI component library for [MirrorStack](https://mirrorstack.com).
@@ -149,4 +149,4 @@ Look for issues labeled [`good first issue`](https://github.com/mirrorstack-ai/w
 
 ## License
 
-MIT
+[Apache-2.0](LICENSE). Releases before this change were published under MIT; code contributed before the change keeps its MIT notice in [NOTICE](NOTICE).

@@ -2,6 +2,16 @@
   "name": "@mirrorstack-ai/web-ui-kit",
   "packageManager": "pnpm@10.29.3",
   "version": "0.7.16",
+  "description": "MirrorStack Design System: shared React UI components",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mirrorstack-ai/web-ui-kit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mirrorstack-ai/web-ui-kit/issues"
+  },
+  "homepage": "https://mirrorstack-ai.github.io/web-ui-kit/",
   "sideEffects": [
     "**/*.css"
   ],
@@ -16,7 +26,8 @@
   },
   "files": [
     "dist",
-    "src/theme.css"
+    "src/theme.css",
+    "NOTICE"
   ],
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
