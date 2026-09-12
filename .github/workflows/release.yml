@@ -60,3 +60,20 @@ jobs:
         run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for the npmjs token
+        id: npmjs
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: echo "enabled=$([ -n "$NPM_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      # Public mirror so anyone can install without a GitHub token. Internal
+      # consumers keep resolving the scope from GitHub Packages (above).
+      - name: Publish to npmjs
+        if: steps.npmjs.outputs.enabled == 'true'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          printf '%s\n' '@mirrorstack-ai:registry=https://registry.npmjs.org/' '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
+          npm pkg set publishConfig.registry=https://registry.npmjs.org/ publishConfig.access=public
+          pnpm publish --no-git-checks
