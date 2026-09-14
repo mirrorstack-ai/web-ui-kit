@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/81 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">78/81 infos</a><span class="filter-pill ok" aria-disabled="true">338 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/81 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">78/81 infos</a><span class="filter-pill ok" aria-disabled="true">340 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -11692,7 +11692,7 @@ onLoadOlder?: () =&gt; void</code></pre>
       <div class="badges">
         <label for="c-60-ui-data-settingrow-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-60-ui-data-settingrow-info" class="badge info as-toggle">1 info</label>
-        <label for="c-60-ui-data-settingrow-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-60-ui-data-settingrow-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -11782,7 +11782,7 @@ tone?: | &quot;primary&quot;
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { Button, SettingRow, Switch } from "@mirrorstack-ai/web-ui-kit";</code></pre>
+                <pre><code>import { Button, FloatingLabelInput, SettingRow, Switch } from "@mirrorstack-ai/web-ui-kit";</code></pre>
               </div>
           
           
@@ -11848,6 +11848,38 @@ tone?: | &quot;primary&quot;
               <pre><code>const NoDescription = () =&gt; &lt;SettingRow
     title=&quot;Developer mode&quot;
     description={undefined}
+    control={&lt;Switch checked={false} onChange={() =&gt; {}} aria-label=&quot;Developer mode&quot; /&gt;} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Long Description With Wide Control</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">🔴 THE CASE THE ROW USED TO SQUEEZE, kept as a story so it is renderable at 400px instead of being rediscovered on a module&#39;s PR. A long description AND a control wider than a Switch. `control` is `shrink-0`, so before the row could wrap, the text column was the only thing able to give: it collapsed to a ribbon and broke this description across four or five lines. Reported on ai-assistant&#39;s Model and Token-ceiling rows and quiz-core&#39;s &quot;Show the answer key&quot; (f5, 2026-09-14). Review it at 400px, not at the default viewport — at a comfortable width there was never anything wrong with this row.</div>
+              <pre><code>const LongDescriptionWithWideControl = () =&gt; &lt;SettingRow
+    title=&quot;Token ceiling&quot;
+    description=&quot;The largest number of tokens one assistant reply may spend. Replies that would exceed it are cut at the boundary rather than refused.&quot;
+    control={(&lt;div className=&quot;w-32&quot;&gt;
+      &lt;FloatingLabelInput
+        label=&quot;Tokens&quot;
+        size=&quot;sm&quot;
+        inputMode=&quot;numeric&quot;
+        value=&quot;4096&quot;
+        onChange={() =&gt; {}}
+      /&gt;
+    &lt;/div&gt;)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Narrow Control Does Not Wrap</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">The same row with a Switch: narrow enough that it never reaches the wrap point, so this is the check that the fix left the already-fitting rows exactly where they were.</div>
+              <pre><code>const NarrowControlDoesNotWrap = () =&gt; &lt;SettingRow
+    title=&quot;Show the answer key&quot;
+    description=&quot;Reveal correct answers after a learner submits, instead of keeping them hidden until the exam closes.&quot;
     control={&lt;Switch checked={false} onChange={() =&gt; {}} aria-label=&quot;Developer mode&quot; /&gt;} /&gt;;</code></pre>
             </div>
         </div>
