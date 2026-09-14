@@ -1,1 +1,0 @@
-const r={primary:"border-primary/40",secondary:"border-secondary/40",tertiary:"border-tertiary/40",error:"border-error/40",warning:"border-warning/40",success:"border-success/40"},s={success:"var(--color-success)",warning:"var(--color-warning)",error:"var(--color-error)"},a={success:"Success",warning:"Warning",error:"Error"};export{a,s as d,r as t};
