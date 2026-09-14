@@ -1,5 +1,6 @@
 packages:
   - "."
+  - "packages/*"
   - "test/react18"
 
 overrides:

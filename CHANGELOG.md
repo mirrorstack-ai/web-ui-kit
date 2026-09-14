@@ -3,6 +3,20 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## Unreleased
+
+### Added
+
+- **`@mirrorstack-ai/module-preview`** — a second package, published from this
+  repository on the same version and the same train, taking the kit as a PEER
+  so a module's preview chrome is the module's own chrome by construction. Its
+  purpose is the console's page shell on localhost around a module's real
+  mount, so a surface can be reviewed without a platform, a database or a
+  tunnel. This release carries the part a hand-rolled harness cannot get right
+  by itself: the frame widths the console actually uses, the host's header
+  copy, and the locale resolution that makes a `/ui-preflight` sheet mean
+  something. The React shell follows.
+
 ## 0.7.17
 
 ### Changed
