@@ -28,6 +28,11 @@ jobs:
 
       - run: pnpm check:package
 
+      # The second published package. check:package only ever covered the root,
+      # so without this a broken @mirrorstack-ai/module-preview reaches the
+      # release job green.
+      - run: pnpm check:preview
+
       - run: pnpm test
 
       - run: pnpm components validate

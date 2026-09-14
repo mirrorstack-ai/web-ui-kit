@@ -35,6 +35,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && node scripts/finalize-source-maps.mjs",
     "check:package": "pnpm build && pnpm pack --dry-run",
+    "check:preview": "pnpm -C packages/module-preview typecheck && pnpm -C packages/module-preview build && pnpm -C packages/module-preview pack --dry-run",
     "prepublishOnly": "pnpm build",
     "components": "tsx scripts/components.ts",
     "start-issue": "tsx scripts/start-issue.ts",

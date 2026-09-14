@@ -56,8 +56,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 🔴 module-preview RIDES THIS TRAIN, and it must be built before it is
+      # published: it compiles against the kit's freshly built types.
+      - name: Build module-preview
+        run: pnpm -C packages/module-preview build
+
       - name: Publish to GitHub Packages
-        run: pnpm publish --no-git-checks
+        run: |
+          pnpm publish --no-git-checks
+          pnpm -C packages/module-preview publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -77,3 +84,7 @@ jobs:
           printf '%s\n' '@mirrorstack-ai:registry=https://registry.npmjs.org/' '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
           npm pkg set publishConfig.registry=https://registry.npmjs.org/ publishConfig.access=public
           pnpm publish --no-git-checks
+          # The .npmrc above is repository-root and applies to the workspace,
+          # so only the package's own publishConfig has to be redirected.
+          npm pkg set --prefix packages/module-preview publishConfig.registry=https://registry.npmjs.org/ publishConfig.access=public
+          pnpm -C packages/module-preview publish --no-git-checks
