@@ -26,37 +26,72 @@ putting the bug back.
 
 ## Use
 
-The React shell (`ModulePreview`) lands next, in the follow-up to this change.
-What this release already carries is the part a harness cannot get right by
-itself: the console's own frame widths and header copy, and the locale
-resolution that makes a `/ui-preflight` sheet mean something.
+```tsx
+import { createRoot } from "react-dom/client";
+import { ModulePreview } from "@mirrorstack-ai/module-preview";
+import { mountSettings } from "../src/index";        // your REAL entry point
+import { fixtureFetch, SCENARIOS } from "./fixtures";
 
-```ts
-import { SURFACE_FRAME, hostSettingsCopy, resolveLocale } from "@mirrorstack-ai/module-preview";
-
-const locale = resolveLocale(["zh-TW", "en-US"]);   // ?locale=, else the browser
-const copy = hostSettingsCopy(locale);              // { title: "設定", manage: "管理 {name}" }
-const frame = SURFACE_FRAME.settings;               // "mx-auto max-w-5xl space-y-6"
+createRoot(document.getElementById("preview")!).render(
+  <ModulePreview
+    surface="settings"
+    moduleName={{ "zh-TW": "AI 助理", "en-US": "AI Assistant" }}
+    scenarios={SCENARIOS}
+    locales={["zh-TW", "en-US"]}
+    savedMessage={{ "zh-TW": "已儲存", "en-US": "Saved" }}
+    mount={(target, { scenario, locale, unsaved }) =>
+      mountSettings(target, {
+        apiBase: "/api/modules/ai-assistant",
+        fetch: fixtureFetch(scenario),
+        appId: "00000000-0000-4000-8000-000000000001",
+        locale,
+        unsaved,
+      })
+    }
+  />,
+);
 ```
 
-### `PreviewSurface`
+The seam is `mount`: the shell owns the chrome, the axes and the host services;
+you own your fixtures and your own mount call. Mount your **real** entry point —
+the one the console imports from `dist/index.js` — or the preview stops being
+evidence about the thing that ships. Answer your fixtures at the host `fetch`
+the mount context carries, not by stubbing your own API module, for the same
+reason.
 
-| value | frame | chrome the console draws |
+### `surface`
+
+| value | frame | chrome the shell draws |
 |---|---|---|
-| `settings` | `max-w-5xl` | breadcrumb + `設定` / `管理 <module>` |
+| `settings` (default) | `max-w-5xl` | breadcrumb + `設定` / `管理 <module>` |
 | `nav` | `max-w-5xl` (provisional) | none |
 
 `nav` is provisional: what the console frames a nav-item page in is being
 decided in web-applications#390, and it must be read off that route when it
 lands rather than guessed here.
 
-### The module name to pass the header
+### `moduleName`
 
 Pass what the **console** would resolve — `module.name` from your
 `i18n/<locale>.json`, falling back to the non-localized `ms.Config.Name`. If
 your module declares no `module.name`, pass the Latin config name: a zh-TW
-console really will read `管理 AI Assistant`, and a preview must show that
+console really will read `管理 AI Assistant`, and the preview must show that
 rather than hide it.
+
+### Axes as links
+
+`?scenario=`, `?locale=` and `?theme=` set the opening state, so a review is
+handed over as a link to the exact page under discussion rather than as three
+clicks to reproduce. With no `?locale=`, the locale follows the browser — which
+is what `/ui-preflight` drives, and reading the query alone is how a preview
+came to render Chinese in all four "en" cells of every sheet.
+
+### What the shell will NOT do
+
+Render your page's heading. The host renders the title and subtitle, and
+web-applications' settings-module route says in its own source that a bundle
+"should NOT render its own page-level heading to avoid duplication". If your
+page renders an `<h1>`, the deployed page shows two.
 
 ## Caveat
 

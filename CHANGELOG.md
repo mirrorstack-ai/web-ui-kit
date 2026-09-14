@@ -15,7 +15,16 @@ Notable API additions and breaking changes. For the full commit log, see
   tunnel. This release carries the part a hand-rolled harness cannot get right
   by itself: the frame widths the console actually uses, the host's header
   copy, and the locale resolution that makes a `/ui-preflight` sheet mean
-  something. The React shell follows.
+  something.
+- **`ModulePreview` and `useHostUnsavedBar`** — the shell itself: the console's
+  frame and header around a module's real mount, the scene/locale/theme axes as
+  the kit's own `DevToolbar`/`SegmentedButton`/`ThemeToggle`, and a faithful
+  copy of the host's unsaved bar. The one seam is `mount`, so a module keeps
+  its fixtures and its own entry point and inherits everything else. The bar's
+  two shapes are declared structurally in `hostTypes.ts` rather than imported
+  from `@mirrorstack-ai/app-module-client`: that package is on a private
+  registry this repository's CI cannot reach, and two interfaces are not worth
+  coupling the kit's build to another package's availability.
 
 ## 0.7.17
 
