@@ -32,13 +32,11 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@mirrorstack-ai/app-module-client": ">=0.6.0",
     "@mirrorstack-ai/web-ui-kit": ">=0.7.17",
     "react": ">=18",
     "react-dom": ">=18"
   },
   "devDependencies": {
-    "@mirrorstack-ai/app-module-client": "0.6.0",
     "@mirrorstack-ai/web-ui-kit": "workspace:*",
     "@types/node": "^25.5.0",
     "typescript": "^5.0.0",
