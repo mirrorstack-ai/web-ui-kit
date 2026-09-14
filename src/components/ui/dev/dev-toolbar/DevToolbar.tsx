@@ -95,9 +95,6 @@ export function DevToolbar(props: DevToolbarProps): ReactElement | null {
             role="group"
             aria-label={axis.label}
           >
-            {/* A divider before every axis but the first, so the groups read as
-                groups when they wrap onto separate lines. */}
-            {index > 0 && <span className="w-px h-4 bg-outline-variant shrink-0" />}
             {axis.label && (
               <span className="text-xs font-mono text-on-surface-variant shrink-0">
                 {axis.label}
@@ -118,6 +115,14 @@ export function DevToolbar(props: DevToolbarProps): ReactElement | null {
                 {item.label}
               </button>
             ))}
+            {/* 🔴 THE DIVIDER TRAILS ITS OWN AXIS, it does not lead the next
+                one. Both render identically on one line, but at 400px the bar
+                WRAPS — and a leading divider becomes an orphan `|` at the start
+                of a row, reading as a stray glyph rather than a separator.
+                Trailing, it ends a row the way a comma does. */}
+            {index < axes.length - 1 && (
+              <span className="w-px h-4 bg-outline-variant shrink-0" />
+            )}
           </div>
         ))}
         {onToggleError && (
