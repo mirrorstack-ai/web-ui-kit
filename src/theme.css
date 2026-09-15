@@ -77,8 +77,30 @@
   --animate-wave-bar: wave-bar 1s ease-in-out infinite;
 }
 
+/* 🔴 Tell the BROWSER which mode the page is in, not just our own components.
+   `prefers-color-scheme` READS the OS preference; `color-scheme` DECLARES what
+   this page is, and it is the only thing the UA consults when it paints the
+   controls we do not draw ourselves: the datetime/date picker indicator and its
+   popup, <select> popups, spin buttons, autofill, and the canvas behind the
+   page.
+
+   Without it the console's dark mode — which is a `.dark` CLASS, invisible to
+   the UA — left the browser believing every page was light, so it painted a
+   near-black calendar glyph onto a near-black input. The owner reported that
+   one glyph (T152); it was one visible instance of a whole class.
+
+   Declared in the same light-then-.dark shape as every token above, so it
+   follows the theme by the same mechanism and needs no JS. Apps get it by
+   importing this file; MODULES inherit it from <html>, because their bundles
+   ship no copy of this stylesheet — one declaration covers every module. */
+:root {
+  color-scheme: light;
+}
+
 /* Dark mode */
 .dark {
+  color-scheme: dark;
+
   --color-primary: #93cdf6;
   --color-on-primary: #00344c;
   --color-primary-container: #004c6d;
