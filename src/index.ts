@@ -141,6 +141,7 @@ export {
   DevToolbar,
   type DevToolbarProps,
   type DevToolbarItem,
+  type DevToolbarAxis,
 } from "./components/ui/dev/dev-toolbar/DevToolbar";
 export {
   ServiceLogcat,

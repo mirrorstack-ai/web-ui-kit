@@ -89,10 +89,22 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
   const setTheme = useCallback((next: Theme) => {
-    setThemeState(next);
-    localStorage.setItem(STORAGE_KEY, next);
-    setCookie(next);
-    const resolved = resolve(next);
+    // 🔴 NORMALIZED EVEN THOUGH THE TYPE SAYS IT CANNOT NEED IT. `Theme` does
+    // not include "system", but this value crosses an untyped boundary on the
+    // way in — a JSON fixture, a `?mock` profile, a theme-sync relay — and
+    // "system" is what those write, because that is the word every OS-level
+    // setting uses. Before this, the cookie read was the ONLY place that mapped
+    // it: `resolve("system")` fell through to `return theme`, `applyClass` was
+    // handed "system", `classList.toggle("dark", false)` ran, and every dark
+    // preview rendered LIGHT after hydration (web-ui-kit#409, found by the
+    // ui-preflight dry runs). Production never saw it — the account API answers
+    // only auto|light|dark — which is exactly why it survived: the one path
+    // nobody checks is the one only previews take.
+    const normalized = normalize(next);
+    setThemeState(normalized);
+    localStorage.setItem(STORAGE_KEY, normalized);
+    setCookie(normalized);
+    const resolved = resolve(normalized);
     setResolvedTheme(resolved);
     applyClass(resolved);
   }, []);
