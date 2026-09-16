@@ -115,6 +115,72 @@ export function defaultFormat(value: number): string {
 }
 
 /**
+ * What kind of quantity a series carries, which decides how it is written and,
+ * for a rate, what a full-length wedge means.
+ *
+ * 🔴 NOT TrendChart's `unit`. That one is a suffix string the caller appends
+ * ("ms", "%"); this one changes the NUMBER. A rate arrives as the ratio the
+ * server computed — ad-core's ctr is 0.0234, because the console never divides
+ * (zero impressions is an ordinary first day and a client that divides locally
+ * prints NaN) — and an operator reads 2.3%. A chart that printed `0.0234` would
+ * be arithmetically correct and unreadable, which is 63's point and the reason
+ * this is an enum rather than a formatter every consumer writes for itself: two
+ * pages passing their own are how two pages come to disagree about what 2.3%
+ * looks like.
+ */
+export type ChartMeasure = "count" | "rate";
+
+/**
+ * The number a rate is a share OF. A ratio's whole is 1, always, and that is
+ * what lets PolarChart scale rates honestly without being told a ceiling.
+ */
+export const RATE_WHOLE = 1;
+
+function formatCount(value: number): string {
+  return value.toLocaleString();
+}
+
+function formatRate(value: number): string {
+  const percent = value * 100;
+  // One decimal, but not a trailing ".0" — 2.3% and 50%, never 50.0%.
+  return `${Number.isInteger(percent) ? percent : Number(percent.toFixed(1))}%`;
+}
+
+/**
+ * The formatter a chart should use: an explicit `formatValue` if the caller
+ * passed one, otherwise the shared rendering for its measure.
+ *
+ * `formatValue` stays because no enum covers currency, durations or a locale
+ * the kit does not know about — but a consumer reaching for it when `measure`
+ * would do is choosing to drift from the other pages, and the prop doc says so.
+ */
+export function formatterFor(
+  measure: ChartMeasure | undefined,
+  formatValue: ((value: number) => string) | undefined,
+): (value: number) => string {
+  if (formatValue) return formatValue;
+  if (measure === "count") return formatCount;
+  if (measure === "rate") return formatRate;
+  return defaultFormat;
+}
+
+/**
+ * The label a legend shows for a datum.
+ *
+ * 🔴 THE KIT MUST NOT NAME AN EMPTY LABEL (63, reviewing against ad-core). The
+ * same blank means two different things one page apart: in the by-ad table it
+ * means the creative was deleted — ad_daily_stats outlives the ad deliberately,
+ * so the totals an app earned survive it — and in the by-placement table it
+ * means a placement nobody has named yet. A kit that shipped "Deleted" would be
+ * right for one of those and a lie in the other, and the consumer would need
+ * the per-chart escape hatch this single API exists to avoid. So the fallback
+ * is the datum's own key: never blank, never a word the kit invented.
+ */
+export function datumLabel(datum: ChartDatum): string {
+  return datum.label.trim() === "" ? datum.key : datum.label;
+}
+
+/**
  * The sentence a screen reader gets in place of the drawing.
  *
  * The kit's existing charts mark their SVG `aria-hidden` and rely on a
@@ -126,6 +192,6 @@ export function seriesAriaLabel(
   data: ChartDatum[],
   format: (value: number) => string,
 ): string {
-  const parts = data.map((datum) => `${datum.label}: ${format(datum.value)}`);
+  const parts = data.map((datum) => `${datumLabel(datum)}: ${format(datum.value)}`);
   return [title, parts.join(", ")].filter(Boolean).join(" — ");
 }

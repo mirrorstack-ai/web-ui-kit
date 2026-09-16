@@ -2,12 +2,15 @@ import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
 import {
-  defaultFormat,
+  datumLabel,
+  formatterFor,
   normalizeSeries,
   seriesAriaLabel,
   seriesColor,
   seriesOpacity,
+  RATE_WHOLE,
   type ChartDatum,
+  type ChartMeasure,
 } from "@/types/chart";
 import { ringSegmentPath } from "@/utils/chartGeometry";
 
@@ -22,15 +25,31 @@ export interface PolarChartProps {
   data: ChartDatum[];
   /**
    * The value a full-length wedge represents. Defaults to the largest value in
-   * the data.
+   * the data — except under `measure="rate"`, where it defaults to 1, because a
+   * ratio's whole is always 1.
    *
-   * 🔴 PASS IT FOR A RATE. With the default, the best category always reaches
-   * the rim — so a quiz where every question is answered correctly 30% of the
-   * time looks identical to one where every question is at 100%. `max={100}`
-   * is what makes a percentage chart mean a percentage.
+   * 🔴 IT IS IN THE VALUES' OWN UNITS, and `formatValue` does not change that:
+   * a ctr series of ratios wants `max={0.05}`, not `max={5}`. Only the text
+   * goes through the formatter; the wedge is drawn from the raw number.
+   *
+   * 🔴 AND WITHOUT IT A RATE FLATTERS ITSELF. With the largest-value default
+   * the best category always reaches the rim, so a quiz where nothing exceeds
+   * 30% looks exactly like one where everything is at 100%. Declaring
+   * `measure="rate"` is usually better than declaring a max: it gets the right
+   * ceiling and the right text together.
    */
   max?: number;
-  /** Renders each value in the legend and the aria label. Default: integers bare, otherwise one decimal. */
+  /**
+   * What the values are. `"count"` groups thousands; `"rate"` takes the ratio
+   * the server computed (0.0234), writes what an operator reads (2.3%), and
+   * scales the wedges against a whole of 1 rather than against the leader.
+   */
+  measure?: ChartMeasure;
+  /**
+   * Full control of the value text, for what no measure covers — a currency, a
+   * duration, a locale the kit does not know. It WINS over `measure` for the
+   * text, and changes nothing about the geometry.
+   */
   formatValue?: (value: number) => string;
   /** Show the legend beside (or under) the wedges. Default `true`. */
   legend?: boolean;
@@ -57,12 +76,14 @@ const GUIDE_FRACTIONS = [0.25, 0.5, 0.75, 1];
 export function PolarChart({
   data,
   max,
-  formatValue = defaultFormat,
+  measure,
+  formatValue,
   legend = true,
   emptyLabel = "No data",
   title,
   className,
 }: PolarChartProps) {
+  const format = formatterFor(measure, formatValue);
   const { data: series } = normalizeSeries(data);
   const largest = series.reduce((peak, datum) => Math.max(peak, datum.value), 0);
 
@@ -72,9 +93,11 @@ export function PolarChart({
     );
   }
 
-  // A zero ceiling would divide every wedge by zero. Falling back to 1 draws
-  // every category at nothing, which is the truth about an all-zero series.
-  const ceiling = Math.max(max ?? largest, Number.EPSILON);
+  // The declared ceiling, then a rate's inherent one, then the leader. A zero
+  // ceiling would divide every wedge by zero; EPSILON draws every category at
+  // nothing, which is the truth about an all-zero series — ad-core's day one,
+  // where no placement has an impression yet.
+  const ceiling = Math.max(max ?? (measure === "rate" ? RATE_WHOLE : largest), Number.EPSILON);
   const empty = series.length === 0 || largest <= 0;
   const step = series.length > 0 ? 360 / series.length : 360;
 
@@ -92,7 +115,7 @@ export function PolarChart({
         aria-label={
           empty
             ? [title, emptyLabel].filter(Boolean).join(" — ")
-            : seriesAriaLabel(title, series, formatValue)
+            : seriesAriaLabel(title, series, format)
         }
       >
         {GUIDE_FRACTIONS.map((fraction) => (
@@ -161,7 +184,7 @@ export function PolarChart({
             fill="currentColor"
             opacity="0.5"
           >
-            {formatValue(ceiling)}
+            {format(ceiling)}
           </text>
         )}
       </svg>
@@ -181,8 +204,10 @@ export function PolarChart({
                     opacity: seriesOpacity(index, datum.tone),
                   }}
                 />
-                <span className="min-w-0 flex-1 truncate text-on-surface-variant">{datum.label}</span>
-                <span className="shrink-0 tabular-nums text-on-surface">{formatValue(datum.value)}</span>
+                <span className="min-w-0 flex-1 truncate text-on-surface-variant">
+                  {datumLabel(datum)}
+                </span>
+                <span className="shrink-0 tabular-nums text-on-surface">{format(datum.value)}</span>
               </li>
             ))
           )}

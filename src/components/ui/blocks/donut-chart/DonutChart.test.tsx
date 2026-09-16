@@ -217,3 +217,91 @@ describe("palette cycling", () => {
     expect(seriesOpacity(6, "error")).toBe(1);
   });
 });
+
+describe("measure and labels (63's review of ad-core's block)", () => {
+  // 🔴 The kit must not NAME an empty label: one page apart, the same blank
+  // means "this creative was deleted" and "nobody has named this placement".
+  // The key is the only fallback that is true in both.
+  it("falls back to the key when a label is empty, never to a word of its own", () => {
+    render(
+      <DonutChart
+        title="Impressions"
+        data={[
+          { key: "ad_7f3", label: "", value: 120 },
+          { key: "home-top", label: "首頁上方", value: 80 },
+        ]}
+      />,
+    );
+    expect(screen.getByText("ad_7f3")).toBeInTheDocument();
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "aria-label",
+      "Impressions — ad_7f3: 120, 首頁上方: 80",
+    );
+  });
+
+  it("writes a count with thousands and a rate as the percent an operator reads", () => {
+    const { rerender } = render(
+      <DonutChart measure="count" data={[{ key: "a", label: "A", value: 12543 }]} />,
+    );
+    // Twice over: the centre figure and the legend row, which must agree.
+    expect(screen.getAllByText((12543).toLocaleString())).toHaveLength(2);
+
+    // ad-core's ctr arrives as the ratio the SERVER computed — the console never
+    // divides, because zero impressions is an ordinary first day.
+    rerender(<DonutChart measure="rate" data={[{ key: "a", label: "A", value: 0.0234 }]} />);
+    expect(screen.getAllByText("2.3%")).toHaveLength(2);
+  });
+
+  it("lets formatValue win over measure, for what no measure covers", () => {
+    render(
+      <DonutChart
+        measure="count"
+        formatValue={(value) => `NT$${value}`}
+        data={[{ key: "a", label: "A", value: 90 }]}
+      />,
+    );
+    expect(screen.getAllByText("NT$90")).toHaveLength(2);
+  });
+
+  // ad-core's day one: every placement present, every count zero.
+  it("draws an empty state rather than one placement taking 100% of nothing", () => {
+    const { container } = render(
+      <DonutChart
+        measure="count"
+        centerLabel="impressions"
+        emptyLabel="尚無曝光"
+        data={[
+          { key: "home-top", label: "首頁上方", value: 0 },
+          { key: "footer", label: "頁尾", value: 0 },
+        ]}
+      />,
+    );
+    expect(container.querySelectorAll("path")).toHaveLength(0);
+    // The track only — no wedge circle claiming the whole ring.
+    expect(container.querySelectorAll("circle")).toHaveLength(1);
+    expect(screen.getByText("尚無曝光")).toBeInTheDocument();
+  });
+});
+
+describe("centre figure", () => {
+  // The hole is a fixed fraction of the viewBox, so a long string has to be set
+  // smaller or it runs under the ring — ad-core's grouped impression totals are
+  // five digits and a separator as a matter of course.
+  it("sets a long total smaller so it stays inside the ring", () => {
+    const { container, rerender } = render(
+      <DonutChart measure="count" data={[{ key: "a", label: "A", value: 42 }]} legend={false} />,
+    );
+    const size = () => container.querySelector("text")!.getAttribute("font-size");
+    expect(size()).toBe("16");
+
+    rerender(
+      <DonutChart measure="count" data={[{ key: "a", label: "A", value: 43680 }]} legend={false} />,
+    );
+    expect(Number(size())).toBeLessThan(16);
+
+    rerender(
+      <DonutChart measure="count" data={[{ key: "a", label: "A", value: 128450900 }]} legend={false} />,
+    );
+    expect(Number(size())).toBeLessThan(12);
+  });
+});

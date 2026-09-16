@@ -1,12 +1,14 @@
 import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import {
-  defaultFormat,
+  datumLabel,
+  formatterFor,
   normalizeSeries,
   seriesAriaLabel,
   seriesColor,
   seriesOpacity,
   type ChartDatum,
+  type ChartMeasure,
 } from "@/types/chart";
 import { isFullSweep, ringSegmentPath } from "@/utils/chartGeometry";
 
@@ -22,14 +24,25 @@ export interface DonutChartProps {
   /**
    * The number under the centre label. Defaults to the sum of the data.
    *
-   * Pass it when the whole is larger than what is drawn — "3 of 47 placements"
-   * — so the ring shows a share of the real denominator instead of implying
-   * the slices are everything.
+   * Pass it when the whole is larger than what is drawn — "3 of 47 placements",
+   * or a report the server truncated — so the ring shows a share of the real
+   * denominator instead of implying the drawn slices are everything. A total
+   * BELOW the sum is ignored: the drawing stays a whole.
    */
   total?: number;
   /** Word under the centre figure, e.g. "attempts". Omit for a bare ring. */
   centerLabel?: string;
-  /** Renders each value in the legend and the aria label. Default: integers bare, otherwise one decimal. */
+  /**
+   * What the values are. `"count"` groups thousands; `"rate"` takes the ratio
+   * the server computed (0.0234) and writes what an operator reads (2.3%).
+   * Setting it is how two pages agree on what a number looks like.
+   */
+  measure?: ChartMeasure;
+  /**
+   * Full control of the value text, for what no measure covers — a currency, a
+   * duration, a locale the kit does not know. It WINS over `measure`; reaching
+   * for it when `measure` would do is choosing to drift from the other pages.
+   */
   formatValue?: (value: number) => string;
   /** Show the legend beside (or under) the ring. Default `true`. */
   legend?: boolean;
@@ -59,13 +72,15 @@ export function DonutChart({
   data,
   total,
   centerLabel,
-  formatValue = defaultFormat,
+  measure,
+  formatValue,
   legend = true,
   thickness = 0.38,
   emptyLabel = "No data",
   title,
   className,
 }: DonutChartProps) {
+  const format = formatterFor(measure, formatValue);
   const { data: series, total: sum } = normalizeSeries(data);
   // The denominator the ring divides. An explicit total below the sum would
   // draw more than a full circle, so the sum wins — the drawing stays a whole.
@@ -95,7 +110,13 @@ export function DonutChart({
   });
 
   const empty = drawable.length === 0 || whole <= 0;
-  const centerValue = formatValue(total ?? sum);
+  const centerValue = format(total ?? sum);
+  // 🔴 A GROUPED COUNT OUTGROWS THE HOLE. "43,680" at the fixed size ran under
+  // the ring on both sides — seen on the contact sheet with ad-core's real
+  // impression totals, where five digits and a separator are ordinary. The hole
+  // is a fixed fraction of the viewBox, so the type has to answer to the string
+  // rather than the other way round.
+  const centerFontSize = centerValue.length > 8 ? 9 : centerValue.length > 5 ? 12 : 16;
 
   return (
     <div
@@ -111,7 +132,7 @@ export function DonutChart({
         aria-label={
           empty
             ? [title, emptyLabel].filter(Boolean).join(" — ")
-            : seriesAriaLabel(title, drawable, formatValue)
+            : seriesAriaLabel(title, drawable, format)
         }
       >
         {/* The track. Always drawn, so an empty series is a ring with nothing
@@ -164,7 +185,7 @@ export function DonutChart({
               y={centerLabel ? CENTER - 4 : CENTER}
               textAnchor="middle"
               dominantBaseline="central"
-              fontSize="16"
+              fontSize={centerFontSize}
               fontWeight="bold"
               fill="currentColor"
             >
@@ -202,8 +223,10 @@ export function DonutChart({
                     opacity: seriesOpacity(index, datum.tone),
                   }}
                 />
-                <span className="min-w-0 flex-1 truncate text-on-surface-variant">{datum.label}</span>
-                <span className="shrink-0 tabular-nums text-on-surface">{formatValue(datum.value)}</span>
+                <span className="min-w-0 flex-1 truncate text-on-surface-variant">
+                  {datumLabel(datum)}
+                </span>
+                <span className="shrink-0 tabular-nums text-on-surface">{format(datum.value)}</span>
               </li>
             ))
           )}

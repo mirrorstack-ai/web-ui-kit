@@ -45,7 +45,7 @@ export const ImpressionShare: Story = {
       <DonutChart
         title="Impressions"
         centerLabel="impressions"
-        formatValue={(value) => value.toLocaleString("en-US")}
+        measure="count"
         data={[
           { key: "home-top", label: "首頁上方", value: 48210 },
           { key: "list-inline", label: "列表插入", value: 30140 },
@@ -84,7 +84,7 @@ export const PartialOfKnownWhole: Story = {
         title="Impressions"
         centerLabel="of 47 placements"
         total={120000}
-        formatValue={(value) => value.toLocaleString("en-US")}
+        measure="count"
         data={[
           { key: "a", label: "首頁上方", value: 41000 },
           { key: "b", label: "列表插入", value: 22500 },
@@ -94,7 +94,29 @@ export const PartialOfKnownWhole: Story = {
     ),
 };
 
-/** A quiz nobody has attempted: the ring stays, the figure is a dash. */
+/**
+ * ad-core's first day: every placement configured, nothing served yet. The ring
+ * stays and the figure is a dash — never one placement taking 100% of nothing.
+ * This is the state the block shows until a campaign runs, not an edge case.
+ */
+export const DayOneAllZero: Story = {
+  render: () =>
+    wrap(
+      <DonutChart
+        title="Impressions"
+        centerLabel="impressions"
+        measure="count"
+        emptyLabel="尚無曝光"
+        data={[
+          { key: "home-top", label: "首頁上方", value: 0 },
+          { key: "list-inline", label: "列表插入", value: 0 },
+          { key: "footer", label: "頁尾", value: 0 },
+        ]}
+      />,
+    ),
+};
+
+/** A quiz nobody has attempted: the same state from the other consumer. */
 export const Empty: Story = {
   render: () =>
     wrap(
@@ -105,6 +127,27 @@ export const Empty: Story = {
         data={[
           { key: "passed", label: "通過", value: 0, tone: "success" },
           { key: "failed", label: "未通過", value: 0, tone: "error" },
+        ]}
+      />,
+    ),
+};
+
+/**
+ * A deleted creative keeps its totals — ad_daily_stats outlives the ad on
+ * purpose — and arrives with no label. The legend shows its key rather than a
+ * word the kit invented, because one page over the same blank means a placement
+ * nobody has named yet.
+ */
+export const DeletedCreative: Story = {
+  render: () =>
+    wrap(
+      <DonutChart
+        title="Impressions"
+        centerLabel="impressions"
+        measure="count"
+        data={[
+          { key: "ad_0f21c8", label: "春季招生", value: 31200 },
+          { key: "ad_7f3ab1", label: "", value: 12480 },
         ]}
       />,
     ),
