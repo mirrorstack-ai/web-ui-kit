@@ -232,3 +232,41 @@ describe("bar placement", () => {
     }
   });
 });
+
+describe("corner prop", () => {
+  // 🔴 It is a PROP because the owner asked to try values without a code round
+  // trip, and a prop nobody can reach from Storybook is the same round trip
+  // with extra steps — the stories render from args for that reason.
+  it("changes the rounding, and 0 gives square corners", () => {
+    const strokeFor = (corner: number) => {
+      cleanup();
+      const { container } = render(
+        <PolarChart
+          max={100}
+          corner={corner}
+          legend={false}
+          data={[{ key: "q", label: "Q", value: 80 }]}
+        />,
+      );
+      return Number(container.querySelector("path")!.getAttribute("stroke-width") ?? 0);
+    };
+    expect(strokeFor(0)).toBe(0);
+    expect(strokeFor(2)).toBeCloseTo(4, 5);
+    expect(strokeFor(6)).toBeCloseTo(12, 5);
+  });
+
+  it("keeps the painted reach on the value whatever the corner", () => {
+    for (const corner of [0, 2, 3.5, 8]) {
+      cleanup();
+      const { container } = render(
+        <PolarChart
+          max={100}
+          corner={corner}
+          legend={false}
+          data={[{ key: "q", label: "Q", value: 100 }]}
+        />,
+      );
+      expect(painted(container)[0]).toBeCloseTo(43, 1);
+    }
+  });
+});

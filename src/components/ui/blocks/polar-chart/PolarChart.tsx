@@ -54,6 +54,15 @@ export interface PolarChartProps {
   legend?: boolean;
   /** What to say when there is nothing to draw. Default `"No data"`. */
   emptyLabel?: string;
+  /**
+   * How much of each corner is rounded, in the chart's own units (its radius is
+   * 43). Default 3.5.
+   *
+   * A bar too narrow to carry the full radius rounds less automatically, and 0
+   * gives square corners. The gap between bars is unaffected at any value —
+   * each edge carries its own inset angle, so rounding costs the seam nothing.
+   */
+  corner?: number;
   /** Names the chart for assistive technology. */
   title?: string;
   className?: string;
@@ -72,8 +81,9 @@ const HUB_RADIUS = 9;
 const GAP_DEG = 4;
 
 /**
- * How much of each corner is rounded, in viewBox units — about a twelfth of the
- * chart's radius.
+ * Default corner rounding, in viewBox units — about a twelfth of the chart's
+ * radius. Overridable per chart via the `corner` prop, which is what the
+ * Storybook control drives.
  *
  * Settled by looking, over three owner rounds: 5 read as pills, 2 read as not
  * rounded at all. What made 5 look wrong was never its size — it was the inset
@@ -113,6 +123,7 @@ export function PolarChart({
   formatValue,
   legend = true,
   emptyLabel = "No data",
+  corner = CORNER,
   title,
   className,
 }: PolarChartProps) {
@@ -194,7 +205,7 @@ export function PolarChart({
               Math.max(reach, HUB_RADIUS + 0.5),
               index * step - barDeg / 2,
               index * step + barDeg / 2,
-              CORNER,
+              Math.max(0, corner),
             );
             const color = seriesColor(index, datum.tone);
             return (

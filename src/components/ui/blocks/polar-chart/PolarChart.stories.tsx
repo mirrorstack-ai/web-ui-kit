@@ -5,13 +5,35 @@ const meta: Meta<typeof PolarChart> = {
   title: "UI/Blocks/PolarChart",
   component: PolarChart,
   parameters: { layout: "centered" },
+  // 🔴 EVERY STORY RENDERS FROM ARGS, or the Controls panel is empty and trying
+  // a different corner radius costs a code round trip (owner, 2026-09-16). A
+  // `render` that ignores its args looks identical on the canvas and silently
+  // disables every knob, which is exactly what was shipped here.
+  render: (args) => wrap(<PolarChart {...args} />),
+  argTypes: {
+    corner: {
+      control: { type: "range", min: 0, max: 12, step: 0.5 },
+      description:
+        "Corner rounding in chart units (the chart's radius is 43). 0 is square.",
+    },
+    max: { control: { type: "number" } },
+    measure: { control: { type: "inline-radio" }, options: ["count", "rate"] },
+    legend: { control: { type: "boolean" } },
+    title: { control: { type: "text" } },
+    emptyLabel: { control: { type: "text" } },
+    data: { control: false },
+    formatValue: { control: false },
+    className: { control: false },
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof PolarChart>;
 
 const wrap = (children: React.ReactNode) => (
-  <div className="w-full max-w-[420px] rounded-xl border border-outline-variant p-4 text-on-surface">{children}</div>
+  <div className="w-full max-w-[420px] rounded-xl border border-outline-variant p-4 text-on-surface">
+    {children}
+  </div>
 );
 
 /**
@@ -21,22 +43,19 @@ const wrap = (children: React.ReactNode) => (
  * a percentage.
  */
 export const CorrectRatePerQuestion: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="每題答對率"
-        max={100}
-        formatValue={(value) => `${Math.round(value)}%`}
-        data={[
-          { key: "q1", label: "第 1 題", value: 92 },
-          { key: "q2", label: "第 2 題", value: 74 },
-          { key: "q3", label: "第 3 題", value: 41 },
-          { key: "q4", label: "第 4 題", value: 88 },
-          { key: "q5", label: "第 5 題", value: 63 },
-          { key: "q6", label: "第 6 題", value: 12 },
-        ]}
-      />,
-    ),
+  args: {
+    title: "每題答對率",
+    max: 100,
+    formatValue: (value) => `${Math.round(value)}%`,
+    data: [
+      { key: "q1", label: "第 1 題", value: 92 },
+      { key: "q2", label: "第 2 題", value: 74 },
+      { key: "q3", label: "第 3 題", value: 41 },
+      { key: "q4", label: "第 4 題", value: 88 },
+      { key: "q5", label: "第 5 題", value: 63 },
+      { key: "q6", label: "第 6 題", value: 12 },
+    ],
+  },
 };
 
 /**
@@ -46,19 +65,16 @@ export const CorrectRatePerQuestion: Story = {
  * visible side by side.
  */
 export const RateWithoutAMaximum: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="每題答對率（無 max，示警用）"
-        formatValue={(value) => `${Math.round(value)}%`}
-        data={[
-          { key: "q1", label: "第 1 題", value: 41 },
-          { key: "q2", label: "第 2 題", value: 33 },
-          { key: "q3", label: "第 3 題", value: 28 },
-          { key: "q4", label: "第 4 題", value: 19 },
-        ]}
-      />,
-    ),
+  args: {
+    title: "每題答對率（無 max，示警用）",
+    formatValue: (value) => `${Math.round(value)}%`,
+    data: [
+      { key: "q1", label: "第 1 題", value: 41 },
+      { key: "q2", label: "第 2 題", value: 33 },
+      { key: "q3", label: "第 3 題", value: 28 },
+      { key: "q4", label: "第 4 題", value: 19 },
+    ],
+  },
 };
 
 /**
@@ -67,20 +83,17 @@ export const RateWithoutAMaximum: Story = {
  * meaningful.
  */
 export const CtrByPlacement: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="各版位點擊率"
-        measure="rate"
-        max={0.05}
-        data={[
-          { key: "home-top", label: "首頁上方", value: 0.0382 },
-          { key: "list-inline", label: "列表插入", value: 0.0241 },
-          { key: "detail-side", label: "詳情側欄", value: 0.0115 },
-          { key: "footer", label: "頁尾", value: 0.0034 },
-        ]}
-      />,
-    ),
+  args: {
+    title: "各版位點擊率",
+    measure: "rate",
+    max: 0.05,
+    data: [
+      { key: "home-top", label: "首頁上方", value: 0.0382 },
+      { key: "list-inline", label: "列表插入", value: 0.0241 },
+      { key: "detail-side", label: "詳情側欄", value: 0.0115 },
+      { key: "footer", label: "頁尾", value: 0.0034 },
+    ],
+  },
 };
 
 /**
@@ -90,19 +103,16 @@ export const CtrByPlacement: Story = {
  * declaring a ceiling in the units the DATA is in, not the units it prints in.
  */
 export const RateAgainstItsWhole: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="各版位點擊率（以 100% 為尺規）"
-        measure="rate"
-        data={[
-          { key: "home-top", label: "首頁上方", value: 0.0382 },
-          { key: "list-inline", label: "列表插入", value: 0.0241 },
-          { key: "detail-side", label: "詳情側欄", value: 0.0115 },
-          { key: "footer", label: "頁尾", value: 0.0034 },
-        ]}
-      />,
-    ),
+  args: {
+    title: "各版位點擊率（以 100% 為尺規）",
+    measure: "rate",
+    data: [
+      { key: "home-top", label: "首頁上方", value: 0.0382 },
+      { key: "list-inline", label: "列表插入", value: 0.0241 },
+      { key: "detail-side", label: "詳情側欄", value: 0.0115 },
+      { key: "footer", label: "頁尾", value: 0.0034 },
+    ],
+  },
 };
 
 /**
@@ -110,19 +120,16 @@ export const RateAgainstItsWhole: Story = {
  * clicked. Not an edge case — it is what the block shows until a campaign runs.
  */
 export const DayOneAllZero: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="各版位點擊率"
-        measure="rate"
-        emptyLabel="尚無點擊"
-        data={[
-          { key: "home-top", label: "首頁上方", value: 0 },
-          { key: "list-inline", label: "列表插入", value: 0 },
-          { key: "footer", label: "頁尾", value: 0 },
-        ]}
-      />,
-    ),
+  args: {
+    title: "各版位點擊率",
+    measure: "rate",
+    emptyLabel: "尚無點擊",
+    data: [
+      { key: "home-top", label: "首頁上方", value: 0 },
+      { key: "list-inline", label: "列表插入", value: 0 },
+      { key: "footer", label: "頁尾", value: 0 },
+    ],
+  },
 };
 
 /**
@@ -132,79 +139,64 @@ export const DayOneAllZero: Story = {
  * nobody has named.
  */
 export const DeletedCreative: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="各廣告點擊率"
-        measure="rate"
-        max={0.05}
-        data={[
-          { key: "ad_0f21c8", label: "春季招生", value: 0.0402 },
-          { key: "ad_7f3ab1", label: "", value: 0.0188 },
-        ]}
-      />,
-    ),
+  args: {
+    title: "各廣告點擊率",
+    measure: "rate",
+    max: 0.05,
+    data: [
+      { key: "ad_0f21c8", label: "春季招生", value: 0.0402 },
+      { key: "ad_7f3ab1", label: "", value: 0.0188 },
+    ],
+  },
 };
 
 /** Counts rather than rates: no ceiling to declare, so the largest sets the rim. */
 export const RawCounts: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="Clicks by placement"
-        formatValue={(value) => value.toLocaleString("en-US")}
-        data={[
-          { key: "a", label: "首頁上方", value: 1842 },
-          { key: "b", label: "列表插入", value: 726 },
-          { key: "c", label: "詳情側欄", value: 143 },
-        ]}
-      />,
-    ),
+  args: {
+    title: "Clicks by placement",
+    formatValue: (value) => value.toLocaleString("en-US"),
+    data: [
+      { key: "a", label: "首頁上方", value: 1842 },
+      { key: "b", label: "列表插入", value: 726 },
+      { key: "c", label: "詳情側欄", value: 143 },
+    ],
+  },
 };
 
 /** One category: a wedge, not a full-circle degenerate arc. */
 export const SingleCategory: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="每題答對率"
-        max={100}
-        formatValue={(value) => `${value}%`}
-        data={[{ key: "q1", label: "第 1 題", value: 76 }]}
-      />,
-    ),
+  args: {
+    title: "每題答對率",
+    max: 100,
+    formatValue: (value) => `${value}%`,
+    data: [{ key: "q1", label: "第 1 題", value: 76 }],
+  },
 };
 
 /** Nobody has answered anything yet: guides and hub, no wedges, a dash. */
 export const Empty: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="每題答對率"
-        max={100}
-        emptyLabel="尚無作答"
-        data={[
-          { key: "q1", label: "第 1 題", value: 0 },
-          { key: "q2", label: "第 2 題", value: 0 },
-        ]}
-      />,
-    ),
+  args: {
+    title: "每題答對率",
+    max: 100,
+    emptyLabel: "尚無作答",
+    data: [
+      { key: "q1", label: "第 1 題", value: 0 },
+      { key: "q2", label: "第 2 題", value: 0 },
+    ],
+  },
 };
 
 /** Twelve categories, to see where the wedges stop being readable. */
 export const ManyCategories: Story = {
-  render: () =>
-    wrap(
-      <PolarChart
-        title="每題答對率"
-        max={100}
-        legend={false}
-        formatValue={(value) => `${value}%`}
-        data={Array.from({ length: 12 }, (_, index) => ({
-          key: `q${index}`,
-          label: `第 ${index + 1} 題`,
-          value: 30 + ((index * 17) % 70),
-        }))}
-      />,
-    ),
+  args: {
+    title: "每題答對率",
+    max: 100,
+    legend: false,
+    formatValue: (value: number) => `${value}%`,
+    data: Array.from({ length: 12 }, (_, index) => ({
+      key: `q${index}`,
+      label: `第 ${index + 1} 題`,
+      value: 30 + ((index * 17) % 70),
+    })),
+  },
 };
