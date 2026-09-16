@@ -3,6 +3,20 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.19
+
+### Fixed
+
+- **The release itself.** `0.7.18` was tagged and a GitHub Release created, and
+  then nothing was published: the job builds `module-preview` before the kit,
+  and `module-preview` compiles against the kit's built types. Until the kit's
+  own build runs, `dist/` does not exist and its `tsc` answers TS2307 on the
+  import. The kit's `prepublishOnly` does build it — two steps later, inside
+  `pnpm publish`. This is why `module-preview` had never been published at all:
+  the path failed on every train since it was added. `v0.7.18` remains as a tag
+  and a GitHub Release with no package behind it; nothing resolves it, and
+  `0.7.19` is the first version that carries this content.
+
 ## 0.7.18
 
 ### Added

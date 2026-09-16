@@ -56,6 +56,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 🔴 THE KIT IS BUILT FIRST, because module-preview compiles against its
+      # TYPES and resolves them through package.json's `types`/`main` — both of
+      # which point into dist/. Until this step runs, dist/ does not exist, and
+      # module-preview's tsc answers TS2307 "Cannot find module
+      # '@mirrorstack-ai/web-ui-kit'" plus a cascade of implicit-any errors from
+      # the untyped import. The kit's own `prepublishOnly` does build it, but
+      # that hook runs inside `pnpm publish` — two steps LATER.
+      #
+      # Measured on the 0.7.18 attempt (run 35079845215), which is also why
+      # module-preview had never been published: this path has failed on every
+      # train since it was added.
+      - name: Build the kit
+        run: pnpm build
+
       # 🔴 module-preview RIDES THIS TRAIN, and it must be built before it is
       # published: it compiles against the kit's freshly built types.
       - name: Build module-preview
