@@ -56,7 +56,7 @@ export interface PolarChartProps {
   emptyLabel?: string;
   /**
    * How much of each corner is rounded, in the chart's own units (its radius is
-   * 43). Default 3.5.
+   * 43). Default 4.
    *
    * A bar too narrow to carry the full radius rounds less automatically, and 0
    * gives square corners. The gap between bars is unaffected at any value —
@@ -81,21 +81,21 @@ const HUB_RADIUS = 9;
 const GAP_DEG = 4;
 
 /**
- * Default corner rounding, in viewBox units — about a twelfth of the chart's
- * radius. Overridable per chart via the `corner` prop, which is what the
- * Storybook control drives.
+ * Default corner rounding, in viewBox units — about a tenth of the chart's
+ * radius. The owner's pick, 2026-09-16, chosen on the Storybook slider after
+ * three rounds of guessing at it from here. Overridable per chart via the
+ * `corner` prop.
  *
- * Settled by looking, over three owner rounds: 5 read as pills, 2 read as not
- * rounded at all. What made 5 look wrong was never its size — it was the inset
- * bug underneath it, which inflated every seam (see roundedSector). With that
- * fixed, a corner this size rounds visibly and costs the gap nothing: the seam
- * stays the 4° it is declared as at any corner radius.
+ * What made 5 look wrong in the first round was never its size — it was the
+ * inset bug underneath it, which inflated every seam in proportion to the
+ * corner (see roundedSector). With that fixed, corner and gap are independent:
+ * the seam stays the 4° it is declared as at any radius.
  *
  * A bar too narrow to carry it rounds less, automatically — roundedSector
  * halves the radius until the shape it is cutting still exists, which is what
  * keeps twelve categories from turning back into blobs.
  */
-const CORNER = 3.5;
+const CORNER = 4;
 
 /**
  * The widest a single bar may be, in degrees.
