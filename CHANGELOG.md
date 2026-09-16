@@ -7,6 +7,24 @@ Notable API additions and breaking changes. For the full commit log, see
 
 ### Added
 
+- **`DonutChart` and `PolarChart`** — two categorical charts, hand-drawn in SVG
+  on the theme tokens like `Gauge`, `Sparkline` and `TrendChart`, with no
+  charting dependency. They take one shape, `ChartDatum {key, label, value,
+  tone?}`, and divide by what the numbers MEAN rather than by who asked:
+  `DonutChart` for parts of a whole (attempts split into passed/failed/open,
+  impressions by placement, with `total` when the denominator is larger than
+  what is drawn), `PolarChart` for like-for-like categories that are NOT a
+  whole (a correct rate per question, a CTR per placement — stacking rates sums
+  to nothing). `measure="count" | "rate"` is a shared formatter rather than one
+  each consumer writes: a rate arrives as the ratio a server computed (0.0234)
+  and is written as what an operator reads (2.3%), and under it `PolarChart`
+  scales against a whole of 1 rather than against its own best category, so a
+  chart where nothing exceeds 30% no longer looks like one at 100%. Past six
+  categories the palette rotates rather than fading, because in a ring the
+  seventh touches the first and an opacity-faded repeat reads as *disabled* on
+  a dark background. An empty label falls back to the datum's key and never to
+  a word the kit invented — the same blank means "this creative was deleted"
+  on one consumer page and "nobody has named this placement" on the next.
 - **`@mirrorstack-ai/module-preview`** — a second package, published from this
   repository on the same version and the same train, taking the kit as a PEER
   so a module's preview chrome is the module's own chrome by construction. Its
