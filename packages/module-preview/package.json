@@ -1,6 +1,6 @@
 {
   "name": "@mirrorstack-ai/module-preview",
-  "version": "0.7.17",
+  "version": "0.7.18",
   "description": "The console's page shell, rendered on localhost so a module's surface can be reviewed without a platform: the real frame width, the host's header chrome, the host's unsaved bar, and the theme/locale/scene axes a review has to cover.",
   "license": "Apache-2.0",
   "repository": {
