@@ -73,13 +73,20 @@ const HUB_RADIUS = 9;
 const GAP_DEG = 4;
 
 /**
- * How much of each corner is rounded, in viewBox units.
+ * How much of each corner is rounded, in viewBox units — about a twelfth of the
+ * chart's radius.
  *
- * Small on purpose (owner, 2026-09-16): at 5 the bars stopped reading as
- * wedges and became pills with seams too wide between them. A bar should look
- * like a bar whose corners happen to be soft.
+ * Settled by looking, over three owner rounds: 5 read as pills, 2 read as not
+ * rounded at all. What made 5 look wrong was never its size — it was the inset
+ * bug underneath it, which inflated every seam (see roundedSector). With that
+ * fixed, a corner this size rounds visibly and costs the gap nothing: the seam
+ * stays the 4° it is declared as at any corner radius.
+ *
+ * A bar too narrow to carry it rounds less, automatically — roundedSector
+ * halves the radius until the shape it is cutting still exists, which is what
+ * keeps twelve categories from turning back into blobs.
  */
-const CORNER = 2;
+const CORNER = 3.5;
 
 /**
  * The widest a single bar may be, in degrees.
