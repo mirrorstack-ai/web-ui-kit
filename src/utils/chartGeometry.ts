@@ -46,23 +46,26 @@ export function isFullSweep(sweepDeg: number): boolean {
 }
 
 /**
- * A ring sector with ROUNDED CORNERS: narrow at the inner radius, wider at the
- * outer one, with a fillet at each of its four corners.
+ * A radial bar: a ring sector whose four corners are rounded.
  *
- * 🔴 THIS IS NOT A STROKE WITH ROUND CAPS (owner, 2026-09-16, on the first
- * rounded render: "looks like flower petals, not a chart"). A capped stroke has
- * a constant width and two semicircular ends, so a radial bar became a petal
- * and lost the thing that makes it a bar — that it grows as it goes outward,
- * which is what lets the eye compare lengths at a glance. A sector keeps the
- * shape and rounds only the corners, which is what the kit's own surfaces do.
+ * Returns the path to draw and the stroke width to draw it with, because the
+ * rounding is done by SVG's own round line JOIN rather than by fillets computed
+ * here. The path is the sector INSET by the corner radius on every side, and
+ * stroking it with `2 × corner` and `strokeLinejoin="round"` grows it back to
+ * the requested radii and angles with every corner rounded exactly.
  *
- * The fillet is clamped three ways, because a corner radius larger than the
- * shape it is cutting inverts the path: never more than half the bar's radial
- * length, and never more than half the arc it sits on — the inner arc is the
- * shorter of the two, so a thin bar near the hub rounds less than its outer
- * end, exactly as it should.
+ * 🔴 THE FILLET VERSION OF THIS WAS WRONG AND SHIPPED (owner, 2026-09-16, and
+ * they were right to be angry). Each corner was drawn as an arc between two
+ * points whose angular inset was approximated as `corner / radius` — the true
+ * tangency angle is `asin(corner / (radius + corner))`. The two differ by a
+ * fraction of a degree, so the arc met the edge at a slight angle instead of
+ * tangentially, and every corner grew a little spike. Twelve of those per
+ * six-bar chart read exactly as what it was: broken.
+ *
+ * There is no corner arithmetic here at all now. The renderer owns the joins,
+ * and a join cannot be off-tangent.
  */
-export function roundedRingSectorPath(
+export function roundedSector(
   cx: number,
   cy: number,
   innerRadius: number,
@@ -70,48 +73,40 @@ export function roundedRingSectorPath(
   startAngle: number,
   endAngle: number,
   corner: number,
-): string {
-  const sweepDeg = endAngle - startAngle;
-  if (sweepDeg <= 0 || outerRadius <= innerRadius) return "";
+): { d: string; strokeWidth: number } {
+  const sweep = endAngle - startAngle;
+  if (sweep <= 0 || outerRadius <= innerRadius) return { d: "", strokeWidth: 0 };
 
-  const radial = outerRadius - innerRadius;
-  const innerArc = (sweepDeg / 360) * 2 * Math.PI * innerRadius;
-  const outerArc = (sweepDeg / 360) * 2 * Math.PI * outerRadius;
-  // 🔴 A FILLET MAY NOT EAT ITS OWN EDGE. Half the arc is the geometric limit,
-  // but at that size the two fillets on one edge meet, the straight part
-  // between them disappears, and a narrow bar renders as a notched, pinched
-  // shape — seen at twelve categories, where each 26° bar spent more than a
-  // third of each end on a corner. A fifth of the edge keeps the corner
-  // recognisably a corner.
-  const cIn = Math.max(0, Math.min(corner, radial / 2, innerArc / 5));
-  const cOut = Math.max(0, Math.min(corner, radial / 2, outerArc / 5));
-
-  // How much angle each fillet eats at its own radius.
-  const dIn = innerRadius > 0 ? (cIn / innerRadius) * (180 / Math.PI) : 0;
-  const dOut = (cOut / outerRadius) * (180 / Math.PI);
-  // A fillet pair wider than the sector itself would cross over; fall back to
-  // square corners there rather than drawing a knot.
-  if (dIn * 2 > sweepDeg || dOut * 2 > sweepDeg) {
-    return ringSegmentPath(cx, cy, outerRadius, innerRadius, startAngle, endAngle);
+  // The inset must leave a real shape behind: half the radial span at most, and
+  // never so much angle that the sector closes up. Both are checked against the
+  // inset's own inner radius, where the angular cost of an inset is highest.
+  let c = Math.min(corner, (outerRadius - innerRadius) / 2);
+  for (let i = 0; i < 8 && c > 0.1; i += 1) {
+    const insetInner = innerRadius + c;
+    const angularCost = (Math.asin(Math.min(1, c / insetInner)) * 180) / Math.PI;
+    if (sweep - 2 * angularCost > 1) break;
+    c /= 2;
+  }
+  if (c <= 0.1) {
+    // No room to round: a sliver of a bar is drawn square rather than as a
+    // shape that has been pushed inside out.
+    return {
+      d: ringSegmentPath(cx, cy, outerRadius, innerRadius, startAngle, endAngle),
+      strokeWidth: 0,
+    };
   }
 
-  const p = (radius: number, angle: number) => polarPoint(cx, cy, radius, angle);
-  const xy = (point: { x: number; y: number }) => `${point.x.toFixed(2)},${point.y.toFixed(2)}`;
-  const largeInner = sweepDeg - dIn * 2 > 180 ? 1 : 0;
-  const largeOuter = sweepDeg - dOut * 2 > 180 ? 1 : 0;
-
-  return [
-    `M${xy(p(innerRadius, startAngle + dIn))}`,
-    // Inner edge, clockwise.
-    `A${innerRadius},${innerRadius} 0 ${largeInner} 1 ${xy(p(innerRadius, endAngle - dIn))}`,
-    `A${cIn},${cIn} 0 0 1 ${xy(p(innerRadius + cIn, endAngle))}`,
-    `L${xy(p(outerRadius - cOut, endAngle))}`,
-    `A${cOut},${cOut} 0 0 1 ${xy(p(outerRadius, endAngle - dOut))}`,
-    // Outer edge, back anticlockwise.
-    `A${outerRadius},${outerRadius} 0 ${largeOuter} 0 ${xy(p(outerRadius, startAngle + dOut))}`,
-    `A${cOut},${cOut} 0 0 1 ${xy(p(outerRadius - cOut, startAngle))}`,
-    `L${xy(p(innerRadius + cIn, startAngle))}`,
-    `A${cIn},${cIn} 0 0 1 ${xy(p(innerRadius, startAngle + dIn))}`,
-    "Z",
-  ].join(" ");
+  const insetInner = innerRadius + c;
+  const angularCost = (Math.asin(Math.min(1, c / insetInner)) * 180) / Math.PI;
+  return {
+    d: ringSegmentPath(
+      cx,
+      cy,
+      outerRadius - c,
+      insetInner,
+      startAngle + angularCost,
+      endAngle - angularCost,
+    ),
+    strokeWidth: c * 2,
+  };
 }

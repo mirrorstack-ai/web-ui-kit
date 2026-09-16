@@ -12,7 +12,7 @@ import {
   type ChartDatum,
   type ChartMeasure,
 } from "@/types/chart";
-import { roundedRingSectorPath } from "@/utils/chartGeometry";
+import { roundedSector } from "@/utils/chartGeometry";
 
 export const meta: ComponentMeta = {
   name: "PolarChart",
@@ -76,6 +76,18 @@ const GAP_DEG = 4;
 const CORNER = 5;
 
 /**
+ * The widest a single bar may be, in degrees.
+ *
+ * 🔴 WITHOUT THIS, ONE CATEGORY IS A 356° BAR. The circle is divided by the
+ * number of categories, so a series of one asked for the whole of it and drew a
+ * disc with a notch where its own two ends almost met — seen on the
+ * SingleCategory story, and not a bar by any reading. A bar keeps a bar's
+ * proportions however few there are; the slot still moves with the count, so
+ * six categories are unchanged and two sit opposite each other.
+ */
+const MAX_BAR_DEG = 60;
+
+/**
  * The rings a reader measures against. Without them a radial bar carries no
  * scale at all: the eye can order the wedges but cannot say whether the longest
  * is 40% or 95%, which is exactly the question a rate chart exists to answer.
@@ -120,6 +132,11 @@ export function PolarChart({
   // DEGREES holds the same visual separation at every radius, which a fixed
   // stroke width could not.
   const gapDeg = Math.min(GAP_DEG, step * 0.3);
+  // The bar's own width. Each bar is centred ON its slot's ray rather than
+  // inside the slot, so the first one points straight up whatever the count —
+  // centring inside the slot put a lone bar at six o'clock, which reads as a
+  // chart that has slipped rather than as one bar.
+  const barDeg = Math.min(step - gapDeg, MAX_BAR_DEG);
 
   return (
     <div
@@ -158,20 +175,30 @@ export function PolarChart({
             // A sector's outer edge sits exactly on its value — no cap paints
             // past it, so nothing has to be narrowed to stay honest, and a bar
             // worth almost nothing is a sliver rather than a dot.
+            const { d, strokeWidth } = roundedSector(
+              CENTER,
+              CENTER,
+              HUB_RADIUS,
+              Math.max(reach, HUB_RADIUS + 0.5),
+              index * step - barDeg / 2,
+              index * step + barDeg / 2,
+              CORNER,
+            );
+            const color = seriesColor(index, datum.tone);
+            const opacity = seriesOpacity(index, datum.tone);
             return (
+              // Fill AND stroke in the same colour: the stroke is what rounds
+              // the corners, so it is part of the shape rather than an outline
+              // around it.
               <path
                 key={datum.key}
-                d={roundedRingSectorPath(
-                  CENTER,
-                  CENTER,
-                  HUB_RADIUS,
-                  Math.max(reach, HUB_RADIUS + 0.5),
-                  index * step + gapDeg / 2,
-                  (index + 1) * step - gapDeg / 2,
-                  CORNER,
-                )}
-                fill={seriesColor(index, datum.tone)}
-                fillOpacity={seriesOpacity(index, datum.tone)}
+                d={d}
+                fill={color}
+                fillOpacity={opacity}
+                stroke={color}
+                strokeOpacity={opacity}
+                strokeWidth={strokeWidth}
+                strokeLinejoin="round"
               />
             );
           })}

@@ -6,25 +6,24 @@ afterEach(cleanup);
 
 const CENTER = 50;
 
-// A bar is a ring SECTOR with rounded corners (owner: "should start narrow near
-// the center and grow wider toward the outer edge … looks like flower petals,
-// not a chart"), so what it claims is the radius of its outer arc — the only
-// arc in the path drawn anticlockwise, which is how it is picked out here. That
-// radius is the number a reader turns back into a value.
-const outerArcRadius = (d: string) => {
-  const match = /A([\d.]+),[\d.]+ 0 \d 0 /.exec(d);
-  if (!match) throw new Error(`no outer arc in path: ${d}`);
-  return Number(match[1]);
-};
+// A bar is a ring SECTOR whose corners are rounded by SVG's own round line
+// JOIN: the path is the sector INSET by the corner radius, and the stroke grows
+// it back. So what the bar claims is its inset outer arc plus half that stroke
+// — the painted edge, which is the number a reader turns back into a value.
+const arcRadii = (d: string) =>
+  Array.from(d.matchAll(/A([\d.]+),[\d.]+ 0 \d (\d) /g)).map(([, radius, sweep]) => ({
+    radius: Number(radius),
+    sweep: Number(sweep),
+  }));
 
 const painted = (container: HTMLElement) =>
-  Array.from(container.querySelectorAll("path")).map((path) =>
-    outerArcRadius(path.getAttribute("d")!),
-  );
-
-// Distance from the centre to a point in the path, for checking the shape
-// itself rather than only its reach.
-const radiusOfPoint = (x: number, y: number) => Math.hypot(x - CENTER, y - CENTER);
+  Array.from(container.querySelectorAll("path")).map((path) => {
+    // ringSegmentPath draws the OUTER edge first and clockwise (sweep 1) and
+    // returns along the inner one anticlockwise (sweep 0).
+    const outer = arcRadii(path.getAttribute("d")!).find((arc) => arc.sweep === 1);
+    if (!outer) throw new Error(`no outer arc in path: ${path.getAttribute("d")}`);
+    return outer.radius + Number(path.getAttribute("stroke-width") ?? 0) / 2;
+  });
 
 const RATES = [
   { key: "q1", label: "Q1", value: 90 },
@@ -34,33 +33,34 @@ const RATES = [
 describe("PolarChart", () => {
   // 🔴 The structure the owner asked for: a bar is narrow where it starts and
   // wide where it ends, which is what makes lengths comparable round a circle.
-  // A constant-width capped stroke — the previous attempt — lost exactly that.
+  // A constant-width capped stroke — an earlier attempt — lost exactly that.
   it("draws a bar that is narrower at the hub than at the rim", () => {
     const { container } = render(
       <PolarChart max={100} data={[{ key: "q", label: "Q", value: 100 }]} legend={false} />,
     );
-    const d = container.querySelector("path")!.getAttribute("d")!;
-    const points = Array.from(d.matchAll(/(\d+\.\d+),(\d+\.\d+)/g)).map(([, x, y]) =>
-      radiusOfPoint(Number(x), Number(y)),
-    );
-    const inner = Math.min(...points);
-    const outer = Math.max(...points);
-    // Both edges are arcs at their own radius, and the outer one is longer
-    // because it is further out — the sector widens on its way there.
+    const arcs = arcRadii(container.querySelector("path")!.getAttribute("d")!);
+    const outer = arcs.find((arc) => arc.sweep === 1)!.radius;
+    const inner = arcs.find((arc) => arc.sweep === 0)!.radius;
+    // Two arcs at two radii, and the outer one is longer because it is further
+    // out — the sector widens on its way there.
     expect(outer).toBeGreaterThan(inner);
-    expect(inner).toBeGreaterThanOrEqual(9);
   });
 
-  it("rounds the corners rather than the whole shape", () => {
+  // 🔴 The corners are rounded by the RENDERER's join, not by fillets computed
+  // here. The fillet version shipped with a spike on every corner, because its
+  // angular inset used `corner / radius` where tangency needs
+  // `asin(corner / (radius + corner))` — off by a fraction of a degree, enough
+  // that each arc met its edge at an angle instead of tangentially. A join
+  // cannot be off-tangent.
+  it("rounds the corners with a round join, in the bar's own colour", () => {
     const { container } = render(<PolarChart max={100} data={RATES} legend={false} />);
     const bars = Array.from(container.querySelectorAll("path"));
     expect(bars).toHaveLength(2);
     for (const bar of bars) {
-      const d = bar.getAttribute("d")!;
-      // Four corner fillets plus the two edges: a petal would have neither the
-      // straight radial runs nor four small arcs.
-      expect((d.match(/A/g) ?? []).length).toBe(6);
-      expect((d.match(/L/g) ?? []).length).toBe(2);
+      expect(bar).toHaveAttribute("stroke-linejoin", "round");
+      expect(Number(bar.getAttribute("stroke-width"))).toBeGreaterThan(0);
+      // The stroke IS the shape's edge, so it cannot be a different colour.
+      expect(bar.getAttribute("stroke")).toBe(bar.getAttribute("fill"));
     }
   });
 
@@ -182,5 +182,51 @@ describe("PolarChart measures (63's review of ad-core's block)", () => {
     );
     expect(container.querySelectorAll("path")).toHaveLength(0);
     expect(screen.getByText("尚無點擊")).toBeInTheDocument();
+  });
+});
+
+describe("bar placement", () => {
+  // 🔴 The circle is divided by the number of categories, so one category asked
+  // for the whole of it and drew a disc with a notch where its own two ends
+  // almost met — and centring each bar INSIDE its slot then put that lone bar
+  // at six o'clock. A bar keeps a bar's proportions however few there are, and
+  // the first one points straight up.
+  it("draws one category as a bar pointing up, not as a disc", () => {
+    const { container } = render(
+      <PolarChart max={100} data={[{ key: "q", label: "Q", value: 76 }]} legend={false} />,
+    );
+    const d = container.querySelector("path")!.getAttribute("d")!;
+    const points = Array.from(d.matchAll(/(\d+\.\d+),(\d+\.\d+)/g)).map(([, x, y]) => ({
+      x: Number(x),
+      y: Number(y),
+    }));
+    // Every point is above the centre and within a bar's width of the vertical.
+    for (const point of points) {
+      expect(point.y).toBeLessThan(50);
+      expect(Math.abs(point.x - 50)).toBeLessThan(25);
+    }
+  });
+
+  it("keeps bars a bar's width however few categories there are", () => {
+    for (const count of [1, 2, 3, 6, 12]) {
+      cleanup();
+      const { container } = render(
+        <PolarChart
+          max={100}
+          legend={false}
+          data={Array.from({ length: count }, (_, index) => ({
+            key: `k${index}`,
+            label: `L${index}`,
+            value: 80,
+          }))}
+        />,
+      );
+      expect(container.querySelectorAll("path")).toHaveLength(count);
+      // None of them swallows the circle: a sector wider than 180° would need
+      // the large-arc flag on its outer edge.
+      for (const bar of container.querySelectorAll("path")) {
+        expect(bar.getAttribute("d")).not.toMatch(/A[\d.]+,[\d.]+ 0 1 1 /);
+      }
+    }
   });
 });
