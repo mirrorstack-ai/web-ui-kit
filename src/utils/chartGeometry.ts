@@ -54,16 +54,21 @@ export function isFullSweep(sweepDeg: number): boolean {
  * stroking it with `2 × corner` and `strokeLinejoin="round"` grows it back to
  * the requested radii and angles with every corner rounded exactly.
  *
- * 🔴 THE FILLET VERSION OF THIS WAS WRONG AND SHIPPED (owner, 2026-09-16, and
- * they were right to be angry). Each corner was drawn as an arc between two
- * points whose angular inset was approximated as `corner / radius` — the true
- * tangency angle is `asin(corner / (radius + corner))`. The two differ by a
- * fraction of a degree, so the arc met the edge at a slight angle instead of
- * tangentially, and every corner grew a little spike. Twelve of those per
- * six-bar chart read exactly as what it was: broken.
+ * 🔴 THE FILLET VERSION OF THIS WAS WRONG AND SHIPPED (owner, 2026-09-16). Each
+ * corner was drawn as an arc between two points whose angular inset was
+ * approximated as `corner / radius`; the true tangency angle is
+ * `asin(corner / (radius + corner))`. The two differ by a fraction of a degree,
+ * so the arc met the edge off-tangent and every corner grew a spike. There is
+ * no corner arithmetic here now: a join cannot be off-tangent.
  *
- * There is no corner arithmetic here at all now. The renderer owns the joins,
- * and a join cannot be off-tangent.
+ * 🔴 AND THE INSET IS ANGULARLY DIFFERENT AT THE TWO RADII, which the first
+ * join version missed by insetting both edges by the inner edge's angle. An
+ * inset is a constant distance, and the same distance is a much bigger angle
+ * near the hub than out at the rim — so the outer end came back narrower than
+ * it should and every seam read as far too wide (owner again: "the gaps between
+ * wedges look oversized … wedges read as separate rounded blobs"). Each edge
+ * now carries its own inset angle, so the bar is the width it was asked for at
+ * both ends.
  */
 export function roundedSector(
   cx: number,
@@ -77,36 +82,39 @@ export function roundedSector(
   const sweep = endAngle - startAngle;
   if (sweep <= 0 || outerRadius <= innerRadius) return { d: "", strokeWidth: 0 };
 
-  // The inset must leave a real shape behind: half the radial span at most, and
-  // never so much angle that the sector closes up. Both are checked against the
-  // inset's own inner radius, where the angular cost of an inset is highest.
+  const degrees = (radians: number) => (radians * 180) / Math.PI;
+  const insetAngle = (radius: number, c: number) =>
+    radius <= c ? 90 : degrees(Math.asin(Math.min(1, c / radius)));
+
+  // The inset has to leave a real shape behind at BOTH radii: half the radial
+  // span at most, and never so much angle that an edge closes up.
   let c = Math.min(corner, (outerRadius - innerRadius) / 2);
-  for (let i = 0; i < 8 && c > 0.1; i += 1) {
-    const insetInner = innerRadius + c;
-    const angularCost = (Math.asin(Math.min(1, c / insetInner)) * 180) / Math.PI;
-    if (sweep - 2 * angularCost > 1) break;
+  for (let i = 0; i < 10 && c > 0.05; i += 1) {
+    if (sweep - 2 * insetAngle(innerRadius + c, c) > 0.5) break;
     c /= 2;
   }
-  if (c <= 0.1) {
-    // No room to round: a sliver of a bar is drawn square rather than as a
-    // shape that has been pushed inside out.
+  if (c <= 0.05) {
     return {
       d: ringSegmentPath(cx, cy, outerRadius, innerRadius, startAngle, endAngle),
       strokeWidth: 0,
     };
   }
 
-  const insetInner = innerRadius + c;
-  const angularCost = (Math.asin(Math.min(1, c / insetInner)) * 180) / Math.PI;
+  const inner = innerRadius + c;
+  const outer = outerRadius - c;
+  const dIn = insetAngle(inner, c);
+  const dOut = insetAngle(outer, c);
+  const p = (radius: number, angle: number) => polarPoint(cx, cy, radius, angle);
+  const xy = (point: { x: number; y: number }) => `${point.x.toFixed(2)},${point.y.toFixed(2)}`;
+
   return {
-    d: ringSegmentPath(
-      cx,
-      cy,
-      outerRadius - c,
-      insetInner,
-      startAngle + angularCost,
-      endAngle - angularCost,
-    ),
+    d: [
+      `M${xy(p(inner, startAngle + dIn))}`,
+      `A${inner.toFixed(2)},${inner.toFixed(2)} 0 ${sweep - 2 * dIn > 180 ? 1 : 0} 1 ${xy(p(inner, endAngle - dIn))}`,
+      `L${xy(p(outer, endAngle - dOut))}`,
+      `A${outer.toFixed(2)},${outer.toFixed(2)} 0 ${sweep - 2 * dOut > 180 ? 1 : 0} 0 ${xy(p(outer, startAngle + dOut))}`,
+      "Z",
+    ].join(" "),
     strokeWidth: c * 2,
   };
 }

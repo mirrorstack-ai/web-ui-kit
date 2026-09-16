@@ -72,8 +72,14 @@ const HUB_RADIUS = 9;
  */
 const GAP_DEG = 4;
 
-/** How much of each corner is rounded, in viewBox units. */
-const CORNER = 5;
+/**
+ * How much of each corner is rounded, in viewBox units.
+ *
+ * Small on purpose (owner, 2026-09-16): at 5 the bars stopped reading as
+ * wedges and became pills with seams too wide between them. A bar should look
+ * like a bar whose corners happen to be soft.
+ */
+const CORNER = 2;
 
 /**
  * The widest a single bar may be, in degrees.

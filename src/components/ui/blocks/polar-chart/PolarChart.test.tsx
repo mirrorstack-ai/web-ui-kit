@@ -10,19 +10,17 @@ const CENTER = 50;
 // JOIN: the path is the sector INSET by the corner radius, and the stroke grows
 // it back. So what the bar claims is its inset outer arc plus half that stroke
 // — the painted edge, which is the number a reader turns back into a value.
+// Read the two edge radii by SIZE, not by the order or sweep flag they happen
+// to be drawn in — those are the geometry's business and have already changed
+// twice under tests that asserted on them.
 const arcRadii = (d: string) =>
-  Array.from(d.matchAll(/A([\d.]+),[\d.]+ 0 \d (\d) /g)).map(([, radius, sweep]) => ({
-    radius: Number(radius),
-    sweep: Number(sweep),
-  }));
+  Array.from(d.matchAll(/A([\d.]+),[\d.]+ /g)).map(([, radius]) => Number(radius));
 
 const painted = (container: HTMLElement) =>
   Array.from(container.querySelectorAll("path")).map((path) => {
-    // ringSegmentPath draws the OUTER edge first and clockwise (sweep 1) and
-    // returns along the inner one anticlockwise (sweep 0).
-    const outer = arcRadii(path.getAttribute("d")!).find((arc) => arc.sweep === 1);
-    if (!outer) throw new Error(`no outer arc in path: ${path.getAttribute("d")}`);
-    return outer.radius + Number(path.getAttribute("stroke-width") ?? 0) / 2;
+    const radii = arcRadii(path.getAttribute("d")!);
+    if (radii.length === 0) throw new Error(`no arcs in path: ${path.getAttribute("d")}`);
+    return Math.max(...radii) + Number(path.getAttribute("stroke-width") ?? 0) / 2;
   });
 
 const RATES = [
@@ -39,8 +37,8 @@ describe("PolarChart", () => {
       <PolarChart max={100} data={[{ key: "q", label: "Q", value: 100 }]} legend={false} />,
     );
     const arcs = arcRadii(container.querySelector("path")!.getAttribute("d")!);
-    const outer = arcs.find((arc) => arc.sweep === 1)!.radius;
-    const inner = arcs.find((arc) => arc.sweep === 0)!.radius;
+    const outer = Math.max(...arcs);
+    const inner = Math.min(...arcs);
     // Two arcs at two radii, and the outer one is longer because it is further
     // out — the sector widens on its way there.
     expect(outer).toBeGreaterThan(inner);
@@ -196,10 +194,14 @@ describe("bar placement", () => {
       <PolarChart max={100} data={[{ key: "q", label: "Q", value: 76 }]} legend={false} />,
     );
     const d = container.querySelector("path")!.getAttribute("d")!;
-    const points = Array.from(d.matchAll(/(\d+\.\d+),(\d+\.\d+)/g)).map(([, x, y]) => ({
-      x: Number(x),
-      y: Number(y),
-    }));
+    // 🔴 Only the POINTS, which follow M, L or an arc's flags. A bare
+    // "number,number" match also catches an arc's `rx,ry` radii — "A11.00,11.00"
+    // read as a point 39 units left of centre and failed this test for a
+    // drawing that was correct.
+    const points = Array.from(
+      d.matchAll(/(?:[ML]|\d ")?(?:[ML]|\d \d )([\d.]+),([\d.]+)/g),
+    ).map(([, x, y]) => ({ x: Number(x), y: Number(y) }));
+    expect(points.length).toBeGreaterThan(0);
     // Every point is above the centre and within a bar's width of the vertical.
     for (const point of points) {
       expect(point.y).toBeLessThan(50);
