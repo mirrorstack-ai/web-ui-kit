@@ -12,7 +12,7 @@ import {
   type ChartDatum,
   type ChartMeasure,
 } from "@/types/chart";
-import { ringSegmentPath } from "@/utils/chartGeometry";
+import { polarPoint } from "@/utils/chartGeometry";
 
 export const meta: ComponentMeta = {
   name: "PolarChart",
@@ -64,7 +64,12 @@ const VIEWBOX = 100;
 const CENTER = VIEWBOX / 2;
 const MAX_RADIUS = 43;
 const HUB_RADIUS = 9;
-const PAD_DEG = 1.5;
+
+/**
+ * The seam between two bars, in viewBox units measured at the hub — where
+ * neighbouring bars are closest and where a gap has to survive.
+ */
+const GAP = 1.6;
 
 /**
  * The rings a reader measures against. Without them a radial bar carries no
@@ -100,6 +105,26 @@ export function PolarChart({
   const ceiling = Math.max(max ?? (measure === "rate" ? RATE_WHOLE : largest), Number.EPSILON);
   const empty = series.length === 0 || largest <= 0;
   const step = series.length > 0 ? 360 / series.length : 360;
+  // 🔴 A ROUNDED BAR, NOT A WEDGE (owner, 2026-09-16: "too sharp, our style
+  // guide is rounded"). A ring segment has four hard corners; a stroked line
+  // with a round cap has none, and it is the same primitive Gauge draws its
+  // value arc with.
+  //
+  // Width is set where neighbours are CLOSEST, which is where the bars begin —
+  // not at the hub circle itself. A bar starts half its own width out from the
+  // hub, so the room it has depends on how wide it is: solving
+  // `w ≤ k(HUB + w/2) − GAP` for w gives the widest bar that still leaves the
+  // seam. Measuring at the hub instead (the first attempt) ignored that half
+  // width and drew a spindly pinwheel — 7 units across an 86-unit chart.
+  const anglePerBar = (step / 360) * 2 * Math.PI;
+  const widest = (MAX_RADIUS - HUB_RADIUS) / 2;
+  const denominator = 1 - anglePerBar / 2;
+  const fitted =
+    // Few enough bars and the constraint stops binding — three bars have a
+    // third of the circle each and want more width than the chart has room for,
+    // which the algebra reports as a negative denominator.
+    denominator > 0.15 ? (anglePerBar * HUB_RADIUS - GAP) / denominator : widest;
+  const barWidth = Math.max(1.5, Math.min(fitted, widest));
 
   return (
     <div
@@ -133,19 +158,32 @@ export function PolarChart({
 
         {!empty &&
           series.map((datum, index) => {
-            const reach = HUB_RADIUS + (MAX_RADIUS - HUB_RADIUS) * Math.min(datum.value / ceiling, 1);
-            const start = index * step;
-            // A single category would otherwise sweep the full circle and
-            // degenerate the same way a whole-ring donut slice does; the pad
-            // keeps every wedge a real arc.
-            const end = start + Math.max(step - PAD_DEG, step * 0.5);
             if (datum.value <= 0) return null;
+            const reach = HUB_RADIUS + (MAX_RADIUS - HUB_RADIUS) * Math.min(datum.value / ceiling, 1);
+            const length = reach - HUB_RADIUS;
+            // 🔴 A ROUND CAP PAINTS HALF ITS OWN WIDTH PAST THE LINE, so a bar
+            // shorter than it is wide cannot be drawn at full width without
+            // reaching further than its value does. On the first rounded render
+            // a 12% bar painted out to 47% of the scale — rounder, and lying.
+            // A short bar is drawn NARROWER instead, which keeps its painted
+            // outer edge exactly on its value and reads as the small number it
+            // is. Above that length the caps cancel: the line runs from half a
+            // width out to half a width short, so the paint spans hub → reach.
+            const width = Math.max(1.5, Math.min(barWidth, length));
+            const angle = index * step + step / 2;
+            const inner = polarPoint(CENTER, CENTER, HUB_RADIUS + width / 2, angle);
+            const outer = polarPoint(CENTER, CENTER, Math.max(reach - width / 2, HUB_RADIUS + width / 2), angle);
             return (
-              <path
+              <line
                 key={datum.key}
-                d={ringSegmentPath(CENTER, CENTER, reach, HUB_RADIUS, start, Math.min(end, start + 359))}
-                fill={seriesColor(index, datum.tone)}
-                fillOpacity={seriesOpacity(index, datum.tone)}
+                x1={inner.x.toFixed(2)}
+                y1={inner.y.toFixed(2)}
+                x2={outer.x.toFixed(2)}
+                y2={outer.y.toFixed(2)}
+                stroke={seriesColor(index, datum.tone)}
+                strokeOpacity={seriesOpacity(index, datum.tone)}
+                strokeWidth={width}
+                strokeLinecap="round"
               />
             );
           })}

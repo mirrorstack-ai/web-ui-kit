@@ -4,10 +4,91 @@ import { PolarChart } from "./PolarChart";
 
 afterEach(cleanup);
 
-const reaches = (container: HTMLElement) =>
-  Array.from(container.querySelectorAll("path")).map((path) =>
-    Number(/A([\d.]+),/.exec(path.getAttribute("d")!)![1]),
-  );
+const CENTER = 50;
+
+// A bar is a stroked line with a round cap (owner: "our style guide is
+// rounded"), so what it CLAIMS is where its paint ends: the far end of the line
+// plus half the cap. That is the number a reader turns back into a value, so it
+// is the number the tests assert on.
+const painted = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll("line")).map((line) => {
+    const x = Number(line.getAttribute("x2")) - CENTER;
+    const y = Number(line.getAttribute("y2")) - CENTER;
+    const width = Number(line.getAttribute("stroke-width"));
+    return Math.hypot(x, y) + width / 2;
+  });
+
+const RATES = [
+  { key: "q1", label: "Q1", value: 90 },
+  { key: "q2", label: "Q2", value: 45 },
+];
+
+describe("PolarChart", () => {
+  it("rounds both ends of every bar", () => {
+    const { container } = render(<PolarChart max={100} data={RATES} legend={false} />);
+    const bars = container.querySelectorAll("line");
+    expect(bars).toHaveLength(2);
+    for (const bar of bars) {
+      expect(bar).toHaveAttribute("stroke-linecap", "round");
+    }
+  });
+
+  it("scales bars against an explicit maximum, not against the best category", () => {
+    const { container } = render(<PolarChart max={100} data={RATES} legend={false} />);
+    const [first, second] = painted(container);
+    // 90 reaches further than 45, and neither touches the rim a max-less chart
+    // would hand the leader (MAX_RADIUS is 43).
+    expect(first).toBeGreaterThan(second);
+    expect(first).toBeLessThan(43);
+  });
+
+  it("clamps a bar that exceeds max to the rim rather than overflowing the chart", () => {
+    const { container } = render(
+      <PolarChart max={50} data={[{ key: "q1", label: "Q1", value: 90 }]} legend={false} />,
+    );
+    expect(painted(container)[0]).toBeCloseTo(43, 1);
+  });
+
+  // 🔴 A round cap paints half its own width past the line, so a bar shorter
+  // than it is wide cannot be drawn at full width without reaching further than
+  // its value does: on the first rounded render a 12% bar painted out to 47% of
+  // the scale — rounder, and lying.
+  it("narrows a short bar so its painted end stays on its value", () => {
+    const { container } = render(
+      <PolarChart
+        max={100}
+        legend={false}
+        data={[
+          { key: "big", label: "Big", value: 95 },
+          { key: "small", label: "Small", value: 12 },
+        ]}
+      />,
+    );
+    const [big, small] = Array.from(container.querySelectorAll("line"));
+    expect(Number(small.getAttribute("stroke-width"))).toBeLessThan(
+      Number(big.getAttribute("stroke-width")),
+    );
+    // 12 of 100 over the hub-to-rim span (9 → 43) lands just under 13.
+    const [, smallReach] = painted(container);
+    expect(smallReach).toBeCloseTo(9 + (43 - 9) * 0.12, 1);
+  });
+
+  it("draws no bar for a zero value and says the series is empty", () => {
+    const { container } = render(
+      <PolarChart data={[{ key: "q1", label: "Q1", value: 0 }]} emptyLabel="Nothing answered" />,
+    );
+    expect(container.querySelectorAll("line")).toHaveLength(0);
+    expect(screen.getByText("Nothing answered")).toBeInTheDocument();
+  });
+
+  it("reads its values out rather than hiding the drawing from assistive tech", () => {
+    render(<PolarChart title="Correct rate" max={100} data={RATES} />);
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "aria-label",
+      "Correct rate — Q1: 90, Q2: 45",
+    );
+  });
+});
 
 describe("PolarChart measures (63's review of ad-core's block)", () => {
   // 🔴 A ratio's whole is 1, and saying so is better than declaring a ceiling:
@@ -25,16 +106,13 @@ describe("PolarChart measures (63's review of ad-core's block)", () => {
         ]}
       />,
     );
-    // 3.82% of a whole of 1 is a stub, not a full-length wedge: the hub is 9
-    // and the rim 43, so a leader-scaled chart would put it at 43.
-    const [leader] = reaches(container);
-    expect(leader).toBeLessThan(12);
+    // 3.82% of a whole of 1 is a stub: the hub is 9 and the rim 43, so a
+    // leader-scaled chart would have put it at 43.
+    expect(painted(container)[0]).toBeLessThan(12);
   });
 
   it("writes a server ratio as the percent an operator reads", () => {
-    render(
-      <PolarChart measure="rate" data={[{ key: "a", label: "首頁上方", value: 0.0234 }]} />,
-    );
+    render(<PolarChart measure="rate" data={[{ key: "a", label: "首頁上方", value: 0.0234 }]} />);
     // The legend value and the rim's own scale label.
     expect(screen.getByText("2.3%")).toBeInTheDocument();
     expect(screen.getByText("100%")).toBeInTheDocument();
@@ -51,23 +129,19 @@ describe("PolarChart measures (63's review of ad-core's block)", () => {
     );
     // 0.05 of a 0.05 ceiling is the rim — the units are the data's, never the
     // formatter's.
-    expect(reaches(container)[0]).toBe(43);
+    expect(painted(container)[0]).toBeCloseTo(43, 1);
   });
 
   it("falls back to the key when a label is empty", () => {
     render(
-      <PolarChart
-        title="CTR"
-        measure="rate"
-        data={[{ key: "ad_7f3", label: "", value: 0.02 }]}
-      />,
+      <PolarChart title="CTR" measure="rate" data={[{ key: "ad_7f3", label: "", value: 0.02 }]} />,
     );
     expect(screen.getByText("ad_7f3")).toBeInTheDocument();
     expect(screen.getByRole("img")).toHaveAttribute("aria-label", "CTR — ad_7f3: 2%");
   });
 
   // ad-core's day one again, from the rate side.
-  it("draws no wedge when every rate is zero", () => {
+  it("draws no bar when every rate is zero", () => {
     const { container } = render(
       <PolarChart
         measure="rate"
@@ -78,7 +152,7 @@ describe("PolarChart measures (63's review of ad-core's block)", () => {
         ]}
       />,
     );
-    expect(container.querySelectorAll("path")).toHaveLength(0);
+    expect(container.querySelectorAll("line")).toHaveLength(0);
     expect(screen.getByText("尚無點擊")).toBeInTheDocument();
   });
 });

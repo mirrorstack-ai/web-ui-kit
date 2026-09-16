@@ -10,7 +10,7 @@ import {
   type ChartDatum,
   type ChartMeasure,
 } from "@/types/chart";
-import { isFullSweep, ringSegmentPath } from "@/utils/chartGeometry";
+import { isFullSweep } from "@/utils/chartGeometry";
 
 export const meta: ComponentMeta = {
   name: "DonutChart",
@@ -46,7 +46,13 @@ export interface DonutChartProps {
   formatValue?: (value: number) => string;
   /** Show the legend beside (or under) the ring. Default `true`. */
   legend?: boolean;
-  /** Ring thickness as a share of its radius, 0-1. Default `0.38`. */
+  /**
+   * Ring thickness as a share of its radius, 0-1. Default `0.3`.
+   *
+   * Thinner than it was: with round caps a slice is as wide as the ring, so a
+   * fat ring turns a small share into something that reads as a dot rather
+   * than as a short arc.
+   */
   thickness?: number;
   /** What to say when there is nothing to draw. Default `"No data"`. */
   emptyLabel?: string;
@@ -60,13 +66,15 @@ const CENTER = VIEWBOX / 2;
 const OUTER_RADIUS = 46;
 
 /**
- * 🔴 A GAP IS NOT A SEPARATOR WHEN THE SLICE IS SMALLER THAN THE GAP. Padding
- * between segments is drawn by shortening each sweep, so a slice worth less
- * than the padding would invert and wrap the wrong way round the circle. The
- * sweep is floored at zero instead: a slice too thin to separate simply has no
- * gap, which reads as a hairline rather than as a slice drawn backwards.
+ * The seam between two slices, in viewBox units of arc.
+ *
+ * 🔴 A GAP IS NOT A SEPARATOR WHEN THE SLICE IS SMALLER THAN THE GAP. It is
+ * drawn by shortening each slice, so a slice worth less than the gap would
+ * invert and wrap the wrong way round the circle. Every length below is floored
+ * at zero instead: a slice too thin to separate keeps its round cap and reads
+ * as a dot, which is what it is.
  */
-const PAD_DEG = 1.2;
+const GAP = 2;
 
 export function DonutChart({
   data,
@@ -75,7 +83,7 @@ export function DonutChart({
   measure,
   formatValue,
   legend = true,
-  thickness = 0.38,
+  thickness = 0.3,
   emptyLabel = "No data",
   title,
   className,
@@ -88,12 +96,33 @@ export function DonutChart({
   const innerRadius = OUTER_RADIUS * (1 - Math.min(Math.max(thickness, 0.05), 0.9));
   const drawable = series.filter((datum) => datum.value > 0);
 
+  // 🔴 THE RING IS STROKED, NOT FILLED (owner, 2026-09-16: "too sharp, our
+  // style guide is rounded"). A filled ring segment has four hard corners where
+  // its arcs meet its radial edges, and four of those per slice is what read as
+  // angular against a kit whose every surface is rounded. Stroking a dashed
+  // circle with `strokeLinecap="round"` is the same idiom Gauge already uses
+  // for its value arc, and it rounds both ends of every slice for free.
+  const strokeWidth = OUTER_RADIUS - innerRadius;
+  const midRadius = (OUTER_RADIUS + innerRadius) / 2;
+  const circumference = 2 * Math.PI * midRadius;
+
   let cursor = 0;
   const segments = drawable.map((datum, index) => {
-    const sweep = (datum.value / whole) * 360;
+    const arc = (datum.value / whole) * circumference;
     const start = cursor;
-    cursor += sweep;
+    cursor += arc;
     const paletteIndex = series.indexOf(datum);
+    // A round cap adds half the stroke width beyond each end of the dash, so
+    // the DRAWN length is `dash + width`. Subtracting it keeps the seam the
+    // width it says it is instead of letting neighbours grow into it.
+    //
+    // 🔴 And a slice shorter than the ring is thick cannot be drawn at full
+    // thickness without painting more arc than it owns — the caps alone are
+    // `strokeWidth` long. Such a slice is drawn THINNER, so its painted arc
+    // still matches its share; it reads as a small bead on the ring, which is
+    // what a small share is.
+    const width = Math.max(1.5, Math.min(strokeWidth, arc - GAP));
+    const dash = Math.max(0, arc - GAP - width);
     return {
       datum,
       paletteIndex,
@@ -102,9 +131,12 @@ export function DonutChart({
       // that changes colour when a number reaches zero is a legend nobody can
       // read across two page loads.
       color: seriesColor(paletteIndex, datum.tone),
-      start,
-      end: start + sweep,
-      sweep,
+      // Half the cap sits before the dash, so the slice starts there to keep
+      // its painted edge on its own boundary.
+      offset: start + width / 2,
+      dash,
+      width,
+      arc,
       index,
     };
   });
@@ -140,43 +172,39 @@ export function DonutChart({
         <circle
           cx={CENTER}
           cy={CENTER}
-          r={(OUTER_RADIUS + innerRadius) / 2}
+          r={midRadius}
           fill="none"
           stroke="currentColor"
-          strokeWidth={OUTER_RADIUS - innerRadius}
+          strokeWidth={strokeWidth}
           opacity="0.1"
         />
 
-        {segments.map(({ datum, color, paletteIndex, start, end, sweep }) =>
-          isFullSweep(sweep) ? (
-            // One category holding the whole: a stroked circle, because an arc
-            // between two identical points draws nothing.
+        {segments.map(({ datum, color, paletteIndex, offset, dash, arc, width }) => {
+          // One category holding everything: a plain circle. A dash the length
+          // of the whole circumference would have its two round caps meet and
+          // overlap, and the seam would show on a ring that has no seam.
+          const whole360 = isFullSweep((arc / circumference) * 360);
+          return (
             <circle
               key={datum.key}
               cx={CENTER}
               cy={CENTER}
-              r={(OUTER_RADIUS + innerRadius) / 2}
+              r={midRadius}
               fill="none"
               stroke={color}
               strokeOpacity={seriesOpacity(paletteIndex, datum.tone)}
-              strokeWidth={OUTER_RADIUS - innerRadius}
+              strokeWidth={width}
+              strokeLinecap="round"
+              {...(whole360
+                ? {}
+                : {
+                    strokeDasharray: `${dash.toFixed(2)} ${(circumference - dash).toFixed(2)}`,
+                    strokeDashoffset: (-offset).toFixed(2),
+                  })}
+              transform={`rotate(-90 ${CENTER} ${CENTER})`}
             />
-          ) : (
-            <path
-              key={datum.key}
-              d={ringSegmentPath(
-                CENTER,
-                CENTER,
-                OUTER_RADIUS,
-                innerRadius,
-                start,
-                Math.max(start, end - PAD_DEG),
-              )}
-              fill={color}
-              fillOpacity={seriesOpacity(paletteIndex, datum.tone)}
-            />
-          ),
-        )}
+          );
+        })}
 
         {(centerLabel || !empty) && (
           <>
