@@ -3,7 +3,7 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
-## Unreleased
+## 0.7.18
 
 ### Added
 
