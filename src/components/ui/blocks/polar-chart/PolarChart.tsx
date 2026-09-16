@@ -7,7 +7,6 @@ import {
   normalizeSeries,
   seriesAriaLabel,
   seriesColor,
-  seriesOpacity,
   RATE_WHOLE,
   type ChartDatum,
   type ChartMeasure,
@@ -198,7 +197,6 @@ export function PolarChart({
               CORNER,
             );
             const color = seriesColor(index, datum.tone);
-            const opacity = seriesOpacity(index, datum.tone);
             return (
               // Fill AND stroke in the same colour: the stroke is what rounds
               // the corners, so it is part of the shape rather than an outline
@@ -207,9 +205,7 @@ export function PolarChart({
                 key={datum.key}
                 d={d}
                 fill={color}
-                fillOpacity={opacity}
                 stroke={color}
-                strokeOpacity={opacity}
                 strokeWidth={strokeWidth}
                 strokeLinejoin="round"
               />
@@ -265,10 +261,7 @@ export function PolarChart({
                 <span
                   aria-hidden="true"
                   className="size-2.5 shrink-0 rounded-full"
-                  style={{
-                    backgroundColor: seriesColor(index, datum.tone),
-                    opacity: seriesOpacity(index, datum.tone),
-                  }}
+                  style={{ backgroundColor: seriesColor(index, datum.tone) }}
                 />
                 <span className="min-w-0 flex-1 truncate text-on-surface-variant">
                   {datumLabel(datum)}

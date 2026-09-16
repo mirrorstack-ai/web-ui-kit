@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { DonutChart } from "./DonutChart";
-import { normalizeSeries, seriesColor, seriesOpacity } from "@/types/chart";
+import { normalizeSeries, seriesColor } from "@/types/chart";
 import { isFullSweep, ringSegmentPath } from "@/utils/chartGeometry";
 
 afterEach(cleanup);
@@ -202,10 +202,35 @@ describe("measure and labels (63's review of ad-core's block)", () => {
 
 describe("palette cycling", () => {
   // 🔴 Seen on a contact sheet, not reasoned about: a seven-slice ring drew the
-  // seventh category in the first category's colour, touching it, and the two
-  // read as one slice with a gap. Cycling is still right — a seventh token no
-  // theme defines is not — so the repeat is drawn lighter.
-  it("draws a repeated palette colour at a lighter weight so neighbours stay apart", () => {
+  // seventh category in the first category's colour, TOUCHING it, and the two
+  // read as one slice with a gap. Six tones is what the theme defines, so the
+  // palette repeats — it just must not repeat next to itself.
+  it("never puts a repeated colour beside its twin", () => {
+    const { container } = render(
+      <DonutChart
+        legend={false}
+        data={Array.from({ length: 14 }, (_, index) => ({
+          key: `k${index}`,
+          label: `L${index}`,
+          value: 10,
+        }))}
+      />,
+    );
+    const colours = Array.from(container.querySelectorAll("circle")).map((slice) =>
+      slice.getAttribute("stroke"),
+    );
+    expect(colours).toHaveLength(14);
+    for (let i = 0; i < colours.length; i += 1) {
+      // Neighbours in a RING: the last slice touches the first.
+      expect(colours[i]).not.toBe(colours[(i + 1) % colours.length]);
+    }
+  });
+
+  // 🔴 The first answer to that adjacency was a lower opacity per lap. It works
+  // on a light background and inverts on a dark one — opacity moves a colour
+  // toward what is behind it, so the repeat came out dim and muddy and read as
+  // disabled. Every category is drawn at full strength now, in both themes.
+  it("draws every category at full strength", () => {
     const { container } = render(
       <DonutChart
         legend={false}
@@ -216,17 +241,15 @@ describe("palette cycling", () => {
         }))}
       />,
     );
-    const drawn = slices(container);
-    expect(drawn[0].getAttribute("stroke")).toBe(drawn[6].getAttribute("stroke"));
-    expect(drawn[0].getAttribute("stroke-opacity")).toBe("1");
-    expect(Number(drawn[6].getAttribute("stroke-opacity"))).toBeLessThan(1);
+    for (const slice of container.querySelectorAll("circle")) {
+      expect(slice.getAttribute("stroke-opacity")).toBeNull();
+    }
   });
 
-  it("keeps a pinned tone at full weight wherever it sits in the series", () => {
-    expect(seriesOpacity(0)).toBe(1);
-    expect(seriesOpacity(6)).toBeLessThan(1);
-    // A tone was chosen to mean something; position must not dilute it.
-    expect(seriesOpacity(6, "error")).toBe(1);
+  it("keeps a pinned tone exactly where it was put, whatever its position", () => {
+    // A tone was chosen to MEAN something; neither position nor lap may move it.
+    expect(seriesColor(0, "error")).toBe(seriesColor(9, "error"));
+    expect(seriesColor(0)).not.toBe(seriesColor(6));
   });
 });
 

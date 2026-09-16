@@ -6,7 +6,6 @@ import {
   normalizeSeries,
   seriesAriaLabel,
   seriesColor,
-  seriesOpacity,
   type ChartDatum,
   type ChartMeasure,
 } from "@/types/chart";
@@ -185,7 +184,6 @@ export function DonutChart({
               r={midRadius}
               fill="none"
               stroke={color}
-              strokeOpacity={seriesOpacity(paletteIndex, datum.tone)}
               strokeWidth={width}
               strokeLinecap="round"
               {...(whole360
@@ -239,10 +237,7 @@ export function DonutChart({
                 <span
                   aria-hidden="true"
                   className="size-2.5 shrink-0 rounded-full"
-                  style={{
-                    backgroundColor: seriesColor(index, datum.tone),
-                    opacity: seriesOpacity(index, datum.tone),
-                  }}
+                  style={{ backgroundColor: seriesColor(index, datum.tone) }}
                 />
                 <span className="min-w-0 flex-1 truncate text-on-surface-variant">
                   {datumLabel(datum)}

@@ -57,26 +57,28 @@ const SERIES_TONES: readonly ChartTone[] = [
   "error",
 ];
 
-/** The colour for slice `index`, honouring an explicit tone when the datum pins one. */
-export function seriesColor(index: number, tone?: ChartTone): string {
-  return chartToneVarColor[tone ?? SERIES_TONES[index % SERIES_TONES.length]];
-}
-
 /**
- * How opaque slice `index` is drawn.
+ * The colour for slice `index`, honouring an explicit tone when the datum pins
+ * one.
  *
- * 🔴 THE SEVENTH CATEGORY REPEATS THE FIRST, AND IN A RING THE TWO ARE
- * ADJACENT. Cycling the palette is the right answer — inventing a seventh
- * colour no theme defines is not — but a seven-slice donut drew 版位 7 in the
- * same teal as 版位 1, touching it, which reads as one slice with a gap in it
- * (seen on the contact sheet, not reasoned about). Each further lap is drawn
- * lighter, so a repeat is still recognisably its own category. A datum that
- * pins a tone keeps full weight: it was given that colour to MEAN something.
+ * 🔴 PAST THE SIXTH CATEGORY THE PALETTE ROTATES, it does not fade. The problem
+ * a seventh category creates is not that it repeats a colour — six tones is
+ * what the theme defines, and inventing a seventh is worse — it is that in a
+ * ring the seventh TOUCHES the first, so the two read as one slice with a gap.
+ *
+ * The first answer to that was to draw each further lap at a lower opacity.
+ * That works on a light background and inverts on a dark one: opacity moves a
+ * colour toward whatever is behind it, so on dark the repeat came out muddy and
+ * dim and read as disabled rather than as its own category (seen on the dark
+ * contact sheet, not reasoned about). Rotating the palette by two each lap
+ * keeps every category at full strength in both themes and still guarantees a
+ * repeat never lands beside its twin.
  */
-export function seriesOpacity(index: number, tone?: ChartTone): number {
-  if (tone) return 1;
+export function seriesColor(index: number, tone?: ChartTone): string {
+  if (tone) return chartToneVarColor[tone];
   const lap = Math.floor(index / SERIES_TONES.length);
-  return lap === 0 ? 1 : Math.max(0.35, 1 - lap * 0.4);
+  const position = index % SERIES_TONES.length;
+  return chartToneVarColor[SERIES_TONES[(position + lap * 2) % SERIES_TONES.length]];
 }
 
 export interface NormalizedSeries {
