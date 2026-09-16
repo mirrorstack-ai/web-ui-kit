@@ -167,18 +167,11 @@ export function DonutChart({
             : seriesAriaLabel(title, drawable, format)
         }
       >
-        {/* The track. Always drawn, so an empty series is a ring with nothing
-            in it rather than a blank square that reads as a failed render. */}
-        <circle
-          cx={CENTER}
-          cy={CENTER}
-          r={midRadius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          opacity="0.1"
-        />
-
+        {/* No track behind the slices (owner, 2026-09-16). A grey ring under
+            coloured ones reads as a fifth category, and the data already says
+            where the whole ends. An empty series therefore has nothing to draw
+            at all, which is why the centre keeps its dash and the legend keeps
+            its emptyLabel — those carry the empty state on their own now. */}
         {segments.map(({ datum, color, paletteIndex, offset, dash, arc, width }) => {
           // One category holding everything: a plain circle. A dash the length
           // of the whole circumference would have its two round caps meet and

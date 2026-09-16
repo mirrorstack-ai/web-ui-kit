@@ -6,17 +6,25 @@ afterEach(cleanup);
 
 const CENTER = 50;
 
-// A bar is a stroked line with a round cap (owner: "our style guide is
-// rounded"), so what it CLAIMS is where its paint ends: the far end of the line
-// plus half the cap. That is the number a reader turns back into a value, so it
-// is the number the tests assert on.
+// A bar is a ring SECTOR with rounded corners (owner: "should start narrow near
+// the center and grow wider toward the outer edge … looks like flower petals,
+// not a chart"), so what it claims is the radius of its outer arc — the only
+// arc in the path drawn anticlockwise, which is how it is picked out here. That
+// radius is the number a reader turns back into a value.
+const outerArcRadius = (d: string) => {
+  const match = /A([\d.]+),[\d.]+ 0 \d 0 /.exec(d);
+  if (!match) throw new Error(`no outer arc in path: ${d}`);
+  return Number(match[1]);
+};
+
 const painted = (container: HTMLElement) =>
-  Array.from(container.querySelectorAll("line")).map((line) => {
-    const x = Number(line.getAttribute("x2")) - CENTER;
-    const y = Number(line.getAttribute("y2")) - CENTER;
-    const width = Number(line.getAttribute("stroke-width"));
-    return Math.hypot(x, y) + width / 2;
-  });
+  Array.from(container.querySelectorAll("path")).map((path) =>
+    outerArcRadius(path.getAttribute("d")!),
+  );
+
+// Distance from the centre to a point in the path, for checking the shape
+// itself rather than only its reach.
+const radiusOfPoint = (x: number, y: number) => Math.hypot(x - CENTER, y - CENTER);
 
 const RATES = [
   { key: "q1", label: "Q1", value: 90 },
@@ -24,12 +32,35 @@ const RATES = [
 ];
 
 describe("PolarChart", () => {
-  it("rounds both ends of every bar", () => {
+  // 🔴 The structure the owner asked for: a bar is narrow where it starts and
+  // wide where it ends, which is what makes lengths comparable round a circle.
+  // A constant-width capped stroke — the previous attempt — lost exactly that.
+  it("draws a bar that is narrower at the hub than at the rim", () => {
+    const { container } = render(
+      <PolarChart max={100} data={[{ key: "q", label: "Q", value: 100 }]} legend={false} />,
+    );
+    const d = container.querySelector("path")!.getAttribute("d")!;
+    const points = Array.from(d.matchAll(/(\d+\.\d+),(\d+\.\d+)/g)).map(([, x, y]) =>
+      radiusOfPoint(Number(x), Number(y)),
+    );
+    const inner = Math.min(...points);
+    const outer = Math.max(...points);
+    // Both edges are arcs at their own radius, and the outer one is longer
+    // because it is further out — the sector widens on its way there.
+    expect(outer).toBeGreaterThan(inner);
+    expect(inner).toBeGreaterThanOrEqual(9);
+  });
+
+  it("rounds the corners rather than the whole shape", () => {
     const { container } = render(<PolarChart max={100} data={RATES} legend={false} />);
-    const bars = container.querySelectorAll("line");
+    const bars = Array.from(container.querySelectorAll("path"));
     expect(bars).toHaveLength(2);
     for (const bar of bars) {
-      expect(bar).toHaveAttribute("stroke-linecap", "round");
+      const d = bar.getAttribute("d")!;
+      // Four corner fillets plus the two edges: a petal would have neither the
+      // straight radial runs nor four small arcs.
+      expect((d.match(/A/g) ?? []).length).toBe(6);
+      expect((d.match(/L/g) ?? []).length).toBe(2);
     }
   });
 
@@ -49,11 +80,11 @@ describe("PolarChart", () => {
     expect(painted(container)[0]).toBeCloseTo(43, 1);
   });
 
-  // 🔴 A round cap paints half its own width past the line, so a bar shorter
-  // than it is wide cannot be drawn at full width without reaching further than
-  // its value does: on the first rounded render a 12% bar painted out to 47% of
-  // the scale — rounder, and lying.
-  it("narrows a short bar so its painted end stays on its value", () => {
+  // 🔴 A round CAP paints half its own width past the line it ends, which is
+  // why the capped-stroke version had to narrow short bars to stay honest and
+  // still drew a 12% bar as a blob. A sector's outer edge simply sits on its
+  // value, at any size.
+  it("puts a short bar's outer edge exactly on its value", () => {
     const { container } = render(
       <PolarChart
         max={100}
@@ -64,20 +95,17 @@ describe("PolarChart", () => {
         ]}
       />,
     );
-    const [big, small] = Array.from(container.querySelectorAll("line"));
-    expect(Number(small.getAttribute("stroke-width"))).toBeLessThan(
-      Number(big.getAttribute("stroke-width")),
-    );
-    // 12 of 100 over the hub-to-rim span (9 → 43) lands just under 13.
-    const [, smallReach] = painted(container);
-    expect(smallReach).toBeCloseTo(9 + (43 - 9) * 0.12, 1);
+    const [big, small] = painted(container);
+    // 12 of 100 over the hub-to-rim span (9 → 43).
+    expect(small).toBeCloseTo(9 + (43 - 9) * 0.12, 1);
+    expect(big).toBeCloseTo(9 + (43 - 9) * 0.95, 1);
   });
 
   it("draws no bar for a zero value and says the series is empty", () => {
     const { container } = render(
       <PolarChart data={[{ key: "q1", label: "Q1", value: 0 }]} emptyLabel="Nothing answered" />,
     );
-    expect(container.querySelectorAll("line")).toHaveLength(0);
+    expect(container.querySelectorAll("path")).toHaveLength(0);
     expect(screen.getByText("Nothing answered")).toBeInTheDocument();
   });
 
@@ -152,7 +180,7 @@ describe("PolarChart measures (63's review of ad-core's block)", () => {
         ]}
       />,
     );
-    expect(container.querySelectorAll("line")).toHaveLength(0);
+    expect(container.querySelectorAll("path")).toHaveLength(0);
     expect(screen.getByText("尚無點擊")).toBeInTheDocument();
   });
 });

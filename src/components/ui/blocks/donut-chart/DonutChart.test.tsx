@@ -12,12 +12,9 @@ const OUTCOMES = [
 ];
 
 // The ring is drawn as stroked, dashed circles (owner: "our style guide is
-// rounded"), so a SLICE is a circle carrying a dasharray and the track is the
-// one circle without it.
-const slices = (container: HTMLElement) =>
-  Array.from(container.querySelectorAll("circle")).filter(
-    (circle) => circle.getAttribute("stroke") !== "currentColor",
-  );
+// rounded"), and there is no track behind them any more (owner again), so every
+// circle in the drawing IS a slice.
+const slices = (container: HTMLElement) => Array.from(container.querySelectorAll("circle"));
 
 const dashOf = (circle: Element) => Number(circle.getAttribute("stroke-dasharray")?.split(" ")[0]);
 
@@ -194,10 +191,11 @@ describe("measure and labels (63's review of ad-core's block)", () => {
         ]}
       />,
     );
-    expect(slices(container)).toHaveLength(0);
-    // The track survives, so the empty state is a ring with nothing in it
-    // rather than a blank square that reads as a failed render.
-    expect(container.querySelectorAll("circle")).toHaveLength(1);
+    // Nothing is drawn at all: the owner had the grey track removed, so an
+    // empty series carries its state in the centre dash and the legend rather
+    // than in a ring with nothing in it.
+    expect(container.querySelectorAll("circle")).toHaveLength(0);
+    expect(screen.getByText("—")).toBeInTheDocument();
     expect(screen.getByText("尚無曝光")).toBeInTheDocument();
   });
 });

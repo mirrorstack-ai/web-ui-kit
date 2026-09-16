@@ -12,7 +12,7 @@ import {
   type ChartDatum,
   type ChartMeasure,
 } from "@/types/chart";
-import { polarPoint } from "@/utils/chartGeometry";
+import { roundedRingSectorPath } from "@/utils/chartGeometry";
 
 export const meta: ComponentMeta = {
   name: "PolarChart",
@@ -66,10 +66,14 @@ const MAX_RADIUS = 43;
 const HUB_RADIUS = 9;
 
 /**
- * The seam between two bars, in viewBox units measured at the hub — where
- * neighbouring bars are closest and where a gap has to survive.
+ * The seam between two bars, in degrees. Angular rather than in units, so the
+ * separation reads the same at the hub and at the rim; capped per-bar so a
+ * chart with few categories does not spend a third of each bar on its gap.
  */
-const GAP = 1.6;
+const GAP_DEG = 4;
+
+/** How much of each corner is rounded, in viewBox units. */
+const CORNER = 5;
 
 /**
  * The rings a reader measures against. Without them a radial bar carries no
@@ -105,26 +109,17 @@ export function PolarChart({
   const ceiling = Math.max(max ?? (measure === "rate" ? RATE_WHOLE : largest), Number.EPSILON);
   const empty = series.length === 0 || largest <= 0;
   const step = series.length > 0 ? 360 / series.length : 360;
-  // 🔴 A ROUNDED BAR, NOT A WEDGE (owner, 2026-09-16: "too sharp, our style
-  // guide is rounded"). A ring segment has four hard corners; a stroked line
-  // with a round cap has none, and it is the same primitive Gauge draws its
-  // value arc with.
+  // 🔴 A RADIAL BAR IS A SECTOR WITH ROUNDED CORNERS, not a stroke with round
+  // caps (owner, 2026-09-16: "looks like flower petals, not a chart"). A capped
+  // stroke has one constant width and two semicircular ends; a bar has to start
+  // narrow at the hub and widen as it goes out, which is what lets the eye
+  // compare lengths around the circle. So each bar keeps its angular share and
+  // rounds only its corners.
   //
-  // Width is set where neighbours are CLOSEST, which is where the bars begin —
-  // not at the hub circle itself. A bar starts half its own width out from the
-  // hub, so the room it has depends on how wide it is: solving
-  // `w ≤ k(HUB + w/2) − GAP` for w gives the widest bar that still leaves the
-  // seam. Measuring at the hub instead (the first attempt) ignored that half
-  // width and drew a spindly pinwheel — 7 units across an 86-unit chart.
-  const anglePerBar = (step / 360) * 2 * Math.PI;
-  const widest = (MAX_RADIUS - HUB_RADIUS) / 2;
-  const denominator = 1 - anglePerBar / 2;
-  const fitted =
-    // Few enough bars and the constraint stops binding — three bars have a
-    // third of the circle each and want more width than the chart has room for,
-    // which the algebra reports as a negative denominator.
-    denominator > 0.15 ? (anglePerBar * HUB_RADIUS - GAP) / denominator : widest;
-  const barWidth = Math.max(1.5, Math.min(fitted, widest));
+  // The seam is angular now rather than a width in units: a fixed gap in
+  // DEGREES holds the same visual separation at every radius, which a fixed
+  // stroke width could not.
+  const gapDeg = Math.min(GAP_DEG, step * 0.3);
 
   return (
     <div
@@ -160,30 +155,23 @@ export function PolarChart({
           series.map((datum, index) => {
             if (datum.value <= 0) return null;
             const reach = HUB_RADIUS + (MAX_RADIUS - HUB_RADIUS) * Math.min(datum.value / ceiling, 1);
-            const length = reach - HUB_RADIUS;
-            // 🔴 A ROUND CAP PAINTS HALF ITS OWN WIDTH PAST THE LINE, so a bar
-            // shorter than it is wide cannot be drawn at full width without
-            // reaching further than its value does. On the first rounded render
-            // a 12% bar painted out to 47% of the scale — rounder, and lying.
-            // A short bar is drawn NARROWER instead, which keeps its painted
-            // outer edge exactly on its value and reads as the small number it
-            // is. Above that length the caps cancel: the line runs from half a
-            // width out to half a width short, so the paint spans hub → reach.
-            const width = Math.max(1.5, Math.min(barWidth, length));
-            const angle = index * step + step / 2;
-            const inner = polarPoint(CENTER, CENTER, HUB_RADIUS + width / 2, angle);
-            const outer = polarPoint(CENTER, CENTER, Math.max(reach - width / 2, HUB_RADIUS + width / 2), angle);
+            // A sector's outer edge sits exactly on its value — no cap paints
+            // past it, so nothing has to be narrowed to stay honest, and a bar
+            // worth almost nothing is a sliver rather than a dot.
             return (
-              <line
+              <path
                 key={datum.key}
-                x1={inner.x.toFixed(2)}
-                y1={inner.y.toFixed(2)}
-                x2={outer.x.toFixed(2)}
-                y2={outer.y.toFixed(2)}
-                stroke={seriesColor(index, datum.tone)}
-                strokeOpacity={seriesOpacity(index, datum.tone)}
-                strokeWidth={width}
-                strokeLinecap="round"
+                d={roundedRingSectorPath(
+                  CENTER,
+                  CENTER,
+                  HUB_RADIUS,
+                  Math.max(reach, HUB_RADIUS + 0.5),
+                  index * step + gapDeg / 2,
+                  (index + 1) * step - gapDeg / 2,
+                  CORNER,
+                )}
+                fill={seriesColor(index, datum.tone)}
+                fillOpacity={seriesOpacity(index, datum.tone)}
               />
             );
           })}
