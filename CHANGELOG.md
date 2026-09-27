@@ -3,6 +3,16 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## Unreleased
+
+### Added
+
+- **`Notch` `notchGap`.** Shortens the notch without moving its tip or the
+  content: the body's edge drops toward the tip by `notchGap` and the notch
+  shortens by the same, so the SVG box is unchanged. Clamped to leave the notch
+  `radius + inverseRadius`; default `0` draws exactly what it drew before
+  (core-v2#1703, the video player's quality menu).
+
 ## 0.7.19
 
 ### Fixed

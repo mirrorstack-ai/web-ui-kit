@@ -24,6 +24,7 @@ const meta: Meta<typeof Notch> = {
     notchOffset: { control: { type: "range", min: -100, max: 100, step: 1 } },
     radius: { control: { type: "range", min: 0, max: 20, step: 1 } },
     inverseRadius: { control: { type: "range", min: 0, max: 16, step: 1 } },
+    notchGap: { control: { type: "range", min: 0, max: 40, step: 1 } },
     strokeWidth: { control: { type: "range", min: 0, max: 4, step: 0.5 } },
   },
 };
@@ -61,6 +62,20 @@ export const WithOffset: Story = {
         <div key={offset}>
           <p className="text-xs text-on-surface-variant mb-2">offset: {offset}</p>
           <Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={offset} />
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/** A shorter notch with the same tip and the same content box: the body's edge drops toward the tip. */
+export const WithNotchGap: Story = {
+  render: () => (
+    <div className="flex gap-8 p-4">
+      {[0, 8, 16].map((gap) => (
+        <div key={gap}>
+          <p className="text-xs text-on-surface-variant mb-2">notchGap: {gap}</p>
+          <Notch width={160} height={120} notchWidth={52} notchHeight={46} notchSide="top" notchOffset={-24} radius={12} inverseRadius={10} notchGap={gap} />
         </div>
       ))}
     </div>
