@@ -100,4 +100,36 @@ describe("Notch", () => {
       expect(pathD("top", 30)).not.toBe(pathD("bottom", 30));
     });
   });
+
+  // notchGap: the notch gets shorter while its tip and the content stay put —
+  // the body's edge drops toward the tip instead (core-v2#1703).
+  describe("notchGap", () => {
+    const draw = (props: Partial<Parameters<typeof Notch>[0]>) => {
+      const { container } = render(
+        <Notch width={200} height={150} notchWidth={40} notchHeight={50} radius={12} inverseRadius={10} notchOffset={80} {...props} />,
+      );
+      const svg = container.querySelector("svg")!;
+      return { svg, d: svg.querySelector("path")!.getAttribute("d"), transform: svg.querySelector("path")!.getAttribute("transform") };
+    };
+
+    it.each(["top", "bottom", "left", "right"] as const)("keeps the box (and so the tip) where it was — %s", (notchSide) => {
+      const plain = draw({ notchSide });
+      const gapped = draw({ notchSide, notchGap: 10 });
+      expect(gapped.svg.getAttribute("width")).toBe(plain.svg.getAttribute("width"));
+      expect(gapped.svg.getAttribute("height")).toBe(plain.svg.getAttribute("height"));
+      expect(gapped.transform).toBe(plain.transform);
+      expect(gapped.d).not.toBe(plain.d);
+    });
+
+    it("draws a taller body and a shorter notch in the same box", () => {
+      expect(draw({ notchSide: "top", notchGap: 10 }).d).toBe(draw({ notchSide: "top", height: 160, notchHeight: 40 }).d);
+      expect(draw({ notchSide: "right", notchGap: 10 }).d).toBe(draw({ notchSide: "right", width: 210, notchWidth: 30 }).d);
+    });
+
+    it("clamps so the notch keeps room for its corners", () => {
+      // protrusion 50 − (radius 12 + inverseRadius 10) = 28 at most.
+      expect(draw({ notchSide: "top", notchGap: 99 }).d).toBe(draw({ notchSide: "top", notchGap: 28 }).d);
+      expect(draw({ notchSide: "top", notchGap: -5 }).d).toBe(draw({ notchSide: "top" }).d);
+    });
+  });
 });

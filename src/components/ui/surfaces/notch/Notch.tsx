@@ -20,6 +20,14 @@ export interface NotchProps {
   notchOffset?: number;
   radius?: number;
   inverseRadius?: number;
+  /**
+   * Empty space between the content box and the notch's shoulders. The body
+   * grows toward the notch's tip by this much and the notch gets shorter by the
+   * same, so the tip (the trigger it wraps) and the content both stay put.
+   * Clamped so the notch keeps room for `radius + inverseRadius`. Ignored with
+   * `headOnly`. Default `0`.
+   */
+  notchGap?: number;
   /** Set "none" to disable */
   fill?: string;
   /** Set "none" to disable */
@@ -147,6 +155,14 @@ function clampOffset(ny: number, edge: number, notchLen: number, minGap: number,
   return clamped;
 }
 
+function clampGap(gap: number, protrusion: number, minGap: number) {
+  const max = Math.max(0, protrusion - minGap);
+  if (gap > max && isDev) {
+    console.warn(`[Notch] notchGap ${gap} leaves the notch no room for its corners — clamping to ${max}.`);
+  }
+  return Math.min(Math.max(0, gap), max);
+}
+
 function getTransform(side: NotchSide, pw: number, ph: number): string | undefined {
   switch (side) {
     case "right": return undefined;
@@ -167,6 +183,7 @@ export function Notch({
   notchOffset = 0,
   radius = 8,
   inverseRadius = 6,
+  notchGap = 0,
   fill = "var(--color-surface-container-low)",
   stroke = "var(--color-primary)",
   strokeWidth = 1,
@@ -213,9 +230,11 @@ export function Notch({
     );
   }
 
-  const bw = horiz ? width : height;
+  // The gap moves the body's edge toward the tip; the box keeps its size.
+  const gap = clampGap(notchGap, horiz ? notchWidth : notchHeight, minGap);
+  const bw = (horiz ? width : height) + gap;
   const bh = horiz ? height : width;
-  const bnw = horiz ? notchWidth : notchHeight;
+  const bnw = (horiz ? notchWidth : notchHeight) - gap;
   const bnh = horiz ? notchHeight : notchWidth;
   const rawNy = resolveOffset(notchOffset, edge, notchLen, notchSide);
   const ny = clampOffset(rawNy, edge, notchLen, minGap, notchOffset);
