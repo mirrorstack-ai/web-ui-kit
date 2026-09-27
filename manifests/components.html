@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">359 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">360 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -9487,9 +9487,9 @@ orientation?: &quot;vertical&quot; | &quot;horizontal&quot; = &quot;vertical&quo
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Notch</h2>
       <div class="badges">
-        <label for="c-48-ui-notch-notch-props" class="badge ok as-toggle">14 prop types</label>
+        <label for="c-48-ui-notch-notch-props" class="badge ok as-toggle">15 prop types</label>
         <label for="c-48-ui-notch-notch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-48-ui-notch-notch-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-48-ui-notch-notch-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -9521,7 +9521,7 @@ orientation?: &quot;vertical&quot; | &quot;horizontal&quot; = &quot;vertical&quo
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">14 prop types</span>
+              <span class="badge ok">15 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/notch/Notch.tsx::Notch</code></pre>
             <pre><code>Props:</code></pre>
@@ -9540,6 +9540,15 @@ headOnly?: boolean = false
 height: number
 
 inverseRadius?: number = 6
+
+/**
+ * Empty space between the content box and the notch&#39;s shoulders. The body
+ * grows toward the notch&#39;s tip by this much and the notch gets shorter by the
+ * same, so the tip (the trigger it wraps) and the content both stay put.
+ * Clamped so the notch keeps room for `radius + inverseRadius`. Ignored with
+ * `headOnly`. Default `0`.
+ */
+notchGap?: number = 0
 
 notchHeight: number
 
@@ -9666,6 +9675,24 @@ width: number</code></pre>
       &lt;div key={offset}&gt;
         &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: {offset}&lt;/p&gt;
         &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={offset} /&gt;
+      &lt;/div&gt;
+    ))}
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Notch Gap</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A shorter notch with the same tip and the same content box: the body&#39;s edge drops toward the tip.</div>
+              <pre><code>const WithNotchGap = () =&gt; (
+  &lt;div className=&quot;flex gap-8 p-4&quot;&gt;
+    {[0, 8, 16].map((gap) =&gt; (
+      &lt;div key={gap}&gt;
+        &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;notchGap: {gap}&lt;/p&gt;
+        &lt;Notch width={160} height={120} notchWidth={52} notchHeight={46} notchSide=&quot;top&quot; notchOffset={-24} radius={12} inverseRadius={10} notchGap={gap} /&gt;
       &lt;/div&gt;
     ))}
   &lt;/div&gt;
