@@ -746,7 +746,7 @@ unreleased component work on top of that baseline.
   public types (`NotchGridProps`, `NotchGridItem`, `NotchSubItem`,
   `NotchGridUI`, `PrimitiveRegistry`) and the desire/theme model types
   (`Desire`, `Pos`, `Mask`, `Priority`, `NotchTheme`). Design doc:
-  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs/tree/main/architecture/notch-grid-v2).
+  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs-internal/tree/main/architecture/notch-grid-v2).
 
 ## 0.3.4
 
@@ -794,7 +794,7 @@ unreleased component work on top of that baseline.
   (responsive resolution), `BlockShape.tsx` (rounded-mask React adapter).
   No public exports yet — these are wired up in a later slice when the
   `<NotchGrid>` component lands. Design doc:
-  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs/tree/main/architecture/notch-grid-v2).
+  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs-internal/tree/main/architecture/notch-grid-v2).
 
 ## 0.3.0
 
