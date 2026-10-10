@@ -11,7 +11,7 @@ pnpm storybook
 
 Storybook opens at [http://localhost:6006](http://localhost:6006).
 
-Questions? Join us on [Discord](https://discord.gg/2JRusWWFec).
+Questions? Join us on [Discord](https://discord.gg/QABqwGnXbc).
 
 ## Branch naming
 
