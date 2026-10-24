@@ -3,6 +3,14 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.23
+
+### Changed
+
+- **`DropdownMenu` separator** — block margin halved (`my-1` → `my-0.5`): the gap on
+  each side of the divider goes from 8px to 6px. Hover-open menus stay open over
+  the whole card, separator included (now covered by a test).
+
 ## 0.7.22
 
 ### Fixed
