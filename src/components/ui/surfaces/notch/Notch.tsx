@@ -19,6 +19,11 @@ export interface NotchProps {
   /** Positive = from top/left, negative = from bottom/right */
   notchOffset?: number;
   radius?: number;
+  /**
+   * Corner radius for ONLY the notch tab's two outer corners (the ones at the
+   * tip). Default = `radius`. Raise it to round the tab more than the body.
+   */
+  headRadius?: number;
   inverseRadius?: number;
   /**
    * Empty space between the content box and the notch's shoulders. The body
@@ -46,6 +51,7 @@ function buildPath(
   nw: number, nh: number,
   ny: number,
   r: number, ir: number,
+  hr: number = r,
 ) {
   const tw = w + nw;
   const nb = ny + nh;
@@ -56,23 +62,23 @@ function buildPath(
   d.push(`M ${r},0`);
 
   if (atStart) {
-    d.push(`H ${tw - r}`);
-    d.push(`A ${r},${r} 0 0,1 ${tw},${r}`);
+    d.push(`H ${tw - hr}`);
+    d.push(`A ${hr},${hr} 0 0,1 ${tw},${hr}`);
   } else {
     d.push(`H ${w - r}`);
     d.push(`A ${r},${r} 0 0,1 ${w},${r}`);
     d.push(`V ${ny - ir}`);
     d.push(`A ${ir},${ir} 0 0,0 ${w + ir},${ny}`);
-    d.push(`H ${tw - r}`);
-    d.push(`A ${r},${r} 0 0,1 ${tw},${ny + r}`);
+    d.push(`H ${tw - hr}`);
+    d.push(`A ${hr},${hr} 0 0,1 ${tw},${ny + hr}`);
   }
 
   if (atEnd) {
-    d.push(`V ${h - r}`);
-    d.push(`A ${r},${r} 0 0,1 ${tw - r},${h}`);
+    d.push(`V ${h - hr}`);
+    d.push(`A ${hr},${hr} 0 0,1 ${tw - hr},${h}`);
   } else {
-    d.push(`V ${nb - r}`);
-    d.push(`A ${r},${r} 0 0,1 ${tw - r},${nb}`);
+    d.push(`V ${nb - hr}`);
+    d.push(`A ${hr},${hr} 0 0,1 ${tw - hr},${nb}`);
     d.push(`H ${w + ir}`);
     d.push(`A ${ir},${ir} 0 0,0 ${w},${nb + ir}`);
     d.push(`V ${h - r}`);
@@ -182,6 +188,7 @@ export function Notch({
   notchSide = "right",
   notchOffset = 0,
   radius = 8,
+  headRadius = radius,
   inverseRadius = 6,
   notchGap = 0,
   fill = "var(--color-surface-container-low)",
@@ -205,7 +212,7 @@ export function Notch({
     const botIr = atEnd ? 0 : ir;
     const pathW = notchWidth + ir;
     const pathH = notchHeight + topIr + botIr;
-    const headPath = buildHeadPath(notchWidth, notchHeight, radius, ir, atStart, atEnd);
+    const headPath = buildHeadPath(notchWidth, notchHeight, headRadius, ir, atStart, atEnd);
 
     let svgW: number, svgH: number;
     if (horiz) { svgW = pathW; svgH = pathH; }
@@ -239,7 +246,7 @@ export function Notch({
   const rawNy = resolveOffset(notchOffset, edge, notchLen, notchSide);
   const ny = clampOffset(rawNy, edge, notchLen, minGap, notchOffset);
 
-  const path = buildPath(bw, bh, bnw, bnh, ny, radius, ir);
+  const path = buildPath(bw, bh, bnw, bnh, ny, radius, ir, headRadius);
 
   const svgW = horiz ? width + notchWidth : width;
   const svgH = horiz ? height : height + notchHeight;

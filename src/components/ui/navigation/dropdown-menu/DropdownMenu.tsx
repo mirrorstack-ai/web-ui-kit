@@ -74,6 +74,9 @@ export interface DropdownMenuProps {
    *  match a small trigger's own radius for a less-rounded head (e.g. an icon
    *  button with an 8px radius). */
   notchRadius?: number;
+  /** Corner radius for ONLY the notch tab's outer corners (the tip), so the tab
+   *  can be rounder than the menu body. Default = `notchRadius`. */
+  notchHeadRadius?: number;
   /** Radius of the notch's inverse (concave) corners, where the tab curves back
    *  into the card (SVG units). Default `10`. Usually scaled down alongside
    *  `notchRadius` for a tighter head. */
@@ -126,6 +129,7 @@ export function DropdownMenu({
   notchWidth = DD_NOTCH_W,
   notchHeight = DD_NOTCH_H,
   notchRadius = DD_R,
+  notchHeadRadius,
   notchInverseRadius = DD_IR,
   notchStrokeWidth = DD_SW,
   useNotch = true,
@@ -291,6 +295,7 @@ export function DropdownMenu({
               notchSide={openUp ? "top" : "bottom"}
               notchOffset={offset}
               radius={notchRadius}
+              headRadius={notchHeadRadius}
               inverseRadius={notchInverseRadius}
               stroke="var(--color-primary)"
               strokeWidth={notchStrokeWidth}
