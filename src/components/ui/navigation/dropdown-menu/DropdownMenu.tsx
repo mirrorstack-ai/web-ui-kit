@@ -390,7 +390,10 @@ export function DropdownMenu({
                   {isToggle && (
                     // The row owns the interaction (click, Enter, Space); the
                     // Switch is its visual state, so it is inert to pointer + AT.
-                    <span aria-hidden="true" className="pointer-events-none ml-auto pl-3">
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none ml-auto flex shrink-0 items-center pl-3"
+                    >
                       <Switch
                         size="sm"
                         checked={item.checked === true}

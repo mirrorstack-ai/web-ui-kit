@@ -137,12 +137,36 @@ export const RoundedHead: Story = {
   },
 };
 
+async function waitForRow(root: HTMLElement): Promise<HTMLElement> {
+  for (let i = 0; i < 50; i++) {
+    const row = root.querySelector<HTMLElement>('[role="menuitemcheckbox"]');
+    if (row) return row;
+    await new Promise((r) => setTimeout(r, 20));
+  }
+  throw new Error("toggle row never rendered");
+}
+
 /**
  * An item with `checked` becomes a toggle row (`menuitemcheckbox`): no leading
  * icon, a trailing Switch, and selecting it (click / Enter / Space) does NOT
  * close the menu — the caller flips its own state.
  */
 export const ToggleItem: Story = {
+  // Layout proof: the Switch box must sit on the label's vertical centre.
+  play: async ({ canvasElement }) => {
+    canvasElement.querySelector("button")?.click();
+    const row = await waitForRow(canvasElement);
+    await document.fonts.ready; // the icon font changes row height once loaded
+    await new Promise((r) => requestAnimationFrame(() => r(null)));
+    const label = Array.from(row.childNodes).find((n) => n.nodeType === Node.TEXT_NODE)!;
+    const range = document.createRange();
+    range.selectNodeContents(label);
+    const labelRect = range.getBoundingClientRect();
+    const sw = row.querySelector('[role="switch"]')!.getBoundingClientRect();
+    const diff = Math.abs(sw.top + sw.height / 2 - (labelRect.top + labelRect.height / 2));
+    console.log(`[ToggleItem] switch centreY - label centreY = ${diff.toFixed(2)}px`);
+    if (diff > 0.5) throw new Error(`Switch is ${diff.toFixed(2)}px off the label's centre`);
+  },
   render: (args) => {
     const [reduce, setReduce] = useState(false);
     return (
