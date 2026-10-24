@@ -87,6 +87,70 @@ describe("DropdownMenu", () => {
   });
 });
 
+describe("DropdownMenu plain rows (checked unset)", () => {
+  it("renders the exact legacy markup", () => {
+    render(<DropdownMenu items={items} onSelect={() => {}} trigger={trigger} />);
+    fireEvent.click(screen.getByText("Open"));
+    const rows = screen.getAllByRole("menuitem").map((el) => el.outerHTML);
+    expect(rows).toMatchInlineSnapshot(`
+      [
+        "<div role="menuitem" class="flex cursor-pointer items-center rounded-lg text-left text-sm transition-colors gap-2 px-2 py-1.5 text-on-surface bg-on-surface/8"><span class="material-symbols-rounded select-none shrink-0 text-on-surface-variant" style="font-size: 16px;" aria-hidden="true">edit</span>Edit</div>",
+        "<div role="menuitem" class="flex cursor-pointer items-center rounded-lg text-left text-sm transition-colors gap-2 px-2 py-1.5 text-on-surface"><span class="material-symbols-rounded select-none shrink-0 text-on-surface-variant" style="font-size: 16px;" aria-hidden="true">content_copy</span>Duplicate</div>",
+        "<div role="menuitem" aria-disabled="true" class="flex cursor-pointer items-center rounded-lg text-left text-sm transition-colors gap-2 px-2 py-1.5 pointer-events-none opacity-50 text-on-surface">Locked</div>",
+        "<div role="menuitem" class="flex cursor-pointer items-center rounded-lg text-left text-sm transition-colors gap-2 px-2 py-1.5 text-error"><span class="material-symbols-rounded select-none shrink-0 text-error" style="font-size: 16px;" aria-hidden="true">delete</span>Delete</div>",
+      ]
+    `);
+  });
+});
+
+describe("DropdownMenu toggle item", () => {
+  const toggleItems: DropdownMenuEntry[] = [
+    { id: "motion", label: "Reduce animation", icon: "animation", checked: true },
+    { id: "edit", label: "Edit", icon: "edit" },
+  ];
+
+  const openMenu = (onSelect = vi.fn()) => {
+    render(<DropdownMenu items={toggleItems} onSelect={onSelect} trigger={trigger} />);
+    fireEvent.click(screen.getByText("Open"));
+    return onSelect;
+  };
+
+  it("renders menuitemcheckbox with aria-checked, a trailing sm Switch and no icon", () => {
+    openMenu();
+    const row = screen.getByRole("menuitemcheckbox", { name: /Reduce animation/ });
+    expect(row).toHaveAttribute("aria-checked", "true");
+    expect(row.querySelector('[role="switch"]')).toHaveAttribute("aria-checked", "true");
+    expect(row.firstChild?.nodeType).toBe(Node.TEXT_NODE); // label first: no leading icon
+  });
+
+  it("click calls onSelect and keeps the menu open", () => {
+    const onSelect = openMenu();
+    fireEvent.click(screen.getByRole("menuitemcheckbox"));
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "motion" }));
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
+
+  it.each(["Enter", " "])("key %j selects without closing; focus stays", async (key) => {
+    const onSelect = openMenu();
+    const menu = screen.getByRole("menu");
+    await act(async () => {
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+    });
+    expect(menu).toHaveFocus();
+    fireEvent.keyDown(menu, { key });
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    expect(menu).toHaveFocus();
+  });
+
+  it("a plain row beside a toggle still closes on select", () => {
+    openMenu();
+    fireEvent.click(screen.getByText("Edit"));
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+});
+
 describe("DropdownMenu openOnHover", () => {
   const realPointerEvent = globalThis.PointerEvent;
   beforeAll(() => {

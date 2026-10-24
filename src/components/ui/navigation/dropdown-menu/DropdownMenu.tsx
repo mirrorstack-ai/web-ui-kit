@@ -11,6 +11,7 @@ import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
+import { Switch } from "@/components/ui/inputs/switch/Switch";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
 import { useMenuKeyNav } from "@/hooks/useMenuKeyNav";
 
@@ -52,6 +53,11 @@ export interface DropdownMenuItem {
   /** `"danger"` is a deprecated alias for `"error"`. */
   variant?: "default" | "error" | "danger";
   disabled?: boolean;
+  /** Turns the row into a toggle: `role="menuitemcheckbox"` with `aria-checked`,
+   *  no leading icon, and a kit `Switch` (sm) on the trailing edge. Selecting it
+   *  (click, Enter, Space) calls `onSelect` WITHOUT closing the menu; the caller
+   *  flips its own state and re-renders `checked`. Unset = a plain action row. */
+  checked?: boolean;
 }
 
 export interface DropdownMenuSeparator {
@@ -173,7 +179,7 @@ export function DropdownMenu({
       const entry = items[index];
       if (entry && isActionable(entry)) {
         onSelect(entry);
-        closeMenu();
+        if (entry.checked === undefined) closeMenu();
       }
     },
     // DropdownMenu never moves focus on close (the trigger node is
@@ -332,11 +338,13 @@ export function DropdownMenu({
               }
               const isError =
                 item.variant === "error" || item.variant === "danger";
+              const isToggle = item.checked !== undefined;
 
               return (
                 <div
                   key={item.id}
-                  role="menuitem"
+                  role={isToggle ? "menuitemcheckbox" : "menuitem"}
+                  aria-checked={isToggle ? item.checked : undefined}
                   aria-disabled={item.disabled || undefined}
                   className={cn(
                     "flex cursor-pointer items-center rounded-lg text-left text-sm transition-colors",
@@ -351,13 +359,14 @@ export function DropdownMenu({
                   onClick={() => {
                     if (item.disabled) return;
                     onSelect(item);
-                    closeMenu();
+                    if (!isToggle) closeMenu();
                   }}
                   onMouseEnter={() => {
                     if (!item.disabled) setActiveIndex(index);
                   }}
                 >
-                  {item.icon != null &&
+                  {!isToggle &&
+                    item.icon != null &&
                     (typeof item.icon === "string" ? (
                       <Icon
                         name={item.icon}
@@ -378,7 +387,19 @@ export function DropdownMenu({
                       </span>
                     ))}
                   {item.label}
-                  {item.external && (
+                  {isToggle && (
+                    // The row owns the interaction (click, Enter, Space); the
+                    // Switch is its visual state, so it is inert to pointer + AT.
+                    <span aria-hidden="true" className="pointer-events-none ml-auto pl-3">
+                      <Switch
+                        size="sm"
+                        checked={item.checked === true}
+                        onChange={() => {}}
+                        aria-label={item.label}
+                      />
+                    </span>
+                  )}
+                  {!isToggle && item.external && (
                     <Icon
                       name="open_in_new"
                       size={sz.icon - 3}
