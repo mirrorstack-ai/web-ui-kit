@@ -109,6 +109,25 @@ export const OpenOnHoverSeparator: Story = {
 };
 
 /**
+ * Regression for a click-through header: the menu sits under a
+ * click-through wrapper (`pointer-events: none` on the menu), yet the whole card (separator, padding, gaps)
+ * stays hoverable, so a hover-open menu does not close while the pointer
+ * crosses the divider.
+ */
+export const OpenOnHoverUnderPointerNone: Story = {
+  ...OpenOnHoverSeparator,
+  decorators: [
+    (Story) => (
+      // The menu wrapper is click-through and only item rows opt back in —
+      // the shape of the mirrorstack.ai header's global CSS.
+      <div className="inline-block [&_[role=menu]]:pointer-events-none [&_[role=menuitem]]:pointer-events-auto">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+/**
  * The notch head tuned to a small trigger: `notchWidth`/`notchHeight` size the
  * tab to the icon button, and `notchRadius`/`notchInverseRadius` round the head
  * down to the button's own corner radius instead of the default bulbous 16.
