@@ -179,6 +179,35 @@ describe("DropdownMenu openOnHover", () => {
     return container.firstChild as HTMLElement;
   };
 
+  it("stays open while the pointer travels over a separator inside the card", () => {
+    const outer = renderHover();
+    fireEvent.pointerEnter(outer, mouse);
+    const sep = screen.getByRole("separator");
+    // trigger -> separator is a move between descendants of the container:
+    // no pointerleave reaches it, so no close may be scheduled.
+    fireEvent.pointerOver(sep, { ...mouse, relatedTarget: screen.getByText("Edit") });
+    fireEvent.pointerMove(sep, mouse);
+    act(() => {
+      vi.advanceTimersByTime(HOVER_CLOSE_GRACE_MS * 4);
+    });
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    // leaving ONTO the separator from the container edge cancels a pending close
+    fireEvent.pointerLeave(outer, mouse);
+    fireEvent.pointerEnter(outer, mouse);
+    act(() => {
+      vi.advanceTimersByTime(HOVER_CLOSE_GRACE_MS * 4);
+    });
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
+
+  it("separator block margin is my-0.5 (half the old my-1)", () => {
+    const outer = renderHover();
+    fireEvent.pointerEnter(outer, mouse);
+    const cls = screen.getByRole("separator").className;
+    expect(cls).toContain("my-0.5");
+    expect(cls).not.toContain("my-1 ");
+  });
+
   it("opens on pointerEnter (mouse)", () => {
     const root = renderHover();
     fireEvent.pointerEnter(root, mouse);

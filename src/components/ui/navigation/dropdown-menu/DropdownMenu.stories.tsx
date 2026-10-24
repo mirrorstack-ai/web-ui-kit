@@ -91,6 +91,24 @@ export const OpenOnHover: Story = {
 };
 
 /**
+ * Hover menu with a separator above a toggle row (the mirrorstack.ai ≡ menu
+ * shape): the menu stays open over the whole card, separator included, and the
+ * divider's block margin is `my-0.5` (a 6px gap each side with the 4px flex gap).
+ */
+export const OpenOnHoverSeparator: Story = {
+  args: {
+    openOnHover: true,
+    trigger: <IconButton icon="menu" aria-label="Open menu" variant="text" size="sm" />,
+    items: [
+      { id: "docs", label: "Docs", icon: "menu_book" },
+      { type: "separator" as const },
+      { id: "reduce-motion", label: "Reduce animation", checked: false },
+    ],
+    onSelect: (item) => console.log("Selected:", item.id),
+  },
+};
+
+/**
  * The notch head tuned to a small trigger: `notchWidth`/`notchHeight` size the
  * tab to the icon button, and `notchRadius`/`notchInverseRadius` round the head
  * down to the button's own corner radius instead of the default bulbous 16.
