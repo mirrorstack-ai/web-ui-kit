@@ -3,6 +3,16 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.20
+
+### Added
+
+- **`Notch` `headRadius` and `DropdownMenu` `notchHeadRadius`** — round only the
+  notch tab's two outer corners, so the tab can be rounder than the body
+  (`notchRadius`). Default is the body radius, and the path is byte-identical
+  when unset.
+- **`Notch` `notchGap`** (#419) — a shorter notch with the same tip and content.
+
 ## 0.7.19
 
 ### Fixed
