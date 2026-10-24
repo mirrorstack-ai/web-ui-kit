@@ -324,7 +324,7 @@ export function DropdownMenu({
                   <div
                     key={`sep-${index}`}
                     role="separator"
-                    className={cn("my-1 h-px bg-outline-variant", sz.sep)}
+                    className={cn("my-0.5 h-px bg-outline-variant", sz.sep)}
                   />
                 );
               }
