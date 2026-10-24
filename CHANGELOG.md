@@ -3,6 +3,15 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.21
+
+### Added
+
+- **`DropdownMenu` toggle item** (`checked?: boolean` on an item) — the row renders
+  `role="menuitemcheckbox"` with `aria-checked`, no leading icon, the label and a
+  trailing `Switch` (sm). Selecting it by click, Enter or Space calls `onSelect`
+  without closing the menu. Plain rows are byte-identical when `checked` is unset.
+
 ## 0.7.20
 
 ### Added
