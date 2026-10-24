@@ -3,6 +3,13 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.22
+
+### Fixed
+
+- **`DropdownMenu` toggle item** — the trailing `Switch` is now vertically centred on
+  the row (its wrapper was inline and sat ~2.5px high).
+
 ## 0.7.21
 
 ### Added
