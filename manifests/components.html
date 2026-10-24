@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">360 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">361 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4277,9 +4277,9 @@ total?: number</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DropdownMenu</h2>
       <div class="badges">
-        <label for="c-20-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">15 prop types</label>
+        <label for="c-20-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">16 prop types</label>
         <label for="c-20-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-20-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-20-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -4311,7 +4311,7 @@ total?: number</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">15 prop types</span>
+              <span class="badge ok">16 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/navigation/dropdown-menu/DropdownMenu.tsx::DropdownMenu</code></pre>
             <pre><code>Props:</code></pre>
@@ -4325,6 +4325,12 @@ items: DropdownMenuEntry[]
  *  to nudge the whole notched card off the auto-aligned anchor.
  */
 menuClassName?: string
+
+/**
+ * Corner radius for ONLY the notch tab&#39;s outer corners (the tip), so the tab
+ *  can be rounder than the menu body. Default = `notchRadius`.
+ */
+notchHeadRadius?: number
 
 /**
  * Height of the notch tab (SVG units). Default `46`.
@@ -4495,6 +4501,27 @@ useNotch?: boolean = true</code></pre>
       { id: &quot;source&quot;, label: &quot;View source&quot;, icon: &quot;code&quot; },
       { type: &quot;separator&quot; as const },
       { id: &quot;subscribe&quot;, label: &quot;Get early access&quot;, icon: &quot;mail&quot; },
+    ]}
+    onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Rounded Head</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`notchHeadRadius` rounds ONLY the notch tab&#39;s outer corners, so an avatar trigger gets a rounder tab (20) than the menu body (`notchRadius` 12).</div>
+              <pre><code>const RoundedHead = () =&gt; &lt;DropdownMenu
+    trigger={(&lt;IconButton icon=&quot;account_circle&quot; aria-label=&quot;Account menu&quot; variant=&quot;text&quot; size=&quot;sm&quot; /&gt;)}
+    notchWidth={44}
+    notchHeight={44}
+    notchRadius={12}
+    notchHeadRadius={20}
+    items={[
+      { id: &quot;profile&quot;, label: &quot;Profile&quot;, icon: &quot;person&quot; },
+      { id: &quot;settings&quot;, label: &quot;Settings&quot;, icon: &quot;settings&quot; },
+      { type: &quot;separator&quot; as const },
+      { id: &quot;signout&quot;, label: &quot;Sign out&quot;, icon: &quot;logout&quot; },
     ]}
     onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
             </div>
@@ -9487,7 +9514,7 @@ orientation?: &quot;vertical&quot; | &quot;horizontal&quot; = &quot;vertical&quo
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Notch</h2>
       <div class="badges">
-        <label for="c-48-ui-notch-notch-props" class="badge ok as-toggle">15 prop types</label>
+        <label for="c-48-ui-notch-notch-props" class="badge ok as-toggle">16 prop types</label>
         <label for="c-48-ui-notch-notch-info" class="badge info as-toggle">1 info</label>
         <label for="c-48-ui-notch-notch-stories" class="badge ok as-toggle">8 stories</label>
         
@@ -9521,7 +9548,7 @@ orientation?: &quot;vertical&quot; | &quot;horizontal&quot; = &quot;vertical&quo
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">15 prop types</span>
+              <span class="badge ok">16 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/notch/Notch.tsx::Notch</code></pre>
             <pre><code>Props:</code></pre>
@@ -9536,6 +9563,12 @@ fill?: string = &quot;var(--color-surface-container-low)&quot;
  * Render only the notch tab, no body
  */
 headOnly?: boolean = false
+
+/**
+ * Corner radius for ONLY the notch tab&#39;s two outer corners (the ones at the
+ * tip). Default = `radius`. Raise it to round the tab more than the body.
+ */
+headRadius?: number = radius = 8
 
 height: number
 
