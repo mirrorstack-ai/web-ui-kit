@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">361 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">362 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4279,7 +4279,7 @@ total?: number</code></pre>
       <div class="badges">
         <label for="c-20-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">16 prop types</label>
         <label for="c-20-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-20-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-20-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -4524,6 +4524,30 @@ useNotch?: boolean = true</code></pre>
       { id: &quot;signout&quot;, label: &quot;Sign out&quot;, icon: &quot;logout&quot; },
     ]}
     onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Toggle Item</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">An item with `checked` becomes a toggle row (`menuitemcheckbox`): no leading icon, a trailing Switch, and selecting it (click / Enter / Space) does NOT close the menu — the caller flips its own state.</div>
+              <pre><code>const ToggleItem = () =&gt; {
+    const [reduce, setReduce] = useState(false);
+
+    return (
+        &lt;DropdownMenu
+            trigger={(&lt;IconButton icon=&quot;menu&quot; aria-label=&quot;Open menu&quot; variant=&quot;text&quot; size=&quot;sm&quot; /&gt;)}
+            items={[
+              { id: &quot;docs&quot;, label: &quot;Docs&quot;, icon: &quot;menu_book&quot; },
+              { type: &quot;separator&quot; as const },
+              { id: &quot;reduce-motion&quot;, label: &quot;Reduce animation&quot;, checked: reduce },
+            ]}
+            onSelect={(item) =&gt; {
+              if (item.id === &quot;reduce-motion&quot;) setReduce((v) =&gt; !v);
+            }} /&gt;
+    );
+};</code></pre>
             </div>
         </div>
     
