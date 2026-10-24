@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">362 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">363 stories ok</span></div>
   </div>
 </header>
 <main>
@@ -4279,7 +4279,7 @@ total?: number</code></pre>
       <div class="badges">
         <label for="c-20-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">16 prop types</label>
         <label for="c-20-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-20-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-20-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">7 stories</label>
         
       </div>
     </div>
@@ -4480,6 +4480,23 @@ useNotch?: boolean = true</code></pre>
       { type: &quot;separator&quot; as const },
       { id: &quot;archive&quot;, label: &quot;Archive&quot;, icon: &quot;archive&quot; },
       { id: &quot;delete&quot;, label: &quot;Delete&quot;, icon: &quot;delete&quot;, variant: &quot;error&quot; as const },
+    ]}
+    onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Open On Hover Separator</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Hover menu with a separator above a toggle row (the mirrorstack.ai ≡ menu shape): the menu stays open over the whole card, separator included, and the divider&#39;s block margin is `my-0.5` (a 6px gap each side with the 4px flex gap).</div>
+              <pre><code>const OpenOnHoverSeparator = () =&gt; &lt;DropdownMenu
+    openOnHover
+    trigger={&lt;IconButton icon=&quot;menu&quot; aria-label=&quot;Open menu&quot; variant=&quot;text&quot; size=&quot;sm&quot; /&gt;}
+    items={[
+      { id: &quot;docs&quot;, label: &quot;Docs&quot;, icon: &quot;menu_book&quot; },
+      { type: &quot;separator&quot; as const },
+      { id: &quot;reduce-motion&quot;, label: &quot;Reduce animation&quot;, checked: false },
     ]}
     onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
             </div>
