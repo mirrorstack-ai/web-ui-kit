@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "@/components/ui/actions/icon-button/IconButton";
@@ -133,5 +134,36 @@ export const RoundedHead: Story = {
       { id: "signout", label: "Sign out", icon: "logout" },
     ],
     onSelect: (item) => console.log("Selected:", item.id),
+  },
+};
+
+/**
+ * An item with `checked` becomes a toggle row (`menuitemcheckbox`): no leading
+ * icon, a trailing Switch, and selecting it (click / Enter / Space) does NOT
+ * close the menu — the caller flips its own state.
+ */
+export const ToggleItem: Story = {
+  render: (args) => {
+    const [reduce, setReduce] = useState(false);
+    return (
+      <DropdownMenu
+        {...args}
+        items={[
+          { id: "docs", label: "Docs", icon: "menu_book" },
+          { type: "separator" as const },
+          { id: "reduce-motion", label: "Reduce animation", checked: reduce },
+        ]}
+        onSelect={(item) => {
+          if (item.id === "reduce-motion") setReduce((v) => !v);
+        }}
+      />
+    );
+  },
+  args: {
+    trigger: (
+      <IconButton icon="menu" aria-label="Open menu" variant="text" size="sm" />
+    ),
+    items: [],
+    onSelect: () => {},
   },
 };
