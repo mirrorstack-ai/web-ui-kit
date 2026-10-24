@@ -3,6 +3,15 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.24
+
+### Fixed
+
+- **`DropdownMenu` card is `pointer-events-auto`** — under a click-through ancestor
+  (e.g. a `pointer-events-none` header that only re-enables item rows) the
+  separator, padding and gaps were not hit-testable, so an `openOnHover` menu closed
+  when the pointer crossed a divider. The whole card is now one hover/click surface.
+
 ## 0.7.23
 
 ### Changed
