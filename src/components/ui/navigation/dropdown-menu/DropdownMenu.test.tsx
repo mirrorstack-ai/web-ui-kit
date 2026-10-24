@@ -200,6 +200,13 @@ describe("DropdownMenu openOnHover", () => {
     expect(screen.getByRole("menu")).toBeInTheDocument();
   });
 
+  it("the card is hit-testable even under a pointer-events-none ancestor", () => {
+    const outer = renderHover();
+    fireEvent.pointerEnter(outer, mouse);
+    const card = screen.getByRole("separator").parentElement!;
+    expect(card.className).toContain("pointer-events-auto");
+  });
+
   it("separator block margin is my-0.5 (half the old my-1)", () => {
     const outer = renderHover();
     fireEvent.pointerEnter(outer, mouse);

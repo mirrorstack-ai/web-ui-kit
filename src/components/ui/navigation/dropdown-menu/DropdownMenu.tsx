@@ -311,7 +311,10 @@ export function DropdownMenu({
           <div
             ref={contentRef}
             className={cn(
-              "relative z-10 flex flex-col gap-1 p-2",
+              // pointer-events-auto: the card (rows, separators, padding, gaps) is ONE
+              // hover/click surface even under a pointer-events-none ancestor (e.g. a
+              // click-through header), so travel over a separator never "leaves".
+              "pointer-events-auto relative z-10 flex flex-col gap-1 p-2",
               sz.minW,
               !useNotch &&
                 "rounded-lg border border-outline-variant bg-surface-container-low",
