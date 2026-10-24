@@ -112,3 +112,26 @@ export const TightHead: Story = {
     onSelect: (item) => console.log("Selected:", item.id),
   },
 };
+
+/**
+ * `notchHeadRadius` rounds ONLY the notch tab's outer corners, so an avatar
+ * trigger gets a rounder tab (20) than the menu body (`notchRadius` 12).
+ */
+export const RoundedHead: Story = {
+  args: {
+    trigger: (
+      <IconButton icon="account_circle" aria-label="Account menu" variant="text" size="sm" />
+    ),
+    notchWidth: 44,
+    notchHeight: 44,
+    notchRadius: 12,
+    notchHeadRadius: 20,
+    items: [
+      { id: "profile", label: "Profile", icon: "person" },
+      { id: "settings", label: "Settings", icon: "settings" },
+      { type: "separator" as const },
+      { id: "signout", label: "Sign out", icon: "logout" },
+    ],
+    onSelect: (item) => console.log("Selected:", item.id),
+  },
+};
