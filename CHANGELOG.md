@@ -3,6 +3,17 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.25
+
+### Fixed
+
+- **Release train publishes `module-preview` again** — the workflow ran
+  `pnpm -C packages/module-preview publish`, which pnpm forwards to npm 11 as extra
+  positionals (EUSAGE). The kit published, the step then failed, so 0.7.20–0.7.24
+  shipped no `@mirrorstack-ai/module-preview` and skipped the npmjs mirror. It now
+  publishes from inside the package directory. This release carries every change
+  since 0.7.19 (Notch `headRadius`, DropdownMenu toggle item and fixes) to both.
+
 ## 0.7.24
 
 ### Fixed
