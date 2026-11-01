@@ -133,10 +133,49 @@ describe("useAgentChat", () => {
     await flush();
 
     expect(result.current.error).toBe("send_failed");
+    expect(result.current.errorInfo).toEqual({ code: "send_failed" });
     // Pending placeholder dropped (no streamed text), user bubble kept.
     expect(result.current.messages).toEqual([
       expect.objectContaining({ role: "user", content: "hello" }),
     ]);
+  });
+
+  it("a send refused with a server code keeps the real code, message, and wait time", async () => {
+    const client = fakeClient({
+      createConversation: vi
+        .fn()
+        .mockRejectedValue({ status: 429, code: "agent_turn_limit", retryAfterSeconds: 42 }),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+
+    act(() => result.current.send("hello"));
+    await flush();
+
+    expect(result.current.error).toBe("agent_turn_limit");
+    expect(result.current.errorInfo).toEqual({
+      code: "agent_turn_limit",
+      retryAfterSeconds: 42,
+    });
+  });
+
+  it("a send refused with a server message keeps it in errorInfo", async () => {
+    const client = fakeClient({
+      createConversation: vi.fn().mockRejectedValue({
+        status: 429,
+        code: "daily_ai_ceiling",
+        serverMessage: "Daily AI usage cap reached. Resets at 00:00 UTC.",
+      }),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+
+    act(() => result.current.send("hello"));
+    await flush();
+
+    expect(result.current.error).toBe("daily_ai_ceiling");
+    expect(result.current.errorInfo).toEqual({
+      code: "daily_ai_ceiling",
+      message: "Daily AI usage cap reached. Resets at 00:00 UTC.",
+    });
   });
 
   it("stream onError settles the pending bubble, keeping streamed text", async () => {
@@ -152,9 +191,28 @@ describe("useAgentChat", () => {
     await flush();
 
     expect(result.current.error).toBe("reply_failed");
+    expect(result.current.errorInfo).toEqual({ code: "reply_failed" });
     expect(result.current.messages[1]).toMatchObject({ role: "agent", content: "partial" });
     expect(result.current.messages[1].id).not.toBe("__pending__");
   });
+
+  it.each(["ai_unavailable", "ai_credits_exhausted", "prompt_too_long"])(
+    "a crafted SSE error frame sets error to %s",
+    async (code) => {
+      const stream = controlledStream();
+      const client = fakeClient({ streamAgentReply: stream.fn });
+      const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+
+      act(() => result.current.send("hello"));
+      await flush();
+      act(() => stream.handlers.onError(code));
+      stream.release();
+      await flush();
+
+      expect(result.current.error).toBe(code);
+      expect(result.current.errorInfo).toEqual({ code });
+    },
+  );
 
   it("interleaves tool calls with response text in stream order, resolving in place", async () => {
     const stream = controlledStream();
@@ -311,10 +369,32 @@ describe("useAgentChat", () => {
     await flush();
 
     expect(result.current.error).toBe("send_failed");
+    expect(result.current.errorInfo).toEqual({ code: "send_failed" });
     // The placeholder had no streamed text yet → dropped with the old reply.
     expect(result.current.messages).toEqual([
       expect.objectContaining({ role: "user", content: "hello" }),
     ]);
+  });
+
+  it("a rerun refused with a server code keeps the real code and wait time", async () => {
+    const reply = controlledStream();
+    const client = fakeClient({
+      streamAgentReply: reply.fn,
+      streamAgentRerun: vi
+        .fn()
+        .mockRejectedValue({ status: 429, code: "agent_turn_limit", retryAfterSeconds: 42 }),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    await seedFirstTurn(result, reply);
+
+    act(() => result.current.rerunMessage("m-1"));
+    await flush();
+
+    expect(result.current.error).toBe("agent_turn_limit");
+    expect(result.current.errorInfo).toEqual({
+      code: "agent_turn_limit",
+      retryAfterSeconds: 42,
+    });
   });
 
   it("rerun 409 (message superseded) reloads the conversation instead of erroring", async () => {
@@ -337,6 +417,7 @@ describe("useAgentChat", () => {
 
     expect(client.listConversationMessages).toHaveBeenCalledWith("c-1");
     expect(result.current.error).toBeNull();
+    expect(result.current.errorInfo).toBeNull();
     expect(result.current.messages).toEqual([
       { id: "m-1", role: "user", content: "hello" },
       { id: "m-3", role: "agent", content: "winner", feedback: undefined },

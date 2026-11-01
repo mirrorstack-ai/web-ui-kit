@@ -78,10 +78,24 @@ export interface UseAgentChatOptions {
   labels?: UseAgentChatLabels;
 }
 
+/** Structured detail behind the last failed send/load's `error` code. The
+ *  server fields (api-client-shared#90) are read structurally — web-ui-kit
+ *  does not import that package, see client.ts. `message` and
+ *  `retryAfterSeconds` are absent for client-made codes and for mid-stream
+ *  SSE errors (the wire frame carries no message). */
+export interface AgentChatErrorInfo {
+  code: string;
+  message?: string;
+  retryAfterSeconds?: number;
+}
+
 export interface UseAgentChatResult {
   messages: AgentChatMessage[];
   /** Error code of the last failed send/load, null when healthy. */
   error: string | null;
+  /** Full detail behind `error` — same code, plus server message and wait
+   *  time when the server sent them. Null exactly when `error` is null. */
+  errorInfo: AgentChatErrorInfo | null;
   send: (message: string) => void;
   /** Thumbs up/down on an agent reply — optimistic, rolls back on failure.
    *  null clears the rating (the kit sends null on re-clicking the active
@@ -271,6 +285,24 @@ function appendTextSegment(
   return [...segs, { type: "text", text }];
 }
 
+// Read a rejected send/rerun's error fields structurally (api-client-shared#90
+// names: status, code, serverMessage, retryAfterSeconds — the kit doesn't
+// import that package, see client.ts). A plain network/parse error has no
+// `code`, so it falls back to the client-made "send_failed".
+function readThrownErrorInfo(err: unknown): AgentChatErrorInfo {
+  if (err && typeof err === "object" && typeof (err as { code?: unknown }).code === "string") {
+    const e = err as { code: string; serverMessage?: unknown; retryAfterSeconds?: unknown };
+    return {
+      code: e.code,
+      ...(typeof e.serverMessage === "string" ? { message: e.serverMessage } : {}),
+      ...(typeof e.retryAfterSeconds === "number"
+        ? { retryAfterSeconds: e.retryAfterSeconds }
+        : {}),
+    };
+  }
+  return { code: "send_failed" };
+}
+
 // Build the four SSE handlers shared by send and rerunMessage. Both paths
 // push deltas into the PENDING_ID bubble (as ordered segments + flat content),
 // interleave tool rows, swap the bubble for the persisted id on done, and
@@ -278,6 +310,7 @@ function appendTextSegment(
 function makeStreamHandlers(
   setMessages: Dispatch<SetStateAction<AgentChatMessage[]>>,
   setError: Dispatch<SetStateAction<string | null>>,
+  setErrorInfo: Dispatch<SetStateAction<AgentChatErrorInfo | null>>,
 ): Pick<AgentStreamHandlers, "onDelta" | "onTool" | "onDone" | "onError"> {
   return {
     onDelta: (text) =>
@@ -307,7 +340,10 @@ function makeStreamHandlers(
         ),
       ),
     onError: (code) => {
+      // The SSE error frame carries no message — unlike a connect-time
+      // rejection, there's nothing beyond the code to surface.
       setError(code);
+      setErrorInfo({ code });
       setMessages((prev) => settlePending(prev));
     },
   };
@@ -343,6 +379,7 @@ export function useAgentChat(
 
   const [messages, setMessages] = useState<AgentChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [errorInfo, setErrorInfo] = useState<AgentChatErrorInfo | null>(null);
   // User's explicit pick; undefined = unpinned (platform default applies).
   const [userModelId, setUserModelId] = useState<string | undefined>(undefined);
   const [roster, setRoster] = useState<AgentModelsResponse | undefined>(undefined);
@@ -437,6 +474,7 @@ export function useAgentChat(
     createConversationRef.current = null;
     setMessages([]);
     setError(null);
+    setErrorInfo(null);
     setUserModelId(undefined);
   }, [scopeKey]);
 
@@ -483,6 +521,7 @@ export function useAgentChat(
       abortRef.current = controller;
       loadSeq.current++;
       setError(null);
+      setErrorInfo(null);
 
       setMessages((prev) => [
         ...settlePending(prev),
@@ -501,13 +540,15 @@ export function useAgentChat(
           await clientRef.current.streamAgentReply(
             convId,
             content,
-            makeStreamHandlers(setMessages, setError),
+            makeStreamHandlers(setMessages, setError, setErrorInfo),
             controller.signal,
           );
         } catch (err) {
           if (controller.signal.aborted) return;
           console.error("agent: send failed", err);
-          setError("send_failed");
+          const info = readThrownErrorInfo(err);
+          setError(info.code);
+          setErrorInfo(info);
           setMessages((prev) => settlePending(prev));
         } finally {
           if (abortRef.current === controller) abortRef.current = null;
@@ -528,6 +569,7 @@ export function useAgentChat(
       scopeEpoch.current++;
       conversationIdRef.current = id;
       setError(null);
+      setErrorInfo(null);
       setMessages([]);
       // Adopt the conversation's pinned model so the picker reflects it.
       const conv = conversations?.find((c) => c.id === id);
@@ -543,6 +585,7 @@ export function useAgentChat(
           if (loadSeq.current !== seq) return;
           console.error("agent: load conversation failed", err);
           setError("load_failed");
+          setErrorInfo({ code: "load_failed" });
         });
     },
     [conversations],
@@ -649,6 +692,7 @@ export function useAgentChat(
       abortRef.current = controller;
       loadSeq.current++;
       setError(null);
+      setErrorInfo(null);
 
       // The old reply becomes the streaming placeholder — the server
       // supersedes it in place, so the thread position stays.
@@ -665,7 +709,7 @@ export function useAgentChat(
           await clientRef.current.streamAgentRerun(
             convId,
             messageId,
-            makeStreamHandlers(setMessages, setError),
+            makeStreamHandlers(setMessages, setError, setErrorInfo),
             controller.signal,
           );
         } catch (err) {
@@ -677,7 +721,9 @@ export function useAgentChat(
             return;
           }
           console.error("agent: rerun failed", err);
-          setError("send_failed");
+          const info = readThrownErrorInfo(err);
+          setError(info.code);
+          setErrorInfo(info);
           setMessages((prev) => settlePending(prev));
         } finally {
           if (abortRef.current === controller) abortRef.current = null;
@@ -711,6 +757,7 @@ export function useAgentChat(
   return {
     messages,
     error,
+    errorInfo,
     send,
     rateMessage,
     rerunMessage,

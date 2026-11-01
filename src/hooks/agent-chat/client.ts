@@ -131,7 +131,9 @@ export interface CreateConversationOptions {
  * Everything useAgentChat needs from the agent service. Method names match
  * api-client-shared's `agent` exports one-to-one so the binding is
  * mechanical. Streaming methods resolve once the stream is fully consumed;
- * connect-time failures reject with `.status` attached where known, while
+ * connect-time failures reject with `status`, `code`, `serverMessage`, and
+ * `retryAfterSeconds` attached where known (api-client-shared#90's error
+ * shape, read structurally — see useAgentChat's `errorInfo`), while
  * stream-time failures surface through `handlers.onError`.
  */
 export interface AgentChatClient {

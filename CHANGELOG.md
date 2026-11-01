@@ -3,6 +3,18 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.26
+
+### Added
+
+- **`useAgentChat` / `useAgentSession` expose `errorInfo`** — a refused send
+  or rerun used to collapse into the generic `send_failed` code. The hook now
+  keeps the server's real `code`, `message`, and `retryAfterSeconds` (read
+  structurally off the thrown error) in a new `errorInfo` field alongside the
+  existing `error: string | null`, which still carries the code for current
+  hosts. Mid-stream SSE errors set `errorInfo` to `{ code }` (the wire frame
+  carries no message).
+
 ## 0.7.25
 
 ### Fixed

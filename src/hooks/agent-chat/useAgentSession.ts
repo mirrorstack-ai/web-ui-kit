@@ -92,6 +92,7 @@ export interface UseAgentSessionResult
     UseAgentChatResult,
     | "messages"
     | "error"
+    | "errorInfo"
     | "rateMessage"
     | "rerunMessage"
     | "history"
@@ -360,6 +361,7 @@ export function useAgentSession(deps: UseAgentSessionDeps): UseAgentSessionResul
   return {
     messages: chat.messages,
     error: chat.error,
+    errorInfo: chat.errorInfo,
     send: queuedSend.send,
     rateMessage: chat.rateMessage,
     rerunMessage: chat.rerunMessage,
