@@ -537,6 +537,7 @@ export {
 // --- hooks ---
 export {
   useAgentChat,
+  type AgentChatErrorInfo,
   type AgentChatMessage,
   type UseAgentChatLabels,
   type UseAgentChatOptions,
