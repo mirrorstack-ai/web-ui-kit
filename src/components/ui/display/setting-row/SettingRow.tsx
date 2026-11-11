@@ -52,7 +52,21 @@ export function SettingRow({
   return (
     <div
       className={cn(
-        "flex items-center gap-4 px-4 py-3 rounded-xl border bg-surface-container",
+        // 🔴 WRAPS RATHER THAN STARVING THE TEXT. `control` is `shrink-0`, so
+        // on a narrow mount a wide one — a number field, a select, anything
+        // that is not a Switch — took its natural width and the text column,
+        // being the only thing that could give, collapsed to a ribbon that
+        // broke a one-line description across four or five. Seen at 400px in
+        // English on ai-assistant's Model and Token-ceiling rows and
+        // quiz-core's "Show the answer key" (f5, 2026-09-14).
+        //
+        // Fixed HERE rather than in each module, because a caller's only
+        // workaround is to stop using this component. `basis-48` is the width
+        // below which the text is not worth reading: above it the row is
+        // untouched, below it the control takes its own line. A Switch-sized
+        // control never reaches that point, so the rows that already fit do
+        // not move.
+        "flex flex-wrap items-center gap-4 px-4 py-3 rounded-xl border bg-surface-container",
         border,
         className,
       )}
@@ -66,7 +80,7 @@ export function SettingRow({
       {leading ? (
         <div className="shrink-0 flex items-center">{leading}</div>
       ) : null}
-      <div className="min-w-0 flex-1 space-y-1.5">
+      <div className="min-w-0 grow basis-48 space-y-1.5">
         <p className="text-sm font-medium text-on-surface">{title}</p>
         {description && (
           <p className="text-xs text-on-surface-variant">{description}</p>
