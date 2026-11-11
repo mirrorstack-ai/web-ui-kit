@@ -3,6 +3,163 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.25
+
+### Fixed
+
+- **Release train publishes `module-preview` again** — the workflow ran
+  `pnpm -C packages/module-preview publish`, which pnpm forwards to npm 11 as extra
+  positionals (EUSAGE). The kit published, the step then failed, so 0.7.20–0.7.24
+  shipped no `@mirrorstack-ai/module-preview` and skipped the npmjs mirror. It now
+  publishes from inside the package directory. This release carries every change
+  since 0.7.19 (Notch `headRadius`, DropdownMenu toggle item and fixes) to both.
+
+## 0.7.24
+
+### Fixed
+
+- **`DropdownMenu` card is `pointer-events-auto`** — under a click-through ancestor
+  (e.g. a `pointer-events-none` header that only re-enables item rows) the
+  separator, padding and gaps were not hit-testable, so an `openOnHover` menu closed
+  when the pointer crossed a divider. The whole card is now one hover/click surface.
+
+## 0.7.23
+
+### Changed
+
+- **`DropdownMenu` separator** — block margin halved (`my-1` → `my-0.5`): the gap on
+  each side of the divider goes from 8px to 6px. Hover-open menus stay open over
+  the whole card, separator included (now covered by a test).
+
+## 0.7.22
+
+### Fixed
+
+- **`DropdownMenu` toggle item** — the trailing `Switch` is now vertically centred on
+  the row (its wrapper was inline and sat ~2.5px high).
+
+## 0.7.21
+
+### Added
+
+- **`DropdownMenu` toggle item** (`checked?: boolean` on an item) — the row renders
+  `role="menuitemcheckbox"` with `aria-checked`, no leading icon, the label and a
+  trailing `Switch` (sm). Selecting it by click, Enter or Space calls `onSelect`
+  without closing the menu. Plain rows are byte-identical when `checked` is unset.
+
+## 0.7.20
+
+### Added
+
+- **`Notch` `headRadius` and `DropdownMenu` `notchHeadRadius`** — round only the
+  notch tab's two outer corners, so the tab can be rounder than the body
+  (`notchRadius`). Default is the body radius, and the path is byte-identical
+  when unset.
+- **`Notch` `notchGap`** (#419) — a shorter notch with the same tip and content.
+
+## 0.7.19
+
+### Fixed
+
+- **The release itself.** `0.7.18` was tagged and a GitHub Release created, and
+  then nothing was published: the job builds `module-preview` before the kit,
+  and `module-preview` compiles against the kit's built types. Until the kit's
+  own build runs, `dist/` does not exist and its `tsc` answers TS2307 on the
+  import. The kit's `prepublishOnly` does build it — two steps later, inside
+  `pnpm publish`. This is why `module-preview` had never been published at all:
+  the path failed on every train since it was added. `v0.7.18` remains as a tag
+  and a GitHub Release with no package behind it; nothing resolves it, and
+  `0.7.19` is the first version that carries this content.
+
+## 0.7.18
+
+### Added
+
+- **`DonutChart` and `PolarChart`** — two categorical charts, hand-drawn in SVG
+  on the theme tokens like `Gauge`, `Sparkline` and `TrendChart`, with no
+  charting dependency. They take one shape, `ChartDatum {key, label, value,
+  tone?}`, and divide by what the numbers MEAN rather than by who asked:
+  `DonutChart` for parts of a whole (attempts split into passed/failed/open,
+  impressions by placement, with `total` when the denominator is larger than
+  what is drawn), `PolarChart` for like-for-like categories that are NOT a
+  whole (a correct rate per question, a CTR per placement — stacking rates sums
+  to nothing). `measure="count" | "rate"` is a shared formatter rather than one
+  each consumer writes: a rate arrives as the ratio a server computed (0.0234)
+  and is written as what an operator reads (2.3%), and under it `PolarChart`
+  scales against a whole of 1 rather than against its own best category, so a
+  chart where nothing exceeds 30% no longer looks like one at 100%. Past six
+  categories the palette rotates rather than fading, because in a ring the
+  seventh touches the first and an opacity-faded repeat reads as *disabled* on
+  a dark background. An empty label falls back to the datum's key and never to
+  a word the kit invented — the same blank means "this creative was deleted"
+  on one consumer page and "nobody has named this placement" on the next.
+- **`@mirrorstack-ai/module-preview`** — a second package, published from this
+  repository on the same version and the same train, taking the kit as a PEER
+  so a module's preview chrome is the module's own chrome by construction. Its
+  purpose is the console's page shell on localhost around a module's real
+  mount, so a surface can be reviewed without a platform, a database or a
+  tunnel. This release carries the part a hand-rolled harness cannot get right
+  by itself: the frame widths the console actually uses, the host's header
+  copy, and the locale resolution that makes a `/ui-preflight` sheet mean
+  something.
+- **`ModulePreview` and `useHostUnsavedBar`** — the shell itself: the console's
+  frame and header around a module's real mount, the scene/locale/theme axes as
+  the kit's own `DevToolbar`/`SegmentedButton`/`ThemeToggle`, and a faithful
+  copy of the host's unsaved bar. The one seam is `mount`, so a module keeps
+  its fixtures and its own entry point and inherits everything else. The bar's
+  two shapes are declared structurally in `hostTypes.ts` rather than imported
+  from `@mirrorstack-ai/app-module-client`: that package is on a private
+  registry this repository's CI cannot reach, and two interfaces are not worth
+  coupling the kit's build to another package's availability.
+
+## 0.7.17
+
+### Changed
+
+- **License: MIT → Apache-2.0.** The kit is now published under the Apache
+  License 2.0. Code contributed before 2026-09-12 keeps its MIT notice in
+  `NOTICE`, which ships in the package.
+- **Also published to npmjs.com.** `pnpm add @mirrorstack-ai/web-ui-kit` now
+  works without a GitHub token. GitHub Packages still receives every release,
+  so existing `.npmrc` setups keep working.
+
+## 0.7.16
+
+### Added
+
+- **`SettingsTransfer`.** The copy/paste pair that moves one settings page's
+  configuration between applications — staging to production, one tenant to the
+  next — without an operator re-entering every field and getting one of them
+  subtly wrong. Five modules had grown their own copy of it; this is the shared
+  one. The caller keeps what only it can know: the envelope it copies
+  (`TExport`) and the `parse` that validates a paste back into its own settings
+  (`TImport`). Strings come in through `labels`, per key, defaulting to English
+  — the kit holds no catalog, and resolving `t("…")` at the CALL SITE is also
+  the only place an i18n usage guard can see the key, so consumers with
+  different key conventions share the component without first agreeing on one.
+
+  🔴 **Import loads the DRAFT; it does not save.** Pasting is one keystroke and
+  a settings page is a live application's behaviour, so the paste lands where
+  every other edit on that page lands — behind the save bar, next to a Reset
+  that throws it away. An "import" that wrote straight through would be the only
+  control on the page with no undo.
+
+  The paste box carries a real `id`, so its `<label>` actually names it. Every
+  module-local copy omitted one, and `FloatingLabelInput` associates through
+  `htmlFor`/`id` — the textarea those pages shipped had no accessible name at
+  all.
+
+## 0.7.15
+
+### Added
+
+- **`Avatar` accepts `tone="warning"`, which carries NO fill.** An avatar inside
+  a warning surface — a pending approval, an unfinished billing transfer — had
+  no way to stop being primary. The other two tones tint because they sit on a
+  neutral surface and must lift off it; this one sits inside an `Alert` that is
+  already `bg-warning/10`, where a tinted frame is one hue washed over itself.
+  Border and initials carry the tone; the surface keeps the fill.
+
 ## 0.7.14
 
 ### Fixed
@@ -643,7 +800,7 @@ unreleased component work on top of that baseline.
   public types (`NotchGridProps`, `NotchGridItem`, `NotchSubItem`,
   `NotchGridUI`, `PrimitiveRegistry`) and the desire/theme model types
   (`Desire`, `Pos`, `Mask`, `Priority`, `NotchTheme`). Design doc:
-  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs/tree/main/architecture/notch-grid-v2).
+  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs-internal/tree/main/architecture/notch-grid-v2).
 
 ## 0.3.4
 
@@ -691,7 +848,7 @@ unreleased component work on top of that baseline.
   (responsive resolution), `BlockShape.tsx` (rounded-mask React adapter).
   No public exports yet — these are wired up in a later slice when the
   `<NotchGrid>` component lands. Design doc:
-  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs/tree/main/architecture/notch-grid-v2).
+  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs-internal/tree/main/architecture/notch-grid-v2).
 
 ## 0.3.0
 

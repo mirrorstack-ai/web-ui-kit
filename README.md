@@ -2,14 +2,15 @@
 
 [![CI](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/ci.yml)
 [![Storybook](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/storybook.yml/badge.svg)](https://github.com/mirrorstack-ai/web-ui-kit/actions/workflows/storybook.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@mirrorstack-ai/web-ui-kit)](https://www.npmjs.com/package/@mirrorstack-ai/web-ui-kit)
 [![Good First Issues](https://img.shields.io/github/issues/mirrorstack-ai/web-ui-kit/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/mirrorstack-ai/web-ui-kit/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
 
 Shared React UI component library for [MirrorStack](https://mirrorstack.com).
 
 Built with React 19, TypeScript, Tailwind CSS v4, and Material Design 3.
 
-**[Storybook Demo](https://mirrorstack-ai.github.io/web-ui-kit/)** | **[Contributing](CONTRIBUTING.md)** | **[Good First Issues](https://github.com/mirrorstack-ai/web-ui-kit/issues?q=is%3Aopen+label%3A%22good+first+issue%22)** | **[Slack](https://join.slack.com/t/mirrorstackai/shared_invite/zt-3twmj15cm-EPfQscE71I~JJj0yHK6EZg)**
+**[Storybook Demo](https://mirrorstack-ai.github.io/web-ui-kit/)** | **[Contributing](CONTRIBUTING.md)** | **[Good First Issues](https://github.com/mirrorstack-ai/web-ui-kit/issues?q=is%3Aopen+label%3A%22good+first+issue%22)** | **[Discord](https://discord.gg/QABqwGnXbc)**
 
 ## Getting started
 
@@ -18,6 +19,8 @@ Built with React 19, TypeScript, Tailwind CSS v4, and Material Design 3.
 ```bash
 pnpm add @mirrorstack-ai/web-ui-kit
 ```
+
+Published on [npmjs.com](https://www.npmjs.com/package/@mirrorstack-ai/web-ui-kit): no token or `.npmrc` setup needed.
 
 ### Setup theme
 
@@ -149,4 +152,4 @@ Look for issues labeled [`good first issue`](https://github.com/mirrorstack-ai/w
 
 ## License
 
-MIT
+[Apache-2.0](LICENSE). Releases before this change were published under MIT; code contributed before the change keeps its MIT notice in [NOTICE](NOTICE).

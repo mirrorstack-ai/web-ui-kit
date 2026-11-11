@@ -19,7 +19,20 @@ export interface NotchProps {
   /** Positive = from top/left, negative = from bottom/right */
   notchOffset?: number;
   radius?: number;
+  /**
+   * Corner radius for ONLY the notch tab's two outer corners (the ones at the
+   * tip). Default = `radius`. Raise it to round the tab more than the body.
+   */
+  headRadius?: number;
   inverseRadius?: number;
+  /**
+   * Empty space between the content box and the notch's shoulders. The body
+   * grows toward the notch's tip by this much and the notch gets shorter by the
+   * same, so the tip (the trigger it wraps) and the content both stay put.
+   * Clamped so the notch keeps room for `radius + inverseRadius`. Ignored with
+   * `headOnly`. Default `0`.
+   */
+  notchGap?: number;
   /** Set "none" to disable */
   fill?: string;
   /** Set "none" to disable */
@@ -38,6 +51,7 @@ function buildPath(
   nw: number, nh: number,
   ny: number,
   r: number, ir: number,
+  hr: number = r,
 ) {
   const tw = w + nw;
   const nb = ny + nh;
@@ -48,23 +62,23 @@ function buildPath(
   d.push(`M ${r},0`);
 
   if (atStart) {
-    d.push(`H ${tw - r}`);
-    d.push(`A ${r},${r} 0 0,1 ${tw},${r}`);
+    d.push(`H ${tw - hr}`);
+    d.push(`A ${hr},${hr} 0 0,1 ${tw},${hr}`);
   } else {
     d.push(`H ${w - r}`);
     d.push(`A ${r},${r} 0 0,1 ${w},${r}`);
     d.push(`V ${ny - ir}`);
     d.push(`A ${ir},${ir} 0 0,0 ${w + ir},${ny}`);
-    d.push(`H ${tw - r}`);
-    d.push(`A ${r},${r} 0 0,1 ${tw},${ny + r}`);
+    d.push(`H ${tw - hr}`);
+    d.push(`A ${hr},${hr} 0 0,1 ${tw},${ny + hr}`);
   }
 
   if (atEnd) {
-    d.push(`V ${h - r}`);
-    d.push(`A ${r},${r} 0 0,1 ${tw - r},${h}`);
+    d.push(`V ${h - hr}`);
+    d.push(`A ${hr},${hr} 0 0,1 ${tw - hr},${h}`);
   } else {
-    d.push(`V ${nb - r}`);
-    d.push(`A ${r},${r} 0 0,1 ${tw - r},${nb}`);
+    d.push(`V ${nb - hr}`);
+    d.push(`A ${hr},${hr} 0 0,1 ${tw - hr},${nb}`);
     d.push(`H ${w + ir}`);
     d.push(`A ${ir},${ir} 0 0,0 ${w},${nb + ir}`);
     d.push(`V ${h - r}`);
@@ -147,6 +161,14 @@ function clampOffset(ny: number, edge: number, notchLen: number, minGap: number,
   return clamped;
 }
 
+function clampGap(gap: number, protrusion: number, minGap: number) {
+  const max = Math.max(0, protrusion - minGap);
+  if (gap > max && isDev) {
+    console.warn(`[Notch] notchGap ${gap} leaves the notch no room for its corners — clamping to ${max}.`);
+  }
+  return Math.min(Math.max(0, gap), max);
+}
+
 function getTransform(side: NotchSide, pw: number, ph: number): string | undefined {
   switch (side) {
     case "right": return undefined;
@@ -166,7 +188,9 @@ export function Notch({
   notchSide = "right",
   notchOffset = 0,
   radius = 8,
+  headRadius = radius,
   inverseRadius = 6,
+  notchGap = 0,
   fill = "var(--color-surface-container-low)",
   stroke = "var(--color-primary)",
   strokeWidth = 1,
@@ -188,7 +212,7 @@ export function Notch({
     const botIr = atEnd ? 0 : ir;
     const pathW = notchWidth + ir;
     const pathH = notchHeight + topIr + botIr;
-    const headPath = buildHeadPath(notchWidth, notchHeight, radius, ir, atStart, atEnd);
+    const headPath = buildHeadPath(notchWidth, notchHeight, headRadius, ir, atStart, atEnd);
 
     let svgW: number, svgH: number;
     if (horiz) { svgW = pathW; svgH = pathH; }
@@ -213,14 +237,16 @@ export function Notch({
     );
   }
 
-  const bw = horiz ? width : height;
+  // The gap moves the body's edge toward the tip; the box keeps its size.
+  const gap = clampGap(notchGap, horiz ? notchWidth : notchHeight, minGap);
+  const bw = (horiz ? width : height) + gap;
   const bh = horiz ? height : width;
-  const bnw = horiz ? notchWidth : notchHeight;
+  const bnw = (horiz ? notchWidth : notchHeight) - gap;
   const bnh = horiz ? notchHeight : notchWidth;
   const rawNy = resolveOffset(notchOffset, edge, notchLen, notchSide);
   const ny = clampOffset(rawNy, edge, notchLen, minGap, notchOffset);
 
-  const path = buildPath(bw, bh, bnw, bnh, ny, radius, ir);
+  const path = buildPath(bw, bh, bnw, bnh, ny, radius, ir, headRadius);
 
   const svgW = horiz ? width + notchWidth : width;
   const svgH = horiz ? height : height + notchHeight;

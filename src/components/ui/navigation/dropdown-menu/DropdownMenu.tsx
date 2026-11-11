@@ -11,6 +11,7 @@ import { cn } from "@/utils/cn";
 import { isDev } from "@/utils/env";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
+import { Switch } from "@/components/ui/inputs/switch/Switch";
 import { Notch } from "@/components/ui/surfaces/notch/Notch";
 import { useMenuKeyNav } from "@/hooks/useMenuKeyNav";
 
@@ -52,6 +53,11 @@ export interface DropdownMenuItem {
   /** `"danger"` is a deprecated alias for `"error"`. */
   variant?: "default" | "error" | "danger";
   disabled?: boolean;
+  /** Turns the row into a toggle: `role="menuitemcheckbox"` with `aria-checked`,
+   *  no leading icon, and a kit `Switch` (sm) on the trailing edge. Selecting it
+   *  (click, Enter, Space) calls `onSelect` WITHOUT closing the menu; the caller
+   *  flips its own state and re-renders `checked`. Unset = a plain action row. */
+  checked?: boolean;
 }
 
 export interface DropdownMenuSeparator {
@@ -74,6 +80,9 @@ export interface DropdownMenuProps {
    *  match a small trigger's own radius for a less-rounded head (e.g. an icon
    *  button with an 8px radius). */
   notchRadius?: number;
+  /** Corner radius for ONLY the notch tab's outer corners (the tip), so the tab
+   *  can be rounder than the menu body. Default = `notchRadius`. */
+  notchHeadRadius?: number;
   /** Radius of the notch's inverse (concave) corners, where the tab curves back
    *  into the card (SVG units). Default `10`. Usually scaled down alongside
    *  `notchRadius` for a tighter head. */
@@ -126,6 +135,7 @@ export function DropdownMenu({
   notchWidth = DD_NOTCH_W,
   notchHeight = DD_NOTCH_H,
   notchRadius = DD_R,
+  notchHeadRadius,
   notchInverseRadius = DD_IR,
   notchStrokeWidth = DD_SW,
   useNotch = true,
@@ -169,7 +179,7 @@ export function DropdownMenu({
       const entry = items[index];
       if (entry && isActionable(entry)) {
         onSelect(entry);
-        closeMenu();
+        if (entry.checked === undefined) closeMenu();
       }
     },
     // DropdownMenu never moves focus on close (the trigger node is
@@ -291,6 +301,7 @@ export function DropdownMenu({
               notchSide={openUp ? "top" : "bottom"}
               notchOffset={offset}
               radius={notchRadius}
+              headRadius={notchHeadRadius}
               inverseRadius={notchInverseRadius}
               stroke="var(--color-primary)"
               strokeWidth={notchStrokeWidth}
@@ -300,7 +311,10 @@ export function DropdownMenu({
           <div
             ref={contentRef}
             className={cn(
-              "relative z-10 flex flex-col gap-1 p-2",
+              // pointer-events-auto: the card (rows, separators, padding, gaps) is ONE
+              // hover/click surface even under a pointer-events-none ancestor (e.g. a
+              // click-through header), so travel over a separator never "leaves".
+              "pointer-events-auto relative z-10 flex flex-col gap-1 p-2",
               sz.minW,
               !useNotch &&
                 "rounded-lg border border-outline-variant bg-surface-container-low",
@@ -313,7 +327,7 @@ export function DropdownMenu({
                   <div
                     key={`sep-${index}`}
                     role="separator"
-                    className={cn("my-1 h-px bg-outline-variant", sz.sep)}
+                    className={cn("my-0.5 h-px bg-outline-variant", sz.sep)}
                   />
                 );
               }
@@ -327,11 +341,13 @@ export function DropdownMenu({
               }
               const isError =
                 item.variant === "error" || item.variant === "danger";
+              const isToggle = item.checked !== undefined;
 
               return (
                 <div
                   key={item.id}
-                  role="menuitem"
+                  role={isToggle ? "menuitemcheckbox" : "menuitem"}
+                  aria-checked={isToggle ? item.checked : undefined}
                   aria-disabled={item.disabled || undefined}
                   className={cn(
                     "flex cursor-pointer items-center rounded-lg text-left text-sm transition-colors",
@@ -346,13 +362,14 @@ export function DropdownMenu({
                   onClick={() => {
                     if (item.disabled) return;
                     onSelect(item);
-                    closeMenu();
+                    if (!isToggle) closeMenu();
                   }}
                   onMouseEnter={() => {
                     if (!item.disabled) setActiveIndex(index);
                   }}
                 >
-                  {item.icon != null &&
+                  {!isToggle &&
+                    item.icon != null &&
                     (typeof item.icon === "string" ? (
                       <Icon
                         name={item.icon}
@@ -373,7 +390,22 @@ export function DropdownMenu({
                       </span>
                     ))}
                   {item.label}
-                  {item.external && (
+                  {isToggle && (
+                    // The row owns the interaction (click, Enter, Space); the
+                    // Switch is its visual state, so it is inert to pointer + AT.
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none ml-auto flex shrink-0 items-center pl-3"
+                    >
+                      <Switch
+                        size="sm"
+                        checked={item.checked === true}
+                        onChange={() => {}}
+                        aria-label={item.label}
+                      />
+                    </span>
+                  )}
+                  {!isToggle && item.external && (
                     <Icon
                       name="open_in_new"
                       size={sz.icon - 3}

@@ -123,6 +123,16 @@ export {
   type TrendChartOverlay,
 } from "./components/ui/blocks/trend-chart/TrendChart";
 export {
+  DonutChart,
+  type DonutChartProps,
+} from "./components/ui/blocks/donut-chart/DonutChart";
+export {
+  PolarChart,
+  type PolarChartProps,
+} from "./components/ui/blocks/polar-chart/PolarChart";
+export { type ChartDatum, type ChartTone } from "./types/chart";
+
+export {
   StarRating,
   type StarRatingProps,
 } from "./components/ui/blocks/star-rating/StarRating";
@@ -442,6 +452,12 @@ export {
   SettingsSection,
   type SettingsSectionProps,
 } from "./components/ui/surfaces/settings-section/SettingsSection";
+export {
+  SettingsTransfer,
+  type SettingsTransferProps,
+  type SettingsTransferLabels,
+  type SettingsTransferError,
+} from "./components/ui/surfaces/settings-transfer/SettingsTransfer";
 export {
   Card,
   type CardProps,

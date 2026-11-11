@@ -97,6 +97,30 @@ describe("SettingRow", () => {
     expect(container.firstChild?.childNodes).toHaveLength(2);
   });
 
+  // 🔴 jsdom computes no layout, so these assert the CONTRACT that produces the
+  // right layout rather than the layout itself: the row may wrap, and the text
+  // column has a real basis to wrap at. The picture is checked on the
+  // LongDescriptionWithWideControl story at 400px — that is the evidence; this
+  // is what stops the classes being removed without anyone noticing.
+  it("lets the row wrap instead of starving the text column", () => {
+    const { container } = render(
+      <SettingRow title="Token ceiling" description="A long one." control={<span>4096</span>} />,
+    );
+    expect(container.firstChild).toHaveClass("flex-wrap");
+  });
+
+  it("gives the text column a basis to wrap at, not bare flex-1", () => {
+    const { container } = render(
+      <SettingRow title="Token ceiling" description="A long one." control={<span>4096</span>} />,
+    );
+    const text = screen.getByText("Token ceiling").parentElement;
+    expect(text).toHaveClass("basis-48");
+    expect(text).toHaveClass("grow");
+    // flex-1 sets basis-0, which is exactly the "shrink to nothing" the basis
+    // above replaces — if both are present the basis is dead.
+    expect(text).not.toHaveClass("flex-1");
+  });
+
   it("forwards the className prop", () => {
     const { container } = render(
       <SettingRow title="X" control={<span />} className="custom-class" />,
