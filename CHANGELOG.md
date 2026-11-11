@@ -3,6 +3,60 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.25
+
+### Fixed
+
+- **Release train publishes `module-preview` again** — the workflow ran
+  `pnpm -C packages/module-preview publish`, which pnpm forwards to npm 11 as extra
+  positionals (EUSAGE). The kit published, the step then failed, so 0.7.20–0.7.24
+  shipped no `@mirrorstack-ai/module-preview` and skipped the npmjs mirror. It now
+  publishes from inside the package directory. This release carries every change
+  since 0.7.19 (Notch `headRadius`, DropdownMenu toggle item and fixes) to both.
+
+## 0.7.24
+
+### Fixed
+
+- **`DropdownMenu` card is `pointer-events-auto`** — under a click-through ancestor
+  (e.g. a `pointer-events-none` header that only re-enables item rows) the
+  separator, padding and gaps were not hit-testable, so an `openOnHover` menu closed
+  when the pointer crossed a divider. The whole card is now one hover/click surface.
+
+## 0.7.23
+
+### Changed
+
+- **`DropdownMenu` separator** — block margin halved (`my-1` → `my-0.5`): the gap on
+  each side of the divider goes from 8px to 6px. Hover-open menus stay open over
+  the whole card, separator included (now covered by a test).
+
+## 0.7.22
+
+### Fixed
+
+- **`DropdownMenu` toggle item** — the trailing `Switch` is now vertically centred on
+  the row (its wrapper was inline and sat ~2.5px high).
+
+## 0.7.21
+
+### Added
+
+- **`DropdownMenu` toggle item** (`checked?: boolean` on an item) — the row renders
+  `role="menuitemcheckbox"` with `aria-checked`, no leading icon, the label and a
+  trailing `Switch` (sm). Selecting it by click, Enter or Space calls `onSelect`
+  without closing the menu. Plain rows are byte-identical when `checked` is unset.
+
+## 0.7.20
+
+### Added
+
+- **`Notch` `headRadius` and `DropdownMenu` `notchHeadRadius`** — round only the
+  notch tab's two outer corners, so the tab can be rounder than the body
+  (`notchRadius`). Default is the body radius, and the path is byte-identical
+  when unset.
+- **`Notch` `notchGap`** (#419) — a shorter notch with the same tip and content.
+
 ## 0.7.19
 
 ### Fixed
@@ -746,7 +800,7 @@ unreleased component work on top of that baseline.
   public types (`NotchGridProps`, `NotchGridItem`, `NotchSubItem`,
   `NotchGridUI`, `PrimitiveRegistry`) and the desire/theme model types
   (`Desire`, `Pos`, `Mask`, `Priority`, `NotchTheme`). Design doc:
-  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs/tree/main/architecture/notch-grid-v2).
+  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs-internal/tree/main/architecture/notch-grid-v2).
 
 ## 0.3.4
 
@@ -794,7 +848,7 @@ unreleased component work on top of that baseline.
   (responsive resolution), `BlockShape.tsx` (rounded-mask React adapter).
   No public exports yet — these are wired up in a later slice when the
   `<NotchGrid>` component lands. Design doc:
-  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs/tree/main/architecture/notch-grid-v2).
+  [`mirrorstack-docs/architecture/notch-grid-v2/`](https://github.com/mirrorstack-ai/mirrorstack-docs-internal/tree/main/architecture/notch-grid-v2).
 
 ## 0.3.0
 
