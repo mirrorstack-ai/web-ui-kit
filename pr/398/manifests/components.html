@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">359 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">5/83 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">80/83 infos</a><span class="filter-pill ok" aria-disabled="true">364 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4277,9 +4277,9 @@ total?: number</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DropdownMenu</h2>
       <div class="badges">
-        <label for="c-20-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">15 prop types</label>
+        <label for="c-20-ui-navigation-dropdownmenu-props" class="badge ok as-toggle">16 prop types</label>
         <label for="c-20-ui-navigation-dropdownmenu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-20-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-20-ui-navigation-dropdownmenu-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -4311,7 +4311,7 @@ total?: number</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">15 prop types</span>
+              <span class="badge ok">16 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/navigation/dropdown-menu/DropdownMenu.tsx::DropdownMenu</code></pre>
             <pre><code>Props:</code></pre>
@@ -4325,6 +4325,12 @@ items: DropdownMenuEntry[]
  *  to nudge the whole notched card off the auto-aligned anchor.
  */
 menuClassName?: string
+
+/**
+ * Corner radius for ONLY the notch tab&#39;s outer corners (the tip), so the tab
+ *  can be rounder than the menu body. Default = `notchRadius`.
+ */
+notchHeadRadius?: number
 
 /**
  * Height of the notch tab (SVG units). Default `46`.
@@ -4479,6 +4485,32 @@ useNotch?: boolean = true</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
+                <span class="ex-name">Open On Hover Separator</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Hover menu with a separator above a toggle row (the mirrorstack.ai ≡ menu shape): the menu stays open over the whole card, separator included, and the divider&#39;s block margin is `my-0.5` (a 6px gap each side with the 4px flex gap).</div>
+              <pre><code>const OpenOnHoverSeparator = () =&gt; &lt;DropdownMenu
+    openOnHover
+    trigger={&lt;IconButton icon=&quot;menu&quot; aria-label=&quot;Open menu&quot; variant=&quot;text&quot; size=&quot;sm&quot; /&gt;}
+    items={[
+      { id: &quot;docs&quot;, label: &quot;Docs&quot;, icon: &quot;menu_book&quot; },
+      { type: &quot;separator&quot; as const },
+      { id: &quot;reduce-motion&quot;, label: &quot;Reduce animation&quot;, checked: false },
+    ]}
+    onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Open On Hover Under Pointer None</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Regression for a click-through header: the menu sits under a click-through wrapper (`pointer-events: none` on the menu), yet the whole card (separator, padding, gaps) stays hoverable, so a hover-open menu does not close while the pointer crosses the divider.</div>
+              <pre><code>const OpenOnHoverUnderPointerNone = () =&gt; &lt;DropdownMenu /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
                 <span class="ex-name">Tight Head</span>
                 <span class="badge ok">story ok</span>
               </div>
@@ -4497,6 +4529,51 @@ useNotch?: boolean = true</code></pre>
       { id: &quot;subscribe&quot;, label: &quot;Get early access&quot;, icon: &quot;mail&quot; },
     ]}
     onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Rounded Head</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">`notchHeadRadius` rounds ONLY the notch tab&#39;s outer corners, so an avatar trigger gets a rounder tab (20) than the menu body (`notchRadius` 12).</div>
+              <pre><code>const RoundedHead = () =&gt; &lt;DropdownMenu
+    trigger={(&lt;IconButton icon=&quot;account_circle&quot; aria-label=&quot;Account menu&quot; variant=&quot;text&quot; size=&quot;sm&quot; /&gt;)}
+    notchWidth={44}
+    notchHeight={44}
+    notchRadius={12}
+    notchHeadRadius={20}
+    items={[
+      { id: &quot;profile&quot;, label: &quot;Profile&quot;, icon: &quot;person&quot; },
+      { id: &quot;settings&quot;, label: &quot;Settings&quot;, icon: &quot;settings&quot; },
+      { type: &quot;separator&quot; as const },
+      { id: &quot;signout&quot;, label: &quot;Sign out&quot;, icon: &quot;logout&quot; },
+    ]}
+    onSelect={(item) =&gt; console.log(&quot;Selected:&quot;, item.id)} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Toggle Item</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">An item with `checked` becomes a toggle row (`menuitemcheckbox`): no leading icon, a trailing Switch, and selecting it (click / Enter / Space) does NOT close the menu — the caller flips its own state.</div>
+              <pre><code>const ToggleItem = () =&gt; {
+    const [reduce, setReduce] = useState(false);
+
+    return (
+        &lt;DropdownMenu
+            trigger={(&lt;IconButton icon=&quot;menu&quot; aria-label=&quot;Open menu&quot; variant=&quot;text&quot; size=&quot;sm&quot; /&gt;)}
+            items={[
+              { id: &quot;docs&quot;, label: &quot;Docs&quot;, icon: &quot;menu_book&quot; },
+              { type: &quot;separator&quot; as const },
+              { id: &quot;reduce-motion&quot;, label: &quot;Reduce animation&quot;, checked: reduce },
+            ]}
+            onSelect={(item) =&gt; {
+              if (item.id === &quot;reduce-motion&quot;) setReduce((v) =&gt; !v);
+            }} /&gt;
+    );
+};</code></pre>
             </div>
         </div>
     
@@ -9487,9 +9564,9 @@ orientation?: &quot;vertical&quot; | &quot;horizontal&quot; = &quot;vertical&quo
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Notch</h2>
       <div class="badges">
-        <label for="c-48-ui-notch-notch-props" class="badge ok as-toggle">14 prop types</label>
+        <label for="c-48-ui-notch-notch-props" class="badge ok as-toggle">16 prop types</label>
         <label for="c-48-ui-notch-notch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-48-ui-notch-notch-stories" class="badge ok as-toggle">7 stories</label>
+        <label for="c-48-ui-notch-notch-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
@@ -9521,7 +9598,7 @@ orientation?: &quot;vertical&quot; | &quot;horizontal&quot; = &quot;vertical&quo
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">14 prop types</span>
+              <span class="badge ok">16 prop types</span>
             </div>
             <pre><code>Component: src/components/ui/surfaces/notch/Notch.tsx::Notch</code></pre>
             <pre><code>Props:</code></pre>
@@ -9537,9 +9614,24 @@ fill?: string = &quot;var(--color-surface-container-low)&quot;
  */
 headOnly?: boolean = false
 
+/**
+ * Corner radius for ONLY the notch tab&#39;s two outer corners (the ones at the
+ * tip). Default = `radius`. Raise it to round the tab more than the body.
+ */
+headRadius?: number = radius = 8
+
 height: number
 
 inverseRadius?: number = 6
+
+/**
+ * Empty space between the content box and the notch&#39;s shoulders. The body
+ * grows toward the notch&#39;s tip by this much and the notch gets shorter by the
+ * same, so the tip (the trigger it wraps) and the content both stay put.
+ * Clamped so the notch keeps room for `radius + inverseRadius`. Ignored with
+ * `headOnly`. Default `0`.
+ */
+notchGap?: number = 0
 
 notchHeight: number
 
@@ -9666,6 +9758,24 @@ width: number</code></pre>
       &lt;div key={offset}&gt;
         &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;offset: {offset}&lt;/p&gt;
         &lt;Notch width={160} height={120} notchWidth={36} notchHeight={40} notchOffset={offset} /&gt;
+      &lt;/div&gt;
+    ))}
+  &lt;/div&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">With Notch Gap</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">A shorter notch with the same tip and the same content box: the body&#39;s edge drops toward the tip.</div>
+              <pre><code>const WithNotchGap = () =&gt; (
+  &lt;div className=&quot;flex gap-8 p-4&quot;&gt;
+    {[0, 8, 16].map((gap) =&gt; (
+      &lt;div key={gap}&gt;
+        &lt;p className=&quot;text-xs text-on-surface-variant mb-2&quot;&gt;notchGap: {gap}&lt;/p&gt;
+        &lt;Notch width={160} height={120} notchWidth={52} notchHeight={46} notchSide=&quot;top&quot; notchOffset={-24} radius={12} inverseRadius={10} notchGap={gap} /&gt;
       &lt;/div&gt;
     ))}
   &lt;/div&gt;
