@@ -46,6 +46,26 @@ export interface TypeToConfirmDialogProps {
   consequences?: ReactNode;
   /** Loading state for the confirm action. Disables Cancel + Confirm while true. */
   loading?: boolean;
+  /**
+   * Label for the Cancel button on BOTH stages. Default "Cancel".
+   *
+   * 🔴 Every string this component paints needs an override, because the kit
+   * ships one language and its consumers do not. A localized console using this
+   * dialog rendered a Chinese title and consequences around an English
+   * "To confirm, type … below." and an English Cancel — the mixed-language
+   * result is worse than either language alone, and no amount of translation on
+   * the CONSUMER side could reach these.
+   */
+  cancelLabel?: string;
+  /**
+   * The sentence above the input. Replaces the default "To confirm, type
+   * <phrase> below." entirely — a ReactNode rather than a template because the
+   * phrase's position inside the sentence differs by language, and a
+   * `{placeholder}` string could not carry the phrase's own styling.
+   */
+  confirmInstruction?: ReactNode;
+  /** Accessible label for the confirmation input. Default "Confirmation". */
+  confirmInputLabel?: string;
 }
 
 export function TypeToConfirmDialog({
@@ -57,6 +77,9 @@ export function TypeToConfirmDialog({
   confirmTitle,
   confirmActionLabel,
   warnActionLabel = "Continue",
+  cancelLabel = "Cancel",
+  confirmInstruction,
+  confirmInputLabel = "Confirmation",
   color = "error",
   consequences,
   loading = false,
@@ -79,7 +102,7 @@ export function TypeToConfirmDialog({
   const matched = input.trim().toLowerCase() === phrase.toLowerCase();
   const resolvedConfirmTitle = confirmTitle ?? `Type '${phrase}' to confirm`;
   const cancelAction = (disabled?: boolean) => ({
-    label: "Cancel",
+    label: cancelLabel,
     variant: "text" as const,
     onClick: onClose,
     disabled,
@@ -123,16 +146,20 @@ export function TypeToConfirmDialog({
         <div className="space-y-3">
           {consequences}
           <p className="text-sm text-on-surface-variant">
-            To confirm, type{" "}
-            <span className="font-mono font-medium text-on-surface">
-              {phrase}
-            </span>{" "}
-            below.
+            {confirmInstruction ?? (
+              <>
+                To confirm, type{" "}
+                <span className="font-mono font-medium text-on-surface">
+                  {phrase}
+                </span>{" "}
+                below.
+              </>
+            )}
           </p>
           <FloatingLabelInput
             id={inputId}
             type="text"
-            label="Confirmation"
+            label={confirmInputLabel}
             size="sm"
             hideLabel
             value={input}
