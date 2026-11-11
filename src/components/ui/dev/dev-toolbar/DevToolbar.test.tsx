@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 declare const process: any;
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { DevToolbar } from "./DevToolbar";
@@ -61,6 +61,102 @@ describe("DevToolbar", () => {
     fireEvent.click(buttonB);
     
     expect(defaultProps.onChange).toHaveBeenCalledWith("b");
+  });
+
+  // 🔴 web-ui-kit#408. The bar is `fixed` and centred, so a second instance sits
+  // ON the first — which is why quiz-core folded theme/locale into `items` and
+  // ai-assistant bolted a ThemeToggle beside the bar. Three axes in ONE bar is
+  // what lets both drop their workaround.
+  it("renders every axis in one bar and routes each pill to its own onChange", () => {
+    process.env.NODE_ENV = ENV.DEV;
+    const onScene = vi.fn();
+    const onTheme = vi.fn();
+    const onLocale = vi.fn();
+
+    // 🔴 SCOPED TO THIS RENDER'S CONTAINER. This file has no `cleanup()` in its
+    // afterEach, so every previous test's DOM is still mounted — which is why
+    // every assertion here reads `getAllBy...[0]`. A bare `getAllByText("DEV:")`
+    // counts the bars from earlier tests too, so "one bar" has to be asked of
+    // one render, not of the document.
+    const { container } = render(
+      <DevToolbar
+        axes={[
+          {
+            label: "Scene",
+            items: [{ label: "Empty", value: "empty" }, { label: "Full", value: "full" }],
+            value: "empty",
+            onChange: onScene,
+          },
+          {
+            label: "Theme",
+            items: [{ label: "Light", value: "light" }, { label: "Dark", value: "dark" }],
+            value: "light",
+            onChange: onTheme,
+          },
+          {
+            label: "Locale",
+            items: [{ label: "zh-TW", value: "zh-TW" }, { label: "en", value: "en" }],
+            value: "zh-TW",
+            onChange: onLocale,
+          },
+        ]}
+      />
+    );
+
+    // One bar, not three: every axis lives under a single fixed container.
+    expect(within(container).getAllByText("DEV:")).toHaveLength(1);
+
+    fireEvent.click(within(container).getByRole("button", { name: "Dark" }));
+    expect(onTheme).toHaveBeenCalledWith("dark");
+    // 🔴 The mis-routing this guards: three axes sharing one handler is exactly
+    // what folding them into `items` produced.
+    expect(onScene).not.toHaveBeenCalled();
+    expect(onLocale).not.toHaveBeenCalled();
+  });
+
+  it("marks the selected pill of each axis independently", () => {
+    process.env.NODE_ENV = ENV.DEV;
+    const { container } = render(
+      <DevToolbar
+        axes={[
+          {
+            label: "Scene",
+            items: [{ label: "Empty", value: "empty" }, { label: "Full", value: "full" }],
+            value: "full",
+            onChange: vi.fn(),
+          },
+          {
+            label: "Theme",
+            items: [{ label: "Light", value: "light" }, { label: "Dark", value: "dark" }],
+            value: "dark",
+            onChange: vi.fn(),
+          },
+        ]}
+      />
+    );
+
+    // aria-pressed rather than a class assertion: the selected pill has to be
+    // announced, not merely coloured, and a colour test would pin the palette.
+    const bar = within(container);
+    expect(bar.getByRole("button", { name: "Full" })).toHaveAttribute("aria-pressed", "true");
+    expect(bar.getByRole("button", { name: "Empty" })).toHaveAttribute("aria-pressed", "false");
+    expect(bar.getByRole("button", { name: "Dark" })).toHaveAttribute("aria-pressed", "true");
+    expect(bar.getByRole("button", { name: "Light" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  // The single-axis form is what both modules and every existing story pass
+  // today. A kit release that broke it would block the very previews #408
+  // exists to unblock, so it is pinned rather than left to the type system.
+  it("still accepts the flat single-axis props", () => {
+    process.env.NODE_ENV = ENV.DEV;
+    const onChange = vi.fn();
+    const { container } = render(
+      <DevToolbar items={defaultProps.items} value="a" onChange={onChange} />
+    );
+
+    expect(within(container).getAllByText("DEV:")).toHaveLength(1);
+    fireEvent.click(within(container).getByRole("button", { name: "State B" }));
+    expect(onChange).toHaveBeenCalledWith("b");
   });
 
   it("calls onToggleError when error button is clicked", () => {
