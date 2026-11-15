@@ -28,6 +28,7 @@ import {
   type ConversationHistoryGroup,
   type RecencyLabels,
 } from "./history";
+import { clampRetryAfterSeconds } from "./errorMessages";
 
 /** Sidebar-renderable chat message — assignable to the kit's
  *  AgentSidebarMessage union (text bubbles + tool-call rows). */
@@ -80,12 +81,16 @@ export interface UseAgentChatOptions {
 
 /** Structured detail behind the last failed send/load's `error` code. The
  *  server fields (api-client-shared#90) are read structurally — web-ui-kit
- *  does not import that package, see client.ts. `message` and
+ *  does not import that package, see client.ts. The server's free-text
+ *  message is deliberately NOT exposed: render from `code` through
+ *  `agentErrorMessage` / `AgentErrorNotice` (per-locale copy). `status` and
  *  `retryAfterSeconds` are absent for client-made codes and for mid-stream
- *  SSE errors (the wire frame carries no message). */
+ *  SSE errors (the wire frame carries neither). */
 export interface AgentChatErrorInfo {
   code: string;
-  message?: string;
+  /** HTTP status of the refused request, when known. */
+  status?: number;
+  /** Seconds to wait before retrying; finite, > 0, capped at 24 h. */
   retryAfterSeconds?: number;
 }
 
@@ -285,22 +290,26 @@ function appendTextSegment(
   return [...segs, { type: "text", text }];
 }
 
-// Read a rejected send/rerun's error fields structurally (api-client-shared#90
-// names: status, code, serverMessage, retryAfterSeconds — the kit doesn't
-// import that package, see client.ts). A plain network/parse error has no
-// `code`, so it falls back to the client-made "send_failed".
-function readThrownErrorInfo(err: unknown): AgentChatErrorInfo {
-  if (err && typeof err === "object" && typeof (err as { code?: unknown }).code === "string") {
-    const e = err as { code: string; serverMessage?: unknown; retryAfterSeconds?: unknown };
-    return {
-      code: e.code,
-      ...(typeof e.serverMessage === "string" ? { message: e.serverMessage } : {}),
-      ...(typeof e.retryAfterSeconds === "number"
-        ? { retryAfterSeconds: e.retryAfterSeconds }
-        : {}),
-    };
+// Read a rejected send/rerun/load's error fields structurally
+// (api-client-shared#90 names: status, code, retryAfterSeconds — the kit
+// doesn't import that package, see client.ts). The server `serverMessage` is
+// never read (see AgentChatErrorInfo). Only a snake_case server code adopted:
+// a Node/DOM error code (ECONNRESET, ...) or a plain network/parse error
+// falls back to the client-made code.
+const SERVER_CODE = /^[a-z][a-z0-9_]{0,63}$/;
+function readThrownErrorInfo(err: unknown, fallback = "send_failed"): AgentChatErrorInfo {
+  if (err && typeof err === "object") {
+    const e = err as { code?: unknown; status?: unknown; retryAfterSeconds?: unknown };
+    if (typeof e.code === "string" && SERVER_CODE.test(e.code)) {
+      const wait = clampRetryAfterSeconds(e.retryAfterSeconds);
+      return {
+        code: e.code,
+        ...(typeof e.status === "number" ? { status: e.status } : {}),
+        ...(wait !== undefined ? { retryAfterSeconds: wait } : {}),
+      };
+    }
   }
-  return { code: "send_failed" };
+  return { code: fallback };
 }
 
 // Build the four SSE handlers shared by send and rerunMessage. Both paths
@@ -545,8 +554,9 @@ export function useAgentChat(
           );
         } catch (err) {
           if (controller.signal.aborted) return;
-          console.error("agent: send failed", err);
           const info = readThrownErrorInfo(err);
+          // code/status only — the thrown error may carry server text.
+          console.error("agent: send failed", info.code, info.status);
           setError(info.code);
           setErrorInfo(info);
           setMessages((prev) => settlePending(prev));
@@ -583,9 +593,10 @@ export function useAgentChat(
         })
         .catch((err) => {
           if (loadSeq.current !== seq) return;
-          console.error("agent: load conversation failed", err);
-          setError("load_failed");
-          setErrorInfo({ code: "load_failed" });
+          const info = readThrownErrorInfo(err, "load_failed");
+          console.error("agent: load conversation failed", info.code, info.status);
+          setError(info.code);
+          setErrorInfo(info);
         });
     },
     [conversations],
@@ -720,8 +731,8 @@ export function useAgentChat(
             selectConversation(convId);
             return;
           }
-          console.error("agent: rerun failed", err);
           const info = readThrownErrorInfo(err);
+          console.error("agent: rerun failed", info.code, info.status);
           setError(info.code);
           setErrorInfo(info);
           setMessages((prev) => settlePending(prev));

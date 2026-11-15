@@ -544,6 +544,15 @@ export {
   type UseAgentChatResult,
 } from "./hooks/agent-chat/useAgentChat";
 export {
+  agentErrorMessage,
+  AGENT_ERROR_COPY,
+  type AgentErrorCopy,
+} from "./hooks/agent-chat/errorMessages";
+export {
+  AgentErrorNotice,
+  type AgentErrorNoticeProps,
+} from "./components/ui/agent/errors/AgentErrorNotice";
+export {
   useQueuedAgentSend,
   type QueuedAgentChatSource,
   type QueuedAgentSend,

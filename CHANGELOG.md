@@ -7,13 +7,21 @@ Notable API additions and breaking changes. For the full commit log, see
 
 ### Added
 
-- **`useAgentChat` / `useAgentSession` expose `errorInfo`** — a refused send
-  or rerun used to collapse into the generic `send_failed` code. The hook now
-  keeps the server's real `code`, `message`, and `retryAfterSeconds` (read
-  structurally off the thrown error) in a new `errorInfo` field alongside the
-  existing `error: string | null`, which still carries the code for current
-  hosts. Mid-stream SSE errors set `errorInfo` to `{ code }` (the wire frame
-  carries no message).
+- **`useAgentChat` / `useAgentSession` expose `errorInfo`** — a refused send,
+  rerun or conversation load used to collapse into the generic `send_failed`
+  / `load_failed` code. The hook now keeps the server's real snake_case
+  `code`, plus `status` and `retryAfterSeconds` (read structurally off the
+  thrown error; the wait is sanitised: finite, > 0, capped at 24 h), in a new
+  `errorInfo` field alongside the existing `error: string | null`, which still
+  carries the code for current hosts. A non-server code (`ECONNRESET`, ...)
+  falls back to the client-made code. Mid-stream SSE errors set `errorInfo` to
+  `{ code }`. The server's free-text message is deliberately not exposed, and
+  the console log of a failed send carries only code and status.
+- **`agentErrorMessage(code, locale, retryAfterSeconds?)`, `AGENT_ERROR_COPY`
+  and `<AgentErrorNotice errorInfo locale />`** — per-locale copy (en, zh-TW;
+  add a language with one `AGENT_ERROR_COPY` entry) for each agent refusal
+  code plus the wait time. Render a refused turn from these, never from
+  server text.
 
 ## 0.7.26
 
