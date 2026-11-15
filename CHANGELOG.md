@@ -3,6 +3,15 @@
 Notable API additions and breaking changes. For the full commit log, see
 [GitHub Releases](https://github.com/mirrorstack-ai/web-ui-kit/releases).
 
+## 0.7.26
+
+### Security
+
+- **`Sidebar` markdown no longer loads model-written images** — an `<img src>` rendered
+  from model text was a data-leak channel (the browser fetches the URL, so a prompt
+  injection can encode page data into it). Markdown images now render their alt text
+  only (#438). Consumers pick this up by bumping to 0.7.26.
+
 ## 0.7.25
 
 ### Fixed
