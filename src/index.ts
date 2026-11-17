@@ -586,7 +586,7 @@ export {
 } from "./hooks/agent-chat/useAgentSession";
 export type {
   AgentApiMessage,
-  AgentAskAnswers, AgentAskEvent, AgentAskQuestion, AgentAskReplay, AgentPlanEvent, AgentPlanStep,
+  AgentAskAnswers, AgentAskEvent, AgentAskQuestion, AgentAskReplay, AgentDoneMeta, AgentPlanEvent, AgentPlanStep,
   AgentChatClient,
   AgentConversation,
   AgentConversationsPage,

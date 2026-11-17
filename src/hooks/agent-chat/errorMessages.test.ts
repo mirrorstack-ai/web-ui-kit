@@ -19,6 +19,10 @@ const NEW_CODES = {
     en: "Your AI credits have run out.",
     "zh-TW": "你的 AI 額度已用完。",
   },
+  ask_unlinked: {
+    en: "This question can't be answered any more. Please ask again.",
+    "zh-TW": "這個問題已無法回答，請重新提問。",
+  },
 } as const;
 
 describe("agentErrorMessage", () => {

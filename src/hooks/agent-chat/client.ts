@@ -47,6 +47,9 @@ export interface AgentApiMessage {
   createdAt: string;
   /** Present on a replayed ask card; absent on every other row. */
   ask?: AgentAskReplay;
+  /** Present on a replayed plan card (PROPOSED: the plan frame as last sent, like `ask`);
+   *  absent on every other row. */
+  plan?: AgentPlanEvent;
 }
 
 /** Known keys in an agent message's meta JSONB. feedback comes from the
@@ -124,6 +127,13 @@ export interface AgentAskReplay {
   answers?: AgentAskAnswers;
 }
 
+/** `meta` of the `done` frame. PROPOSED: a turn that streamed several ask cards names the stored
+ *  row of each, `ask_message_ids[ask_id]`; `message_id` stays the row the turn ended on. */
+export interface AgentDoneMeta {
+  ask_message_ids?: Record<string, string>;
+  [key: string]: unknown;
+}
+
 /** One plan-frame step. category and state are OPEN strings. */
 export interface AgentPlanStep { id: string; kind: string; category: string; title: string; state: string }
 
@@ -145,7 +155,7 @@ export type AgentToolEventStatus = "started" | "done" | "error";
 
 export interface AgentStreamHandlers {
   onDelta: (text: string) => void;
-  onDone: (messageId: string) => void;
+  onDone: (messageId: string, meta?: AgentDoneMeta) => void;
   /** Server stream error event ("reply_failed" | "persist_failed") or
    *  "stream_interrupted" when the stream ends without a terminal event. */
   onError: (code: string) => void;
@@ -231,7 +241,4 @@ export interface AgentChatClient {
     handlers: AgentStreamHandlers,
     signal: AbortSignal,
   ): Promise<void>;
-  /** Approve a draft/edit_text plan step. Optional: with no method the hook
-   *  exposes no approve action (no server route exists yet). */
-  approvePlanStep?(planId: string, stepId: string): Promise<void>;
 }
