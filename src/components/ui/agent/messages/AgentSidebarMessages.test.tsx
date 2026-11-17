@@ -369,3 +369,16 @@ describe("AgentSidebarMessages showLogo", () => {
     expect(logo()).toHaveLength(0);
   });
 });
+
+describe("AgentSidebarMessages ask card key", () => {
+  it("keeps typed text when the card's id changes but its clientKey does not", () => {
+    const card = (id: string): AgentSidebarMessage => ({
+      id, clientKey: "ask:a-1", role: "agent", kind: "multi-question", title: "Name it", status: "pending",
+      questions: [{ id: "q1", type: "text", label: "Name" }],
+    });
+    const { rerender } = render(<AgentSidebarMessages messages={[card("__ask__:a-1")]} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "my text" } });
+    rerender(<AgentSidebarMessages messages={[card("m-stored")]} />);
+    expect(screen.getByRole("textbox")).toHaveValue("my text");
+  });
+});

@@ -24,6 +24,7 @@ import type {
   AgentAskQuestion,
   AgentChatClient,
   AgentConversation,
+  AgentDoneMeta,
   AgentMessageMeta,
   AgentModelsResponse,
   AgentPlanEvent,
@@ -57,6 +58,9 @@ export type AgentChatMessage =
   | { id: string; role: "tool"; tool: AgentToolCall }
   | {
       id: string; role: "agent"; kind: "multi-question"; askId: string; title: string;
+      /** React key, fixed for the card's life: `id` changes when `done` assigns the stored row,
+       *  and a key that follows it would remount the card and drop typed text. */
+      clientKey: string;
       description?: string; questions: AgentSidebarQuestion[]; status: "pending" | "submitted";
       /** The user's answers, shown read-only once submitted. */
       answers?: Record<string, AgentSidebarMultiQuestionAnswer>;
@@ -101,6 +105,13 @@ export interface UseAgentChatOptions {
   /** Gate all fetching (e.g. on the session being ready). Default true. */
   enabled?: boolean;
   labels?: UseAgentChatLabels;
+  /**
+   * Host confirm for one plan step (decision X1: the model never writes; the host runs the
+   * confirm / passkey step-up). The hook never marks a step approved itself: it calls this and
+   * shows the step as approved only after the returned promise resolves. Absent (PROPOSED):
+   * `approvePlanStep` is undefined and the card renders no approve control.
+   */
+  confirmPlanStep?: (planId: string, stepId: string) => Promise<void>;
 }
 
 export interface UseAgentChatResult {
@@ -135,8 +146,9 @@ export interface UseAgentChatResult {
   /** Answer a pending question card: submitted at once, the turn continues, rolls back on a
    *  connect failure. A submitted card is ignored. */
   submitAsk: (messageId: string, answers: Record<string, AgentSidebarMultiQuestionAnswer>) => void;
-  /** Approve a draft/edit_text plan step (optimistic). undefined when the client has no
-   *  `approvePlanStep`: show no button. */
+  /** Approve a draft/edit_text plan step through the host's `confirmPlanStep`; the step turns
+   *  approved only after it resolves, and stays as it was when it rejects. undefined when the host
+   *  gave no `confirmPlanStep`: show no button. */
   approvePlanStep: ((messageId: string, stepId: string) => void) | undefined;
 }
 
@@ -279,7 +291,7 @@ function askMessage(
   answers?: AgentAskMessage["answers"],
 ): AgentAskMessage {
   return {
-    id, role: "agent", kind: "multi-question", askId: ask.ask_id, title: ask.title,
+    id, clientKey: `ask:${ask.ask_id}`, role: "agent", kind: "multi-question", askId: ask.ask_id, title: ask.title,
     description: ask.description, questions: ask.questions.map(toSidebarQuestion), status,
     ...(answers ? { answers } : {}),
   };
@@ -287,19 +299,25 @@ function askMessage(
 
 // An ask card streamed this turn carries this id until `done` names its row.
 const ASK_PENDING_PREFIX = "__ask__:";
+const isPendingAsk = (m: AgentChatMessage): m is AgentAskMessage =>
+  "askId" in m && m.id.startsWith(ASK_PENDING_PREFIX);
 // Cards land above the in-flight reply bubble so the bubble stays last.
 function insertBeforePending(list: AgentChatMessage[], row: AgentChatMessage) {
   const i = list.findIndex((m) => m.id === PENDING_ID);
   return i === -1 ? [...list, row] : [...list.slice(0, i), row, ...list.slice(i)];
 }
 
-// A plan frame for a plan already on screen updates that row in place.
-function applyPlanEvent(list: AgentChatMessage[], plan: AgentPlanEvent): AgentChatMessage[] {
-  const row: AgentChatMessage = {
+function planMessage(plan: AgentPlanEvent): AgentChatMessage {
+  return {
     id: `plan:${plan.plan_id}`, role: "agent", kind: "plan", planId: plan.plan_id,
     version: plan.version, state: plan.state, confirmPath: plan.confirm_path,
     steps: plan.steps.map(({ id, title, category, state }) => ({ id, title, category, state })),
   };
+}
+
+// A plan frame for a plan already on screen updates that row in place.
+function applyPlanEvent(list: AgentChatMessage[], plan: AgentPlanEvent): AgentChatMessage[] {
+  const row = planMessage(plan);
   return list.some((m) => m.id === row.id)
     ? list.map((m) => (m.id === row.id ? row : m))
     : insertBeforePending(list, row);
@@ -330,6 +348,13 @@ function replayMessage(m: AgentApiMessage): AgentChatMessage[] {
     ];
   }
   if (m.role !== "agent") return [];
+  if (m.plan) {
+    // Only a plan still awaiting confirmation is rebuilt (same row id as the live frame, so a
+    // later frame updates it); a settled plan has nothing left to confirm here.
+    const p = m.plan;
+    if (p.state !== "proposed" || typeof p.plan_id !== "string" || !Array.isArray(p.steps)) return [];
+    return [planMessage(p)];
+  }
   if (m.ask) {
     // The card (title, questions) rides in meta.ask; `m.ask` carries id, status, answers.
     const card = (m.meta as { ask?: Partial<AgentAskEvent> } | undefined)?.ask;
@@ -387,15 +412,20 @@ function makeStreamHandlers(
         insertBeforePending(prev, askMessage(`${ASK_PENDING_PREFIX}${ask.ask_id}`, ask, "pending")),
       ),
     onPlan: (plan) => setMessages((prev) => applyPlanEvent(prev, plan)),
-    onDone: (messageId) =>
+    onDone: (messageId, meta) =>
       setMessages((prev) => {
-        // A turn that streamed an ask card ends with `done` naming the CARD's row: the card
-        // takes the id, the reply bubble keeps only text that really streamed.
-        const card = prev.find((m) => m.id.startsWith(ASK_PENDING_PREFIX));
+        // A turn that streamed ask cards ends with `done`: EVERY card leaves the pending id (a
+        // left-over prefix would be taken by the next turn's done). A card takes its own stored
+        // row from meta.ask_message_ids; else the one the turn ended on takes `message_id` and
+        // an earlier one a local id. The reply bubble keeps only text that really streamed.
+        const cards = prev.filter(isPendingAsk);
+        const last = cards[cards.length - 1];
+        const storedId = (c: AgentAskMessage) =>
+          meta?.ask_message_ids?.[c.askId] ?? (c === last ? messageId : `local-${crypto.randomUUID()}`);
         return prev.flatMap((m): AgentChatMessage[] => {
-          if (m === card) return [{ ...card, id: messageId }];
+          if (isPendingAsk(m)) return [{ ...m, id: storedId(m) }];
           if (m.id !== PENDING_ID || !isAgentText(m)) return [m];
-          if (card) return m.content ? [{ id: `local-${crypto.randomUUID()}`, role: "agent", content: m.content }] : [];
+          if (cards.length > 0) return m.content ? [{ id: `local-${crypto.randomUUID()}`, role: "agent", content: m.content }] : [];
           const segments = m.segments?.length ? { segments: m.segments } : {};
           return [{ id: messageId, role: "agent", content: m.content, ...segments }];
         });
@@ -835,13 +865,19 @@ export function useAgentChat(
     [messages, refreshConversations, selectConversation],
   );
 
-  const canApprovePlanStep = !!client.approvePlanStep;
+  // Steps with a confirm in flight: a ref, so a double click in one tick confirms once.
+  const confirmingRef = useRef(new Set<string>());
+  const confirmPlanStepRef = useRef(options.confirmPlanStep);
+  confirmPlanStepRef.current = options.confirmPlanStep;
+  const canApprovePlanStep = !!options.confirmPlanStep;
   const approvePlanStep = useCallback(
     (messageId: string, stepId: string) => {
-      const approve = clientRef.current.approvePlanStep;
+      const confirm = confirmPlanStepRef.current;
       const row = messages.find((m) => m.id === messageId && "planId" in m);
-      const prevState = row && "planId" in row ? row.steps.find((s) => s.id === stepId)?.state : undefined;
-      if (!approve || !row || !("planId" in row) || prevState === undefined) return;
+      if (!confirm || !row || !("planId" in row) || !row.steps.some((s) => s.id === stepId)) return;
+      const inFlight = `${row.planId}:${stepId}`;
+      if (confirmingRef.current.has(inFlight)) return;
+      confirmingRef.current.add(inFlight);
       const setStep = (state: string) =>
         setMessages((prev) =>
           prev.map((m) =>
@@ -850,11 +886,11 @@ export function useAgentChat(
               : m,
           ),
         );
-      setStep("approved");
-      approve.call(clientRef.current, row.planId, stepId).catch((err) => {
-        console.error("agent: approve step failed", err);
-        setStep(prevState);
-      });
+      // X1: approved only after the host's confirm succeeds; a failure leaves the step as it was.
+      confirm(row.planId, stepId).then(
+        () => setStep("approved"),
+        (err) => console.error("agent: confirm step failed", err),
+      ).finally(() => confirmingRef.current.delete(inFlight));
     },
     [messages],
   );

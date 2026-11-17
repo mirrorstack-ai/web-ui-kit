@@ -49,6 +49,8 @@ export type AgentSidebarMessage =
       id: string;
       role: "agent";
       kind: "multi-question";
+      /** Stable React key when `id` changes under a mounted card (the stored id arrives on done). */
+      clientKey?: string;
       title: string;
       description?: string;
       questions: AgentSidebarQuestion[];
@@ -285,7 +287,7 @@ export function AgentSidebarMessages({
         if ("kind" in m) {
           return (
             <AgentSidebarMultiQuestion
-              key={m.id}
+              key={m.clientKey ?? m.id}
               title={m.title}
               description={m.description}
               questions={m.questions}

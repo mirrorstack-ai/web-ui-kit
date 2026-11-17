@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { AgentAskEvent, AgentChatClient, AgentPlanEvent, AgentStreamHandlers } from "./client";
-import { useAgentChat } from "./useAgentChat";
+import { useAgentChat, type UseAgentChatOptions } from "./useAgentChat";
 
 const NOW = new Date().toISOString();
 const conv = { id: "c-1", appId: null, title: "t", model: null, createdAt: NOW, updatedAt: NOW };
@@ -18,7 +18,7 @@ const PLAN: AgentPlanEvent = {
   steps: [{ id: "s1", kind: "install", category: "module", title: "Install quiz", state: "draft" }],
 };
 /** Sends one turn on a stub client and hands back the turn's SSE handlers. */
-async function startTurn(over: Partial<AgentChatClient> = {}) {
+async function startTurn(over: Partial<AgentChatClient> = {}, opts: Partial<UseAgentChatOptions> = {}) {
   let handlers!: AgentStreamHandlers;
   const client = {
     listConversations: vi.fn().mockResolvedValue({ items: [conv], nextCursor: null }),
@@ -28,7 +28,7 @@ async function startTurn(over: Partial<AgentChatClient> = {}) {
     streamAgentReply: vi.fn(async (_i, _c, h) => { handlers = h; }),
     ...over,
   } as unknown as AgentChatClient;
-  const hook = renderHook(() => useAgentChat(client, { appId: null }));
+  const hook = renderHook(() => useAgentChat(client, { appId: null, ...opts }));
   act(() => hook.result.current.send("make a form"));
   await waitFor(() => expect(handlers).toBeDefined());
   return { hook, handlers, client };
@@ -102,13 +102,76 @@ describe("useAgentChat plan card", () => {
     expect(Object.keys((plans[0] as { steps: object[] }).steps[0]).sort()).toEqual(["category", "id", "state", "title"]);
   });
 
-  it("exposes approvePlanStep only when the client has it, and rolls back on failure", async () => {
+  it("exposes approvePlanStep only when the host supplies confirmPlanStep (X1)", async () => {
     expect((await startTurn()).hook.result.current.approvePlanStep).toBeUndefined();
-    const approve = vi.fn().mockRejectedValue(new Error("no"));
-    const { hook, handlers } = await startTurn({ approvePlanStep: approve });
+    const { hook } = await startTurn({}, { confirmPlanStep: vi.fn().mockResolvedValue(undefined) });
+    expect(hook.result.current.approvePlanStep).toBeTypeOf("function");
+  });
+
+  it("marks a step approved only AFTER the host confirm succeeds, and never when it rejects", async () => {
+    let settle!: { ok: () => void; fail: (e: Error) => void };
+    const confirm = vi.fn(() => new Promise<void>((ok, fail) => { settle = { ok, fail }; }));
+    const { hook, handlers } = await startTurn({}, { confirmPlanStep: confirm });
     act(() => handlers.onPlan?.(PLAN));
+    const stepState = () => (row(hook, "plan:p-1") as { steps: { state: string }[] }).steps[0].state;
     act(() => hook.result.current.approvePlanStep?.("plan:p-1", "s1"));
-    expect(approve).toHaveBeenCalledWith("p-1", "s1");
-    await waitFor(() => expect((row(hook, "plan:p-1") as { steps: { state: string }[] }).steps[0].state).toBe("draft"));
+    act(() => hook.result.current.approvePlanStep?.("plan:p-1", "s1"));
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(confirm).toHaveBeenCalledWith("p-1", "s1");
+    expect(stepState()).toBe("draft"); // in flight: not approved yet
+    await act(async () => settle.fail(new Error("no passkey")));
+    expect(stepState()).toBe("draft");
+    act(() => hook.result.current.approvePlanStep?.("plan:p-1", "s1")); // retry allowed
+    expect(confirm).toHaveBeenCalledTimes(2);
+    await act(async () => settle.ok());
+    expect(stepState()).toBe("approved");
+  });
+
+  it("rebuilds a plan card that still awaits confirmation when the thread reloads, and no settled one", async () => {
+    const msg = (id: string, plan: AgentPlanEvent) => ({ id, role: "agent" as const, content: "", createdAt: NOW, plan });
+    const list = vi.fn().mockResolvedValue([
+      { id: "u1", role: "user", content: "install quiz", createdAt: NOW },
+      msg("m-p1", PLAN),
+      msg("m-p2", { ...PLAN, plan_id: "p-2", state: "done" }),
+    ]);
+    const { hook } = await startTurn({ listConversationMessages: list });
+    act(() => hook.result.current.selectConversation("c-1"));
+    await waitFor(() => expect(row(hook, "plan:p-1")).toBeDefined());
+    expect(row(hook, "plan:p-1")).toMatchObject({ kind: "plan", planId: "p-1", state: "proposed", confirmPath: "/approvals/p-1" });
+    expect(row(hook, "plan:p-2")).toBeUndefined();
+    expect(hook.result.current.messages.filter((m) => "content" in m && m.role === "agent")).toHaveLength(0);
+  });
+});
+
+describe("useAgentChat ask card ids on done", () => {
+  it("keeps the card's React key when done assigns the stored id", async () => {
+    const { hook, handlers } = await startTurn();
+    act(() => handlers.onAsk?.(ASK));
+    const key = (hook.result.current.messages[1] as { clientKey: string }).clientKey;
+    act(() => handlers.onDone("m-card"));
+    expect(row(hook, "m-card")).toMatchObject({ clientKey: key });
+    expect(key).toBe("ask:a-1");
+  });
+
+  it("maps EVERY ask card of a turn to its stored id, not only the first", async () => {
+    const { hook, handlers } = await startTurn();
+    act(() => handlers.onAsk?.(ASK));
+    act(() => handlers.onAsk?.({ ...ASK, ask_id: "a-2", title: "Second" }));
+    act(() => handlers.onDone("m-2", { ask_message_ids: { "a-1": "m-1", "a-2": "m-2" } }));
+    expect(row(hook, "m-1")).toMatchObject({ askId: "a-1" });
+    expect(row(hook, "m-2")).toMatchObject({ askId: "a-2" });
+    expect(hook.result.current.messages.some((m) => m.id.startsWith("__ask__:"))).toBe(false);
+  });
+
+  it("without the map the card the turn ended on takes message_id and no card keeps a pending id", async () => {
+    const { hook, handlers } = await startTurn();
+    act(() => handlers.onAsk?.(ASK));
+    act(() => handlers.onAsk?.({ ...ASK, ask_id: "a-2" }));
+    act(() => handlers.onDone("m-2"));
+    expect(row(hook, "m-2")).toMatchObject({ askId: "a-2" });
+    const cards = hook.result.current.messages.filter((m) => "askId" in m);
+    expect(cards).toHaveLength(2);
+    expect(cards.some((m) => m.id.startsWith("__ask__:"))).toBe(false);
+    expect(new Set(cards.map((m) => m.id)).size).toBe(2);
   });
 });
