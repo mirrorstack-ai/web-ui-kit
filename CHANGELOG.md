@@ -5,6 +5,8 @@ Notable API additions and breaking changes. For the full commit log, see
 
 ## Unreleased
 
+## 0.7.27
+
 ### Added
 
 - **`useAgentChat` / `useAgentSession` expose `errorInfo`** — a refused send,
@@ -22,6 +24,9 @@ Notable API additions and breaking changes. For the full commit log, see
   add a language with one `AGENT_ERROR_COPY` entry) for each agent refusal
   code plus the wait time. Render a refused turn from these, never from
   server text.
+- **Agent sidebar question card and plan card** — the sidebar renders an agent's
+  question (ask) as a card the user answers in place, and a multi-step plan as a plan card
+  with per-step state (42e011da). Both survive a reload and read as done once resolved.
 
 ### Changed
 
