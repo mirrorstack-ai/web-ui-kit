@@ -823,6 +823,12 @@ export function useAgentChat(
       const card = messages.find((m): m is AgentAskMessage => m.id === messageId && "askId" in m);
       const stream = clientRef.current.streamAgentAskAnswer;
       if (!convId || !card || card.status !== "pending" || !stream) return;
+      // A `local-` id means done carried no stored row for this card (an earlier ask of a
+      // multi-ask turn, no ask_message_ids map): the server cannot tie the answer to a row, so send nothing.
+      if (messageId.startsWith("local-")) {
+        setError("ask_unlinked");
+        return;
+      }
       if (answeringRef.current.has(messageId)) return;
       answeringRef.current.add(messageId);
 

@@ -143,6 +143,20 @@ describe("useAgentChat plan card", () => {
   });
 });
 
+describe("useAgentChat plan replay with an approved step", () => {
+  it("shows no approve control for a step the stored plan already holds as approved", async () => {
+    const approved: AgentPlanEvent = { ...PLAN, steps: [{ ...PLAN.steps[0], state: "approved" }] };
+    const list = vi.fn().mockResolvedValue([
+      { id: "u1", role: "user", content: "install quiz", createdAt: NOW },
+      { id: "m-p1", role: "agent" as const, content: "", createdAt: NOW, plan: approved },
+    ]);
+    const { hook } = await startTurn({ listConversationMessages: list }, { confirmPlanStep: vi.fn() });
+    act(() => hook.result.current.selectConversation("c-1"));
+    await waitFor(() => expect(row(hook, "plan:p-1")).toBeDefined());
+    expect(row(hook, "plan:p-1")).toMatchObject({ steps: [{ id: "s1", state: "approved" }] });
+  });
+});
+
 describe("useAgentChat ask card ids on done", () => {
   it("keeps the card's React key when done assigns the stored id", async () => {
     const { hook, handlers } = await startTurn();
@@ -173,5 +187,20 @@ describe("useAgentChat ask card ids on done", () => {
     expect(cards).toHaveLength(2);
     expect(cards.some((m) => m.id.startsWith("__ask__:"))).toBe(false);
     expect(new Set(cards.map((m) => m.id)).size).toBe(2);
+  });
+
+  it("submitAsk refuses an earlier card that kept a local id: sends nothing and shows an error", async () => {
+    const answerStream = vi.fn().mockResolvedValue(undefined);
+    const { hook, handlers } = await startTurn({ streamAgentAskAnswer: answerStream });
+    act(() => handlers.onAsk?.(ASK));
+    act(() => handlers.onAsk?.({ ...ASK, ask_id: "a-2" }));
+    act(() => handlers.onDone("m-2"));
+    const earlier = hook.result.current.messages.find((m) => "askId" in m && m.askId === "a-1")!;
+    expect(earlier.id.startsWith("local-")).toBe(true);
+    act(() => hook.result.current.submitAsk(earlier.id, { q1: "dark" }));
+    await flush();
+    expect(answerStream).not.toHaveBeenCalled();
+    expect(hook.result.current.error).toBe("ask_unlinked");
+    expect(row(hook, earlier.id)).toMatchObject({ status: "pending" });
   });
 });
