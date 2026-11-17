@@ -81,7 +81,7 @@ export interface UseAgentSessionDeps {
    * `useAgentChat`. A step turns "approved" only after it resolves; omit it and
    * `approvePlanStep` is undefined, so cards render no approve control (fails closed).
    */
-  confirmPlanStep?: (planId: string, stepId: string) => Promise<void>;
+  confirmPlanStep?: (planId: string, stepId: string, version: number, hash: string | undefined) => Promise<void>;
 }
 
 /** Labels the session bakes into derived data. Extends the chat hook's labels

@@ -67,7 +67,7 @@ export type AgentChatMessage =
       answers?: Record<string, AgentSidebarMultiQuestionAnswer>;
     }
   | {
-      id: string; role: "agent"; kind: "plan"; planId: string; version: number; state: string;
+      id: string; role: "agent"; kind: "plan"; planId: string; version: number; hash?: string; state: string;
       confirmPath: string; steps: AgentSidebarPlanStep[];
     };
 
@@ -109,10 +109,12 @@ export interface UseAgentChatOptions {
   /**
    * Host confirm for one plan step (decision X1: the model never writes; the host runs the
    * confirm / passkey step-up). The hook never marks a step approved itself: it calls this and
-   * shows the step as approved only after the returned promise resolves. Absent (PROPOSED):
+   * shows the step as approved only after the returned promise resolves, and only while the card
+   * still holds the plan version that was confirmed (`version` + `hash` say which one the user saw,
+   * so the host binds its confirm to it). Absent (PROPOSED):
    * `approvePlanStep` is undefined and the card renders no approve control.
    */
-  confirmPlanStep?: (planId: string, stepId: string) => Promise<void>;
+  confirmPlanStep?: (planId: string, stepId: string, version: number, hash: string | undefined) => Promise<void>;
 }
 
 /** Structured detail behind the last failed send/load's `error` code. The
@@ -329,7 +331,7 @@ function insertBeforePending(list: AgentChatMessage[], row: AgentChatMessage) {
 function planMessage(plan: AgentPlanEvent): AgentChatMessage {
   return {
     id: `plan:${plan.plan_id}`, role: "agent", kind: "plan", planId: plan.plan_id,
-    version: plan.version, state: plan.state, confirmPath: plan.confirm_path,
+    version: plan.version, hash: plan.hash, state: plan.state, confirmPath: plan.confirm_path,
     steps: plan.steps.map(({ id, title, category, state }) => ({ id, title, category, state })),
   };
 }
@@ -887,8 +889,9 @@ export function useAgentChat(
       const stream = clientRef.current.streamAgentAskAnswer;
       if (!convId || !card || card.status !== "pending" || !stream) return;
       // A `local-` id means done carried no stored row for this card (an earlier ask of a
-      // multi-ask turn, no ask_message_ids map): the server cannot tie the answer to a row, so send nothing.
-      if (messageId.startsWith("local-")) {
+      // multi-ask turn, no ask_message_ids map); an `__ask__:` id means done has not named its row
+      // yet (or never came). The server cannot tie the answer to a stored row, so send nothing.
+      if (messageId.startsWith("local-") || messageId.startsWith(ASK_PENDING_PREFIX)) {
         setError("ask_unlinked");
         return;
       }
@@ -950,16 +953,18 @@ export function useAgentChat(
       const inFlight = `${row.planId}:${stepId}`;
       if (confirmingRef.current.has(inFlight)) return;
       confirmingRef.current.add(inFlight);
+      // A newer frame may have replaced the row (new version / steps) while the host's confirm
+      // was pending: the confirm covers only the version the user saw, so write nothing then.
       const setStep = (state: string) =>
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === messageId && "planId" in m
+            m.id === messageId && "planId" in m && m.version === row.version && m.hash === row.hash
               ? { ...m, steps: m.steps.map((s) => (s.id === stepId ? { ...s, state } : s)) }
               : m,
           ),
         );
       // X1: approved only after the host's confirm succeeds; a failure leaves the step as it was.
-      confirm(row.planId, stepId).then(
+      confirm(row.planId, stepId, row.version, row.hash).then(
         () => setStep("approved"),
         (err) => console.error("agent: confirm step failed", err),
       ).finally(() => confirmingRef.current.delete(inFlight));

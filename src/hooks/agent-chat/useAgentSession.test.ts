@@ -209,7 +209,7 @@ describe("useAgentSession", () => {
     expect(stepState(result)).toBe("draft");
     expect(result.current.approvePlanStep).toBeTypeOf("function");
     await act(async () => result.current.approvePlanStep?.("plan:p-1", "s1"));
-    expect(confirmPlanStep).toHaveBeenCalledWith("p-1", "s1");
+    expect(confirmPlanStep).toHaveBeenCalledWith("p-1", "s1", 1, "abc");
     expect(stepState(result)).toBe("approved");
     stream.release();
     await flush();

@@ -135,7 +135,7 @@ describe("useAgentChat plan card", () => {
     act(() => hook.result.current.approvePlanStep?.("plan:p-1", "s1"));
     act(() => hook.result.current.approvePlanStep?.("plan:p-1", "s1"));
     expect(confirm).toHaveBeenCalledTimes(1);
-    expect(confirm).toHaveBeenCalledWith("p-1", "s1");
+    expect(confirm).toHaveBeenCalledWith("p-1", "s1", 1, "abc");
     expect(stepState()).toBe("draft"); // in flight: not approved yet
     await act(async () => settle.fail(new Error("no passkey")));
     expect(stepState()).toBe("draft");
@@ -143,6 +143,20 @@ describe("useAgentChat plan card", () => {
     expect(confirm).toHaveBeenCalledTimes(2);
     await act(async () => settle.ok());
     expect(stepState()).toBe("approved");
+  });
+
+  it("does not mark a step approved when a newer plan version replaced the row while the confirm was pending", async () => {
+    let settle!: () => void;
+    const confirm = vi.fn(() => new Promise<void>((ok) => { settle = ok; }));
+    const { hook, handlers } = await startTurn({}, { confirmPlanStep: confirm });
+    act(() => handlers.onPlan?.(PLAN));
+    act(() => hook.result.current.approvePlanStep?.("plan:p-1", "s1"));
+    // v2 (new hash) lands while the host's passkey step-up for v1 is pending.
+    act(() => handlers.onPlan?.({ ...PLAN, version: 2, hash: "def" }));
+    await act(async () => settle());
+    const r = row(hook, "plan:p-1") as { version: number; steps: { state: string }[] };
+    expect(r.version).toBe(2);
+    expect(r.steps[0].state).toBe("draft");
   });
 
   it("rebuilds a plan card that still awaits confirmation when the thread reloads, and no settled one", async () => {
@@ -220,5 +234,17 @@ describe("useAgentChat ask card ids on done", () => {
     expect(answerStream).not.toHaveBeenCalled();
     expect(hook.result.current.error).toBe("ask_unlinked");
     expect(row(hook, earlier.id)).toMatchObject({ status: "pending" });
+  });
+
+  it("submitAsk refuses a card still holding the pending __ask__ id (done not seen)", async () => {
+    const answerStream = vi.fn().mockResolvedValue(undefined);
+    const { hook, handlers } = await startTurn({ streamAgentAskAnswer: answerStream });
+    act(() => handlers.onAsk?.(ASK));
+    const card = hook.result.current.messages.find((m) => "askId" in m)!;
+    expect(card.id.startsWith("__ask__:")).toBe(true);
+    act(() => hook.result.current.submitAsk(card.id, { q1: "dark" }));
+    await flush();
+    expect(answerStream).not.toHaveBeenCalled();
+    expect(hook.result.current.error).toBe("ask_unlinked");
   });
 });
