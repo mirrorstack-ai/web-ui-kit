@@ -58,12 +58,34 @@ export type AgentSidebarMultiQuestionAnswer = string | boolean | string[];
 
 export type AgentSidebarMultiQuestionLayout = "list" | "tabs";
 
+const DEFAULT_LABELS = {
+  answerToContinue: "Answer to continue",
+  /** Submit button text; the `submitLabel` prop wins when both are set. */
+  submit: "Submit",
+  submitted: "Submitted",
+  enabled: "Enabled",
+  notEnabled: "Not enabled",
+  notAnswered: "Not answered",
+  selectQuestion: "Select a question",
+  review: "Review",
+  prev: "Prev",
+  next: "Next",
+};
+
+/** Every string the card bakes in — hosts pass a translation (English defaults). */
+export type AgentSidebarMultiQuestionLabels = typeof DEFAULT_LABELS;
+
 export interface AgentSidebarMultiQuestionProps {
   title: string;
   description?: string;
   questions: AgentSidebarQuestion[];
   submitLabel?: string;
   status?: AgentSidebarMultiQuestionStatus;
+  /** Seed values keyed by question id (a submitted card shows these
+   *  read-only). Read once, on mount. */
+  answers?: Record<string, AgentSidebarMultiQuestionAnswer>;
+  /** Localizable strings (English defaults; partial overrides merge). */
+  labels?: Partial<AgentSidebarMultiQuestionLabels>;
   onSubmit?: (answers: Record<string, AgentSidebarMultiQuestionAnswer>) => void;
   className?: string;
   /** "tabs" (default) shows one question at a time with a tab pill row + description.
@@ -80,14 +102,10 @@ const borderByStatus: Record<AgentSidebarMultiQuestionStatus, string> = {
 
 const headerByStatus: Record<
   AgentSidebarMultiQuestionStatus,
-  { text: string; color: string; icon: string }
+  { color: string; icon: string }
 > = {
-  pending: {
-    text: "Answer to continue",
-    color: "text-inverse-on-surface/55",
-    icon: "edit_note",
-  },
-  submitted: { text: "Submitted", color: "text-inverse-primary", icon: "check_circle" },
+  pending: { color: "text-inverse-on-surface/55", icon: "edit_note" },
+  submitted: { color: "text-inverse-primary", icon: "check_circle" },
 };
 
 function initialAnswers(
@@ -122,8 +140,9 @@ function isAnswered(
 function formatAnswer(
   q: AgentSidebarQuestion,
   value: AgentSidebarMultiQuestionAnswer,
+  labels: AgentSidebarMultiQuestionLabels,
 ): string {
-  if (q.type === "toggle") return value ? "Enabled" : "Not enabled";
+  if (q.type === "toggle") return value ? labels.enabled : labels.notEnabled;
   if (q.type === "choice" && q.multiple) {
     if (!Array.isArray(value) || value.length === 0) return "";
     return value
@@ -330,18 +349,25 @@ export function AgentSidebarMultiQuestion({
   title,
   description,
   questions,
-  submitLabel = "Submit",
+  submitLabel,
   status = "pending",
+  answers: seedAnswers,
+  labels: labelOverrides,
   onSubmit,
   className,
   layout = "tabs",
 }: AgentSidebarMultiQuestionProps) {
-  const [answers, setAnswers] = useState(() => initialAnswers(questions));
+  const labels = { ...DEFAULT_LABELS, ...labelOverrides };
+  const [answers, setAnswers] = useState(() => ({
+    ...initialAnswers(questions),
+    ...seedAnswers,
+  }));
   const [activeTabId, setActiveTabId] = useState<string>(
     questions[0]?.id ?? REVIEW_TAB_ID,
   );
   const submitted = status === "submitted";
   const header = headerByStatus[status];
+  const headerText = submitted ? labels.submitted : labels.answerToContinue;
 
   const setAnswer = (id: string, value: AgentSidebarMultiQuestionAnswer) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -356,7 +382,7 @@ export function AgentSidebarMultiQuestion({
   const summaries = questions.map((q) => {
     const value = answers[q.id];
     const answered = isAnswered(q, value);
-    const ans = formatAnswer(q, value);
+    const ans = formatAnswer(q, value, labels);
     return { q, value, answered, ans, filled: answered && !!ans };
   });
 
@@ -374,7 +400,7 @@ export function AgentSidebarMultiQuestion({
             <span className="text-sm text-inverse-on-surface">{ans}</span>
           ) : (
             <span className="text-sm italic text-warning-container">
-              Not answered
+              {labels.notAnswered}
             </span>
           )}
         </div>
@@ -398,7 +424,7 @@ export function AgentSidebarMultiQuestion({
             header.color,
           )}
         >
-          {header.text}
+          {headerText}
         </span>
       </div>
 
@@ -416,7 +442,7 @@ export function AgentSidebarMultiQuestion({
           <>
             <div className="mt-3">
               <SegmentedButton
-                aria-label="Select a question"
+                aria-label={labels.selectQuestion}
                 size="sm"
                 inverse
                 value={activeTabId}
@@ -430,7 +456,7 @@ export function AgentSidebarMultiQuestion({
                       | "muted"
                       | "warning",
                   })),
-                  { value: REVIEW_TAB_ID, label: "Review" },
+                  { value: REVIEW_TAB_ID, label: labels.review },
                 ]}
               />
             </div>
@@ -520,7 +546,7 @@ export function AgentSidebarMultiQuestion({
                   leftIcon="arrow_back"
                   className="text-inverse-on-surface/60 hover:text-inverse-on-surface hover:bg-inverse-on-surface/10"
                 >
-                  Prev
+                  {labels.prev}
                 </Button>
                 <Button
                   variant="text"
@@ -534,7 +560,7 @@ export function AgentSidebarMultiQuestion({
                   rightIcon="arrow_forward"
                   className="text-inverse-on-surface/60 hover:text-inverse-on-surface hover:bg-inverse-on-surface/10"
                 >
-                  Next
+                  {labels.next}
                 </Button>
               </div>
             ) : (
@@ -548,7 +574,7 @@ export function AgentSidebarMultiQuestion({
               rightIcon="check"
               className="hover:bg-primary! hover:text-on-primary!"
             >
-              {submitLabel}
+              {submitLabel ?? labels.submit}
             </Button>
           </div>
         )}

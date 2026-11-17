@@ -39,7 +39,7 @@ export function useQueuedAgentSend(
   const { messages, send: sendNow } = chat;
 
   // The streaming reply placeholder is the only message with streaming: true.
-  const isStreaming = messages.some((m) => m.role === "agent" && m.streaming);
+  const isStreaming = messages.some((m) => m.role === "agent" && "streaming" in m && m.streaming);
 
   // Scope switch resets the thread (useAgentChat) — drop the queue with it.
   useEffect(() => {

@@ -11,14 +11,22 @@ import type {
   AgentSidebarMessageFeedback,
   AgentMessageSegment,
 } from "@/components/ui/agent/messages/AgentSidebarMessage";
+import type {
+  AgentSidebarMultiQuestionAnswer,
+  AgentSidebarQuestion,
+} from "@/components/ui/agent/asks/AgentSidebarMultiQuestion";
+import type { AgentSidebarPlanStep } from "@/components/ui/agent/plans/AgentSidebarPlanCard";
 import type { AgentToolCall } from "@/components/ui/agent/messages/AgentSidebarToolCall";
 import type { AgentSidebarInputModel } from "@/components/ui/agent/sidebar/AgentSidebarInput";
 import type {
   AgentApiMessage,
+  AgentAskEvent,
+  AgentAskQuestion,
   AgentChatClient,
   AgentConversation,
   AgentMessageMeta,
   AgentModelsResponse,
+  AgentPlanEvent,
   AgentStreamHandlers,
   AgentToolEventStatus,
   AgentToolMessageMeta,
@@ -46,7 +54,24 @@ export type AgentChatMessage =
       streaming?: boolean;
       feedback?: AgentSidebarMessageFeedback;
     }
-  | { id: string; role: "tool"; tool: AgentToolCall };
+  | { id: string; role: "tool"; tool: AgentToolCall }
+  | {
+      id: string; role: "agent"; kind: "multi-question"; askId: string; title: string;
+      description?: string; questions: AgentSidebarQuestion[]; status: "pending" | "submitted";
+      /** The user's answers, shown read-only once submitted. */
+      answers?: Record<string, AgentSidebarMultiQuestionAnswer>;
+    }
+  | {
+      id: string; role: "agent"; kind: "plan"; planId: string; version: number; state: string;
+      confirmPath: string; steps: AgentSidebarPlanStep[];
+    };
+
+type AgentTextMessage = Extract<AgentChatMessage, { role: "agent"; content: string }>;
+type AgentAskMessage = Extract<AgentChatMessage, { kind: "multi-question" }>;
+
+/** A plain agent bubble — not an ask or plan card. */
+const isAgentText = (m: AgentChatMessage): m is AgentTextMessage =>
+  m.role === "agent" && !("kind" in m);
 
 /** Localizable strings the hook bakes into derived data. EN defaults. */
 export interface UseAgentChatLabels {
@@ -107,6 +132,12 @@ export interface UseAgentChatResult {
    *  while the roster is unknown. */
   selectedModelId: string | undefined;
   selectModel: (id: string) => void;
+  /** Answer a pending question card: submitted at once, the turn continues, rolls back on a
+   *  connect failure. A submitted card is ignored. */
+  submitAsk: (messageId: string, answers: Record<string, AgentSidebarMultiQuestionAnswer>) => void;
+  /** Approve a draft/edit_text plan step (optimistic). undefined when the client has no
+   *  `approvePlanStep`: show no button. */
+  approvePlanStep: ((messageId: string, stepId: string) => void) | undefined;
 }
 
 /** In-flight agent reply placeholder — swapped for the persisted message id
@@ -146,7 +177,7 @@ function settlePending(list: AgentChatMessage[]): AgentChatMessage[] {
   return list.flatMap((m) => {
     if (m.role === "tool" && m.tool.status === "started") return [];
     if (m.id !== PENDING_ID) return [m];
-    if (m.role === "agent") {
+    if (isAgentText(m)) {
       const segments = settleSegments(m.segments);
       if (m.content || segments) {
         return [
@@ -218,10 +249,60 @@ function applyToolEvent(
   status: AgentToolEventStatus,
 ): AgentChatMessage[] {
   return list.map((m) =>
-    m.id === PENDING_ID && m.role === "agent"
+    m.id === PENDING_ID && isAgentText(m)
       ? { ...m, segments: applyToolToSegments(m.segments ?? [], name, status) }
       : m,
   );
+}
+
+// Wire question -> the kit's question union. Choice questions the server sent
+// without a style pick cards when any option has a description, else segmented.
+function toSidebarQuestion(q: AgentAskQuestion): AgentSidebarQuestion {
+  const base = { id: q.id, label: q.label, description: q.description };
+  const str = typeof q.defaultValue === "string" ? q.defaultValue : undefined;
+  if (q.type === "toggle") return { ...base, type: "toggle", defaultValue: q.defaultValue === true };
+  if (q.type === "text") {
+    return { ...base, type: "text", multiline: q.multiline, placeholder: q.placeholder, defaultValue: str };
+  }
+  const options = q.options ?? [];
+  return {
+    ...base, type: "choice", multiple: q.multiple, options,
+    style: q.style ?? (options.some((o) => o.description) ? "cards" : "segmented"),
+    defaultValue: Array.isArray(q.defaultValue) ? q.defaultValue : str,
+  };
+}
+
+function askMessage(
+  id: string,
+  ask: AgentAskEvent,
+  status: AgentAskMessage["status"],
+  answers?: AgentAskMessage["answers"],
+): AgentAskMessage {
+  return {
+    id, role: "agent", kind: "multi-question", askId: ask.ask_id, title: ask.title,
+    description: ask.description, questions: ask.questions.map(toSidebarQuestion), status,
+    ...(answers ? { answers } : {}),
+  };
+}
+
+// An ask card streamed this turn carries this id until `done` names its row.
+const ASK_PENDING_PREFIX = "__ask__:";
+// Cards land above the in-flight reply bubble so the bubble stays last.
+function insertBeforePending(list: AgentChatMessage[], row: AgentChatMessage) {
+  const i = list.findIndex((m) => m.id === PENDING_ID);
+  return i === -1 ? [...list, row] : [...list.slice(0, i), row, ...list.slice(i)];
+}
+
+// A plan frame for a plan already on screen updates that row in place.
+function applyPlanEvent(list: AgentChatMessage[], plan: AgentPlanEvent): AgentChatMessage[] {
+  const row: AgentChatMessage = {
+    id: `plan:${plan.plan_id}`, role: "agent", kind: "plan", planId: plan.plan_id,
+    version: plan.version, state: plan.state, confirmPath: plan.confirm_path,
+    steps: plan.steps.map(({ id, title, category, state }) => ({ id, title, category, state })),
+  };
+  return list.some((m) => m.id === row.id)
+    ? list.map((m) => (m.id === row.id ? row : m))
+    : insertBeforePending(list, row);
 }
 
 // Map one persisted replay row to its sidebar representation (or nothing).
@@ -249,6 +330,14 @@ function replayMessage(m: AgentApiMessage): AgentChatMessage[] {
     ];
   }
   if (m.role !== "agent") return [];
+  if (m.ask) {
+    // The card (title, questions) rides in meta.ask; `m.ask` carries id, status, answers.
+    const card = (m.meta as { ask?: Partial<AgentAskEvent> } | undefined)?.ask;
+    if (!card?.title || !Array.isArray(card.questions)) return [];
+    const answered = m.ask.status === "answered";
+    const ask = { ...(card as AgentAskEvent), ask_id: m.ask.ask_id };
+    return [askMessage(m.id, ask, answered ? "submitted" : "pending", answered ? m.ask.answers : undefined)];
+  }
   const meta = (m.meta ?? undefined) as AgentMessageMeta | undefined;
   // A rerun keeps the replaced reply server-side (stamped superseded_by) —
   // the open thread shows only the live answer.
@@ -278,12 +367,12 @@ function appendTextSegment(
 function makeStreamHandlers(
   setMessages: Dispatch<SetStateAction<AgentChatMessage[]>>,
   setError: Dispatch<SetStateAction<string | null>>,
-): Pick<AgentStreamHandlers, "onDelta" | "onTool" | "onDone" | "onError"> {
+): AgentStreamHandlers {
   return {
     onDelta: (text) =>
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === PENDING_ID && m.role === "agent"
+          m.id === PENDING_ID && isAgentText(m)
             ? {
                 ...m,
                 content: m.content + text,
@@ -293,19 +382,24 @@ function makeStreamHandlers(
         ),
       ),
     onTool: (name, status) => setMessages((prev) => applyToolEvent(prev, name, status)),
-    onDone: (messageId) =>
+    onAsk: (ask) =>
       setMessages((prev) =>
-        prev.map((m) =>
-          m.id === PENDING_ID && m.role === "agent"
-            ? {
-                id: messageId,
-                role: "agent",
-                content: m.content,
-                ...(m.segments?.length ? { segments: m.segments } : {}),
-              }
-            : m,
-        ),
+        insertBeforePending(prev, askMessage(`${ASK_PENDING_PREFIX}${ask.ask_id}`, ask, "pending")),
       ),
+    onPlan: (plan) => setMessages((prev) => applyPlanEvent(prev, plan)),
+    onDone: (messageId) =>
+      setMessages((prev) => {
+        // A turn that streamed an ask card ends with `done` naming the CARD's row: the card
+        // takes the id, the reply bubble keeps only text that really streamed.
+        const card = prev.find((m) => m.id.startsWith(ASK_PENDING_PREFIX));
+        return prev.flatMap((m): AgentChatMessage[] => {
+          if (m === card) return [{ ...card, id: messageId }];
+          if (m.id !== PENDING_ID || !isAgentText(m)) return [m];
+          if (card) return m.content ? [{ id: `local-${crypto.randomUUID()}`, role: "agent", content: m.content }] : [];
+          const segments = m.segments?.length ? { segments: m.segments } : {};
+          return [{ id: messageId, role: "agent", content: m.content, ...segments }];
+        });
+      }),
     onError: (code) => {
       setError(code);
       setMessages((prev) => settlePending(prev));
@@ -620,10 +714,10 @@ export function useAgentChat(
       // thumb now. The snapshot is read from state (not inside the updater)
       // so it can't depend on updater invocation count.
       const target = messages.find((m) => m.id === messageId);
-      const prevFeedback = target?.role === "agent" ? target.feedback : undefined;
+      const prevFeedback = target && isAgentText(target) ? target.feedback : undefined;
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === messageId && m.role === "agent" ? { ...m, feedback: rating ?? undefined } : m,
+          m.id === messageId && isAgentText(m) ? { ...m, feedback: rating ?? undefined } : m,
         ),
       );
 
@@ -631,7 +725,7 @@ export function useAgentChat(
         console.error("agent: feedback patch failed", err);
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === messageId && m.role === "agent" ? { ...m, feedback: prevFeedback } : m,
+            m.id === messageId && isAgentText(m) ? { ...m, feedback: prevFeedback } : m,
           ),
         );
       });
@@ -654,7 +748,7 @@ export function useAgentChat(
       // supersedes it in place, so the thread position stays.
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === messageId && m.role === "agent"
+          m.id === messageId && isAgentText(m)
             ? { id: PENDING_ID, role: "agent", content: "", streaming: true }
             : m,
         ),
@@ -688,6 +782,81 @@ export function useAgentChat(
       })();
     },
     [refreshConversations, selectConversation],
+  );
+
+  // Cards answered or being answered: a ref, so a double click in one tick sends once.
+  const answeringRef = useRef(new Set<string>());
+
+  const submitAsk = useCallback(
+    (messageId: string, answers: Record<string, AgentSidebarMultiQuestionAnswer>) => {
+      const convId = conversationIdRef.current;
+      const card = messages.find((m): m is AgentAskMessage => m.id === messageId && "askId" in m);
+      const stream = clientRef.current.streamAgentAskAnswer;
+      if (!convId || !card || card.status !== "pending" || !stream) return;
+      if (answeringRef.current.has(messageId)) return;
+      answeringRef.current.add(messageId);
+
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      loadSeq.current++;
+      setError(null);
+
+      const setCard = (patch: Partial<AgentAskMessage>) =>
+        setMessages((prev) => prev.map((m) => (m.id === messageId && "askId" in m ? { ...m, ...patch } : m)));
+      // Optimistic: submitted now, the continuing turn streams under it.
+      setMessages((prev) => [
+        ...settlePending(prev).map((m) =>
+          m.id === messageId && "askId" in m ? { ...m, status: "submitted" as const, answers } : m,
+        ),
+        { id: PENDING_ID, role: "agent", content: "", streaming: true },
+      ]);
+
+      void (async () => {
+        try {
+          await stream.call(
+            clientRef.current, convId, card.askId, answers, makeStreamHandlers(setMessages, setError), controller.signal,
+          );
+        } catch (err) {
+          if (controller.signal.aborted) return;
+          answeringRef.current.delete(messageId);
+          // 409 ask_already_answered: another tab answered — reload the thread.
+          if ((err as Error & { status?: number }).status === 409) return selectConversation(convId);
+          console.error("agent: ask answer failed", err);
+          setError("send_failed");
+          setMessages((prev) => settlePending(prev));
+          setCard({ status: "pending", answers: undefined });
+        } finally {
+          if (abortRef.current === controller) abortRef.current = null;
+          if (!controller.signal.aborted) refreshConversations();
+        }
+      })();
+    },
+    [messages, refreshConversations, selectConversation],
+  );
+
+  const canApprovePlanStep = !!client.approvePlanStep;
+  const approvePlanStep = useCallback(
+    (messageId: string, stepId: string) => {
+      const approve = clientRef.current.approvePlanStep;
+      const row = messages.find((m) => m.id === messageId && "planId" in m);
+      const prevState = row && "planId" in row ? row.steps.find((s) => s.id === stepId)?.state : undefined;
+      if (!approve || !row || !("planId" in row) || prevState === undefined) return;
+      const setStep = (state: string) =>
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId && "planId" in m
+              ? { ...m, steps: m.steps.map((s) => (s.id === stepId ? { ...s, state } : s)) }
+              : m,
+          ),
+        );
+      setStep("approved");
+      approve.call(clientRef.current, row.planId, stepId).catch((err) => {
+        console.error("agent: approve step failed", err);
+        setStep(prevState);
+      });
+    },
+    [messages],
   );
 
   const selectModel = useCallback(
@@ -724,5 +893,7 @@ export function useAgentChat(
     // model the server won't actually reply with).
     selectedModelId: userModelId ?? roster?.default_model_id,
     selectModel,
+    submitAsk,
+    approvePlanStep: canApprovePlanStep ? approvePlanStep : undefined,
   };
 }

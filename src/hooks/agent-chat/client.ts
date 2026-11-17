@@ -45,6 +45,8 @@ export interface AgentApiMessage {
   content: string;
   meta?: unknown;
   createdAt: string;
+  /** Present on a replayed ask card; absent on every other row. */
+  ask?: AgentAskReplay;
 }
 
 /** Known keys in an agent message's meta JSONB. feedback comes from the
@@ -87,6 +89,55 @@ export interface AgentModelsResponse {
   default_model_id?: string;
 }
 
+// ---- Ask cards and plan frames (mirror api-client-shared's agent types) ----
+
+export interface AgentAskOption { value: string; label: string; description?: string }
+
+export interface AgentAskQuestion {
+  id: string;
+  type: "text" | "toggle" | "choice";
+  label: string;
+  description?: string;
+  multiline?: boolean;
+  placeholder?: string;
+  defaultValue?: string | boolean | string[];
+  style?: "segmented" | "cards";
+  multiple?: boolean;
+  options?: AgentAskOption[];
+}
+
+/** `event: ask` frame — one card of questions. */
+export interface AgentAskEvent {
+  ask_id: string;
+  title: string;
+  description?: string;
+  questions: AgentAskQuestion[];
+}
+
+/** Answers keyed by question id. */
+export type AgentAskAnswers = Record<string, string | boolean | string[]>;
+
+/** `ask` on a replayed message; `answers` is omitted while pending. */
+export interface AgentAskReplay {
+  ask_id: string;
+  status: "pending" | "answered";
+  answers?: AgentAskAnswers;
+}
+
+/** One plan-frame step. category and state are OPEN strings. */
+export interface AgentPlanStep { id: string; kind: string; category: string; title: string; state: string }
+
+/** `event: plan` frame; sent again when the plan changes state. */
+export interface AgentPlanEvent {
+  plan_id: string;
+  version: number;
+  state: string;
+  hash: string;
+  /** Relative to the account host, `/approvals/{plan_id}`. */
+  confirm_path: string;
+  steps: AgentPlanStep[];
+}
+
 // ---- Streamed reply (SSE) ----
 
 /** Lifecycle of one streamed tool call. */
@@ -102,6 +153,11 @@ export interface AgentStreamHandlers {
    *  "<module_slug>__<tool>"; frames carry no call id — a done/error frame
    *  resolves the matching started one by name + order. */
   onTool?: (name: string, status: AgentToolEventStatus) => void;
+  /** One `event: ask` frame. The turn still ends with `done` whose
+   *  messageId is the persisted card row. */
+  onAsk?: (ask: AgentAskEvent) => void;
+  /** One `event: plan` frame (again on every state change). */
+  onPlan?: (plan: AgentPlanEvent) => void;
 }
 
 // ---- Message actions ----
@@ -163,4 +219,17 @@ export interface AgentChatClient {
     handlers: AgentStreamHandlers,
     signal: AbortSignal,
   ): Promise<void>;
+  /** Answer one pending ask card; the continuing turn streams through the
+   *  same handlers. Optional so existing hosts compile; without it the hook
+   *  never marks a card submitted. Connect-time 409 = already answered. */
+  streamAgentAskAnswer?(
+    conversationId: string,
+    askId: string,
+    answers: AgentAskAnswers,
+    handlers: AgentStreamHandlers,
+    signal: AbortSignal,
+  ): Promise<void>;
+  /** Approve a draft/edit_text plan step. Optional: with no method the hook
+   *  exposes no approve action (no server route exists yet). */
+  approvePlanStep?(planId: string, stepId: string): Promise<void>;
 }
