@@ -27,7 +27,7 @@ Notable API additions and breaking changes. For the full commit log, see
 
 - **Agent plan approval is host-confirmed** — the optional `AgentChatClient.approvePlanStep`
   is removed (a host that implemented it is now ignored, the approve control disappears).
-  Pass `confirmPlanStep(planId, stepId)` to `useAgentChat` / `useAgentSession` instead; the
+  Pass `confirmPlanStep(planId, stepId, version, hash)` to `useAgentChat` / `useAgentSession` instead; the
   hook exposes `approvePlanStep` and `submitAsk`. Plan replay needs the server to write the
   current plan state into the stored `plan` payload (a step approved later must read
   `approved`, or the card shows the approve control again). `submitAsk` refuses an ask card
