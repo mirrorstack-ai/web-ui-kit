@@ -76,6 +76,12 @@ export interface UseAgentSessionDeps {
    * and the in-place draft binding.
    */
   resetKey?: string;
+  /**
+   * Host confirm for a plan step (e.g. a passkey / confirm dialog) — forwarded to
+   * `useAgentChat`. A step turns "approved" only after it resolves; omit it and
+   * `approvePlanStep` is undefined, so cards render no approve control (fails closed).
+   */
+  confirmPlanStep?: (planId: string, stepId: string) => Promise<void>;
 }
 
 /** Labels the session bakes into derived data. Extends the chat hook's labels
@@ -100,6 +106,8 @@ export interface UseAgentSessionResult
     | "models"
     | "selectedModelId"
     | "selectModel"
+    | "submitAsk"
+    | "approvePlanStep"
   > {
   /** Queue-aware send: goes out now, or queues while a reply streams. */
   send: (message: string) => void;
@@ -160,6 +168,7 @@ export function useAgentSession(deps: UseAgentSessionDeps): UseAgentSessionResul
     appId = null,
     resolveScope,
     resetKey,
+    confirmPlanStep,
   } = deps;
 
   // ---- Tab resolution (internalized; was resolveOpenTabs / resolveSidebarTabs) ----
@@ -297,6 +306,7 @@ export function useAgentSession(deps: UseAgentSessionDeps): UseAgentSessionResul
     scopeKey: activeScopeId,
     enabled,
     labels: chatLabels,
+    confirmPlanStep,
   });
 
   // ---- Select-conversation effect ----
@@ -369,6 +379,8 @@ export function useAgentSession(deps: UseAgentSessionDeps): UseAgentSessionResul
     models: chat.models,
     selectedModelId: chat.selectedModelId,
     selectModel: chat.selectModel,
+    submitAsk: chat.submitAsk,
+    approvePlanStep: chat.approvePlanStep,
     tabs,
     activeTabId: strip.activeTabId,
     selectTab: strip.selectTab,

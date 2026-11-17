@@ -188,6 +188,40 @@ describe("useAgentSession", () => {
     await flush();
   });
 
+  it("forwards confirmPlanStep through the session: approvePlanStep exists and approves a draft step", async () => {
+    const plan = {
+      plan_id: "p-1", version: 1, state: "proposed", hash: "abc", confirm_path: "/approvals/p-1",
+      steps: [{ id: "s1", kind: "install", category: "module", title: "Install quiz", state: "draft" }],
+    };
+    const stepState = (r: { current: ReturnType<typeof useAgentSession> }) =>
+      (r.current.messages.find((m) => m.id === "plan:p-1") as { steps: { state: string }[] } | undefined)?.steps[0].state;
+    const stream = controlledStream();
+    const chatClient = fakeChatClient({
+      createConversation: vi.fn().mockResolvedValue(conv({ id: "c-plan" })),
+      streamAgentReply: stream.fn,
+    });
+    const confirmPlanStep = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() => useAgentSession(makeDeps({ chatClient, confirmPlanStep })));
+    await flush();
+    act(() => result.current.send("build a quiz"));
+    await waitFor(() => expect(() => stream.handlers).not.toThrow());
+    act(() => stream.handlers.onPlan?.(plan));
+    expect(stepState(result)).toBe("draft");
+    expect(result.current.approvePlanStep).toBeTypeOf("function");
+    await act(async () => result.current.approvePlanStep?.("plan:p-1", "s1"));
+    expect(confirmPlanStep).toHaveBeenCalledWith("p-1", "s1");
+    expect(stepState(result)).toBe("approved");
+    stream.release();
+    await flush();
+  });
+
+  it("without confirmPlanStep the session exposes no approvePlanStep (fails closed)", async () => {
+    const { result } = renderHook(() => useAgentSession(makeDeps()));
+    await flush();
+    expect(result.current.approvePlanStep).toBeUndefined();
+    expect(result.current.submitAsk).toBeTypeOf("function");
+  });
+
   it("forwards the injected appId into createConversation and listConversations", async () => {
     const listConversations = vi.fn().mockResolvedValue({ items: [], nextCursor: null });
     const created = conv({ id: "c-app", appId: "app-uuid" });
