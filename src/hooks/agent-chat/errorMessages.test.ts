@@ -1,7 +1,42 @@
 import { describe, expect, it } from "vitest";
-import { agentErrorMessage, clampRetryAfterSeconds } from "./errorMessages";
+import {
+  AGENT_ERROR_COPY,
+  KNOWN_AGENT_CODES,
+  agentErrorMessage,
+  clampRetryAfterSeconds,
+} from "./errorMessages";
+
+const NEW_CODES = {
+  prompt_too_long: {
+    en: "Your message is too long. Please shorten it and try again.",
+    "zh-TW": "訊息太長，請縮短後再試一次。",
+  },
+  ai_unavailable: {
+    en: "The AI assistant is unavailable right now. Please try again later.",
+    "zh-TW": "AI 助理目前無法使用，請稍後再試。",
+  },
+  ai_credits_exhausted: {
+    en: "Your AI credits have run out.",
+    "zh-TW": "你的 AI 額度已用完。",
+  },
+} as const;
 
 describe("agentErrorMessage", () => {
+  for (const [code, text] of Object.entries(NEW_CODES)) {
+    for (const locale of ["en", "zh-TW"] as const) {
+      it(`${code} has its own ${locale} text, not the generic line`, () => {
+        expect(agentErrorMessage(code, locale)).toBe(text[locale]);
+        expect(agentErrorMessage(code, locale)).not.toBe(AGENT_ERROR_COPY[locale].fallback);
+      });
+    }
+  }
+
+  it("every locale carries every known agent code", () => {
+    for (const copy of Object.values(AGENT_ERROR_COPY)) {
+      for (const code of KNOWN_AGENT_CODES) expect(copy.messages[code]).toBeTruthy();
+    }
+  });
+
   it("gives per-locale copy for a known code", () => {
     expect(agentErrorMessage("agent_turn_limit", "en")).toBe(
       "You have reached the message limit for now.",

@@ -10,6 +10,8 @@ export interface AgentErrorCopy {
   fallback: string;
   /** Wait-time sentence for a refusal that carries `retryAfterSeconds`. */
   wait: (seconds: number) => string;
+  /** Joins the message and the wait sentence (CJK: none, Latin: a space). */
+  join: string;
 }
 
 // Longest wait the UI will state; a larger value is a server bug, not a plan.
@@ -25,9 +27,13 @@ const en: AgentErrorCopy = {
     agent_turn_limit: "You have reached the message limit for now.",
     daily_ai_ceiling: "The daily AI usage limit has been reached.",
     rate_limited: "Too many requests right now.",
+    prompt_too_long: "Your message is too long. Please shorten it and try again.",
+    ai_unavailable: "The AI assistant is unavailable right now. Please try again later.",
+    ai_credits_exhausted: "Your AI credits have run out.",
   },
   fallback: "Something went wrong. Please try again.",
   wait: (s) => `Try again in ${formatEn(s)}.`,
+  join: " ",
 };
 
 const zhTW: AgentErrorCopy = {
@@ -40,9 +46,13 @@ const zhTW: AgentErrorCopy = {
     agent_turn_limit: "你暫時已達訊息數量上限。",
     daily_ai_ceiling: "已達每日 AI 使用上限。",
     rate_limited: "目前請求過多。",
+    prompt_too_long: "訊息太長，請縮短後再試一次。",
+    ai_unavailable: "AI 助理目前無法使用，請稍後再試。",
+    ai_credits_exhausted: "你的 AI 額度已用完。",
   },
   fallback: "發生錯誤，請再試一次。",
   wait: (s) => `請於 ${formatZh(s)}後再試。`,
+  join: "",
 };
 
 function formatEn(s: number): string {
@@ -59,6 +69,10 @@ function formatZh(s: number): string {
   if (m < 60) return `${m} 分鐘`;
   return `${Math.ceil(m / 60)} 小時`;
 }
+
+/** Codes the server documents for the agent surface (the English map is the
+ *  source of truth; every locale must carry the same keys — see the test). */
+export const KNOWN_AGENT_CODES: ReadonlySet<string> = new Set(Object.keys(en.messages));
 
 export const AGENT_ERROR_COPY: Record<string, AgentErrorCopy> = {
   en,
@@ -89,5 +103,5 @@ export function agentErrorMessage(
   const base = copy.messages[code] ?? copy.fallback;
   const wait = clampRetryAfterSeconds(retryAfterSeconds);
   if (wait === undefined) return base;
-  return locale.startsWith("zh") ? `${base}${copy.wait(wait)}` : `${base} ${copy.wait(wait)}`;
+  return `${base}${copy.join}${copy.wait(wait)}`;
 }

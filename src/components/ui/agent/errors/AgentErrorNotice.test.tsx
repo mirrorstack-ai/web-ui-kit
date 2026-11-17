@@ -73,4 +73,31 @@ describe("AgentErrorNotice", () => {
     expect(alert).toHaveTextContent("你暫時已達訊息數量上限。請於 2 分鐘後再試。");
     expect(document.body.textContent).not.toContain("acme-corp");
   });
+
+  const DOCUMENTED = {
+    prompt_too_long: {
+      en: "Your message is too long. Please shorten it and try again.",
+      "zh-TW": "訊息太長，請縮短後再試一次。",
+    },
+    ai_unavailable: {
+      en: "The AI assistant is unavailable right now. Please try again later.",
+      "zh-TW": "AI 助理目前無法使用，請稍後再試。",
+    },
+    ai_credits_exhausted: {
+      en: "Your AI credits have run out.",
+      "zh-TW": "你的 AI 額度已用完。",
+    },
+  } as const;
+
+  for (const [code, text] of Object.entries(DOCUMENTED)) {
+    for (const locale of ["en", "zh-TW"] as const) {
+      it(`${code} renders its own ${locale} sentence, not the generic line`, () => {
+        render(<AgentErrorNotice errorInfo={{ code }} locale={locale} />);
+        const alert = screen.getByRole("alert");
+        expect(alert).toHaveTextContent(text[locale]);
+        expect(alert).toHaveAttribute("data-error-code", code);
+        expect(alert).not.toHaveTextContent(/Something went wrong|發生錯誤/);
+      });
+    }
+  }
 });

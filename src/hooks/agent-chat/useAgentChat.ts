@@ -36,7 +36,7 @@ import {
   type ConversationHistoryGroup,
   type RecencyLabels,
 } from "./history";
-import { clampRetryAfterSeconds } from "./errorMessages";
+import { KNOWN_AGENT_CODES, clampRetryAfterSeconds } from "./errorMessages";
 
 /** Sidebar-renderable chat message — assignable to the kit's
  *  AgentSidebarMessage union (text bubbles + tool-call rows). */
@@ -382,14 +382,20 @@ function appendTextSegment(
 // Read a rejected send/rerun/load's error fields structurally
 // (api-client-shared#90 names: status, code, retryAfterSeconds — the kit
 // doesn't import that package, see client.ts). The server `serverMessage` is
-// never read (see AgentChatErrorInfo). Only a snake_case server code adopted:
-// a Node/DOM error code (ECONNRESET, ...) or a plain network/parse error
-// falls back to the client-made code.
+// never read (see AgentChatErrorInfo). A code is adopted only when it is a
+// snake_case string AND the error carries a numeric HTTP `status` (a server
+// answered) or the code is a known agent code. A Node/DOM code (ECONNRESET),
+// a status-less client code ("network_error", "timeout") or a plain
+// network/parse error falls back to the client-made code.
 const SERVER_CODE = /^[a-z][a-z0-9_]{0,63}$/;
 function readThrownErrorInfo(err: unknown, fallback = "send_failed"): AgentChatErrorInfo {
   if (err && typeof err === "object") {
     const e = err as { code?: unknown; status?: unknown; retryAfterSeconds?: unknown };
-    if (typeof e.code === "string" && SERVER_CODE.test(e.code)) {
+    if (
+      typeof e.code === "string" &&
+      SERVER_CODE.test(e.code) &&
+      (typeof e.status === "number" || KNOWN_AGENT_CODES.has(e.code))
+    ) {
       const wait = clampRetryAfterSeconds(e.retryAfterSeconds);
       return {
         code: e.code,

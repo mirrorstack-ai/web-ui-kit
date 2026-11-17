@@ -183,12 +183,29 @@ describe("useAgentChat", () => {
     expect(JSON.stringify(result.current.errorInfo)).not.toContain("acme-corp");
   });
 
+  it("adopts a snake_case code with a numeric status, or a known agent code without one", async () => {
+    for (const [bad, code] of [
+      [{ code: "brand_new_code", status: 502 }, "brand_new_code"],
+      [{ code: "prompt_too_long" }, "prompt_too_long"],
+    ] as const) {
+      const client = fakeClient({ streamAgentReply: vi.fn().mockRejectedValue(bad) });
+      const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+      act(() => result.current.send("hello"));
+      await flush();
+      expect(result.current.error).toBe(code);
+    }
+  });
+
   it("does not adopt a non-server code (ECONNRESET, unknown shapes) — falls back to send_failed", async () => {
     for (const bad of [
       Object.assign(new Error("reset"), { code: "ECONNRESET" }),
       { code: "has space" },
       { code: "" },
       { code: 429 },
+      // snake_case but no status and not a known agent code: a client-side
+      // failure, not a server refusal.
+      { code: "network_error" },
+      { code: "timeout" },
     ]) {
       const client = fakeClient({ streamAgentReply: vi.fn().mockRejectedValue(bad) });
       const { result } = renderHook(() => useAgentChat(client, { appId: null }));
