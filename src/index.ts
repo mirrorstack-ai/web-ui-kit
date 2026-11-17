@@ -68,7 +68,12 @@ export {
   type AgentSidebarMultiQuestionAnswer,
   type AgentSidebarMultiQuestionLayout,
   type AgentSidebarChoiceStyle,
+  type AgentSidebarMultiQuestionLabels,
 } from "./components/ui/agent/asks/AgentSidebarMultiQuestion";
+export {
+  AgentSidebarPlanCard, isSafeConfirmHref,
+  type AgentSidebarPlanCardProps, type AgentSidebarPlanCardLabels, type AgentSidebarPlanStep,
+} from "./components/ui/agent/plans/AgentSidebarPlanCard";
 export {
   AgentSidebarMessages,
   type AgentSidebarMessage,
@@ -581,6 +586,7 @@ export {
 } from "./hooks/agent-chat/useAgentSession";
 export type {
   AgentApiMessage,
+  AgentAskAnswers, AgentAskEvent, AgentAskQuestion, AgentAskReplay, AgentPlanEvent, AgentPlanStep,
   AgentChatClient,
   AgentConversation,
   AgentConversationsPage,

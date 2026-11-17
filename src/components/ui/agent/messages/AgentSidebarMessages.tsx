@@ -15,7 +15,13 @@ import {
   type AgentSidebarMultiQuestionStatus,
   type AgentSidebarMultiQuestionAnswer,
   type AgentSidebarMultiQuestionLayout,
+  type AgentSidebarMultiQuestionLabels,
 } from "../asks/AgentSidebarMultiQuestion";
+import {
+  AgentSidebarPlanCard,
+  type AgentSidebarPlanCardLabels,
+  type AgentSidebarPlanStep,
+} from "../plans/AgentSidebarPlanCard";
 import {
   AgentSidebarToolCall,
   type AgentToolCall,
@@ -48,7 +54,19 @@ export type AgentSidebarMessage =
       questions: AgentSidebarQuestion[];
       submitLabel?: string;
       status?: AgentSidebarMultiQuestionStatus;
+      /** Submitted answers by question id, shown read-only. */
+      answers?: Record<string, AgentSidebarMultiQuestionAnswer>;
       layout?: AgentSidebarMultiQuestionLayout;
+    }
+  | {
+      id: string;
+      role: "agent";
+      kind: "plan";
+      planId: string;
+      state: string;
+      steps: AgentSidebarPlanStep[];
+      /** Server path (`/approvals/{plan}`); the host maps it via `resolvePlanHref`. */
+      confirmPath?: string;
     }
   | {
       id: string;
@@ -66,6 +84,14 @@ export interface AgentSidebarMessagesProps {
    *  icon — the consumer performs the actual clipboard write. Return `false`
    *  (sync or resolved), or reject, to suppress the success flash. */
   onCopyMessage?: (messageId: string) => void | boolean | Promise<void | boolean>;
+  /** Localizable strings of the question card (English defaults). */
+  questionLabels?: Partial<AgentSidebarMultiQuestionLabels>;
+  /** Localizable strings of the plan card (English defaults). */
+  planLabels?: Partial<AgentSidebarPlanCardLabels>;
+  /** Approve a plan step. Omit and no step shows Approve. */
+  onApprovePlanStep?: (messageId: string, stepId: string) => void;
+  /** Builds the plan link from `confirmPath` (D484: account host). Omit: no link. */
+  resolvePlanHref?: (confirmPath: string, planId: string) => string | undefined;
   /** Fired with the next rating: clicking the selected thumb yields null,
    *  clicking the other thumb switches. */
   onRateMessage?: (
@@ -153,6 +179,10 @@ export function AgentSidebarMessages({
   messages,
   onSubmitMultiQuestion,
   onCopyMessage,
+  questionLabels,
+  planLabels,
+  onApprovePlanStep,
+  resolvePlanHref,
   onRateMessage,
   onRerunMessage,
   actionLabels,
@@ -239,6 +269,19 @@ export function AgentSidebarMessages({
         if (m.role === "user") {
           return <AgentSidebarUserMessage key={m.id} content={m.content} />;
         }
+        if ("kind" in m && m.kind === "plan") {
+          return (
+            <AgentSidebarPlanCard
+              key={m.id}
+              planId={m.planId}
+              state={m.state}
+              steps={m.steps}
+              confirmHref={m.confirmPath ? resolvePlanHref?.(m.confirmPath, m.planId) : undefined}
+              onApproveStep={onApprovePlanStep && ((_, stepId) => onApprovePlanStep(m.id, stepId))}
+              labels={planLabels}
+            />
+          );
+        }
         if ("kind" in m) {
           return (
             <AgentSidebarMultiQuestion
@@ -248,6 +291,8 @@ export function AgentSidebarMessages({
               questions={m.questions}
               submitLabel={m.submitLabel}
               status={m.status}
+              answers={m.answers}
+              labels={questionLabels}
               layout={m.layout}
               onSubmit={(answers) => onSubmitMultiQuestion?.(m.id, answers)}
             />

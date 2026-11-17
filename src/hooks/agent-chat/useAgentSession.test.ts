@@ -138,7 +138,7 @@ describe("useAgentSession", () => {
 
     // The streaming first reply survived the flip (scopeKey pinned to the
     // draft id), so the placeholder is still present and streaming.
-    expect(result.current.messages.some((m) => m.role === "agent" && m.streaming)).toBe(true);
+    expect(result.current.messages.some((m) => m.role === "agent" && "streaming" in m && m.streaming)).toBe(true);
     // No replay reload was triggered for the rebound tab.
     expect(chatClient.listConversationMessages).not.toHaveBeenCalled();
 
