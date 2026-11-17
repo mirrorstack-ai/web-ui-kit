@@ -76,6 +76,24 @@ describe("useAgentChat question card", () => {
     expect(answerStream).toHaveBeenCalledTimes(2);
   });
 
+  it("a refused answer keeps the server's code and wait, and rolls the card back", async () => {
+    const refusal = Object.assign(new Error("denied for acme-corp"), {
+      code: "agent_turn_limit",
+      status: 429,
+      retryAfterSeconds: 30,
+    });
+    const answerStream = vi.fn().mockRejectedValue(refusal);
+    const { hook } = await askedTurn({ streamAgentAskAnswer: answerStream });
+    act(() => hook.result.current.submitAsk("m-card", { q1: "dark" }));
+    await waitFor(() => expect(hook.result.current.error).toBe("agent_turn_limit"));
+    expect(hook.result.current.errorInfo).toEqual({
+      code: "agent_turn_limit",
+      status: 429,
+      retryAfterSeconds: 30,
+    });
+    expect(row(hook, "m-card")).toMatchObject({ status: "pending" });
+  });
+
   it("replays a persisted ask: answered as read-only submitted with its answers, pending as pending", async () => {
     const replay = (id: string, status: string, answers?: object) => ({
       id, role: "agent", content: "text", createdAt: NOW,

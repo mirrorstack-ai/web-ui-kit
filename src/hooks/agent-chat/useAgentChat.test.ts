@@ -133,10 +133,162 @@ describe("useAgentChat", () => {
     await flush();
 
     expect(result.current.error).toBe("send_failed");
+    expect(result.current.errorInfo).toEqual({ code: "send_failed" });
     // Pending placeholder dropped (no streamed text), user bubble kept.
     expect(result.current.messages).toEqual([
       expect.objectContaining({ role: "user", content: "hello" }),
     ]);
+  });
+
+  it("a send refused with a server code keeps the real code, message, and wait time", async () => {
+    const client = fakeClient({
+      createConversation: vi
+        .fn()
+        .mockRejectedValue({ status: 429, code: "agent_turn_limit", retryAfterSeconds: 42 }),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+
+    act(() => result.current.send("hello"));
+    await flush();
+
+    expect(result.current.error).toBe("agent_turn_limit");
+    expect(result.current.errorInfo).toEqual({
+      code: "agent_turn_limit",
+      status: 429,
+      retryAfterSeconds: 42,
+    });
+  });
+
+  it("a send refused at stream connect (the real 61st turn) keeps code, status and wait", async () => {
+    const client = fakeClient({
+      streamAgentReply: vi.fn().mockRejectedValue({
+        status: 429,
+        code: "agent_turn_limit",
+        serverMessage: "org acme-corp hit 60 turns",
+        retryAfterSeconds: 42,
+      }),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+
+    act(() => result.current.send("hello"));
+    await flush();
+
+    expect(result.current.error).toBe("agent_turn_limit");
+    expect(result.current.errorInfo).toEqual({
+      code: "agent_turn_limit",
+      status: 429,
+      retryAfterSeconds: 42,
+    });
+    // The server's free text is never exposed — only the code is rendered from.
+    expect(JSON.stringify(result.current.errorInfo)).not.toContain("acme-corp");
+  });
+
+  it("adopts a snake_case code with a numeric status, or a known agent code without one", async () => {
+    for (const [bad, code] of [
+      [{ code: "brand_new_code", status: 502 }, "brand_new_code"],
+      [{ code: "prompt_too_long" }, "prompt_too_long"],
+    ] as const) {
+      const client = fakeClient({ streamAgentReply: vi.fn().mockRejectedValue(bad) });
+      const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+      act(() => result.current.send("hello"));
+      await flush();
+      expect(result.current.error).toBe(code);
+    }
+  });
+
+  it("does not adopt a non-server code (ECONNRESET, unknown shapes) — falls back to send_failed", async () => {
+    for (const bad of [
+      Object.assign(new Error("reset"), { code: "ECONNRESET" }),
+      { code: "has space" },
+      { code: "" },
+      { code: 429 },
+      // snake_case but no status and not a known agent code: a client-side
+      // failure, not a server refusal.
+      { code: "network_error" },
+      { code: "timeout" },
+    ]) {
+      const client = fakeClient({ streamAgentReply: vi.fn().mockRejectedValue(bad) });
+      const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+      act(() => result.current.send("hello"));
+      await flush();
+      expect(result.current.error).toBe("send_failed");
+      expect(result.current.errorInfo).toEqual({ code: "send_failed" });
+    }
+  });
+
+  it.each([[Number.NaN], [-5], [0], [Number.POSITIVE_INFINITY], ["42"]])(
+    "drops a bad retryAfterSeconds (%s)",
+    async (bad) => {
+      const client = fakeClient({
+        streamAgentReply: vi
+          .fn()
+          .mockRejectedValue({ status: 429, code: "agent_turn_limit", retryAfterSeconds: bad }),
+      });
+      const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+      act(() => result.current.send("hello"));
+      await flush();
+      expect(result.current.errorInfo).toEqual({ code: "agent_turn_limit", status: 429 });
+    },
+  );
+
+  it("caps an absurd retryAfterSeconds at 24 h and rounds a fraction up", async () => {
+    const run = async (retryAfterSeconds: number) => {
+      const client = fakeClient({
+        streamAgentReply: vi
+          .fn()
+          .mockRejectedValue({ status: 429, code: "agent_turn_limit", retryAfterSeconds }),
+      });
+      const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+      act(() => result.current.send("hello"));
+      await flush();
+      return result.current.errorInfo?.retryAfterSeconds;
+    };
+    expect(await run(10 ** 9)).toBe(86_400);
+    expect(await run(1.2)).toBe(2);
+  });
+
+  it("a conversation load refused with a server code keeps it instead of load_failed", async () => {
+    const client = fakeClient({
+      listConversationMessages: vi
+        .fn()
+        .mockRejectedValue({ status: 429, code: "rate_limited", retryAfterSeconds: 7 }),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    act(() => result.current.selectConversation("c-1"));
+    await flush();
+    expect(result.current.error).toBe("rate_limited");
+    expect(result.current.errorInfo).toEqual({
+      code: "rate_limited",
+      status: 429,
+      retryAfterSeconds: 7,
+    });
+  });
+
+  it("a conversation load with a plain failure is still load_failed", async () => {
+    const client = fakeClient({
+      listConversationMessages: vi.fn().mockRejectedValue(new Error("boom")),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    act(() => result.current.selectConversation("c-1"));
+    await flush();
+    expect(result.current.error).toBe("load_failed");
+    expect(result.current.errorInfo).toEqual({ code: "load_failed" });
+  });
+
+  it("the console log of a failed send carries only code and status, never the server text", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = fakeClient({
+      streamAgentReply: vi.fn().mockRejectedValue({
+        status: 429,
+        code: "agent_turn_limit",
+        serverMessage: "SECRET-TENANT-DETAIL",
+      }),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    act(() => result.current.send("hello"));
+    await flush();
+    expect(JSON.stringify(spy.mock.calls)).not.toContain("SECRET-TENANT-DETAIL");
+    spy.mockRestore();
   });
 
   it("stream onError settles the pending bubble, keeping streamed text", async () => {
@@ -152,9 +304,28 @@ describe("useAgentChat", () => {
     await flush();
 
     expect(result.current.error).toBe("reply_failed");
+    expect(result.current.errorInfo).toEqual({ code: "reply_failed" });
     expect(result.current.messages[1]).toMatchObject({ role: "agent", content: "partial" });
     expect(result.current.messages[1].id).not.toBe("__pending__");
   });
+
+  it.each(["ai_unavailable", "ai_credits_exhausted", "prompt_too_long"])(
+    "a crafted SSE error frame sets error to %s",
+    async (code) => {
+      const stream = controlledStream();
+      const client = fakeClient({ streamAgentReply: stream.fn });
+      const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+
+      act(() => result.current.send("hello"));
+      await flush();
+      act(() => stream.handlers.onError(code));
+      stream.release();
+      await flush();
+
+      expect(result.current.error).toBe(code);
+      expect(result.current.errorInfo).toEqual({ code });
+    },
+  );
 
   it("interleaves tool calls with response text in stream order, resolving in place", async () => {
     const stream = controlledStream();
@@ -311,10 +482,33 @@ describe("useAgentChat", () => {
     await flush();
 
     expect(result.current.error).toBe("send_failed");
+    expect(result.current.errorInfo).toEqual({ code: "send_failed" });
     // The placeholder had no streamed text yet → dropped with the old reply.
     expect(result.current.messages).toEqual([
       expect.objectContaining({ role: "user", content: "hello" }),
     ]);
+  });
+
+  it("a rerun refused with a server code keeps the real code and wait time", async () => {
+    const reply = controlledStream();
+    const client = fakeClient({
+      streamAgentReply: reply.fn,
+      streamAgentRerun: vi
+        .fn()
+        .mockRejectedValue({ status: 429, code: "agent_turn_limit", retryAfterSeconds: 42 }),
+    });
+    const { result } = renderHook(() => useAgentChat(client, { appId: null }));
+    await seedFirstTurn(result, reply);
+
+    act(() => result.current.rerunMessage("m-1"));
+    await flush();
+
+    expect(result.current.error).toBe("agent_turn_limit");
+    expect(result.current.errorInfo).toEqual({
+      code: "agent_turn_limit",
+      status: 429,
+      retryAfterSeconds: 42,
+    });
   });
 
   it("rerun 409 (message superseded) reloads the conversation instead of erroring", async () => {
@@ -337,6 +531,7 @@ describe("useAgentChat", () => {
 
     expect(client.listConversationMessages).toHaveBeenCalledWith("c-1");
     expect(result.current.error).toBeNull();
+    expect(result.current.errorInfo).toBeNull();
     expect(result.current.messages).toEqual([
       { id: "m-1", role: "user", content: "hello" },
       { id: "m-3", role: "agent", content: "winner", feedback: undefined },

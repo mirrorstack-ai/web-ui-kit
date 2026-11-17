@@ -434,4 +434,28 @@ describe("useAgentSession", () => {
     const lastPut = put.mock.calls.at(-1)?.[0] as AgentSidebarState;
     expect(lastPut.open).toBe(true);
   });
+
+  it("passes errorInfo through from the chat hook (a refused send keeps its code and wait)", async () => {
+    const chatClient = fakeChatClient({
+      streamAgentReply: vi.fn().mockRejectedValue({
+        status: 429,
+        code: "agent_turn_limit",
+        serverMessage: "tenant detail",
+        retryAfterSeconds: 30,
+      }),
+    });
+    const deps = makeDeps({ chatClient });
+    const { result } = renderHook(() => useAgentSession(deps));
+    await flush();
+
+    act(() => result.current.send("hello"));
+    await flush();
+
+    expect(result.current.error).toBe("agent_turn_limit");
+    expect(result.current.errorInfo).toEqual({
+      code: "agent_turn_limit",
+      status: 429,
+      retryAfterSeconds: 30,
+    });
+  });
 });

@@ -37,6 +37,7 @@ import {
   type ConversationHistoryGroup,
   type RecencyLabels,
 } from "./history";
+import { KNOWN_AGENT_CODES, clampRetryAfterSeconds } from "./errorMessages";
 
 /** Sidebar-renderable chat message — assignable to the kit's
  *  AgentSidebarMessage union (text bubbles + tool-call rows). */
@@ -114,10 +115,28 @@ export interface UseAgentChatOptions {
   confirmPlanStep?: (planId: string, stepId: string) => Promise<void>;
 }
 
+/** Structured detail behind the last failed send/load's `error` code. The
+ *  server fields (api-client-shared#90) are read structurally — web-ui-kit
+ *  does not import that package, see client.ts. The server's free-text
+ *  message is deliberately NOT exposed: render from `code` through
+ *  `agentErrorMessage` / `AgentErrorNotice` (per-locale copy). `status` and
+ *  `retryAfterSeconds` are absent for client-made codes and for mid-stream
+ *  SSE errors (the wire frame carries neither). */
+export interface AgentChatErrorInfo {
+  code: string;
+  /** HTTP status of the refused request, when known. */
+  status?: number;
+  /** Seconds to wait before retrying; finite, > 0, capped at 24 h. */
+  retryAfterSeconds?: number;
+}
+
 export interface UseAgentChatResult {
   messages: AgentChatMessage[];
   /** Error code of the last failed send/load, null when healthy. */
   error: string | null;
+  /** Full detail behind `error` — same code, plus server message and wait
+   *  time when the server sent them. Null exactly when `error` is null. */
+  errorInfo: AgentChatErrorInfo | null;
   send: (message: string) => void;
   /** Thumbs up/down on an agent reply — optimistic, rolls back on failure.
    *  null clears the rating (the kit sends null on re-clicking the active
@@ -385,6 +404,34 @@ function appendTextSegment(
   return [...segs, { type: "text", text }];
 }
 
+// Read a rejected send/rerun/load's error fields structurally
+// (api-client-shared#90 names: status, code, retryAfterSeconds — the kit
+// doesn't import that package, see client.ts). The server `serverMessage` is
+// never read (see AgentChatErrorInfo). A code is adopted only when it is a
+// snake_case string AND the error carries a numeric HTTP `status` (a server
+// answered) or the code is a known agent code. A Node/DOM code (ECONNRESET),
+// a status-less client code ("network_error", "timeout") or a plain
+// network/parse error falls back to the client-made code.
+const SERVER_CODE = /^[a-z][a-z0-9_]{0,63}$/;
+function readThrownErrorInfo(err: unknown, fallback = "send_failed"): AgentChatErrorInfo {
+  if (err && typeof err === "object") {
+    const e = err as { code?: unknown; status?: unknown; retryAfterSeconds?: unknown };
+    if (
+      typeof e.code === "string" &&
+      SERVER_CODE.test(e.code) &&
+      (typeof e.status === "number" || KNOWN_AGENT_CODES.has(e.code))
+    ) {
+      const wait = clampRetryAfterSeconds(e.retryAfterSeconds);
+      return {
+        code: e.code,
+        ...(typeof e.status === "number" ? { status: e.status } : {}),
+        ...(wait !== undefined ? { retryAfterSeconds: wait } : {}),
+      };
+    }
+  }
+  return { code: fallback };
+}
+
 // Build the four SSE handlers shared by send and rerunMessage. Both paths
 // push deltas into the PENDING_ID bubble (as ordered segments + flat content),
 // interleave tool rows, swap the bubble for the persisted id on done, and
@@ -392,6 +439,7 @@ function appendTextSegment(
 function makeStreamHandlers(
   setMessages: Dispatch<SetStateAction<AgentChatMessage[]>>,
   setError: Dispatch<SetStateAction<string | null>>,
+  setErrorInfo: Dispatch<SetStateAction<AgentChatErrorInfo | null>>,
 ): AgentStreamHandlers {
   return {
     onDelta: (text) =>
@@ -431,7 +479,10 @@ function makeStreamHandlers(
         });
       }),
     onError: (code) => {
+      // The SSE error frame carries no message — unlike a connect-time
+      // rejection, there's nothing beyond the code to surface.
       setError(code);
+      setErrorInfo({ code });
       setMessages((prev) => settlePending(prev));
     },
   };
@@ -467,6 +518,7 @@ export function useAgentChat(
 
   const [messages, setMessages] = useState<AgentChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [errorInfo, setErrorInfo] = useState<AgentChatErrorInfo | null>(null);
   // User's explicit pick; undefined = unpinned (platform default applies).
   const [userModelId, setUserModelId] = useState<string | undefined>(undefined);
   const [roster, setRoster] = useState<AgentModelsResponse | undefined>(undefined);
@@ -561,6 +613,7 @@ export function useAgentChat(
     createConversationRef.current = null;
     setMessages([]);
     setError(null);
+    setErrorInfo(null);
     setUserModelId(undefined);
   }, [scopeKey]);
 
@@ -607,6 +660,7 @@ export function useAgentChat(
       abortRef.current = controller;
       loadSeq.current++;
       setError(null);
+      setErrorInfo(null);
 
       setMessages((prev) => [
         ...settlePending(prev),
@@ -625,13 +679,16 @@ export function useAgentChat(
           await clientRef.current.streamAgentReply(
             convId,
             content,
-            makeStreamHandlers(setMessages, setError),
+            makeStreamHandlers(setMessages, setError, setErrorInfo),
             controller.signal,
           );
         } catch (err) {
           if (controller.signal.aborted) return;
-          console.error("agent: send failed", err);
-          setError("send_failed");
+          const info = readThrownErrorInfo(err);
+          // code/status only — the thrown error may carry server text.
+          console.error("agent: send failed", info.code, info.status);
+          setError(info.code);
+          setErrorInfo(info);
           setMessages((prev) => settlePending(prev));
         } finally {
           if (abortRef.current === controller) abortRef.current = null;
@@ -652,6 +709,7 @@ export function useAgentChat(
       scopeEpoch.current++;
       conversationIdRef.current = id;
       setError(null);
+      setErrorInfo(null);
       setMessages([]);
       // Adopt the conversation's pinned model so the picker reflects it.
       const conv = conversations?.find((c) => c.id === id);
@@ -665,8 +723,10 @@ export function useAgentChat(
         })
         .catch((err) => {
           if (loadSeq.current !== seq) return;
-          console.error("agent: load conversation failed", err);
-          setError("load_failed");
+          const info = readThrownErrorInfo(err, "load_failed");
+          console.error("agent: load conversation failed", info.code, info.status);
+          setError(info.code);
+          setErrorInfo(info);
         });
     },
     [conversations],
@@ -773,6 +833,7 @@ export function useAgentChat(
       abortRef.current = controller;
       loadSeq.current++;
       setError(null);
+      setErrorInfo(null);
 
       // The old reply becomes the streaming placeholder — the server
       // supersedes it in place, so the thread position stays.
@@ -789,7 +850,7 @@ export function useAgentChat(
           await clientRef.current.streamAgentRerun(
             convId,
             messageId,
-            makeStreamHandlers(setMessages, setError),
+            makeStreamHandlers(setMessages, setError, setErrorInfo),
             controller.signal,
           );
         } catch (err) {
@@ -800,8 +861,10 @@ export function useAgentChat(
             selectConversation(convId);
             return;
           }
-          console.error("agent: rerun failed", err);
-          setError("send_failed");
+          const info = readThrownErrorInfo(err);
+          console.error("agent: rerun failed", info.code, info.status);
+          setError(info.code);
+          setErrorInfo(info);
           setMessages((prev) => settlePending(prev));
         } finally {
           if (abortRef.current === controller) abortRef.current = null;
@@ -837,6 +900,7 @@ export function useAgentChat(
       abortRef.current = controller;
       loadSeq.current++;
       setError(null);
+      setErrorInfo(null);
 
       const setCard = (patch: Partial<AgentAskMessage>) =>
         setMessages((prev) => prev.map((m) => (m.id === messageId && "askId" in m ? { ...m, ...patch } : m)));
@@ -851,15 +915,17 @@ export function useAgentChat(
       void (async () => {
         try {
           await stream.call(
-            clientRef.current, convId, card.askId, answers, makeStreamHandlers(setMessages, setError), controller.signal,
+            clientRef.current, convId, card.askId, answers, makeStreamHandlers(setMessages, setError, setErrorInfo), controller.signal,
           );
         } catch (err) {
           if (controller.signal.aborted) return;
           answeringRef.current.delete(messageId);
           // 409 ask_already_answered: another tab answered — reload the thread.
           if ((err as Error & { status?: number }).status === 409) return selectConversation(convId);
-          console.error("agent: ask answer failed", err);
-          setError("send_failed");
+          const info = readThrownErrorInfo(err);
+          console.error("agent: ask answer failed", info.code, info.status);
+          setError(info.code);
+          setErrorInfo(info);
           setMessages((prev) => settlePending(prev));
           setCard({ status: "pending", answers: undefined });
         } finally {
@@ -922,6 +988,7 @@ export function useAgentChat(
   return {
     messages,
     error,
+    errorInfo,
     send,
     rateMessage,
     rerunMessage,
