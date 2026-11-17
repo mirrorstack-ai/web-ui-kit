@@ -147,6 +147,47 @@ describe("useAgentSession", () => {
     await flush();
   });
 
+  it("forwards done.meta.ask_message_ids through the session wrapper (two ask cards keep stored ids)", async () => {
+    const stream = controlledStream();
+    const chatClient = fakeChatClient({
+      createConversation: vi.fn().mockResolvedValue(conv({ id: "c-ask" })),
+      streamAgentReply: stream.fn,
+    });
+    // done releases the draft pin, and the scope flip then reloads (clears) the thread —
+    // record every render so the ids the done frame produced can be read.
+    const renders: string[][] = [];
+    const { result } = renderHook(() => {
+      const r = useAgentSession(makeDeps({ chatClient }));
+      renders.push(r.messages.map((m) => m.id));
+      return r;
+    });
+    await flush();
+
+    act(() => result.current.send("hello"));
+    await flush();
+    await waitFor(() => expect(result.current.activeTabId).toBe("c-ask"));
+    expect(result.current.messages.length).toBeGreaterThan(0);
+
+    const ask = (id: string) => ({
+      ask_id: id,
+      title: id,
+      questions: [{ id: "q1", type: "toggle" as const, label: "Notify" }],
+    });
+    act(() => stream.handlers.onAsk?.(ask("a-1")));
+    act(() => stream.handlers.onAsk?.(ask("a-2")));
+    act(() =>
+      stream.handlers.onDone("m-2", { ask_message_ids: { "a-1": "m-1", "a-2": "m-2" } }),
+    );
+    // The render the done frame produced: both ask cards under their stored ids.
+    const afterDone = renders.find((ids) => ids.includes("m-2"));
+    expect(afterDone).toBeDefined();
+    expect(afterDone).toContain("m-1");
+    expect(afterDone?.some((id) => id.startsWith("__ask__:"))).toBe(false);
+
+    stream.release();
+    await flush();
+  });
+
   it("forwards the injected appId into createConversation and listConversations", async () => {
     const listConversations = vi.fn().mockResolvedValue({ items: [], nextCursor: null });
     const created = conv({ id: "c-app", appId: "app-uuid" });

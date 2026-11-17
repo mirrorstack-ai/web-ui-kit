@@ -265,9 +265,9 @@ export function useAgentSession(deps: UseAgentSessionDeps): UseAgentSessionResul
           content,
           {
             ...handlers,
-            onDone: (messageId) => {
+            onDone: (messageId, meta) => {
               releasePin();
-              handlers.onDone(messageId);
+              handlers.onDone(messageId, meta);
             },
             onError: (code) => {
               releasePin();
