@@ -1,20 +1,22 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AgentSidebarPlanCard, isSafeConfirmHref } from "./AgentSidebarPlanCard";
+import {
+  AgentSidebarPlanCard, isSafeConfirmHref, APPROVABLE_STEP_STATES, PLAN_STEP_STATES, type AgentPlanStepState,
+} from "./AgentSidebarPlanCard";
 
 afterEach(cleanup);
 
 const HREF = "https://account.mirrorstack.ai/approvals/p-1";
 const steps = [
-  { id: "s1", title: "Install quiz", category: "module", state: "draft" },
-  { id: "s2", title: "Add DNS record", category: "dns", state: "edit_text" },
-  { id: "s3", title: "Pay invoice", category: "billing", state: "pending" },
+  { id: "s1", title: "Install quiz", category: "module", state: "pending" },
+  { id: "s2", title: "Add DNS record", category: "dns", state: "pending" },
+  { id: "s3", title: "Pay invoice", category: "billing", state: "approved" },
 ];
 const base = { planId: "p-1", state: "proposed", steps, confirmHref: HREF };
 
 describe("AgentSidebarPlanCard", () => {
-  it("shows Approve only on draft and edit_text steps, and only with a handler", async () => {
+  it("shows Approve only on pending steps, and only with a handler", async () => {
     const onApprove = vi.fn();
     const { rerender } = render(<AgentSidebarPlanCard {...base} onApproveStep={onApprove} />);
     expect(screen.getAllByRole("button")).toHaveLength(2);
@@ -58,9 +60,48 @@ describe("AgentSidebarPlanCard", () => {
   });
 
   it("takes every label as a prop", () => {
-    const labels = { plan: "計畫", review: "檢視並確認", planStates: { proposed: "待確認" }, stepStates: { draft: "草稿" } };
+    const labels = { plan: "計畫", review: "檢視並確認", planStates: { proposed: "待確認" }, stepStates: { pending: "草稿" } };
     render(<AgentSidebarPlanCard {...base} labels={labels} />);
     expect(screen.getByRole("group", { name: "計畫" })).toBeInTheDocument();
-    for (const t of ["計畫 · 待確認", "檢視並確認", "草稿"]) expect(screen.getByText(t)).toBeInTheDocument();
+    for (const t of ["計畫 · 待確認", "檢視並確認"]) expect(screen.getByText(t)).toBeInTheDocument();
+    expect(screen.getAllByText("草稿")).toHaveLength(2);
+  });
+
+  it("shows host labels for category and kind, and falls back to the raw category and the given title", () => {
+    const withKind = [
+      { id: "k1", kind: "install_module", title: "server title one", category: "module", state: "pending" },
+      { id: "k2", kind: "mystery_kind", title: "server title two", category: "mystery_cat", state: "pending" },
+      { id: "k3", title: "server title three", category: "module", state: "pending" },
+    ];
+    render(
+      <AgentSidebarPlanCard {...base} steps={withKind}
+        categoryLabels={{ module: "模組" }} kindLabels={{ install_module: "安裝模組" }} />,
+    );
+    expect(screen.getByText("安裝模組")).toBeInTheDocument(); // kind label replaces the title
+    expect(screen.queryByText("server title one")).toBeNull();
+    expect(screen.getByText("server title two")).toBeInTheDocument(); // kind without a label → given title
+    expect(screen.getByText("server title three")).toBeInTheDocument(); // no kind → given title
+    expect(screen.getAllByText("模組")).toHaveLength(2); // labelled category
+    expect(screen.getByText("mystery_cat")).toBeInTheDocument(); // unlabelled category → raw value
+  });
+
+  it("holds no fixed text for category or kind: without maps the raw value shows", () => {
+    render(<AgentSidebarPlanCard {...base} steps={[{ id: "r", kind: "install_module", title: "T", category: "module", state: "pending" }]} />);
+    expect(screen.getByText("module")).toBeInTheDocument();
+    expect(screen.getByText("T")).toBeInTheDocument();
+  });
+
+  it("the Approve set holds only states of the contract type", () => {
+    const known: readonly string[] = PLAN_STEP_STATES;
+    for (const s of APPROVABLE_STEP_STATES) expect(known).toContain(s);
+    expect(APPROVABLE_STEP_STATES.has("pending")).toBe(true);
+    // Type-level: fails `pnpm typecheck` if the state type gains or loses these, or the set names a state it lacks.
+    // @ts-expect-error "draft" is not a state the plan contract sends
+    const draft: AgentPlanStepState = "draft";
+    // @ts-expect-error "edit_text" is not a state the plan contract sends
+    const edit: AgentPlanStepState = "edit_text";
+    // @ts-expect-error a set naming a state the type does not have does not type-check
+    const bad: ReadonlySet<AgentPlanStepState> = new Set<AgentPlanStepState>(["pending", "draft"]);
+    expect([draft, edit, bad]).toBeDefined();
   });
 });

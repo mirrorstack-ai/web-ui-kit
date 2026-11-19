@@ -117,7 +117,7 @@ describe("useAgentChat plan card", () => {
     const plans = hook.result.current.messages.filter((m) => "kind" in m && m.kind === "plan");
     expect(plans).toHaveLength(1);
     expect(plans[0]).toMatchObject({ planId: "p-1", state: "approved", version: 2 });
-    expect(Object.keys((plans[0] as { steps: object[] }).steps[0]).sort()).toEqual(["category", "id", "state", "title"]);
+    expect(Object.keys((plans[0] as { steps: object[] }).steps[0]).sort()).toEqual(["category", "id", "kind", "state", "title"]);
   });
 
   it("exposes approvePlanStep only when the host supplies confirmPlanStep (X1)", async () => {
