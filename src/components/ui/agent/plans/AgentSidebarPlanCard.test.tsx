@@ -157,6 +157,29 @@ describe("AgentSidebarPlanCard", () => {
     expect(screen.getByRole("button", { name: "Approve: Add DNS record www" })).toBeInTheDocument();
   });
 
+  it("a title equal to the kind code is not shown under the label and does not name Approve", () => {
+    render(
+      <AgentSidebarPlanCard
+        {...base} onApproveStep={vi.fn()} kindLabels={{ install_module: "Install a module" }}
+        steps={[{ id: "a", kind: "install_module", title: "install_module", category: "module", state: "pending" }]}
+      />,
+    );
+    expect(screen.getByText("Install a module")).toBeInTheDocument();
+    expect(screen.queryByText("install_module")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Approve: Install a module" })).toBeInTheDocument();
+  });
+
+  it("a title equal to the kind code with no label for that kind still shows once and names Approve", () => {
+    render(
+      <AgentSidebarPlanCard
+        {...base} onApproveStep={vi.fn()}
+        steps={[{ id: "a", kind: "add_dns", title: "add_dns", category: "dns", state: "pending" }]}
+      />,
+    );
+    expect(screen.getAllByText("add_dns")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Approve: add_dns" })).toBeInTheDocument();
+  });
+
   // pending = the state a step is inserted with; no step waits behind another in `pending`
   // (see the comment at APPROVABLE_STEP_STATES), so Approve shows on every pending step.
   it("Approve shows on every pending step of a plan, not only the first", () => {

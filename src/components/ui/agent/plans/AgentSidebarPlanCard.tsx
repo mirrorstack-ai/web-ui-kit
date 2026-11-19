@@ -112,6 +112,10 @@ export function AgentSidebarPlanCard({
   const canApprove = (s: AgentSidebarPlanStep) => live && !!onApproveStep && APPROVABLE.has(s.state);
   const showLink = live && isSafeConfirmHref(confirmHref) && steps.some((s) => !canApprove(s));
   const kindLabelOf = (s: AgentSidebarPlanStep) => (s.kind ? kindLabels?.[s.kind] : undefined);
+  // The server still sends `title` equal to the `kind` code (deprecated in the contract): that is
+  // not a title, so it is never printed under the label nor read out as the name of Approve.
+  const hasTitle = (s: AgentSidebarPlanStep) => s.title !== s.kind;
+  const approveName = (s: AgentSidebarPlanStep) => (hasTitle(s) ? s.title : kindLabelOf(s) ?? s.title);
   const style = STATE_STYLE[state] ?? STATE_STYLE.proposed;
 
   // Every server string below is a plain React text node: no markdown, no
@@ -133,7 +137,9 @@ export function AgentSidebarPlanCard({
                   <span className="min-w-0 break-words text-sm font-medium leading-snug text-inverse-on-surface">
                     {kindLabelOf(s)}
                   </span>
-                  <span className="min-w-0 break-words text-xs leading-snug text-inverse-on-surface/70">{s.title}</span>
+                  {hasTitle(s) && (
+                    <span className="min-w-0 break-words text-xs leading-snug text-inverse-on-surface/70">{s.title}</span>
+                  )}
                 </>
               ) : (
                 <span className="min-w-0 break-words text-sm font-medium leading-snug text-inverse-on-surface">
@@ -147,7 +153,7 @@ export function AgentSidebarPlanCard({
                 </span>
                 {canApprove(s) && (
                   <Button variant="tonal" color="primary" size="sm" className="ml-auto"
-                    aria-label={`${labels.approve}: ${s.title}`} onClick={() => onApproveStep?.(planId, s.id)}>
+                    aria-label={`${labels.approve}: ${approveName(s)}`} onClick={() => onApproveStep?.(planId, s.id)}>
                     {labels.approve}
                   </Button>
                 )}
