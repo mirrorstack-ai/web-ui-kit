@@ -2,6 +2,7 @@ import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Button } from "@/components/ui/actions/button/Button";
+import { PLAN_STEP_STATES, type AgentPlanStepState } from "@/hooks/agent-chat/client";
 
 export const meta: ComponentMeta = {
   name: "AgentSidebarPlanCard",
@@ -9,11 +10,9 @@ export const meta: ComponentMeta = {
     "Install-plan card for the agent sidebar — server facts only (plain-text step titles, category and state badges), an optional Approve button on pending steps and one confirm link.",
 };
 
-/** Step states the plan contract sends (`agent_plan_steps.status`). The state on the
- *  wire stays an OPEN string (an unknown one still renders), but the Approve set below
- *  is typed from THIS list, so naming a state the contract does not send fails typecheck. */
-export const PLAN_STEP_STATES = ["pending", "approved", "running", "done", "failed"] as const;
-export type AgentPlanStepState = (typeof PLAN_STEP_STATES)[number];
+// The contract's step states live with the wire types (hooks/agent-chat/client.ts); the Approve
+// set below is typed from them, so naming a state the contract does not send fails typecheck.
+export { PLAN_STEP_STATES, type AgentPlanStepState };
 
 /** One step as the server reports it. `category`, `kind` and `state` are OPEN strings:
  *  show them (through the host's label maps), never branch on them (only the states in

@@ -134,8 +134,19 @@ export interface AgentDoneMeta {
   [key: string]: unknown;
 }
 
-/** One plan-frame step. category and state are OPEN strings. */
-export interface AgentPlanStep { id: string; kind: string; category: string; title: string; state: string }
+/** Step states of the plan contract: `agent_plan_steps.status` CHECK in api-platform
+ *  migration 117 (`pending`, `approved`, `running`, `done`, `failed`). One list for the
+ *  wire type, the card and the tests; the contract test in AgentSidebarPlanCard.test.tsx
+ *  pins it to the migration's list. */
+export const PLAN_STEP_STATES = ["pending", "approved", "running", "done", "failed"] as const;
+export type AgentPlanStepState = (typeof PLAN_STEP_STATES)[number];
+
+/** One plan-frame step. category is an OPEN string; state is the contract states plus an
+ *  open tail (an unknown state still renders, it just never unlocks Approve). */
+export interface AgentPlanStep {
+  id: string; kind: string; category: string; title: string;
+  state: AgentPlanStepState | (string & {});
+}
 
 /** `event: plan` frame; sent again when the plan changes state. */
 export interface AgentPlanEvent {
