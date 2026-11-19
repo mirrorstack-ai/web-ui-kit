@@ -15,7 +15,7 @@ const ASK: AgentAskEvent = {
 };
 const PLAN: AgentPlanEvent = {
   plan_id: "p-1", version: 1, state: "proposed", hash: "abc", confirm_path: "/approvals/p-1",
-  steps: [{ id: "s1", kind: "install", category: "module", title: "Install quiz", state: "draft" }],
+  steps: [{ id: "s1", kind: "install", category: "module", title: "Install quiz", state: "pending" }],
 };
 /** Sends one turn on a stub client and hands back the turn's SSE handlers. */
 async function startTurn(over: Partial<AgentChatClient> = {}, opts: Partial<UseAgentChatOptions> = {}) {
@@ -117,7 +117,7 @@ describe("useAgentChat plan card", () => {
     const plans = hook.result.current.messages.filter((m) => "kind" in m && m.kind === "plan");
     expect(plans).toHaveLength(1);
     expect(plans[0]).toMatchObject({ planId: "p-1", state: "approved", version: 2 });
-    expect(Object.keys((plans[0] as { steps: object[] }).steps[0]).sort()).toEqual(["category", "id", "state", "title"]);
+    expect(Object.keys((plans[0] as { steps: object[] }).steps[0]).sort()).toEqual(["category", "id", "kind", "state", "title"]);
   });
 
   it("exposes approvePlanStep only when the host supplies confirmPlanStep (X1)", async () => {
@@ -136,9 +136,9 @@ describe("useAgentChat plan card", () => {
     act(() => hook.result.current.approvePlanStep?.("plan:p-1", "s1"));
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(confirm).toHaveBeenCalledWith("p-1", "s1", 1, "abc");
-    expect(stepState()).toBe("draft"); // in flight: not approved yet
+    expect(stepState()).toBe("pending"); // in flight: not approved yet
     await act(async () => settle.fail(new Error("no passkey")));
-    expect(stepState()).toBe("draft");
+    expect(stepState()).toBe("pending");
     act(() => hook.result.current.approvePlanStep?.("plan:p-1", "s1")); // retry allowed
     expect(confirm).toHaveBeenCalledTimes(2);
     await act(async () => settle.ok());
@@ -156,7 +156,7 @@ describe("useAgentChat plan card", () => {
     await act(async () => settle());
     const r = row(hook, "plan:p-1") as { version: number; steps: { state: string }[] };
     expect(r.version).toBe(2);
-    expect(r.steps[0].state).toBe("draft");
+    expect(r.steps[0].state).toBe("pending");
   });
 
   it("rebuilds a plan card that still awaits confirmation when the thread reloads, and no settled one", async () => {

@@ -188,10 +188,10 @@ describe("useAgentSession", () => {
     await flush();
   });
 
-  it("forwards confirmPlanStep through the session: approvePlanStep exists and approves a draft step", async () => {
+  it("forwards confirmPlanStep through the session: approvePlanStep exists and approves a pending step", async () => {
     const plan = {
       plan_id: "p-1", version: 1, state: "proposed", hash: "abc", confirm_path: "/approvals/p-1",
-      steps: [{ id: "s1", kind: "install", category: "module", title: "Install quiz", state: "draft" }],
+      steps: [{ id: "s1", kind: "install", category: "module", title: "Install quiz", state: "pending" }],
     };
     const stepState = (r: { current: ReturnType<typeof useAgentSession> }) =>
       (r.current.messages.find((m) => m.id === "plan:p-1") as { steps: { state: string }[] } | undefined)?.steps[0].state;
@@ -206,7 +206,7 @@ describe("useAgentSession", () => {
     act(() => result.current.send("build a quiz"));
     await waitFor(() => expect(() => stream.handlers).not.toThrow());
     act(() => stream.handlers.onPlan?.(plan));
-    expect(stepState(result)).toBe("draft");
+    expect(stepState(result)).toBe("pending");
     expect(result.current.approvePlanStep).toBeTypeOf("function");
     await act(async () => result.current.approvePlanStep?.("plan:p-1", "s1"));
     expect(confirmPlanStep).toHaveBeenCalledWith("p-1", "s1", 1, "abc");

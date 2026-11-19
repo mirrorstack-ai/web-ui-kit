@@ -90,6 +90,9 @@ export interface AgentSidebarMessagesProps {
   questionLabels?: Partial<AgentSidebarMultiQuestionLabels>;
   /** Localizable strings of the plan card (English defaults). */
   planLabels?: Partial<AgentSidebarPlanCardLabels>;
+  /** Plan step `category` / `kind` value → text for the host's locale (raw value / step title when absent). */
+  planCategoryLabels?: Record<string, string>;
+  planKindLabels?: Record<string, string>;
   /** Approve a plan step. Omit and no step shows Approve. */
   onApprovePlanStep?: (messageId: string, stepId: string) => void;
   /** Builds the plan link from `confirmPath` (D484: account host). Omit: no link. */
@@ -183,6 +186,8 @@ export function AgentSidebarMessages({
   onCopyMessage,
   questionLabels,
   planLabels,
+  planCategoryLabels,
+  planKindLabels,
   onApprovePlanStep,
   resolvePlanHref,
   onRateMessage,
@@ -281,6 +286,8 @@ export function AgentSidebarMessages({
               confirmHref={m.confirmPath ? resolvePlanHref?.(m.confirmPath, m.planId) : undefined}
               onApproveStep={onApprovePlanStep && ((_, stepId) => onApprovePlanStep(m.id, stepId))}
               labels={planLabels}
+              categoryLabels={planCategoryLabels}
+              kindLabels={planKindLabels}
             />
           );
         }

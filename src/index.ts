@@ -71,7 +71,7 @@ export {
   type AgentSidebarMultiQuestionLabels,
 } from "./components/ui/agent/asks/AgentSidebarMultiQuestion";
 export {
-  AgentSidebarPlanCard, isSafeConfirmHref,
+  AgentSidebarPlanCard, isSafeConfirmHref, PLAN_STEP_STATES, APPROVABLE_STEP_STATES, type AgentPlanStepState,
   type AgentSidebarPlanCardProps, type AgentSidebarPlanCardLabels, type AgentSidebarPlanStep,
 } from "./components/ui/agent/plans/AgentSidebarPlanCard";
 export {
