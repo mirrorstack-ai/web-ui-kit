@@ -141,11 +141,21 @@ export interface AgentDoneMeta {
 export const PLAN_STEP_STATES = ["pending", "approved", "running", "done", "failed"] as const;
 export type AgentPlanStepState = (typeof PLAN_STEP_STATES)[number];
 
+/** What a plan step acts on (an app or a module). `type` is `app` or `module` (open tail: an
+ *  unknown type shows as sent). The card never shows `id`: a target with no `name` shows the host
+ *  text for `ref` (a new app; the server sends a zero-based step index, so 0 counts) or `unavailable`. */
+export interface AgentPlanTarget {
+  type: "app" | "module" | (string & {});
+  id?: string; name?: string; ref?: number | string; unavailable?: boolean;
+}
+
 /** One plan-frame step. category is an OPEN string; state is the contract states plus an
- *  open tail (an unknown state still renders, it just never unlocks Approve). */
+ *  open tail (an unknown state still renders, it just never unlocks Approve). `targets` is optional:
+ *  a server that does not send it renders the card as before. */
 export interface AgentPlanStep {
   id: string; kind: string; category: string; title: string;
   state: AgentPlanStepState | (string & {});
+  targets?: AgentPlanTarget[];
 }
 
 /** `event: plan` frame; sent again when the plan changes state. */

@@ -93,6 +93,8 @@ export interface AgentSidebarMessagesProps {
   /** Plan step `category` / `kind` value → text for the host's locale (raw value / step title when absent). */
   planCategoryLabels?: Record<string, string>;
   planKindLabels?: Record<string, string>;
+  /** Plan step target `type` (`app`, `module`) → text for the host's locale (raw type when absent). */
+  planTargetTypeLabels?: Record<string, string>;
   /** Approve a plan step. Omit and no step shows Approve. */
   onApprovePlanStep?: (messageId: string, stepId: string) => void;
   /** Builds the plan link from `confirmPath` (D484: account host). Omit: no link. */
@@ -188,6 +190,7 @@ export function AgentSidebarMessages({
   planLabels,
   planCategoryLabels,
   planKindLabels,
+  planTargetTypeLabels,
   onApprovePlanStep,
   resolvePlanHref,
   onRateMessage,
@@ -288,6 +291,7 @@ export function AgentSidebarMessages({
               labels={planLabels}
               categoryLabels={planCategoryLabels}
               kindLabels={planKindLabels}
+              targetTypeLabels={planTargetTypeLabels}
             />
           );
         }
