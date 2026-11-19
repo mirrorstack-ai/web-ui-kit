@@ -143,10 +143,10 @@ export type AgentPlanStepState = (typeof PLAN_STEP_STATES)[number];
 
 /** What a plan step acts on (an app or a module). `type` is `app` or `module` (open tail: an
  *  unknown type shows as sent). The card never shows `id`: a target with no `name` shows the host
- *  text for `ref` (a new app) or `unavailable`. */
+ *  text for `ref` (a new app; the server sends a zero-based step index, so 0 counts) or `unavailable`. */
 export interface AgentPlanTarget {
   type: "app" | "module" | (string & {});
-  id?: string; name?: string; ref?: string; unavailable?: boolean;
+  id?: string; name?: string; ref?: number | string; unavailable?: boolean;
 }
 
 /** One plan-frame step. category is an OPEN string; state is the contract states plus an

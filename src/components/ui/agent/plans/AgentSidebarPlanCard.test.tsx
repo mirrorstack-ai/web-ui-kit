@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   AgentSidebarPlanCard, isSafeConfirmHref, APPROVABLE_STEP_STATES, PLAN_STEP_STATES, type AgentPlanStepState,
 } from "./AgentSidebarPlanCard";
-import type { AgentPlanStep } from "@/hooks/agent-chat/client";
+import type { AgentPlanStep, AgentPlanTarget } from "@/hooks/agent-chat/client";
 
 afterEach(cleanup);
 
@@ -208,6 +208,18 @@ describe("AgentSidebarPlanCard", () => {
       const { container } = render(one([{ type: "app", id: "a-secret-id", ref: "new-app-ref" }]));
       expect(screen.getByText("App: New app")).toBeInTheDocument();
       expect(container.textContent).not.toMatch(/a-secret-id|new-app-ref/);
+    });
+
+    it("a new app whose ref is the step index 0 still shows the host text and Approve names it", () => {
+      const { container } = render(one([{ type: "app", ref: 0 }]));
+      expect(screen.getByText("App: New app")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Approve: Install — New app" })).toBeInTheDocument();
+      expect(container.textContent).not.toMatch(/(^|\D)0(\D|$)/);
+    });
+
+    it("a null or non-object element in targets is skipped, the card still renders", () => {
+      render(one([null, "x", { type: "app", name: "Spring Campaign" }] as unknown as AgentPlanTarget[]));
+      expect(screen.getByRole("button", { name: "Approve: Install — Spring Campaign" })).toBeInTheDocument();
     });
 
     it("an unavailable target shows the host text and the step has no Approve", () => {

@@ -119,7 +119,7 @@ export function AgentSidebarPlanCard({
     ...overrides,
     planStates: { ...DEFAULT_LABELS.planStates, ...overrides?.planStates },
   };
-  const targetsOf = (s: AgentSidebarPlanStep): AgentPlanTarget[] => (Array.isArray(s.targets) ? s.targets : []);
+  const targetsOf = (s: AgentSidebarPlanStep): AgentPlanTarget[] => (Array.isArray(s.targets) ? s.targets.filter((t) => t !== null && typeof t === "object") : []);
   const hasUnavailable = (s: AgentSidebarPlanStep) => targetsOf(s).some((t) => t.unavailable);
   const live = !FINISHED.has(state);
   const canApprove = (s: AgentSidebarPlanStep) => live && !!onApproveStep && APPROVABLE.has(s.state) && !hasUnavailable(s);
@@ -131,7 +131,7 @@ export function AgentSidebarPlanCard({
   const approveName = (s: AgentSidebarPlanStep) => (hasTitle(s) ? s.title : kindLabelOf(s) ?? s.title);
   // Never an id: a named target shows its name; else the host text for unavailable, else for a new app (ref).
   const targetText = (t: AgentPlanTarget) =>
-    t.name || (t.unavailable ? labels.targetUnavailable : t.ref ? labels.targetNewApp : "");
+    t.name || (t.unavailable ? labels.targetUnavailable : t.ref != null ? labels.targetNewApp : "");
   const targetNames = (s: AgentSidebarPlanStep) => targetsOf(s).map(targetText).filter(Boolean);
   const approveLabel = (s: AgentSidebarPlanStep) => {
     const names = targetNames(s);
