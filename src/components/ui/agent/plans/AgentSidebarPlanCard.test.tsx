@@ -182,6 +182,66 @@ describe("AgentSidebarPlanCard", () => {
 
   // pending = the state a step is inserted with; no step waits behind another in `pending`
   // (see the comment at APPROVABLE_STEP_STATES), so Approve shows on every pending step.
+  describe("targets (kit#437h)", () => {
+    const TYPES = { app: "App", module: "Module" };
+    const one = (targets?: AgentPlanStep["targets"], over = {}) => (
+      <AgentSidebarPlanCard planId="p-1" state="proposed" onApproveStep={vi.fn()} targetTypeLabels={TYPES}
+        labels={{ targetNewApp: "New app", targetUnavailable: "Unavailable" }}
+        steps={[{ id: "s1", title: "Install", category: "module", state: "pending", kind: "install_module", targets, ...over }]} />
+    );
+
+    it("shows one app target under the heading as one text node, and Approve names it", () => {
+      render(one([{ type: "app", id: "a-1", name: "Spring Campaign" }]));
+      const line = screen.getByText("App: Spring Campaign");
+      expect(line.childNodes).toHaveLength(1);
+      expect(screen.getByRole("button", { name: "Approve: Install — Spring Campaign" })).toBeInTheDocument();
+    });
+
+    it("shows an app and a module, and Approve names both", () => {
+      render(one([{ type: "app", name: "Spring Campaign" }, { type: "module", name: "quiz-core" }]));
+      expect(screen.getByText("App: Spring Campaign")).toBeInTheDocument();
+      expect(screen.getByText("Module: quiz-core")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Approve: Install — Spring Campaign, quiz-core" })).toBeInTheDocument();
+    });
+
+    it("a new app (ref, no name) shows the host text, never the id or the ref", () => {
+      const { container } = render(one([{ type: "app", id: "a-secret-id", ref: "new-app-ref" }]));
+      expect(screen.getByText("App: New app")).toBeInTheDocument();
+      expect(container.textContent).not.toMatch(/a-secret-id|new-app-ref/);
+    });
+
+    it("an unavailable target shows the host text and the step has no Approve", () => {
+      const { container } = render(one([{ type: "module", id: "m-secret", unavailable: true }]));
+      expect(screen.getByText("Module: Unavailable")).toBeInTheDocument();
+      expect(container.textContent).not.toContain("m-secret");
+      expect(screen.queryByRole("button")).toBeNull();
+    });
+
+    it("an unknown target type with no label shows the raw type", () => {
+      render(one([{ type: "workspace", name: "Acme" }]));
+      expect(screen.getByText("workspace: Acme")).toBeInTheDocument();
+    });
+
+    it("no targets, an empty list or a malformed value renders as before", () => {
+      const before = render(one(undefined)).container.innerHTML;
+      cleanup();
+      expect(render(one([])).container.innerHTML).toBe(before);
+      cleanup();
+      // @ts-expect-error a malformed wire value must not break the card
+      expect(render(one("oops")).container.innerHTML).toBe(before);
+      cleanup();
+      render(one(undefined));
+      expect(screen.getByRole("button", { name: "Approve: Install" })).toBeInTheDocument();
+    });
+
+    it("a name with markdown or a URL renders as text: no link, image or element", () => {
+      const name = "**bold** [x](https://evil.test) <img src=x onerror=alert(1)> https://evil.test";
+      const { container } = render(one([{ type: "app", name }]));
+      expect(screen.getByText(`App: ${name}`)).toBeInTheDocument();
+      expect(container.querySelector("img, a, strong")).toBeNull();
+    });
+  });
+
   it("Approve shows on every pending step of a plan, not only the first", () => {
     render(<AgentSidebarPlanCard {...base} onApproveStep={vi.fn()} />);
     expect(screen.getAllByRole("button")).toHaveLength(2);

@@ -5,6 +5,19 @@ Notable API additions and breaking changes. For the full commit log, see
 
 ## Unreleased
 
+### Added
+
+- **Plan card names what a step acts on** — new optional `targets` on a plan step
+  (`AgentPlanStep` on the wire, `AgentSidebarPlanStep` on the card; new type
+  `AgentPlanTarget` = `{ type: "app" | "module"; id?; name?; ref?; unavailable? }`).
+  `useAgentChat` keeps it on a live plan frame and on a replayed plan. The card shows each
+  target under the heading as plain text (`<type label>: <name>`; never an id). New optional
+  props on `AgentSidebarPlanCard`: `targetTypeLabels` (type → text per locale; no label = the raw
+  type) and `labels.targetNewApp` / `labels.targetUnavailable` (shown for a target with no name:
+  one that carries `ref`, one that is unavailable). The Approve `aria-label` now reads
+  `<approve>: <heading> — <target names>`. A step with an unavailable target shows no Approve.
+  A server that sends no `targets` renders as before.
+
 ## 0.7.27
 
 ### Added

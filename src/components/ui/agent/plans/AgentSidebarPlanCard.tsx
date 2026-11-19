@@ -2,7 +2,7 @@ import { cn } from "@/utils/cn";
 import type { ComponentMeta } from "@/types/component-meta";
 import { Icon } from "@/components/ui/media/icon/Icon";
 import { Button } from "@/components/ui/actions/button/Button";
-import { PLAN_STEP_STATES, type AgentPlanStepState } from "@/hooks/agent-chat/client";
+import { PLAN_STEP_STATES, type AgentPlanStepState, type AgentPlanTarget } from "@/hooks/agent-chat/client";
 
 export const meta: ComponentMeta = {
   name: "AgentSidebarPlanCard",
@@ -12,7 +12,7 @@ export const meta: ComponentMeta = {
 
 // The contract's step states live with the wire types (hooks/agent-chat/client.ts); the Approve
 // set below is typed from them, so naming a state the contract does not send fails typecheck.
-export { PLAN_STEP_STATES, type AgentPlanStepState };
+export { PLAN_STEP_STATES, type AgentPlanStepState, type AgentPlanTarget };
 
 /** One step as the server reports it. `category`, `kind` and `state` are OPEN strings:
  *  show them (through the host's label maps), never branch on them (only the states in
@@ -25,6 +25,9 @@ export interface AgentSidebarPlanStep {
   /** Step kind (e.g. `install_module`). When the host has a label for it, the label is the heading
    *  and the server `title` stays visible under it (the title names the target; the label does not). */
   kind?: string;
+  /** What the step acts on, shown under the heading as plain text (never the id). Optional: no
+   *  `targets` renders the card as before. */
+  targets?: AgentPlanTarget[];
 }
 
 export interface AgentSidebarPlanCardLabels {
@@ -35,6 +38,10 @@ export interface AgentSidebarPlanCardLabels {
   /** State text keyed by state; an unknown state shows as the server sent it. */
   planStates: Record<string, string>;
   stepStates: Record<string, string>;
+  /** Shown for a target that has no name but a `ref`: an app the step will create. */
+  targetNewApp: string;
+  /** Shown for a target that has no name and is unavailable (never its id). */
+  targetUnavailable: string;
 }
 
 const DEFAULT_LABELS: AgentSidebarPlanCardLabels = {
@@ -46,6 +53,8 @@ const DEFAULT_LABELS: AgentSidebarPlanCardLabels = {
     failed: "Failed", expired: "Expired", cancelled: "Cancelled",
   },
   stepStates: {},
+  targetNewApp: "New app",
+  targetUnavailable: "Unavailable",
 };
 
 /** Plan states that are over: no button, no link. */
@@ -95,27 +104,39 @@ export interface AgentSidebarPlanCardProps {
   /** Step `kind` value → heading text, per locale, owned by the host. The server title stays visible
    *  under the label (plain text); a kind without a label shows the title alone. */
   kindLabels?: Record<string, string>;
+  /** Target `type` (`app`, `module`) → text, per locale, owned by the host. No label → the raw type. */
+  targetTypeLabels?: Record<string, string>;
   className?: string;
 }
 
 const badge = "rounded-full px-2 py-0.5 text-[10px] font-medium text-inverse-on-surface/70";
 
 export function AgentSidebarPlanCard({
-  planId, state, steps, confirmHref, onApproveStep, labels: overrides, categoryLabels, kindLabels, className,
+  planId, state, steps, confirmHref, onApproveStep, labels: overrides, categoryLabels, kindLabels, targetTypeLabels, className,
 }: AgentSidebarPlanCardProps) {
   const labels = {
     ...DEFAULT_LABELS,
     ...overrides,
     planStates: { ...DEFAULT_LABELS.planStates, ...overrides?.planStates },
   };
+  const targetsOf = (s: AgentSidebarPlanStep): AgentPlanTarget[] => (Array.isArray(s.targets) ? s.targets : []);
+  const hasUnavailable = (s: AgentSidebarPlanStep) => targetsOf(s).some((t) => t.unavailable);
   const live = !FINISHED.has(state);
-  const canApprove = (s: AgentSidebarPlanStep) => live && !!onApproveStep && APPROVABLE.has(s.state);
+  const canApprove = (s: AgentSidebarPlanStep) => live && !!onApproveStep && APPROVABLE.has(s.state) && !hasUnavailable(s);
   const showLink = live && isSafeConfirmHref(confirmHref) && steps.some((s) => !canApprove(s));
   const kindLabelOf = (s: AgentSidebarPlanStep) => (s.kind ? kindLabels?.[s.kind] : undefined);
   // The server still sends `title` equal to the `kind` code (deprecated in the contract): that is
   // not a title, so it is never printed under the label nor read out as the name of Approve.
   const hasTitle = (s: AgentSidebarPlanStep) => s.title !== s.kind;
   const approveName = (s: AgentSidebarPlanStep) => (hasTitle(s) ? s.title : kindLabelOf(s) ?? s.title);
+  // Never an id: a named target shows its name; else the host text for unavailable, else for a new app (ref).
+  const targetText = (t: AgentPlanTarget) =>
+    t.name || (t.unavailable ? labels.targetUnavailable : t.ref ? labels.targetNewApp : "");
+  const targetNames = (s: AgentSidebarPlanStep) => targetsOf(s).map(targetText).filter(Boolean);
+  const approveLabel = (s: AgentSidebarPlanStep) => {
+    const names = targetNames(s);
+    return `${labels.approve}: ${approveName(s)}${names.length ? ` — ${names.join(", ")}` : ""}`;
+  };
   const style = STATE_STYLE[state] ?? STATE_STYLE.proposed;
 
   // Every server string below is a plain React text node: no markdown, no
@@ -146,6 +167,15 @@ export function AgentSidebarPlanCard({
                   {s.title}
                 </span>
               )}
+              {targetsOf(s).length > 0 && (
+                <div className="flex flex-col gap-0.5">
+                  {targetsOf(s).map((t, i) => (
+                    <span key={`${t.type}:${t.id ?? t.ref ?? i}`} className="min-w-0 break-words text-xs leading-snug text-inverse-on-surface/70">
+                      {[targetTypeLabels?.[t.type] ?? t.type, targetText(t)].filter(Boolean).join(": ")}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className={cn(badge, "bg-inverse-on-surface/[0.08]")}>{categoryLabels?.[s.category] ?? s.category}</span>
                 <span className={cn(badge, "border border-outline-variant/30")}>
@@ -153,7 +183,7 @@ export function AgentSidebarPlanCard({
                 </span>
                 {canApprove(s) && (
                   <Button variant="tonal" color="primary" size="sm" className="ml-auto"
-                    aria-label={`${labels.approve}: ${approveName(s)}`} onClick={() => onApproveStep?.(planId, s.id)}>
+                    aria-label={approveLabel(s)} onClick={() => onApproveStep?.(planId, s.id)}>
                     {labels.approve}
                   </Button>
                 )}

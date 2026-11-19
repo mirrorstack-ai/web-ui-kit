@@ -332,7 +332,9 @@ function planMessage(plan: AgentPlanEvent): AgentChatMessage {
   return {
     id: `plan:${plan.plan_id}`, role: "agent", kind: "plan", planId: plan.plan_id,
     version: plan.version, hash: plan.hash, state: plan.state, confirmPath: plan.confirm_path,
-    steps: plan.steps.map(({ id, kind, title, category, state }) => ({ id, kind, title, category, state })),
+    steps: plan.steps.map(({ id, kind, title, category, state, targets }) => ({
+      id, kind, title, category, state, ...(Array.isArray(targets) ? { targets } : {}),
+    })),
   };
 }
 

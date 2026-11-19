@@ -120,6 +120,15 @@ describe("useAgentChat plan card", () => {
     expect(Object.keys((plans[0] as { steps: object[] }).steps[0]).sort()).toEqual(["category", "id", "kind", "state", "title"]);
   });
 
+  it("keeps a step's optional targets on a live frame and on a replayed plan, and adds no key when the server sends none", async () => {
+    const targets = [{ type: "app", id: "a-1", name: "Spring Campaign" }, { type: "module", ref: "r-1" }];
+    const { hook, handlers } = await startTurn();
+    act(() => handlers.onPlan?.({ ...PLAN, steps: [{ ...PLAN.steps[0], targets }, { ...PLAN.steps[0], id: "s2" }] }));
+    const steps = (hook.result.current.messages.find((m) => "kind" in m && m.kind === "plan") as unknown as { steps: Record<string, unknown>[] }).steps;
+    expect(steps[0].targets).toEqual(targets);
+    expect("targets" in steps[1]).toBe(false);
+  });
+
   it("exposes approvePlanStep only when the host supplies confirmPlanStep (X1)", async () => {
     expect((await startTurn()).hook.result.current.approvePlanStep).toBeUndefined();
     const { hook } = await startTurn({}, { confirmPlanStep: vi.fn().mockResolvedValue(undefined) });
@@ -186,6 +195,16 @@ describe("useAgentChat plan replay with an approved step", () => {
     act(() => hook.result.current.selectConversation("c-1"));
     await waitFor(() => expect(row(hook, "plan:p-1")).toBeDefined());
     expect(row(hook, "plan:p-1")).toMatchObject({ steps: [{ id: "s1", state: "approved" }] });
+  });
+
+  it("keeps a step's targets when the plan is replayed from storage", async () => {
+    const targets = [{ type: "app", name: "Spring Campaign" }];
+    const stored: AgentPlanEvent = { ...PLAN, steps: [{ ...PLAN.steps[0], targets }] };
+    const list = vi.fn().mockResolvedValue([{ id: "m-p1", role: "agent" as const, content: "", createdAt: NOW, plan: stored }]);
+    const { hook } = await startTurn({ listConversationMessages: list });
+    act(() => hook.result.current.selectConversation("c-1"));
+    await waitFor(() => expect(row(hook, "plan:p-1")).toBeDefined());
+    expect(row(hook, "plan:p-1")).toMatchObject({ steps: [{ id: "s1", targets }] });
   });
 });
 
