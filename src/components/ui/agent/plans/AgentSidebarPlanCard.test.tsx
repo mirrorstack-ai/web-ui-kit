@@ -78,8 +78,8 @@ describe("AgentSidebarPlanCard", () => {
       <AgentSidebarPlanCard {...base} steps={withKind}
         categoryLabels={{ module: "模組" }} kindLabels={{ install_module: "安裝模組" }} />,
     );
-    expect(screen.getByText("安裝模組")).toBeInTheDocument(); // kind label replaces the title
-    expect(screen.queryByText("server title one")).toBeNull();
+    expect(screen.getByText("安裝模組")).toBeInTheDocument(); // kind label is the heading
+    expect(screen.getByText("server title one")).toBeInTheDocument(); // …and the server title stays visible under it
     expect(screen.getByText("server title two")).toBeInTheDocument(); // kind without a label → given title
     expect(screen.getByText("server title three")).toBeInTheDocument(); // no kind → given title
     expect(screen.getAllByText("模組")).toHaveLength(2); // labelled category
@@ -113,7 +113,7 @@ describe("AgentSidebarPlanCard", () => {
     expect(screen.queryByRole("button", { name: /Approve/ })).toBeNull();
   });
 
-  it("the Approve button is named after the labelled title when the step has a kind", async () => {
+  it("the Approve button is named after the server title (not the kind label) when the step has a kind", async () => {
     const onApprove = vi.fn();
     render(
       <AgentSidebarPlanCard
@@ -121,8 +121,70 @@ describe("AgentSidebarPlanCard", () => {
         steps={[{ id: "k", kind: "install_module", title: "server title", category: "module", state: "pending" }]}
       />,
     );
-    await userEvent.click(screen.getByRole("button", { name: "Approve: 安裝模組" }));
+    await userEvent.click(screen.getByRole("button", { name: "Approve: server title" }));
     expect(onApprove).toHaveBeenCalledWith("p-1", "k");
+  });
+
+  it("a labelled step shows the label as heading and the server title under it as plain text; a step with no label shows the title alone", () => {
+    const title = "Install **quiz-core** [x](https://evil.example) into the Spring site";
+    render(
+      <AgentSidebarPlanCard
+        {...base} kindLabels={{ install_module: "Install a module" }}
+        steps={[
+          { id: "a", kind: "install_module", title, category: "module", state: "pending" },
+          { id: "b", kind: "unlabelled", title: "Only the title", category: "module", state: "pending" },
+        ]}
+      />,
+    );
+    expect(screen.getByText("Install a module")).toBeInTheDocument();
+    expect(screen.getByText(title)).toBeInTheDocument(); // one text node: no markdown, no link built from it
+    expect(screen.queryByRole("link", { name: /x/ })).toBeNull();
+    expect(screen.getAllByText("Only the title")).toHaveLength(1);
+    expect(screen.queryByText("unlabelled")).toBeNull();
+  });
+
+  it("Approve names the server title, so the control says what it approves (kind with and without a label)", () => {
+    render(
+      <AgentSidebarPlanCard
+        {...base} onApproveStep={vi.fn()} kindLabels={{ install_module: "Install a module" }}
+        steps={[
+          { id: "a", kind: "install_module", title: "Install quiz-core on Spring", category: "module", state: "pending" },
+          { id: "b", kind: "add_dns", title: "Add DNS record www", category: "dns", state: "pending" },
+        ]}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Approve: Install quiz-core on Spring" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Approve: Add DNS record www" })).toBeInTheDocument();
+  });
+
+  it("a title equal to the kind code is not shown under the label and does not name Approve", () => {
+    render(
+      <AgentSidebarPlanCard
+        {...base} onApproveStep={vi.fn()} kindLabels={{ install_module: "Install a module" }}
+        steps={[{ id: "a", kind: "install_module", title: "install_module", category: "module", state: "pending" }]}
+      />,
+    );
+    expect(screen.getByText("Install a module")).toBeInTheDocument();
+    expect(screen.queryByText("install_module")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Approve: Install a module" })).toBeInTheDocument();
+  });
+
+  it("a title equal to the kind code with no label for that kind still shows once and names Approve", () => {
+    render(
+      <AgentSidebarPlanCard
+        {...base} onApproveStep={vi.fn()}
+        steps={[{ id: "a", kind: "add_dns", title: "add_dns", category: "dns", state: "pending" }]}
+      />,
+    );
+    expect(screen.getAllByText("add_dns")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Approve: add_dns" })).toBeInTheDocument();
+  });
+
+  // pending = the state a step is inserted with; no step waits behind another in `pending`
+  // (see the comment at APPROVABLE_STEP_STATES), so Approve shows on every pending step.
+  it("Approve shows on every pending step of a plan, not only the first", () => {
+    render(<AgentSidebarPlanCard {...base} onApproveStep={vi.fn()} />);
+    expect(screen.getAllByRole("button")).toHaveLength(2);
   });
 
   // Type-level (checked by `pnpm typecheck`, which covers *.test.tsx): the Approve set and the
