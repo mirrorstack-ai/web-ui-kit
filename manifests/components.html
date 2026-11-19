@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3255,28 +3255,38 @@ const meta: Meta = {
 };
 export default meta;
 const HREF = &quot;https://account.mirrorstack.ai/approvals/p-1&quot;;
-const step = (id: string, title: string, category: string, state: string) =&gt; ({ id, title, category, state });
+const step = (id: string, title: string, category: string, state: string, kind?: string) =&gt; ({ id, title, category, state, kind });
 const EN_STEPS = [
-  step(&quot;s1&quot;, &quot;Install quiz-core on Spring Campaign&quot;, &quot;module&quot;, &quot;draft&quot;),
-  step(&quot;s2&quot;, &quot;Add DNS record learn.example.com&quot;, &quot;dns&quot;, &quot;edit_text&quot;),
-  step(&quot;s3&quot;, &quot;Charge the monthly base fee&quot;, &quot;billing&quot;, &quot;pending&quot;),
+  step(&quot;s1&quot;, &quot;Install quiz-core on Spring Campaign&quot;, &quot;module&quot;, &quot;pending&quot;, &quot;install_module&quot;),
+  step(&quot;s2&quot;, &quot;Add DNS record learn.example.com&quot;, &quot;dns&quot;, &quot;pending&quot;),
+  step(&quot;s3&quot;, &quot;Charge the monthly base fee&quot;, &quot;billing&quot;, &quot;approved&quot;),
+  step(&quot;s4&quot;, &quot;Create the Spring Campaign app&quot;, &quot;app&quot;, &quot;running&quot;, &quot;create_app&quot;),
+  step(&quot;s5&quot;, &quot;Update the app spec&quot;, &quot;app&quot;, &quot;done&quot;, &quot;update_app_spec&quot;),
+  step(&quot;s6&quot;, &quot;Author the review module&quot;, &quot;mystery_category&quot;, &quot;failed&quot;, &quot;unknown_kind&quot;),
 ];
+const EN_CATEGORIES = { module: &quot;Module&quot;, dns: &quot;Domain&quot;, billing: &quot;Billing&quot;, app: &quot;App&quot; };
+const EN_KINDS = { install_module: &quot;Install a module&quot;, create_app: &quot;Create an app&quot;, update_app_spec: &quot;Update the app spec&quot; };
 const ZH_STEPS = [
-  step(&quot;s1&quot;, &quot;在「春季活動」安裝測驗模組&quot;, &quot;模組&quot;, &quot;draft&quot;),
-  step(&quot;s2&quot;, &quot;新增 DNS 紀錄 learn.example.com&quot;, &quot;網域&quot;, &quot;edit_text&quot;),
-  step(&quot;s3&quot;, &quot;收取每月基本費&quot;, &quot;帳務&quot;, &quot;pending&quot;),
+  step(&quot;s1&quot;, &quot;在「春季活動」安裝測驗模組&quot;, &quot;module&quot;, &quot;pending&quot;, &quot;install_module&quot;),
+  step(&quot;s2&quot;, &quot;新增 DNS 紀錄 learn.example.com&quot;, &quot;dns&quot;, &quot;pending&quot;),
+  step(&quot;s3&quot;, &quot;收取每月基本費&quot;, &quot;billing&quot;, &quot;approved&quot;),
+  step(&quot;s4&quot;, &quot;建立「春季活動」應用程式&quot;, &quot;app&quot;, &quot;running&quot;, &quot;create_app&quot;),
+  step(&quot;s5&quot;, &quot;更新應用程式規格&quot;, &quot;app&quot;, &quot;done&quot;, &quot;update_app_spec&quot;),
+  step(&quot;s6&quot;, &quot;撰寫評論模組&quot;, &quot;mystery_category&quot;, &quot;failed&quot;, &quot;unknown_kind&quot;),
 ];
+const ZH_CATEGORIES = { module: &quot;模組&quot;, dns: &quot;網域&quot;, billing: &quot;帳務&quot;, app: &quot;應用程式&quot; };
+const ZH_KINDS = { install_module: &quot;安裝模組&quot;, create_app: &quot;建立應用程式&quot;, update_app_spec: &quot;更新應用程式規格&quot; };
 const LOCALES = {
   en: {
-    steps: EN_STEPS,
-    plan: { stepStates: { draft: &quot;Draft&quot;, edit_text: &quot;Editable&quot;, pending: &quot;Pending&quot; } }, question: undefined,
+    steps: EN_STEPS, categories: EN_CATEGORIES, kinds: EN_KINDS,
+    plan: { stepStates: { pending: &quot;Pending&quot;, approved: &quot;Approved&quot;, running: &quot;Running&quot;, done: &quot;Done&quot;, failed: &quot;Failed&quot; } }, question: undefined,
     texts: [&quot;Site name&quot;, &quot;Send notification mail&quot;, &quot;Two quick questions&quot;, &quot;An answered card&quot;, &quot;e.g. Spring Campaign&quot;],
   },
   &quot;zh-TW&quot;: {
-    steps: ZH_STEPS,
+    steps: ZH_STEPS, categories: ZH_CATEGORIES, kinds: ZH_KINDS,
     plan: {
       plan: &quot;計畫&quot;, approve: &quot;核准&quot;, review: &quot;檢視並確認&quot;, planStates: { proposed: &quot;待確認&quot; },
-      stepStates: { draft: &quot;草稿&quot;, edit_text: &quot;可編輯&quot;, pending: &quot;待處理&quot; },
+      stepStates: { pending: &quot;待處理&quot;, approved: &quot;已核准&quot;, running: &quot;執行中&quot;, done: &quot;已完成&quot;, failed: &quot;失敗&quot; },
     },
     question: {
       answerToContinue: &quot;請回答以繼續&quot;, submit: &quot;送出&quot;, submitted: &quot;已送出&quot;, enabled: &quot;已啟用&quot;, notEnabled: &quot;未啟用&quot;,
@@ -3296,18 +3306,18 @@ function Scene({ locale }: { locale: keyof typeof LOCALES }) {
     { id: &quot;p1&quot;, role: &quot;agent&quot;, kind: &quot;plan&quot;, planId: &quot;p-1&quot;, state: &quot;proposed&quot;, confirmPath: &quot;/approvals/p-1&quot;, steps: l.steps },
   ];
   return (
-    &lt;AgentSidebarMessages messages={messages} questionLabels={l.question} planLabels={l.plan} autoScroll={false}
+    &lt;AgentSidebarMessages messages={messages} questionLabels={l.question} planLabels={l.plan} planCategoryLabels={l.categories} planKindLabels={l.kinds} autoScroll={false}
       resolvePlanHref={(path) =&gt; `https://account.mirrorstack.ai${path}`} /&gt;
   );
 }
 export const SidebarCardsEnglish: StoryObj = { render: () =&gt; &lt;Scene locale=&quot;en&quot; /&gt; };
 export const SidebarCardsZhTW: StoryObj = { render: () =&gt; &lt;Scene locale=&quot;zh-TW&quot; /&gt; };
-const LONG = step(&quot;s1&quot;, &quot;Install quiz-core on the Spring Campaign application https://learn.example.com/a/very/long/path/that/never/breaks&quot;, &quot;module&quot;, &quot;pending&quot;);
+const LONG = step(&quot;s1&quot;, &quot;Install quiz-core on the Spring Campaign application https://learn.example.com/a/very/long/path/that/never/breaks&quot;, &quot;module&quot;, &quot;pending&quot;, &quot;install_module&quot;);
 export const PlanEveryStateAndLongTitle: StoryObj = {
   render: () =&gt; (
     &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
       {[&quot;proposed&quot;, &quot;approved&quot;, &quot;executing&quot;, &quot;done&quot;, &quot;failed&quot;, &quot;expired&quot;, &quot;cancelled&quot;].map((state) =&gt; (
-        &lt;AgentSidebarPlanCard key={state} planId=&quot;p-1&quot; state={state} confirmHref={HREF}
+        &lt;AgentSidebarPlanCard key={state} planId=&quot;p-1&quot; state={state} confirmHref={HREF} categoryLabels={EN_CATEGORIES} kindLabels={EN_KINDS} labels={LOCALES.en.plan}
           steps={state === &quot;proposed&quot; ? [...EN_STEPS, LONG] : EN_STEPS}
           onApproveStep={state === &quot;proposed&quot; ? (p, s) =&gt; console.log(&quot;approve&quot;, p, s) : undefined} /&gt;
       ))}
@@ -3367,7 +3377,7 @@ export const PlanEveryStateAndLongTitle: StoryObj = {
               <pre><code>const PlanEveryStateAndLongTitle = () =&gt; (
   &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
     {[&quot;proposed&quot;, &quot;approved&quot;, &quot;executing&quot;, &quot;done&quot;, &quot;failed&quot;, &quot;expired&quot;, &quot;cancelled&quot;].map((state) =&gt; (
-      &lt;AgentSidebarPlanCard key={state} planId=&quot;p-1&quot; state={state} confirmHref={HREF}
+      &lt;AgentSidebarPlanCard key={state} planId=&quot;p-1&quot; state={state} confirmHref={HREF} categoryLabels={EN_CATEGORIES} kindLabels={EN_KINDS} labels={LOCALES.en.plan}
         steps={state === &quot;proposed&quot; ? [...EN_STEPS, LONG] : EN_STEPS}
         onApproveStep={state === &quot;proposed&quot; ? (p, s) =&gt; console.log(&quot;approve&quot;, p, s) : undefined} /&gt;
     ))}
@@ -17073,28 +17083,38 @@ const meta: Meta = {
 };
 export default meta;
 const HREF = &quot;https://account.mirrorstack.ai/approvals/p-1&quot;;
-const step = (id: string, title: string, category: string, state: string) =&gt; ({ id, title, category, state });
+const step = (id: string, title: string, category: string, state: string, kind?: string) =&gt; ({ id, title, category, state, kind });
 const EN_STEPS = [
-  step(&quot;s1&quot;, &quot;Install quiz-core on Spring Campaign&quot;, &quot;module&quot;, &quot;draft&quot;),
-  step(&quot;s2&quot;, &quot;Add DNS record learn.example.com&quot;, &quot;dns&quot;, &quot;edit_text&quot;),
-  step(&quot;s3&quot;, &quot;Charge the monthly base fee&quot;, &quot;billing&quot;, &quot;pending&quot;),
+  step(&quot;s1&quot;, &quot;Install quiz-core on Spring Campaign&quot;, &quot;module&quot;, &quot;pending&quot;, &quot;install_module&quot;),
+  step(&quot;s2&quot;, &quot;Add DNS record learn.example.com&quot;, &quot;dns&quot;, &quot;pending&quot;),
+  step(&quot;s3&quot;, &quot;Charge the monthly base fee&quot;, &quot;billing&quot;, &quot;approved&quot;),
+  step(&quot;s4&quot;, &quot;Create the Spring Campaign app&quot;, &quot;app&quot;, &quot;running&quot;, &quot;create_app&quot;),
+  step(&quot;s5&quot;, &quot;Update the app spec&quot;, &quot;app&quot;, &quot;done&quot;, &quot;update_app_spec&quot;),
+  step(&quot;s6&quot;, &quot;Author the review module&quot;, &quot;mystery_category&quot;, &quot;failed&quot;, &quot;unknown_kind&quot;),
 ];
+const EN_CATEGORIES = { module: &quot;Module&quot;, dns: &quot;Domain&quot;, billing: &quot;Billing&quot;, app: &quot;App&quot; };
+const EN_KINDS = { install_module: &quot;Install a module&quot;, create_app: &quot;Create an app&quot;, update_app_spec: &quot;Update the app spec&quot; };
 const ZH_STEPS = [
-  step(&quot;s1&quot;, &quot;在「春季活動」安裝測驗模組&quot;, &quot;模組&quot;, &quot;draft&quot;),
-  step(&quot;s2&quot;, &quot;新增 DNS 紀錄 learn.example.com&quot;, &quot;網域&quot;, &quot;edit_text&quot;),
-  step(&quot;s3&quot;, &quot;收取每月基本費&quot;, &quot;帳務&quot;, &quot;pending&quot;),
+  step(&quot;s1&quot;, &quot;在「春季活動」安裝測驗模組&quot;, &quot;module&quot;, &quot;pending&quot;, &quot;install_module&quot;),
+  step(&quot;s2&quot;, &quot;新增 DNS 紀錄 learn.example.com&quot;, &quot;dns&quot;, &quot;pending&quot;),
+  step(&quot;s3&quot;, &quot;收取每月基本費&quot;, &quot;billing&quot;, &quot;approved&quot;),
+  step(&quot;s4&quot;, &quot;建立「春季活動」應用程式&quot;, &quot;app&quot;, &quot;running&quot;, &quot;create_app&quot;),
+  step(&quot;s5&quot;, &quot;更新應用程式規格&quot;, &quot;app&quot;, &quot;done&quot;, &quot;update_app_spec&quot;),
+  step(&quot;s6&quot;, &quot;撰寫評論模組&quot;, &quot;mystery_category&quot;, &quot;failed&quot;, &quot;unknown_kind&quot;),
 ];
+const ZH_CATEGORIES = { module: &quot;模組&quot;, dns: &quot;網域&quot;, billing: &quot;帳務&quot;, app: &quot;應用程式&quot; };
+const ZH_KINDS = { install_module: &quot;安裝模組&quot;, create_app: &quot;建立應用程式&quot;, update_app_spec: &quot;更新應用程式規格&quot; };
 const LOCALES = {
   en: {
-    steps: EN_STEPS,
-    plan: { stepStates: { draft: &quot;Draft&quot;, edit_text: &quot;Editable&quot;, pending: &quot;Pending&quot; } }, question: undefined,
+    steps: EN_STEPS, categories: EN_CATEGORIES, kinds: EN_KINDS,
+    plan: { stepStates: { pending: &quot;Pending&quot;, approved: &quot;Approved&quot;, running: &quot;Running&quot;, done: &quot;Done&quot;, failed: &quot;Failed&quot; } }, question: undefined,
     texts: [&quot;Site name&quot;, &quot;Send notification mail&quot;, &quot;Two quick questions&quot;, &quot;An answered card&quot;, &quot;e.g. Spring Campaign&quot;],
   },
   &quot;zh-TW&quot;: {
-    steps: ZH_STEPS,
+    steps: ZH_STEPS, categories: ZH_CATEGORIES, kinds: ZH_KINDS,
     plan: {
       plan: &quot;計畫&quot;, approve: &quot;核准&quot;, review: &quot;檢視並確認&quot;, planStates: { proposed: &quot;待確認&quot; },
-      stepStates: { draft: &quot;草稿&quot;, edit_text: &quot;可編輯&quot;, pending: &quot;待處理&quot; },
+      stepStates: { pending: &quot;待處理&quot;, approved: &quot;已核准&quot;, running: &quot;執行中&quot;, done: &quot;已完成&quot;, failed: &quot;失敗&quot; },
     },
     question: {
       answerToContinue: &quot;請回答以繼續&quot;, submit: &quot;送出&quot;, submitted: &quot;已送出&quot;, enabled: &quot;已啟用&quot;, notEnabled: &quot;未啟用&quot;,
@@ -17114,18 +17134,18 @@ function Scene({ locale }: { locale: keyof typeof LOCALES }) {
     { id: &quot;p1&quot;, role: &quot;agent&quot;, kind: &quot;plan&quot;, planId: &quot;p-1&quot;, state: &quot;proposed&quot;, confirmPath: &quot;/approvals/p-1&quot;, steps: l.steps },
   ];
   return (
-    &lt;AgentSidebarMessages messages={messages} questionLabels={l.question} planLabels={l.plan} autoScroll={false}
+    &lt;AgentSidebarMessages messages={messages} questionLabels={l.question} planLabels={l.plan} planCategoryLabels={l.categories} planKindLabels={l.kinds} autoScroll={false}
       resolvePlanHref={(path) =&gt; `https://account.mirrorstack.ai${path}`} /&gt;
   );
 }
 export const SidebarCardsEnglish: StoryObj = { render: () =&gt; &lt;Scene locale=&quot;en&quot; /&gt; };
 export const SidebarCardsZhTW: StoryObj = { render: () =&gt; &lt;Scene locale=&quot;zh-TW&quot; /&gt; };
-const LONG = step(&quot;s1&quot;, &quot;Install quiz-core on the Spring Campaign application https://learn.example.com/a/very/long/path/that/never/breaks&quot;, &quot;module&quot;, &quot;pending&quot;);
+const LONG = step(&quot;s1&quot;, &quot;Install quiz-core on the Spring Campaign application https://learn.example.com/a/very/long/path/that/never/breaks&quot;, &quot;module&quot;, &quot;pending&quot;, &quot;install_module&quot;);
 export const PlanEveryStateAndLongTitle: StoryObj = {
   render: () =&gt; (
     &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
       {[&quot;proposed&quot;, &quot;approved&quot;, &quot;executing&quot;, &quot;done&quot;, &quot;failed&quot;, &quot;expired&quot;, &quot;cancelled&quot;].map((state) =&gt; (
-        &lt;AgentSidebarPlanCard key={state} planId=&quot;p-1&quot; state={state} confirmHref={HREF}
+        &lt;AgentSidebarPlanCard key={state} planId=&quot;p-1&quot; state={state} confirmHref={HREF} categoryLabels={EN_CATEGORIES} kindLabels={EN_KINDS} labels={LOCALES.en.plan}
           steps={state === &quot;proposed&quot; ? [...EN_STEPS, LONG] : EN_STEPS}
           onApproveStep={state === &quot;proposed&quot; ? (p, s) =&gt; console.log(&quot;approve&quot;, p, s) : undefined} /&gt;
       ))}
@@ -17185,7 +17205,7 @@ export const PlanEveryStateAndLongTitle: StoryObj = {
               <pre><code>const PlanEveryStateAndLongTitle = () =&gt; (
   &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
     {[&quot;proposed&quot;, &quot;approved&quot;, &quot;executing&quot;, &quot;done&quot;, &quot;failed&quot;, &quot;expired&quot;, &quot;cancelled&quot;].map((state) =&gt; (
-      &lt;AgentSidebarPlanCard key={state} planId=&quot;p-1&quot; state={state} confirmHref={HREF}
+      &lt;AgentSidebarPlanCard key={state} planId=&quot;p-1&quot; state={state} confirmHref={HREF} categoryLabels={EN_CATEGORIES} kindLabels={EN_KINDS} labels={LOCALES.en.plan}
         steps={state === &quot;proposed&quot; ? [...EN_STEPS, LONG] : EN_STEPS}
         onApproveStep={state === &quot;proposed&quot; ? (p, s) =&gt; console.log(&quot;approve&quot;, p, s) : undefined} /&gt;
     ))}
