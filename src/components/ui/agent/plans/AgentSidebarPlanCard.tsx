@@ -22,7 +22,8 @@ export interface AgentSidebarPlanStep {
   title: string;
   category: string;
   state: string;
-  /** Step kind (e.g. `install_module`). When the host has a label for it, the label is the title. */
+  /** Step kind (e.g. `install_module`). When the host has a label for it, the label is the heading
+   *  and the server `title` stays visible under it (the title names the target; the label does not). */
   kind?: string;
 }
 
@@ -49,7 +50,13 @@ const DEFAULT_LABELS: AgentSidebarPlanCardLabels = {
 
 /** Plan states that are over: no button, no link. */
 const FINISHED = new Set(["done", "failed", "expired", "cancelled"]);
-/** Step states the user can approve from the sidebar: a step the server has not approved yet. */
+/** Step states the user can approve from the sidebar: a step the server has not approved yet.
+ *  What `pending` means (api-platform main, plan service, read 2026-11-19): it is the state a step
+ *  is inserted with (agent_plan_steps.status DEFAULT 'pending'); nothing at step level moves it
+ *  (approval is plan-level: one confirmation), and `depends_on` is written as `[]` for every
+ *  step. So no step is `pending` while it waits behind an earlier one, and every pending step is
+ *  approvable at once; there is no "first pending step only" rule to mirror. If the server ever
+ *  gates approval by order or `depends_on`, this must follow it. */
 export const APPROVABLE_STEP_STATES: ReadonlySet<AgentPlanStepState> = new Set<AgentPlanStepState>(["pending"]);
 const APPROVABLE: ReadonlySet<string> = APPROVABLE_STEP_STATES;
 
@@ -85,7 +92,8 @@ export interface AgentSidebarPlanCardProps {
   labels?: Partial<AgentSidebarPlanCardLabels>;
   /** Step `category` value → text, per locale, owned by the host. No label → the raw value. */
   categoryLabels?: Record<string, string>;
-  /** Step `kind` value → text, per locale, owned by the host. No label → the step's own title. */
+  /** Step `kind` value → heading text, per locale, owned by the host. The server title stays visible
+   *  under the label (plain text); a kind without a label shows the title alone. */
   kindLabels?: Record<string, string>;
   className?: string;
 }
@@ -103,7 +111,7 @@ export function AgentSidebarPlanCard({
   const live = !FINISHED.has(state);
   const canApprove = (s: AgentSidebarPlanStep) => live && !!onApproveStep && APPROVABLE.has(s.state);
   const showLink = live && isSafeConfirmHref(confirmHref) && steps.some((s) => !canApprove(s));
-  const titleOf = (s: AgentSidebarPlanStep) => (s.kind ? kindLabels?.[s.kind] : undefined) ?? s.title;
+  const kindLabelOf = (s: AgentSidebarPlanStep) => (s.kind ? kindLabels?.[s.kind] : undefined);
   const style = STATE_STYLE[state] ?? STATE_STYLE.proposed;
 
   // Every server string below is a plain React text node: no markdown, no
@@ -120,9 +128,18 @@ export function AgentSidebarPlanCard({
         <ul className="flex flex-col gap-2">
           {steps.map((s) => (
             <li key={s.id} className="flex flex-col gap-1.5 rounded-md border border-outline-variant/20 px-3 py-2.5">
-              <span className="min-w-0 break-words text-sm font-medium leading-snug text-inverse-on-surface">
-                {titleOf(s)}
-              </span>
+              {kindLabelOf(s) ? (
+                <>
+                  <span className="min-w-0 break-words text-sm font-medium leading-snug text-inverse-on-surface">
+                    {kindLabelOf(s)}
+                  </span>
+                  <span className="min-w-0 break-words text-xs leading-snug text-inverse-on-surface/70">{s.title}</span>
+                </>
+              ) : (
+                <span className="min-w-0 break-words text-sm font-medium leading-snug text-inverse-on-surface">
+                  {s.title}
+                </span>
+              )}
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className={cn(badge, "bg-inverse-on-surface/[0.08]")}>{categoryLabels?.[s.category] ?? s.category}</span>
                 <span className={cn(badge, "border border-outline-variant/30")}>
@@ -130,7 +147,7 @@ export function AgentSidebarPlanCard({
                 </span>
                 {canApprove(s) && (
                   <Button variant="tonal" color="primary" size="sm" className="ml-auto"
-                    aria-label={`${labels.approve}: ${titleOf(s)}`} onClick={() => onApproveStep?.(planId, s.id)}>
+                    aria-label={`${labels.approve}: ${s.title}`} onClick={() => onApproveStep?.(planId, s.id)}>
                     {labels.approve}
                   </Button>
                 )}

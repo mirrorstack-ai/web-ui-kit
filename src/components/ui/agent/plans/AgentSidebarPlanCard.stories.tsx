@@ -10,7 +10,7 @@ export default meta;
 const HREF = "https://account.mirrorstack.ai/approvals/p-1";
 const step = (id: string, title: string, category: string, state: string, kind?: string) => ({ id, title, category, state, kind });
 const EN_STEPS = [
-  step("s1", "Install quiz-core on Spring Campaign", "module", "pending", "install_module"),
+  step("s1", "Install the quiz-core module (version 1.4.2-rc.1) on the Spring Campaign Learning Portal app for the very-long-organisation-name-example-edu-tw workspace", "module", "pending", "install_module"),
   step("s2", "Add DNS record learn.example.com", "dns", "pending"),
   step("s3", "Charge the monthly base fee", "billing", "approved"),
   step("s4", "Create the Spring Campaign app", "app", "running", "create_app"),
@@ -20,7 +20,7 @@ const EN_STEPS = [
 const EN_CATEGORIES = { module: "Module", dns: "Domain", billing: "Billing", app: "App" };
 const EN_KINDS = { install_module: "Install a module", create_app: "Create an app", update_app_spec: "Update the app spec" };
 const ZH_STEPS = [
-  step("s1", "在「春季活動」安裝測驗模組", "module", "pending", "install_module"),
+  step("s1", "在「春季活動學習入口網站」應用程式為「超級長的組織名稱範例教育機構」工作區安裝測驗核心模組（版本 1.4.2-rc.1）並完成所有必要的設定", "module", "pending", "install_module"),
   step("s2", "新增 DNS 紀錄 learn.example.com", "dns", "pending"),
   step("s3", "收取每月基本費", "billing", "approved"),
   step("s4", "建立「春季活動」應用程式", "app", "running", "create_app"),
