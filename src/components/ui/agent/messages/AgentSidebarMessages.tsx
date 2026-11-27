@@ -23,6 +23,11 @@ import {
   type AgentSidebarPlanStep,
 } from "../plans/AgentSidebarPlanCard";
 import {
+  AgentSidebarRunCard,
+  type AgentSidebarRun,
+  type AgentSidebarRunCardLabels,
+} from "../plans/AgentSidebarRunCard";
+import {
   AgentSidebarToolCall,
   type AgentToolCall,
   type AgentToolCallLabels,
@@ -69,6 +74,8 @@ export type AgentSidebarMessage =
       steps: AgentSidebarPlanStep[];
       /** Server path (`/approvals/{plan}`); the host maps it via `resolvePlanHref`. */
       confirmPath?: string;
+      /** The build run of an author step (server facts), drawn beside the plan card. */
+      run?: AgentSidebarRun;
     }
   | {
       id: string;
@@ -95,6 +102,10 @@ export interface AgentSidebarMessagesProps {
   planKindLabels?: Record<string, string>;
   /** Plan step target `type` (`app`, `module`) → text for the host's locale (raw type when absent). */
   planTargetTypeLabels?: Record<string, string>;
+  /** Localizable strings of the build run card (English defaults). */
+  runLabels?: Partial<AgentSidebarRunCardLabels>;
+  /** Builds the candidate page link from a run's `candidateId`. Omit: the run card has no link. */
+  resolveCandidateHref?: (candidateId: string) => string | undefined;
   /** Approve a plan step. Omit and no step shows Approve. */
   onApprovePlanStep?: (messageId: string, stepId: string) => void;
   /** Builds the plan link from `confirmPath` (D484: account host). Omit: no link. */
@@ -191,6 +202,8 @@ export function AgentSidebarMessages({
   planCategoryLabels,
   planKindLabels,
   planTargetTypeLabels,
+  runLabels,
+  resolveCandidateHref,
   onApprovePlanStep,
   resolvePlanHref,
   onRateMessage,
@@ -280,7 +293,7 @@ export function AgentSidebarMessages({
           return <AgentSidebarUserMessage key={m.id} content={m.content} />;
         }
         if ("kind" in m && m.kind === "plan") {
-          return (
+          const card = (
             <AgentSidebarPlanCard
               key={m.id}
               planId={m.planId}
@@ -293,6 +306,17 @@ export function AgentSidebarMessages({
               kindLabels={planKindLabels}
               targetTypeLabels={planTargetTypeLabels}
             />
+          );
+          if (!m.run) return card;
+          return (
+            <div key={m.id} className="flex flex-col gap-2">
+              {card}
+              <AgentSidebarRunCard
+                {...m.run}
+                candidateHref={m.run.candidateId ? resolveCandidateHref?.(m.run.candidateId) : undefined}
+                labels={runLabels}
+              />
+            </div>
           );
         }
         if ("kind" in m) {

@@ -75,6 +75,10 @@ export {
   type AgentSidebarPlanCardProps, type AgentSidebarPlanCardLabels, type AgentSidebarPlanStep,
 } from "./components/ui/agent/plans/AgentSidebarPlanCard";
 export {
+  AgentSidebarRunCard,
+  type AgentSidebarRun, type AgentSidebarRunCardProps, type AgentSidebarRunCardLabels,
+} from "./components/ui/agent/plans/AgentSidebarRunCard";
+export {
   AgentSidebarMessages,
   type AgentSidebarMessage,
   type AgentSidebarMessagesProps,
