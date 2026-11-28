@@ -7,7 +7,7 @@ import { toneBorderClass, type Tone } from "@/types/tone";
 export const meta: ComponentMeta = {
   name: "SettingRow",
   description:
-    "Optional leading mark, title + optional description, control slot on the right. Used to compose settings forms; supports an optional Tone border accent (primary, secondary, tertiary, error, warning, or success).",
+    "Optional leading mark, title + optional description, control slot on the right. Used to compose settings forms. Content rule (owner 09-14): independent fields = one SettingRow card each; fields that form ONE coherent policy go inside a SettingsSection shared block with dividers instead; supports an optional Tone border accent (primary, secondary, tertiary, error, warning, or success).",
 };
 
 export interface SettingRowProps {
