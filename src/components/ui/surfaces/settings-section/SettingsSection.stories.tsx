@@ -17,6 +17,12 @@ const meta: Meta<typeof SettingsSection> = {
 export default meta;
 type Story = StoryObj<typeof SettingsSection>;
 
+/**
+ * CONTENT RULE (owner 09-14): one coherent policy = one SettingsSection
+ * block with dividers; independent fields = per-field SettingRow cards.
+ * Section-title typography (SectionLabel) must match the deployed
+ * references exactly.
+ */
 export const Playground: Story = {
   args: {
     children: (

@@ -7,7 +7,7 @@ import type { ComponentMeta } from "@/types/component-meta";
 export const meta: ComponentMeta = {
   name: "SettingsSection",
   description:
-    "Titled, boxed group of settings — a SectionLabel above a padded Surface. Use for Info / Settings / Profile groups whose rows visually belong together. Tone-coloured groups (Advanced=warning, Danger zone=error) do NOT use this shape — they render SectionLabel above a naked stack of SettingRow rows with their own per-row borders, no enclosing Surface.",
+    "Titled, boxed group of settings — a SectionLabel above a padded Surface. CONTENT RULE (owner 09-14): a section that is ONE coherent policy = one SettingsSection shared block with dividers between its fields; independent fields = per-field SettingRow cards. Not grouped-by-default: decide per section from its content. The title is always SectionLabel, whose typography must match the deployed references exactly (no per-page overrides). Tone-coloured groups (Advanced=warning, Danger zone=error) do NOT use this shape — they render SectionLabel above a naked stack of SettingRow rows with their own per-row borders, no enclosing Surface.",
 };
 
 export interface SettingsSectionProps {
